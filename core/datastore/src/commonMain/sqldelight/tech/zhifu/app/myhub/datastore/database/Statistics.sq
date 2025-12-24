@@ -1,0 +1,66 @@
+-- 统计信息表
+CREATE TABLE statistics (
+    id INTEGER PRIMARY KEY NOT NULL DEFAULT 1,
+    total_cards INTEGER NOT NULL DEFAULT 0,
+    favorite_cards INTEGER NOT NULL DEFAULT 0,
+    recent_edits INTEGER NOT NULL DEFAULT 0,
+    last_sync_time INTEGER,
+    updated_at TEXT NOT NULL
+);
+
+-- 卡片类型统计表
+CREATE TABLE card_type_statistics (
+    card_type TEXT PRIMARY KEY NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0
+);
+
+-- 标签统计表
+CREATE TABLE tag_statistics (
+    tag_name TEXT PRIMARY KEY NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0
+);
+
+-- 查询：获取统计信息
+selectStatistics:
+SELECT * FROM statistics
+WHERE id = 1;
+
+-- 更新统计信息
+updateStatistics:
+INSERT OR REPLACE INTO statistics (id, total_cards, favorite_cards, recent_edits, last_sync_time, updated_at)
+VALUES (1, ?, ?, ?, ?, ?);
+
+-- 重置统计信息
+resetStatistics:
+UPDATE statistics
+SET total_cards = 0,
+    favorite_cards = 0,
+    recent_edits = 0,
+    last_sync_time = NULL,
+    updated_at = ?;
+
+-- 删除所有统计数据
+deleteAll:
+DELETE FROM statistics;
+DELETE FROM card_type_statistics;
+DELETE FROM tag_statistics;
+
+-- 获取卡片类型统计
+selectCardTypeStatistics:
+SELECT * FROM card_type_statistics
+ORDER BY count DESC;
+
+-- 更新卡片类型统计
+updateCardTypeStatistics:
+INSERT OR REPLACE INTO card_type_statistics (card_type, count)
+VALUES (?, ?);
+
+-- 获取标签统计
+selectTagStatistics:
+SELECT * FROM tag_statistics
+ORDER BY count DESC;
+
+-- 更新标签统计
+updateTagStatistics:
+INSERT OR REPLACE INTO tag_statistics (tag_name, count)
+VALUES (?, ?);

@@ -1,0 +1,73 @@
+-- 用户表
+CREATE TABLE user (
+    id TEXT PRIMARY KEY NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT,
+    display_name TEXT,
+    avatar_url TEXT,
+    created_at TEXT NOT NULL
+);
+
+-- 用户偏好设置表
+CREATE TABLE user_preferences (
+    user_id TEXT PRIMARY KEY NOT NULL,
+    theme TEXT NOT NULL DEFAULT 'dark',
+    language TEXT NOT NULL DEFAULT 'en',
+    default_card_type TEXT,
+    auto_sync INTEGER NOT NULL DEFAULT 1,
+    sync_interval INTEGER NOT NULL DEFAULT 3600000,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- 查询：获取当前用户（假设只有一个用户）
+selectCurrentUser:
+SELECT * FROM user
+LIMIT 1;
+
+-- 查询：根据ID获取用户
+selectUserById:
+SELECT * FROM user
+WHERE id = ?;
+
+-- 插入用户
+insertUser:
+INSERT OR REPLACE INTO user (id, username, email, display_name, avatar_url, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- 更新用户
+updateUser:
+UPDATE user
+SET username = ?,
+    email = ?,
+    display_name = ?,
+    avatar_url = ?
+WHERE id = ?;
+
+-- 删除用户
+deleteUser:
+DELETE FROM user
+WHERE id = ?;
+
+-- 删除所有用户（级联删除偏好设置）
+deleteAll:
+DELETE FROM user;
+
+-- 获取用户偏好设置
+selectUserPreferences:
+SELECT * FROM user_preferences
+WHERE user_id = ?;
+
+-- 插入或更新用户偏好设置
+insertOrUpdatePreferences:
+INSERT OR REPLACE INTO user_preferences (user_id, theme, language, default_card_type, auto_sync, sync_interval)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- 更新用户偏好设置
+updatePreferences:
+UPDATE user_preferences
+SET theme = ?,
+    language = ?,
+    default_card_type = ?,
+    auto_sync = ?,
+    sync_interval = ?
+WHERE user_id = ?;

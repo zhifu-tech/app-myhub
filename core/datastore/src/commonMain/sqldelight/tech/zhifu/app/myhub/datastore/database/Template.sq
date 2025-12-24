@@ -1,0 +1,79 @@
+-- 模板表
+CREATE TABLE template (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    card_type TEXT NOT NULL,
+    preview_image_url TEXT,
+    default_content TEXT,
+    default_tags TEXT, -- JSON格式存储标签列表
+    usage_count INTEGER NOT NULL DEFAULT 0,
+    is_system_template INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+-- 索引
+CREATE INDEX template_card_type_index ON template(card_type);
+CREATE INDEX template_system_index ON template(is_system_template);
+
+-- 查询：获取所有模板
+selectAll:
+SELECT * FROM template
+ORDER BY usage_count DESC, name ASC;
+
+-- 查询：根据ID获取模板
+selectById:
+SELECT * FROM template
+WHERE id = ?;
+
+-- 查询：根据类型获取模板
+selectByType:
+SELECT * FROM template
+WHERE card_type = ?
+ORDER BY usage_count DESC, name ASC;
+
+-- 查询：获取系统模板
+selectSystemTemplates:
+SELECT * FROM template
+WHERE is_system_template = 1
+ORDER BY name ASC;
+
+-- 查询：获取用户自定义模板
+selectUserTemplates:
+SELECT * FROM template
+WHERE is_system_template = 0
+ORDER BY updated_at DESC;
+
+-- 插入模板
+insertTemplate:
+INSERT INTO template (id, name, description, card_type, preview_image_url, default_content, default_tags, usage_count, is_system_template, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- 更新模板
+updateTemplate:
+UPDATE template
+SET name = ?,
+    description = ?,
+    card_type = ?,
+    preview_image_url = ?,
+    default_content = ?,
+    default_tags = ?,
+    usage_count = ?,
+    updated_at = ?
+WHERE id = ?;
+
+-- 删除模板
+deleteTemplate:
+DELETE FROM template
+WHERE id = ?;
+
+-- 删除所有模板
+deleteAll:
+DELETE FROM template;
+
+-- 增加模板使用计数
+incrementUsageCount:
+UPDATE template
+SET usage_count = usage_count + 1
+WHERE id = ?;

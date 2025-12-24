@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">書斎</string>
+    <string name="dashboard">ダッシュボード</string>
+    <string name="all_cards">すべてのカード</string>
+    <string name="templates">テンプレート</string>
+    <string name="favorites">お気に入り</string>
+    <string name="settings">設定</string>
+    <string name="new_card">新規カード</string>
+    <string name="profile">プロフィール</string>
+    <string name="search_placeholder">内容、タグ、または著者で検索...</string>
+    <string name="good_evening">こんばんは、学者さん</string>
+    <string name="cards_to_review">今日は復習すべきカードが %d 枚あります。</string>
+    <string name="last_synced">同期済み：たった今</string>
+    <string name="total_cards">合計</string>
+    <string name="recent_edits">最近の編集</string>
+    <string name="premium_member">プレミアムメンバー</string>
+    <string name="premium">プレミアム</string>
+    <string name="scholar_name">学者名</string>
+</resources>

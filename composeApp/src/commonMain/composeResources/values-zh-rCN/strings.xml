@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">书斋</string>
+    <string name="dashboard">仪表盘</string>
+    <string name="all_cards">所有卡片</string>
+    <string name="templates">模板</string>
+    <string name="favorites">收藏</string>
+    <string name="settings">设置</string>
+    <string name="new_card">新建卡片</string>
+    <string name="profile">个人资料</string>
+    <string name="search_placeholder">搜索卡片内容、标签或作者...</string>
+    <string name="good_evening">晚上好，学者</string>
+    <string name="cards_to_review">你今天有 %d 张卡片需要复习。</string>
+    <string name="last_synced">上次同步：刚刚</string>
+    <string name="total_cards">总计</string>
+    <string name="recent_edits">最近编辑</string>
+    <string name="premium_member">高级会员</string>
+    <string name="premium">高级版</string>
+    <string name="scholar_name">学者姓名</string>
+</resources>

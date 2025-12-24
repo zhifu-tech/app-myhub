@@ -8,13 +8,13 @@ group = "tech.zhifu.app.myhub"
 version = "1.0.0"
 application {
     mainClass.set("tech.zhifu.app.myhub.ApplicationKt")
-    
+
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(projects.core.platform)
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)

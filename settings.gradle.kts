@@ -25,6 +25,8 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        // JetBrains Compose 仓库
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 
@@ -33,5 +35,8 @@ plugins {
 }
 
 include(":composeApp")
+include(":androidApp")
 include(":server")
-include(":shared")
+include(":core:platform")
+include(":core:local")
+include(":core:datastore")

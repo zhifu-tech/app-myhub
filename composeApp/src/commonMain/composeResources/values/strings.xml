@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Study Room</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="all_cards">All Cards</string>
+    <string name="templates">Templates</string>
+    <string name="favorites">Favorites</string>
+    <string name="settings">Settings</string>
+    <string name="new_card">New Card</string>
+    <string name="profile">Profile</string>
+    <string name="search_placeholder">Search card content, tags, or authors...</string>
+    <string name="good_evening">Good evening, Scholar</string>
+    <string name="cards_to_review">You have %d cards to review today.</string>
+    <string name="last_synced">Last synced: Just now</string>
+    <string name="total_cards">Total</string>
+    <string name="recent_edits">Recent Edits</string>
+    <string name="premium_member">Premium Member</string>
+    <string name="premium">Premium</string>
+    <string name="scholar_name">Scholar Name</string>
+</resources>
