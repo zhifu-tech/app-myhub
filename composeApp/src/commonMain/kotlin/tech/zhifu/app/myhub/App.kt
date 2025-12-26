@@ -27,19 +27,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import tech.zhifu.app.local.LocalAppEnvironment
 import tech.zhifu.app.local.LocalAppTheme
 import tech.zhifu.app.local.customAppLocale
 import tech.zhifu.app.local.customAppThemeIsDark
+import tech.zhifu.app.myhub.config.AppBuildConfig
+import tech.zhifu.app.myhub.config.BuildConfigUsage
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
+import tech.zhifu.app.myhub.logger.info
+import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
 import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
-import tech.zhifu.app.myhub.resources.Res
-import tech.zhifu.app.myhub.resources.app_name
 import tech.zhifu.app.myhub.settings.SettingsManager
 import tech.zhifu.app.myhub.settings.SettingsScreen
 import tech.zhifu.app.myhub.theme.AppTheme
@@ -57,6 +58,19 @@ fun App(
 ) {
     // 启动时加载配置
     LaunchedEffect(Unit) {
+        // 记录当前变体配置（仅在开发环境）
+        if (AppBuildConfig.enableLogging) {
+            logger.info { "=== App Build Config ===" }
+            logger.info { "Environment: ${AppBuildConfig.environment}" }
+            logger.info { "Version Type: ${AppBuildConfig.versionType}" }
+            logger.info { "API Base URL: ${AppBuildConfig.apiBaseUrl}" }
+            logger.info { "App Name: ${AppBuildConfig.appName}" }
+            logger.info { "Application ID Suffix: ${AppBuildConfig.applicationIdSuffix}" }
+            logger.info { "Enable Logging: ${AppBuildConfig.enableLogging}" }
+            logger.info { "Enable Debug Features: ${AppBuildConfig.enableDebugFeatures}" }
+            logger.info { "========================" }
+        }
+
         val config = SettingsManager.loadConfig()
         // 如果本地没有语言设置（第一次启动），尝试从服务器获取
         if (config.language == null) {
@@ -105,15 +119,18 @@ fun App(
                                                 }
                                                 Column {
                                                     Text(
-                                                        text = stringResource(Res.string.app_name),
+                                                        text = AppBuildConfig.appName,
                                                         style = MaterialTheme.typography.titleMedium,
                                                         fontWeight = FontWeight.Bold
                                                     )
-                                                    Text(
-                                                        text = "MyHub",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    )
+                                                    // 显示变体信息（仅在开发环境显示）
+                                                    if (AppBuildConfig.enableDebugFeatures) {
+                                                        Text(
+                                                            text = BuildConfigUsage.getEnvironmentDescription(),
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }

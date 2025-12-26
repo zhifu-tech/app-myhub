@@ -1,0 +1,50 @@
+# Gradle
+.gradle/
+build/
+!server/build/libs/*.jar
+gradle-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# 测试和临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# 其他构建产物
+bin/
+out/
+dist/
+
+# 文档（可选，如果需要可以移除）
+docs/
+
+# 数据库文件（运行时生成）
+*.db
+*.db-shm
+*.db-wal
+.myhub/
+
+# Node modules (如果存在)
+node_modules/
+
+# 其他不需要的文件
+androidApp/
+iosApp/
+composeApp/src/
+composeApp/build/
+
+

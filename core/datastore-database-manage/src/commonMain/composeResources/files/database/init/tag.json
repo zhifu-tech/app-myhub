@@ -1,0 +1,26 @@
+[
+  {
+    "id": "tag-001",
+    "name": "编程",
+    "color": "#FF5733",
+    "description": "与编程相关的卡片",
+    "cardCount": 0,
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "tag-002",
+    "name": "名言",
+    "color": "#33FF57",
+    "description": "名言警句",
+    "cardCount": 0,
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "tag-003",
+    "name": "kotlin",
+    "color": "#3357FF",
+    "description": "Kotlin 编程语言相关",
+    "cardCount": 0,
+    "createdAt": "2024-01-02T00:00:00Z"
+  }
+]

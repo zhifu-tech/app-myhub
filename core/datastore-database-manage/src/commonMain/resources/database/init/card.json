@@ -1,0 +1,34 @@
+[
+  {
+    "id": "card-001",
+    "type": "QUOTE",
+    "title": "编程名言",
+    "content": "代码是写给人看的，只是偶尔在机器上运行。",
+    "author": "Harold Abelson",
+    "tags": ["编程", "名言", "代码"],
+    "isFavorite": true,
+    "isTemplate": false,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "metadata": {
+      "quoteAuthor": "Harold Abelson",
+      "quoteCategory": "Programming"
+    }
+  },
+  {
+    "id": "card-002",
+    "type": "CODE",
+    "title": "Hello World",
+    "content": "fun main() {\n    println(\"Hello, World!\")\n}",
+    "language": "kotlin",
+    "tags": ["kotlin", "示例"],
+    "isFavorite": false,
+    "isTemplate": false,
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z",
+    "metadata": {
+      "codeLanguage": "kotlin",
+      "codeSnippet": "fun main() {\n    println(\"Hello, World!\")\n}"
+    }
+  }
+]

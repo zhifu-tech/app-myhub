@@ -37,74 +37,9 @@
 └─────────────┘ └─────────────┘
 ```
 
-## 📁 目录结构
+## 📁 模块结构
 
-```
-datastore/
-├── model/                           # 核心数据模型（领域模型）
-│   ├── Card.kt                      # 卡片实体
-│   ├── User.kt                      # 用户实体
-│   ├── Tag.kt                       # 标签实体
-│   ├── Template.kt                  # 模板实体
-│   ├── Statistics.kt                # 统计信息
-│   └── SearchFilter.kt              # 搜索筛选条件
-│
-├── dto/                             # 数据传输对象（用于API）
-│   └── CardDto.kt                   # 卡片DTO及Domain Model转换函数
-│
-├── repository/                      # 仓库接口和实现
-│   ├── CardRepository.kt            # 卡片仓库接口
-│   ├── TagRepository.kt             # 标签仓库接口
-│   ├── TemplateRepository.kt        # 模板仓库接口
-│   ├── StatisticsRepository.kt      # 统计信息仓库接口
-│   ├── UserRepository.kt            # 用户仓库接口
-│   └── impl/                        # 仓库实现
-│       ├── CardRepositoryImpl.kt            # 卡片仓库实现（协调本地和远程数据源）
-│       ├── TagRepositoryImpl.kt             # 标签仓库实现
-│       ├── TemplateRepositoryImpl.kt        # 模板仓库实现
-│       ├── StatisticsRepositoryImpl.kt      # 统计信息仓库实现
-│       └── UserRepositoryImpl.kt            # 用户仓库实现
-│
-├── datasource/                      # 数据源接口和实现
-│   ├── LocalDataSource.kt           # 本地数据源接口定义
-│   ├── RemoteDataSource.kt          # 远程数据源接口定义
-│   └── impl/                        # 数据源实现
-│       ├── LocalCardDataSourceImpl.kt        # 本地卡片数据源实现（SQLDelight）
-│       ├── LocalTagDataSourceImpl.kt         # 本地标签数据源实现（SQLDelight）
-│       ├── LocalTemplateDataSourceImpl.kt    # 本地模板数据源实现（SQLDelight）
-│       ├── LocalUserDataSourceImpl.kt        # 本地用户数据源实现（SQLDelight）
-│       ├── LocalStatisticsDataSourceImpl.kt  # 本地统计信息数据源实现（SQLDelight）
-│       └── RemoteCardDataSourceImpl.kt       # 远程卡片数据源实现（Ktor Client）
-│
-├── database/                        # 数据库相关
-│   └── DatabaseDriverFactory.kt     # 跨平台数据库驱动工厂（expect/actual）
-│
-├── network/                         # 网络相关
-│   ├── ApiConfig.kt                 # API配置（基础URL、路径、超时等）
-│   ├── KtorClientFactory.kt         # Ktor Client工厂（expect/actual）
-│   └── README.md                    # 网络层实现文档
-│
-├── ui/                              # UI状态模型
-│   └── CardUiState.kt               # 卡片相关UI状态（列表、详情、Dashboard、搜索）
-│
-├── di/                              # 依赖注入配置（Koin模块）
-│   ├── DataModule.kt                # 数据模块（DataSource和Repository配置）
-│   ├── NetworkModule.kt             # 网络模块（HttpClient配置）
-│   └── DatabaseModule.kt            # 数据库模块（数据库实例配置）
-│
-├── sqldelight/                      # SQLDelight数据库Schema定义
-│   └── tech/zhifu/app/myhub/datastore/database/
-│       ├── Card.sq                  # 卡片表定义（主表、标签关联、元数据、待办项）
-│       ├── Tag.sq                   # 标签表定义
-│       ├── Template.sq              # 模板表定义
-│       ├── User.sq                  # 用户表定义（用户信息和偏好设置）
-│       └── Statistics.sq            # 统计信息表定义（总体统计、类型统计、标签统计）
-│
-└── docs/                            # 文档目录
-    └── datastore_architecture.md    # 本文档（架构设计文档）
-
-> **模块位置**：`core/datastore/src/commonMain/kotlin/tech/zhifu/app/myhub/datastore/`
-```
+Datastore 套件采用模块化设计，将不同职责拆分为独立的子模块。详见 [README.md](../README.md#-模块结构) 中的模块结构说明。
 
 ## 📦 核心数据模型
 
@@ -302,47 +237,64 @@ Repository (CardRepository)
 - ✅ CardDto 及转换函数
 - ✅ 支持 API 请求/响应的序列化
 
-#### 3. 本地数据源 (LocalDataSource)
+#### 3. 数据库模块
 
-所有本地数据源已使用 SQLDelight 实现：
+- ✅ **core:datastore-database** - SQLDelight Schema 定义
+- ✅ **core:datastore-database-client** - 客户端数据库驱动工厂和配置
+- ✅ **core:datastore-database-server** - 服务端数据库驱动工厂和配置
+- ✅ **core:datastore-database-test** - 数据库测试工具和辅助函数
+
+#### 4. 本地数据源 (LocalDataSource)
+
+所有本地数据源已使用 SQLDelight 实现（在 `core:datastore-datasource-local` 中）：
 
 - ✅ **LocalCardDataSourceImpl** - 卡片数据源
 - ✅ **LocalTagDataSourceImpl** - 标签数据源
 - ✅ **LocalTemplateDataSourceImpl** - 模板数据源
 - ✅ **LocalUserDataSourceImpl** - 用户数据源
 - ✅ **LocalStatisticsDataSourceImpl** - 统计信息数据源
+- ✅ **LocalDataSourceModule** - Koin 依赖注入模块
 
-#### 4. 远程数据源 (RemoteDataSource)
+#### 5. 远程数据源 (RemoteDataSource)
 
-- ✅ **RemoteCardDataSourceImpl** - 使用 Ktor Client 实现的远程卡片数据源
+所有远程数据源已使用 Ktor Client 实现（在 `core:datastore-datasource-remote` 中）：
 
-#### 5. 仓库层 (Repository)
+- ✅ **RemoteCardDataSourceImpl** - 卡片数据源
+- ✅ **RemoteTagDataSourceImpl** - 标签数据源
+- ✅ **RemoteTemplateDataSourceImpl** - 模板数据源
+- ✅ **RemoteUserDataSourceImpl** - 用户数据源
+- ✅ **RemoteStatisticsDataSourceImpl** - 统计信息数据源
+- ✅ **NetworkModule** - Ktor Client 配置
+- ✅ **RemoteDataSourceModule** - Koin 依赖注入模块
+- ✅ **ApiException** / **NetworkException** - 网络异常定义
 
-所有仓库已实现：
+#### 6. 仓库层 (Repository)
+
+所有仓库接口已定义（在 `core:datastore-repository` 中）：
+
+- ✅ **CardRepository** / **ReactiveCardRepository** - 卡片仓库接口
+- ✅ **TagRepository** / **ReactiveTagRepository** - 标签仓库接口
+- ✅ **TemplateRepository** / **ReactiveTemplateRepository** - 模板仓库接口
+- ✅ **UserRepository** / **ReactiveUserRepository** - 用户仓库接口
+- ✅ **StatisticsRepository** / **ReactiveStatisticsRepository** - 统计信息仓库接口
+
+所有客户端仓库实现已完成（在 `core:datastore-repository-client` 中）：
 
 - ✅ **CardRepositoryImpl** - 卡片仓库（协调本地和远程数据源）
 - ✅ **TagRepositoryImpl** - 标签仓库
 - ✅ **TemplateRepositoryImpl** - 模板仓库
 - ✅ **UserRepositoryImpl** - 用户仓库
 - ✅ **StatisticsRepositoryImpl** - 统计信息仓库
+- ✅ **RepositoryModule** - Koin 依赖注入模块（包含所有子模块）
 
-#### 6. 数据库
+所有服务端仓库实现已完成（在 `core:datastore-repository-server` 中）：
 
-- ✅ SQLDelight 配置和 Schema 定义
-- ✅ 跨平台数据库驱动工厂
-- ✅ 数据库模块配置
-
-#### 7. 网络层
-
-- ✅ Ktor Client 配置
-- ✅ 跨平台 HttpClient 工厂
-- ✅ API 配置和错误处理
-
-#### 8. 依赖注入
-
-- ✅ **DataModule** - 已配置所有 DataSource 和 Repository
-- ✅ **NetworkModule** - 已配置 HttpClient
-- ✅ **DatabaseModule** - 已配置数据库实例
+- ✅ **CardRepositoryImpl** - 服务端卡片仓库
+- ✅ **TagRepositoryImpl** - 服务端标签仓库
+- ✅ **TemplateRepositoryImpl** - 服务端模板仓库
+- ✅ **UserRepositoryImpl** - 服务端用户仓库
+- ✅ **StatisticsRepositoryImpl** - 服务端统计信息仓库
+- ✅ **RepositoryModule** - 服务端 Koin 依赖注入模块
 
 #### 9. UI 状态模型
 
@@ -355,60 +307,79 @@ Repository (CardRepository)
 
 所有数据层的核心组件都已实现单元测试：
 
-- ✅ **LocalDataSource 测试** - 所有 5 个 LocalDataSource 实现都有完整的单元测试
-
+- ✅ **LocalDataSource 测试**（在 `core:datastore-datasource-local` 中）
   - LocalCardDataSourceTest
   - LocalTagDataSourceTest
   - LocalTemplateDataSourceTest
   - LocalUserDataSourceTest
   - LocalStatisticsDataSourceTest
 
-- ✅ **Repository 测试** - 所有 5 个 Repository 实现都有完整的单元测试
+- ✅ **RemoteDataSource 测试**（在 `core:datastore-datasource-remote` 中）
+  - RemoteCardDataSourceTest
+  - RemoteTagDataSourceTest
+  - RemoteTemplateDataSourceTest
+  - RemoteUserDataSourceTest
+  - RemoteStatisticsDataSourceTest
+  - TestUtils - Mock HTTP 客户端工具
 
+- ✅ **Repository 测试**（在 `core:datastore-repository-client` 中）
   - CardRepositoryTest
   - TagRepositoryTest
   - TemplateRepositoryTest
   - UserRepositoryTest
   - StatisticsRepositoryTest
 
-- ✅ **数据库基础功能测试** - DatabaseTest 覆盖了数据库的核心功能
-
-  - Schema 创建
-  - 插入和查询
-  - 事务回滚
-  - 外键约束
-  - CASCADE 删除
+- ✅ **数据库基础功能测试**（在 `core:datastore-database-test` 中）
+  - DatabaseTest - Schema 创建、插入查询、事务回滚、外键约束、CASCADE 删除
+  - DatabaseTestHelper - `createTestDatabase` 辅助函数
 
 - ✅ **跨平台测试支持** - 测试在所有平台（Android、iOS、JVM、Web）都能运行
   - 使用 `runDatabaseTest` 辅助函数统一测试写法
   - 自动处理平台差异（特别是 Kotlin/JS 的异步问题）
 
-📖 **测试文档**: 参见 [`datastore_test_guide.md`](./datastore_test_guide.md)
-
 ## 🎯 使用方式
 
-### 在 ViewModel 中使用
+### 在客户端 ViewModel 中使用
 
 ```kotlin
+// 在 Koin 模块中引入
+val appModule = module {
+    includes(repositoryModule) // 来自 core:datastore-repository-client
+}
+
 class DashboardViewModel(
-    private val cardRepository: CardRepository,
-    private val tagRepository: TagRepository,
-    private val templateRepository: TemplateRepository,
-    private val userRepository: UserRepository,
-    private val statisticsRepository: StatisticsRepository
+    private val cardRepository: ReactiveCardRepository,
+    private val tagRepository: ReactiveTagRepository,
+    private val statisticsRepository: ReactiveStatisticsRepository
 ) : ViewModel() {
 
-    val cards: Flow<List<Card>> = cardRepository.getAllCards()
-    val tags: Flow<List<Tag>> = tagRepository.getAllTags()
-    val statistics: Flow<Statistics> = statisticsRepository.getStatistics()
+    val cards: Flow<List<Card>> = cardRepository.observeAllCards()
+    val tags: Flow<List<Tag>> = tagRepository.observeAllTags()
+    val statistics: Flow<Statistics> = statisticsRepository.observeStatistics()
 
-    fun syncData() {
+    fun refreshData() {
         viewModelScope.launch {
-            cardRepository.sync() // 从远程同步数据
+            statisticsRepository.refreshStatistics() // 从远程刷新数据
         }
     }
 }
 ```
+
+### 在服务端应用中使用
+
+```kotlin
+// 在 Koin 模块中引入
+val serverModule = module {
+    includes(repositoryModule) // 来自 core:datastore-repository-server
+}
+
+class CardService(
+    private val cardRepository: CardRepository
+) {
+    suspend fun getAllCards(): List<Card> {
+        return cardRepository.getAllCards()
+    }
+}
 
 ### 创建卡片
 
@@ -421,26 +392,20 @@ val card = Card(
     updatedAt = Clock.System.now()
 )
 
-cardRepository.createCard(card)
-    .onSuccess { createdCard ->
-        // 卡片创建成功
-    }
-    .onFailure { error ->
-        // 处理错误
-    }
+viewModelScope.launch {
+    val createdCard = cardRepository.createCard(card)
+    // 卡片创建成功，会自动同步到远程
+}
 ```
 
 ### 使用模板创建卡片
 
 ```kotlin
-templateRepository.createCardFromTemplate(templateId)
-    .onSuccess { card ->
-        // 使用创建的卡片
-        cardRepository.createCard(card)
-    }
-    .onFailure { error ->
-        // 处理错误
-    }
+viewModelScope.launch {
+    val card = (templateRepository as TemplateRepositoryImpl)
+        .createCardFromTemplate(templateId)
+    cardRepository.createCard(card)
+}
 ```
 
 ### 搜索卡片
@@ -454,10 +419,17 @@ val filter = SearchFilter(
     sortBy = SortBy.UPDATED_AT_DESC
 )
 
-cardRepository.searchCards(filter)
+// 响应式搜索
+cardRepository.observeSearchCards(filter)
     .collect { cards ->
-        // 处理搜索结果
+        // 处理搜索结果，自动响应数据变化
     }
+
+// 或同步搜索
+viewModelScope.launch {
+    val cards = cardRepository.searchCards(filter)
+    // 处理搜索结果
+}
 ```
 
 ## 🎯 设计原则
@@ -574,6 +546,6 @@ cardRepository.searchCards(filter)
 
 ---
 
-**最后更新**: 2025-12-24  
+**最后更新**: 2025-12-26  
 **维护者**: MyHub Team  
-**状态**: ✅ 核心功能已完成，单元测试已覆盖，可投入使用
+**状态**: ✅ 模块化重构完成，核心功能已完成，单元测试已覆盖，可投入使用

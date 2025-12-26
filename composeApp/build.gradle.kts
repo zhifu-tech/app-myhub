@@ -49,7 +49,11 @@ kotlin {
         }
     }
 
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
 
     js {
         outputModuleName.set("composeApp")
@@ -67,6 +71,99 @@ kotlin {
     }
 
     sourceSets {
+        // ========== 变体 Source Sets ==========
+        // 开发环境变体
+        val devFreeMain by creating {
+            dependsOn(commonMain.get())
+        }
+        val devPremiumMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        // 生产环境变体
+        val prodFreeMain by creating {
+            dependsOn(commonMain.get())
+        }
+        val prodPremiumMain by creating {
+            dependsOn(commonMain.get())
+        }
+
+        // Android 平台变体
+        val androidDevFreeMain by creating {
+            dependsOn(devFreeMain)
+            dependsOn(androidMain.get())
+        }
+        val androidDevPremiumMain by creating {
+            dependsOn(devPremiumMain)
+            dependsOn(androidMain.get())
+        }
+        val androidProdFreeMain by creating {
+            dependsOn(prodFreeMain)
+            dependsOn(androidMain.get())
+        }
+        val androidProdPremiumMain by creating {
+            dependsOn(prodPremiumMain)
+            dependsOn(androidMain.get())
+        }
+
+        // iOS 平台变体（使用默认配置，可通过编译标志区分）
+        val iosDevFreeMain by creating {
+            dependsOn(devFreeMain)
+            dependsOn(iosMain.get())
+        }
+        val iosDevPremiumMain by creating {
+            dependsOn(devPremiumMain)
+            dependsOn(iosMain.get())
+        }
+        val iosProdFreeMain by creating {
+            dependsOn(prodFreeMain)
+            dependsOn(iosMain.get())
+        }
+        val iosProdPremiumMain by creating {
+            dependsOn(prodPremiumMain)
+            dependsOn(iosMain.get())
+        }
+
+        // JVM 平台变体
+        val jvmDevFreeMain by creating {
+            dependsOn(devFreeMain)
+            dependsOn(jvmMain.get())
+        }
+        val jvmDevPremiumMain by creating {
+            dependsOn(devPremiumMain)
+            dependsOn(jvmMain.get())
+        }
+        val jvmProdFreeMain by creating {
+            dependsOn(prodFreeMain)
+            dependsOn(jvmMain.get())
+        }
+        val jvmProdPremiumMain by creating {
+            dependsOn(prodPremiumMain)
+            dependsOn(jvmMain.get())
+        }
+
+        // JS 平台变体
+        val jsDevFreeMain by creating {
+            dependsOn(devFreeMain)
+            dependsOn(jsMain.get())
+        }
+        val jsDevPremiumMain by creating {
+            dependsOn(devPremiumMain)
+            dependsOn(jsMain.get())
+        }
+        val jsProdFreeMain by creating {
+            dependsOn(prodFreeMain)
+            dependsOn(jsMain.get())
+        }
+        val jsProdPremiumMain by creating {
+            dependsOn(prodPremiumMain)
+            dependsOn(jsMain.get())
+        }
+
+        // ========== 默认使用 devFree 变体（开发时） ==========
+        // 可以通过 Gradle 任务参数或环境变量切换变体
+        // 例如：./gradlew build -PbuildVariant=prodPremium
+
         commonMain.dependencies {
             // ========== Compose UI 依赖 ==========
             // Compose 运行时（必需：所有 Compose 组件的基础）
@@ -111,16 +208,30 @@ kotlin {
             // Koin Compose ViewModel（可选：如果使用 ViewModel，需要此依赖）
             implementation(libs.koin.compose.viewmodel)
 
+            // ========== 日志 ==========
+            // Kotlin Logging（必需：AppLogger 使用）
+            implementation(libs.kotlin.logging)
+
             // ========== 项目模块依赖 ==========
-            // 平台抽象层（必需：平台特定实现）
+            // 平台抽象层（必需：平台特定实现，包含日志工具）
             implementation(projects.core.platform)
             // 本地存储层（必需：LocalAppTheme, LocalAppLocale 等）
             implementation(projects.core.local)
             // 数据层（必需：数据存储和网络）
-            implementation(projects.core.datastore)
+            implementation(projects.core.datastoreModel)
+            implementation(projects.core.datastoreRepositoryClient)
+        }
+
+        androidMain.dependencies {
+            // Android 平台日志实现
+            implementation(libs.kotlin.logging.android)
         }
 
         jvmMain.dependencies {
+            // JVM 平台日志实现
+            implementation(libs.slf4j.api)
+            implementation(libs.slf4j.simple)
+            // Desktop 相关
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
         }

@@ -104,7 +104,11 @@ show_help() {
     echo -e "  ${GREEN}clean${NC}          清理构建文件"
     echo ""
     echo -e "  ${GREEN}server 模块命令:${NC}"
-    echo -e "  ${GREEN}run${NC}            运行服务器"
+    echo -e "  ${GREEN}run${NC}            运行服务器（默认 SQLite）"
+    echo -e "  ${GREEN}run-dev${NC}        运行服务器（开发模式，支持热重载）"
+    echo -e "  ${GREEN}run-postgres${NC}   运行服务器（使用 PostgreSQL）"
+    echo -e "  ${GREEN}docker${NC}         使用 Docker Compose 运行（PostgreSQL）"
+    echo -e "  ${GREEN}docker-sqlite${NC}   使用 Docker Compose 运行（SQLite）"
     echo -e "  ${GREEN}build${NC}          构建服务器"
     echo -e "  ${GREEN}clean${NC}          清理构建文件"
     echo ""
@@ -128,7 +132,10 @@ show_help() {
     echo "  ./scripts/run.sh composeApp web             # 运行 Web 应用"
     echo "  ./scripts/run.sh composeApp android         # 构建并安装 Android 应用"
     echo "  ./scripts/run.sh composeApp ios              # 构建并打开 iOS 项目"
-    echo "  ./scripts/run.sh server run                  # 运行服务器"
+    echo "  ./scripts/run.sh server run                  # 运行服务器（SQLite）"
+    echo "  ./scripts/run.sh server run-dev              # 运行服务器（开发模式）"
+    echo "  ./scripts/run.sh server run-postgres         # 运行服务器（PostgreSQL）"
+    echo "  ./scripts/run.sh server docker               # Docker 运行（PostgreSQL）"
     echo "  ./scripts/run.sh all build                  # 构建所有模块"
     echo "  ./scripts/run.sh composeApp build --release # 发布模式构建"
     echo ""
@@ -186,8 +193,74 @@ run_web() {
 
 # 运行服务器
 run_server() {
-    print_info "正在启动服务器..."
-    ./gradlew :server:run
+    local mode="${1:-normal}"
+    
+    case "$mode" in
+        dev|development)
+            print_info "正在启动服务器（开发模式，支持热重载）..."
+            print_info "数据库: SQLite (默认)"
+            ./gradlew :server:run -Pdevelopment
+            ;;
+        postgres|postgresql)
+            print_info "正在启动服务器（使用 PostgreSQL）..."
+            print_info "请确保已设置以下环境变量:"
+            print_info "  DB_TYPE=POSTGRESQL"
+            print_info "  DB_HOST=localhost"
+            print_info "  DB_PORT=5432"
+            print_info "  DB_NAME=myhub"
+            print_info "  DB_USER=postgres"
+            print_info "  DB_PASSWORD=your_password"
+            echo ""
+            
+            # 检查环境变量
+            if [ -z "$DB_TYPE" ] || [ "$DB_TYPE" != "POSTGRESQL" ]; then
+                print_warning "未检测到 DB_TYPE=POSTGRESQL，将使用默认值"
+                export DB_TYPE=POSTGRESQL
+                export DB_HOST=${DB_HOST:-localhost}
+                export DB_PORT=${DB_PORT:-5432}
+                export DB_NAME=${DB_NAME:-myhub}
+                export DB_USER=${DB_USER:-postgres}
+                export DB_PASSWORD=${DB_PASSWORD:-postgres}
+                print_info "使用默认配置:"
+                print_info "  DB_HOST=${DB_HOST}"
+                print_info "  DB_PORT=${DB_PORT}"
+                print_info "  DB_NAME=${DB_NAME}"
+                print_info "  DB_USER=${DB_USER}"
+            fi
+            
+            ./gradlew :server:run
+            ;;
+        docker)
+            print_info "正在使用 Docker Compose 启动服务器（PostgreSQL）..."
+            cd "$PROJECT_ROOT/server" || exit 1
+            if [ ! -f "docker-compose.yml" ]; then
+                print_error "未找到 docker-compose.yml 文件"
+                exit 1
+            fi
+            docker-compose up -d
+            print_success "服务器已启动"
+            print_info "查看日志: docker-compose logs -f myhub-server"
+            print_info "停止服务: docker-compose down"
+            ;;
+        docker-sqlite)
+            print_info "正在使用 Docker Compose 启动服务器（SQLite）..."
+            cd "$PROJECT_ROOT/server" || exit 1
+            if [ ! -f "docker-compose.sqlite.yml" ]; then
+                print_error "未找到 docker-compose.sqlite.yml 文件"
+                exit 1
+            fi
+            docker-compose -f docker-compose.sqlite.yml up -d
+            print_success "服务器已启动"
+            print_info "查看日志: docker-compose -f docker-compose.sqlite.yml logs -f myhub-server"
+            print_info "停止服务: docker-compose -f docker-compose.sqlite.yml down"
+            ;;
+        *)
+            print_info "正在启动服务器（SQLite 模式）..."
+            print_info "端口: 8083"
+            print_info "数据库: SQLite (.myhub/myhub.db)"
+            ./gradlew :server:run
+            ;;
+    esac
 }
 
 # 构建并安装 Android 应用
@@ -347,7 +420,7 @@ parse_args() {
                 command="$module"
                 module="composeApp"
                 ;;
-            server)
+            server|server-run)
                 command="run"
                 module="server"
                 ;;
@@ -433,7 +506,19 @@ main() {
         server)
             case "$command" in
                 run)
-                    run_server
+                    run_server "normal"
+                    ;;
+                run-dev|development)
+                    run_server "dev"
+                    ;;
+                run-postgres|run-postgresql)
+                    run_server "postgres"
+                    ;;
+                docker)
+                    run_server "docker"
+                    ;;
+                docker-sqlite)
+                    run_server "docker-sqlite"
                     ;;
                 build)
                     build_module "server" "$build_type"

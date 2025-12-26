@@ -17,3 +17,10 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+server/.env
+server/.env.local

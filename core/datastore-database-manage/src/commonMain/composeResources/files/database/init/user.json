@@ -1,0 +1,16 @@
+[
+  {
+    "id": "user-001",
+    "username": "default",
+    "email": "user@example.com",
+    "displayName": "Default User",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "preferences": {
+      "theme": "dark",
+      "language": "zh",
+      "defaultCardType": "QUOTE",
+      "autoSync": true,
+      "syncInterval": 3600000
+    }
+  }
+]

@@ -23,9 +23,42 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ========== 变体配置 ==========
+    flavorDimensions += "environment"
+    flavorDimensions += "version"
+    
+    productFlavors {
+        // 环境维度
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("prod") {
+            dimension = "environment"
+        }
+        
+        // 版本维度
+        create("free") {
+            dimension = "version"
+            applicationIdSuffix = ".free"
+            versionNameSuffix = "-free"
+        }
+        create("premium") {
+            dimension = "version"
+            applicationIdSuffix = ".premium"
+            versionNameSuffix = "-premium"
+        }
+    }
+
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
+        }
         release {
             isMinifyEnabled = false
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -54,6 +87,11 @@ android {
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
+}
+
+configurations.all {
+    // 排除 kotlin-logging-android-debug，避免与 kotlin-logging-android 的重复类错误
+    exclude(group = "io.github.oshai", module = "kotlin-logging-android-debug")
 }
 
 dependencies {

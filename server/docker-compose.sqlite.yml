@@ -1,0 +1,29 @@
+services:
+  # MyHub Server 应用（使用 SQLite）
+  myhub-server:
+    build:
+      context: ../  # 使用项目根目录作为构建上下文
+      dockerfile: server/Dockerfile
+    container_name: myhub-server
+    ports:
+      - "${SERVER_PORT:-8083}:8083"
+    env_file:
+      - .env
+    # 环境变量可以通过 .env 文件配置，也可以在这里覆盖
+    environment:
+      # 如果 .env 文件中没有设置，使用以下默认值
+      - SERVER_PORT=${SERVER_PORT:-8083}
+      - DB_TYPE=${DB_TYPE:-SQLITE}
+      - DB_PATH=${DB_PATH:-/app/data/myhub.db}
+    volumes:
+      # 挂载数据目录以持久化 SQLite 数据库
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+
