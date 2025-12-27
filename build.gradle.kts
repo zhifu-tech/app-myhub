@@ -20,4 +20,7 @@ plugins {
     // 其他功能插件
     alias(libs.plugins.ktor) apply false
     alias(libs.plugins.sqldelight) apply false
+
+    // myhub
+    alias(libs.plugins.myhub.kmp) apply false
 }

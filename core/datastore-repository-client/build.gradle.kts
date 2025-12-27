@@ -1,36 +1,14 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.myhub.kmp)
     alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
     android {
         namespace = "tech.zhifu.app.myhub.datastore.repository.impl"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
     }
 
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
-    js {
-        browser()
-    }
-
-
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
+    iosTargets().forEach { iosTarget ->
         iosTarget.binaries.all {
             linkerOpts += listOf("-lsqlite3")
         }

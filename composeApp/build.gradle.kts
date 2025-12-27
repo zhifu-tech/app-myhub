@@ -1,11 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    // Kotlin Multiplatform 插件（必需：KMP 项目基础）
-    alias(libs.plugins.kotlinMultiplatform)
-    // Android KMP 库插件（必需：支持 Android 平台）
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.myhub.kmp)
     // Compose Multiplatform 插件（必需：使用 Compose Multiplatform UI）
     alias(libs.plugins.composeMultiplatform)
     // Compose 编译器插件（必需：编译 Compose 代码）
@@ -23,24 +19,11 @@ compose.resources {
 }
 
 kotlin {
-    applyDefaultHierarchyTemplate()
-
     android {
         namespace = "tech.zhifu.app.myhub"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-
-        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
-
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
+    iosTargets().forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = false
@@ -49,22 +32,11 @@ kotlin {
         }
     }
 
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
     js {
         outputModuleName.set("composeApp")
         browser {
             commonWebpackConfig {
                 outputFileName = "composeApp.js"
-            }
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
             }
         }
         binaries.executable()

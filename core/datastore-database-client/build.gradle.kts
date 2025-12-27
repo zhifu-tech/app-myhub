@@ -1,8 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.myhub.kmp)
 }
 
 kotlin {
@@ -15,20 +14,7 @@ kotlin {
         }
     }
 
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
-
-    js {
-        browser()
-    }
-
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
+    iosTargets().forEach { iosTarget ->
         iosTarget.binaries.all {
             linkerOpts += listOf("-lsqlite3")
         }
