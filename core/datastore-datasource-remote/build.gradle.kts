@@ -10,7 +10,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.platform)
+            implementation(projects.core.logger)
             implementation(projects.core.datastoreModel)
 
             implementation(libs.ktor.client.core)

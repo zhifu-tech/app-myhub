@@ -4,7 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.core.platform)
+    // Logger 模块
+    implementation(projects.core.logger)
 
     // Repository 接口
     api(projects.core.datastoreRepository)

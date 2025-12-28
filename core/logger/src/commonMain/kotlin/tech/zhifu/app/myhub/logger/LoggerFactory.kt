@@ -17,3 +17,4 @@ internal expect fun logger(name: String): Logger
  * 通过函数获取 Logger 实例（用于全局 logger）
  */
 expect fun logger(func: () -> Unit): Logger
+

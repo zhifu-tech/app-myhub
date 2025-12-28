@@ -38,6 +38,7 @@ plugins {
 include(":composeApp")
 include(":androidApp")
 include(":server")
+include(":core:logger")
 include(":core:platform")
 include(":core:local")
 include(":core:datastore-model")

@@ -102,3 +102,4 @@ fun Logger.error(message: () -> Any?) =
 
 fun Logger.error(throwable: Throwable?, message: () -> Any?) =
     error(null, throwable, message)
+

@@ -16,7 +16,7 @@ application {
 
 dependencies {
     // 项目模块
-    implementation(projects.core.platform)
+    implementation(projects.core.logger)
 
     // Model 模块（用于 API，包含 DTO）
     implementation(projects.core.datastoreModel)
