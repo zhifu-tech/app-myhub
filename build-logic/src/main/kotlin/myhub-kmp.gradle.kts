@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -8,6 +9,17 @@ plugins {
 
 configure<KotlinMultiplatformExtension> {
     applyDefaultHierarchyTemplate()
+
+    // 抑制 expect/actual classes Beta 警告
+    targets.all {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
+        }
+    }
 
     android {
         compileSdk = libsCatalog.findVersion("android-compileSdk").get().requiredVersion.toInt()
@@ -37,94 +49,54 @@ configure<KotlinMultiplatformExtension> {
             }
         }
     }
+
+    // 1. 解析当前激活的变体组件 (例如 "devFree" -> env="dev", tier="free")
+    val activeVariant = (project.findProperty("appVariant") ?: "devFree").toString()
+
+    val isDev = activeVariant.startsWith("dev", ignoreCase = true)
+    val env = if (isDev) "dev" else "prod"
+    val envTitle = env.replaceFirstChar { it.uppercase() }
+
+    val isPremium = activeVariant.contains("Premium", ignoreCase = true)
+    val tier = if (isPremium) "premium" else "free"
+    val tierTitle = tier.replaceFirstChar { it.uppercase() }
+
+    val variantTitle = activeVariant.replaceFirstChar { it.uppercase() }
+
     sourceSets {
-        // ========== 变体 Source Sets ==========
-        // 开发环境变体
-        val devFreeMain by creating {
-            dependsOn(commonMain.get())
-        }
-        val devPremiumMain by creating {
-            dependsOn(commonMain.get())
+        // 2. 注入业务逻辑 (Common)
+        commonMain.get().apply {
+            // 注入环境通用目录 (e.g., src/devMain)
+            kotlin.srcDir("src/${env}Main/kotlin")
+            // 注入级别通用目录 (e.g., src/freeMain)
+            kotlin.srcDir("src/${tier}Main/kotlin")
+            // 注入完整变体目录 (e.g., src/devFreeMain)
+            kotlin.srcDir("src/${activeVariant}Main/kotlin")
+
+            resources.srcDir("src/${env}Main/resources")
+            resources.srcDir("src/${tier}Main/resources")
+            resources.srcDir("src/${activeVariant}Main/resources")
         }
 
-        // 生产环境变体
-        val prodFreeMain by creating {
-            dependsOn(commonMain.get())
-        }
-        val prodPremiumMain by creating {
-            dependsOn(commonMain.get())
+        // 3. 辅助函数：注入平台特定的变体组合目录
+        fun KotlinSourceSet.injectPlatformVariant(platform: String) {
+            val p = platform.lowercase()
+            // 注入平台环境代码 (e.g., src/androidDevMain)
+            kotlin.srcDir("src/${p}${envTitle}Main/kotlin")
+            // 注入平台级别代码 (e.g., src/androidFreeMain)
+            kotlin.srcDir("src/${p}${tierTitle}Main/kotlin")
+            // 注入平台全变体代码 (e.g., src/androidDevFreeMain)
+            kotlin.srcDir("src/${p}${variantTitle}Main/kotlin")
+
+            resources.srcDir("src/${p}${envTitle}Main/resources")
+            resources.srcDir("src/${p}${tierTitle}Main/resources")
+            resources.srcDir("src/${p}${variantTitle}Main/resources")
         }
 
-        // Android 平台变体
-        val androidDevFreeMain by creating {
-            dependsOn(devFreeMain)
-            dependsOn(androidMain.get())
-        }
-        val androidDevPremiumMain by creating {
-            dependsOn(devPremiumMain)
-            dependsOn(androidMain.get())
-        }
-        val androidProdFreeMain by creating {
-            dependsOn(prodFreeMain)
-            dependsOn(androidMain.get())
-        }
-        val androidProdPremiumMain by creating {
-            dependsOn(prodPremiumMain)
-            dependsOn(androidMain.get())
-        }
-
-        // iOS 平台变体（使用默认配置，可通过编译标志区分）
-        val iosDevFreeMain by creating {
-            dependsOn(devFreeMain)
-            dependsOn(iosMain.get())
-        }
-        val iosDevPremiumMain by creating {
-            dependsOn(devPremiumMain)
-            dependsOn(iosMain.get())
-        }
-        val iosProdFreeMain by creating {
-            dependsOn(prodFreeMain)
-            dependsOn(iosMain.get())
-        }
-        val iosProdPremiumMain by creating {
-            dependsOn(prodPremiumMain)
-            dependsOn(iosMain.get())
-        }
-
-        // JVM 平台变体
-        val jvmDevFreeMain by creating {
-            dependsOn(devFreeMain)
-            dependsOn(jvmMain.get())
-        }
-        val jvmDevPremiumMain by creating {
-            dependsOn(devPremiumMain)
-            dependsOn(jvmMain.get())
-        }
-        val jvmProdFreeMain by creating {
-            dependsOn(prodFreeMain)
-            dependsOn(jvmMain.get())
-        }
-        val jvmProdPremiumMain by creating {
-            dependsOn(prodPremiumMain)
-            dependsOn(jvmMain.get())
-        }
-
-        // JS 平台变体
-        val jsDevFreeMain by creating {
-            dependsOn(devFreeMain)
-            dependsOn(jsMain.get())
-        }
-        val jsDevPremiumMain by creating {
-            dependsOn(devPremiumMain)
-            dependsOn(jsMain.get())
-        }
-        val jsProdFreeMain by creating {
-            dependsOn(prodFreeMain)
-            dependsOn(jsMain.get())
-        }
-        val jsProdPremiumMain by creating {
-            dependsOn(prodPremiumMain)
-            dependsOn(jsMain.get())
-        }
+        // 应用到各平台默认源集
+        androidMain.get().injectPlatformVariant("android")
+        iosMain.get().injectPlatformVariant("ios")
+        jvmMain.get().injectPlatformVariant("jvm")
+        jsMain.get().injectPlatformVariant("js")
     }
 }

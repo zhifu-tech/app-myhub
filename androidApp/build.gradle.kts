@@ -26,7 +26,7 @@ android {
     // ========== 变体配置 ==========
     flavorDimensions += "environment"
     flavorDimensions += "version"
-    
+
     productFlavors {
         // 环境维度
         create("dev") {
@@ -37,7 +37,7 @@ android {
         create("prod") {
             dimension = "environment"
         }
-        
+
         // 版本维度
         create("free") {
             dimension = "version"
@@ -99,6 +99,7 @@ dependencies {
     // 主应用模块（包含所有 Compose UI 和业务逻辑）
     // 注意：composeApp 已经包含了 Compose Multiplatform、Koin Core、数据层等
     implementation(projects.composeApp)
+    implementation(projects.core.platform)
 
     // ========== Android 平台特定依赖 ==========
     // Koin Android 扩展（必需：MyHubApplication 使用 androidContext）

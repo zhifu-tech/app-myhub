@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.myhub.kmp)
 }
@@ -7,17 +5,6 @@ plugins {
 kotlin {
     android {
         namespace = "tech.zhifu.app.myhub.datastore.database.client"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
-    iosTargets().forEach { iosTarget ->
-        iosTarget.binaries.all {
-            linkerOpts += listOf("-lsqlite3")
-        }
     }
 
     sourceSets {

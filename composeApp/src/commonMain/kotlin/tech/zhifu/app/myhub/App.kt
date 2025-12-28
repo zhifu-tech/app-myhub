@@ -33,7 +33,7 @@ import tech.zhifu.app.local.LocalAppTheme
 import tech.zhifu.app.local.customAppLocale
 import tech.zhifu.app.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.config.AppBuildConfig
-import tech.zhifu.app.myhub.config.BuildConfigUsage
+import tech.zhifu.app.myhub.config.getEnvironmentDescription
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
@@ -44,11 +44,11 @@ import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
 import tech.zhifu.app.myhub.settings.SettingsManager
 import tech.zhifu.app.myhub.settings.SettingsScreen
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
+import tech.zhifu.app.myhub.ui.WindowSizeClass
+import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
+import tech.zhifu.app.myhub.ui.getWindowSize
 import tech.zhifu.app.myhub.ui.utils.ProvideAppLanguage
-import tech.zhifu.app.myhub.ui.utils.ProvideWindowSizeClass
-import tech.zhifu.app.myhub.ui.utils.WindowSizeClass
-import tech.zhifu.app.myhub.ui.utils.calculateWindowSizeClass
-import tech.zhifu.app.myhub.ui.utils.getWindowSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +126,7 @@ fun App(
                                                     // 显示变体信息（仅在开发环境显示）
                                                     if (AppBuildConfig.enableDebugFeatures) {
                                                         Text(
-                                                            text = BuildConfigUsage.getEnvironmentDescription(),
+                                                            text = getEnvironmentDescription(),
                                                             style = MaterialTheme.typography.labelSmall,
                                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                                         )

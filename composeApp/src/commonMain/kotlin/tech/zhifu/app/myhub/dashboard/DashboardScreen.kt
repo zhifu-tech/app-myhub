@@ -18,25 +18,19 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,10 +50,8 @@ import tech.zhifu.app.myhub.components.CodeCard
 import tech.zhifu.app.myhub.components.DictionaryCard
 import tech.zhifu.app.myhub.components.IdeaCard
 import tech.zhifu.app.myhub.components.QuoteCard
-import tech.zhifu.app.myhub.ui.utils.ClipboardManager
-import tech.zhifu.app.myhub.ui.utils.WindowSizeClass
-import tech.zhifu.app.myhub.ui.utils.windowSizeClass
-import tech.zhifu.app.myhub.ui.utils.rememberClipboardManager
+import tech.zhifu.app.myhub.ui.WindowSizeClass
+import tech.zhifu.app.myhub.ui.windowSizeClass
 import kotlin.time.Clock
 
 @Composable
@@ -93,9 +85,7 @@ fun DashboardScreen(
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
             statistics = uiState.statistics,
-            sizeClass = sizeClass,
-            onExport = { viewModel.exportData() },
-            onImport = { viewModel.showImportDialog() }
+            sizeClass = sizeClass
         )
 
         // 统计卡片（移动端显示）
@@ -126,27 +116,6 @@ fun DashboardScreen(
         }
     }
 
-    // 导出对话框
-    if (uiState.showExportDialog) {
-        ExportDialog(
-            jsonData = uiState.exportedJson ?: "",
-            onDismiss = { viewModel.closeExportDialog() }
-        )
-    }
-
-    // 导入对话框
-    if (uiState.showImportDialog) {
-        ImportDialog(
-            jsonText = uiState.importJson,
-            error = uiState.importError,
-            preview = uiState.importPreview,
-            isLoading = uiState.isLoading,
-            onJsonChange = { viewModel.updateImportJson(it) },
-            onPreview = { viewModel.previewImportData() },
-            onImport = { viewModel.importData() },
-            onDismiss = { viewModel.closeImportDialog() }
-        )
-    }
 }
 
 @Composable
@@ -231,9 +200,7 @@ fun DashboardToolbar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     statistics: tech.zhifu.app.myhub.datastore.model.Statistics,
-    sizeClass: WindowSizeClass,
-    onExport: () -> Unit = {},
-    onImport: () -> Unit = {}
+    sizeClass: WindowSizeClass
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -326,28 +293,11 @@ fun DashboardToolbar(
                     }
                 }
 
-                // 导出/导入按钮和视图切换
+                // 视图切换
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 导出按钮
-                    IconButton(onClick = onExport) {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "导出数据",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    // 导入按钮
-                    IconButton(onClick = onImport) {
-                        Icon(
-                            imageVector = Icons.Default.Upload,
-                            contentDescription = "导入数据",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    // 视图切换
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(12.dp)
@@ -432,182 +382,3 @@ fun StatCard(
     }
 }
 
-/**
- * 导出数据对话框
- */
-@Composable
-fun ExportDialog(
-    jsonData: String,
-    onDismiss: () -> Unit
-) {
-    val clipboardManager = rememberClipboardManager()
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("导出数据")
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "数据已导出为 JSON 格式，您可以复制以下内容并保存到文件中：",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = jsonData,
-                    onValueChange = { },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    readOnly = true,
-                    maxLines = 15,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.outline,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("关闭")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    clipboardManager.copyToClipboard(jsonData)
-                    onDismiss()
-                }
-            ) {
-                Text("复制")
-            }
-        }
-    )
-}
-
-/**
- * 导入数据对话框
- */
-@Composable
-fun ImportDialog(
-    jsonText: String,
-    error: String?,
-    preview: DashboardExportData?,
-    isLoading: Boolean,
-    onJsonChange: (String) -> Unit,
-    onPreview: () -> Unit,
-    onImport: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text("导入数据")
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "请粘贴 JSON 格式的数据：",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                OutlinedTextField(
-                    value = jsonText,
-                    onValueChange = onJsonChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    placeholder = {
-                        Text("粘贴 JSON 数据...")
-                    },
-                    maxLines = 10,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-                
-                // 错误信息
-                if (error != null) {
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                
-                // 预览信息
-                if (preview != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = "数据预览：",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "卡片数量: ${preview.cards.size}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "总卡片数: ${preview.statistics.totalCards}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "收藏数: ${preview.statistics.favoriteCards}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onPreview,
-                    enabled = jsonText.isNotBlank() && !isLoading
-                ) {
-                    Text("预览")
-                }
-                Button(
-                    onClick = onImport,
-                    enabled = preview != null && !isLoading
-                ) {
-                    Text(if (isLoading) "导入中..." else "导入")
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("取消")
-            }
-        }
-    )
-}

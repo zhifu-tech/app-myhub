@@ -91,13 +91,13 @@ kotlin {
             // Koin Compose ViewModel（可选：如果使用 ViewModel，需要此依赖）
             implementation(libs.koin.compose.viewmodel)
 
-            // ========== 日志 ==========
-            // Kotlin Logging（必需：AppLogger 使用）
-            implementation(libs.kotlin.logging)
-
             // ========== 项目模块依赖 ==========
             // 平台抽象层（必需：平台特定实现，包含日志工具）
             implementation(projects.core.platform)
+            // 平台 Compose UI 组件（必需：WindowSize 相关功能）
+            implementation(projects.core.platformCompose)
+            // 日志
+            implementation(projects.core.logger)
             // 本地存储层（必需：LocalAppTheme, LocalAppLocale 等）
             implementation(projects.core.local)
             // 数据层（必需：数据存储和网络）
@@ -105,15 +105,7 @@ kotlin {
             implementation(projects.core.datastoreRepositoryClient)
         }
 
-        androidMain.dependencies {
-            // Android 平台日志实现
-            implementation(libs.kotlin.logging.android)
-        }
-
         jvmMain.dependencies {
-            // JVM 平台日志实现
-            implementation(libs.slf4j.api)
-            implementation(libs.slf4j.simple)
             // Desktop 相关
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
