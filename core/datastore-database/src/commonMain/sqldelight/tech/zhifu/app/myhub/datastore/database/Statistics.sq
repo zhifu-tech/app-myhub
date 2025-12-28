@@ -5,30 +5,43 @@ CREATE TABLE statistics (
     favorite_cards INTEGER NOT NULL DEFAULT 0,
     recent_edits INTEGER NOT NULL DEFAULT 0,
     last_sync_time INTEGER,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    user_id TEXT NOT NULL DEFAULT ''
 );
 
 -- 卡片类型统计表
 CREATE TABLE card_type_statistics (
-    card_type TEXT PRIMARY KEY NOT NULL,
-    count INTEGER NOT NULL DEFAULT 0
+    card_type TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    user_id TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (user_id, card_type)
 );
 
 -- 标签统计表
 CREATE TABLE tag_statistics (
-    tag_name TEXT PRIMARY KEY NOT NULL,
-    count INTEGER NOT NULL DEFAULT 0
+    tag_name TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    user_id TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (user_id, tag_name)
 );
 
 -- 查询：获取统计信息
 selectStatistics:
 SELECT * FROM statistics
-WHERE id = 1;
+WHERE user_id = ?;
 
 -- 更新统计信息
+-- 使用 INSERT OR REPLACE，基于 user_id 查找现有记录的 id
 updateStatistics:
-INSERT OR REPLACE INTO statistics (id, total_cards, favorite_cards, recent_edits, last_sync_time, updated_at)
-VALUES (1, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO statistics (id, total_cards, favorite_cards, recent_edits, last_sync_time, updated_at, user_id)
+SELECT 
+    COALESCE((SELECT id FROM statistics WHERE user_id = ?), 1),
+    ?,
+    ?,
+    ?,
+    ?,
+    ?,
+    ?;
 
 -- 重置统计信息
 resetStatistics:
@@ -37,30 +50,33 @@ SET total_cards = 0,
     favorite_cards = 0,
     recent_edits = 0,
     last_sync_time = NULL,
-    updated_at = ?;
+    updated_at = ?
+WHERE user_id = ?;
 
--- 删除所有统计数据
+-- 删除所有统计数据（按用户）
 deleteAll:
-DELETE FROM statistics;
-DELETE FROM card_type_statistics;
-DELETE FROM tag_statistics;
+DELETE FROM statistics WHERE user_id = ?;
+DELETE FROM card_type_statistics WHERE user_id = ?;
+DELETE FROM tag_statistics WHERE user_id = ?;
 
 -- 获取卡片类型统计
 selectCardTypeStatistics:
 SELECT * FROM card_type_statistics
+WHERE user_id = ?
 ORDER BY count DESC;
 
 -- 更新卡片类型统计
 updateCardTypeStatistics:
-INSERT OR REPLACE INTO card_type_statistics (card_type, count)
-VALUES (?, ?);
+INSERT OR REPLACE INTO card_type_statistics (card_type, count, user_id)
+VALUES (?, ?, ?);
 
 -- 获取标签统计
 selectTagStatistics:
 SELECT * FROM tag_statistics
+WHERE user_id = ?
 ORDER BY count DESC;
 
 -- 更新标签统计
 updateTagStatistics:
-INSERT OR REPLACE INTO tag_statistics (tag_name, count)
-VALUES (?, ?);
+INSERT OR REPLACE INTO tag_statistics (tag_name, count, user_id)
+VALUES (?, ?, ?);

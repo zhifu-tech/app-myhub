@@ -12,6 +12,7 @@ import tech.zhifu.app.myhub.datastore.datasource.RemoteStatisticsDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTemplateDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.datasource.di.remoteDataSourceModule
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
@@ -48,7 +49,9 @@ val repositoryModule = module {
     single<ReactiveCardRepository> {
         CardRepositoryImpl(
             localDataSource = get<LocalCardDataSource>(),
-            remoteDataSource = get<RemoteCardDataSource>()
+            remoteDataSource = get<RemoteCardDataSource>(),
+            userContextProvider = get<UserContextProvider>(),
+            userDataSource = get<LocalUserDataSource>()
         )
     }
 
@@ -60,7 +63,9 @@ val repositoryModule = module {
     single<ReactiveTagRepository> {
         TagRepositoryImpl(
             localDataSource = get<LocalTagDataSource>(),
-            remoteDataSource = get<RemoteTagDataSource>()
+            remoteDataSource = get<RemoteTagDataSource>(),
+            userContextProvider = get<UserContextProvider>(),
+            userDataSource = get<LocalUserDataSource>()
         )
     }
 
@@ -72,7 +77,9 @@ val repositoryModule = module {
     single<ReactiveTemplateRepository> {
         TemplateRepositoryImpl(
             localDataSource = get<LocalTemplateDataSource>(),
-            remoteDataSource = get<RemoteTemplateDataSource>()
+            remoteDataSource = get<RemoteTemplateDataSource>(),
+            userContextProvider = get<UserContextProvider>(),
+            userDataSource = get<LocalUserDataSource>()
         )
     }
 
@@ -96,7 +103,8 @@ val repositoryModule = module {
     single<ReactiveStatisticsRepository> {
         StatisticsRepositoryImpl(
             localDataSource = get<LocalStatisticsDataSource>(),
-            remoteDataSource = get<RemoteStatisticsDataSource>()
+            remoteDataSource = get<RemoteStatisticsDataSource>(),
+            userContextProvider = get<UserContextProvider>()
         )
     }
 

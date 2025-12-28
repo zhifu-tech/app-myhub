@@ -7,7 +7,9 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTemplateDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
+import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderImpl
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.StatisticsRepository
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
@@ -30,22 +32,32 @@ val repositoryModule = module {
     includes(databaseModule)
     includes(localDataSourceModule)
 
+    // UserContextProvider 实现（服务端）
+    single<UserContextProvider> {
+        UserContextProviderImpl(
+            userDataSource = get<LocalUserDataSource>()
+        )
+    }
+
     // Repository 实现（服务端）
     single<CardRepository> {
         CardRepositoryImpl(
-            localDataSource = get<LocalCardDataSource>()
+            localDataSource = get<LocalCardDataSource>(),
+            userContextProvider = get<UserContextProvider>()
         )
     }
 
     single<TagRepository> {
         TagRepositoryImpl(
-            localDataSource = get<LocalTagDataSource>()
+            localDataSource = get<LocalTagDataSource>(),
+            userContextProvider = get<UserContextProvider>()
         )
     }
 
     single<TemplateRepository> {
         TemplateRepositoryImpl(
-            localDataSource = get<LocalTemplateDataSource>()
+            localDataSource = get<LocalTemplateDataSource>(),
+            userContextProvider = get<UserContextProvider>()
         )
     }
 
@@ -62,7 +74,8 @@ val repositoryModule = module {
 
     single<StatisticsRepository> {
         StatisticsRepositoryImpl(
-            cardDataSource = get<LocalCardDataSource>()
+            cardDataSource = get<LocalCardDataSource>(),
+            userContextProvider = get<UserContextProvider>()
         )
     }
 }

@@ -1,9 +1,14 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.CreateCardRequest
@@ -24,12 +29,20 @@ import kotlin.time.Clock
  */
 class CardRepositoryImpl(
     private val localDataSource: LocalCardDataSource,
-    private val remoteDataSource: RemoteCardDataSource
+    private val remoteDataSource: RemoteCardDataSource,
+    private val userContextProvider: UserContextProvider,
+    private val userDataSource: LocalUserDataSource
 ) : ReactiveCardRepository {
 
     private val logger = logger("CardRepositoryImpl")
 
+    private suspend fun requireUserId(): String {
+        return userContextProvider.getCurrentUserId()
+            ?: throw IllegalStateException("User not authenticated")
+    }
+
     override suspend fun getAllCards(): List<Card> {
+        val userId = requireUserId()
         // 优先从远程获取最新数据
         return try {
             // 从远程获取所有卡片
@@ -39,11 +52,11 @@ class CardRepositoryImpl(
 
             // 保存到本地（更新或插入）
             remoteCards.forEach { card ->
-                val existingCard = localDataSource.getCardById(card.id)
+                val existingCard = localDataSource.getCardById(card.id, userId)
                 if (existingCard != null) {
-                    localDataSource.updateCard(card)
+                    localDataSource.updateCard(card, userId)
                 } else {
-                    localDataSource.insertCard(card)
+                    localDataSource.insertCard(card, userId)
                 }
             }
             remoteCards
@@ -52,17 +65,25 @@ class CardRepositoryImpl(
                 "Failed to fetch cards from remote data source: ${e.message}"
             }
             // 如果远程获取失败，返回本地数据（降级处理）
-            localDataSource.getAllCards()
+            localDataSource.getAllCards(userId)
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeAllCards(): Flow<List<Card>> {
-        return localDataSource.observeCards()
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                localDataSource.observeCards(user.id)
+            }
+        }
     }
 
     override suspend fun getCardById(id: String): Card? {
+        val userId = requireUserId()
         // 先从本地获取
-        val localCard = localDataSource.getCardById(id)
+        val localCard = localDataSource.getCardById(id, userId)
         if (localCard != null) {
             return localCard
         }
@@ -70,7 +91,7 @@ class CardRepositoryImpl(
         // 如果本地没有，从远程获取
         return try {
             val remoteCard = remoteDataSource.getCardById(id)?.toDomain()
-            remoteCard?.let { localDataSource.insertCard(it) }
+            remoteCard?.let { localDataSource.insertCard(it, userId) }
             remoteCard
         } catch (_: Exception) {
             null
@@ -78,7 +99,8 @@ class CardRepositoryImpl(
     }
 
     override suspend fun searchCards(filter: SearchFilter): List<Card> {
-        return localDataSource.getAllCards().filter { card ->
+        val userId = requireUserId()
+        return localDataSource.getAllCards(userId).filter { card ->
             // 搜索查询匹配
             val matchesQuery = filter.query?.let { query ->
                 query.isBlank() ||
@@ -115,8 +137,19 @@ class CardRepositoryImpl(
         })
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeSearchCards(filter: SearchFilter): Flow<List<Card>> {
-        return localDataSource.observeCards().map { cards ->
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                observeSearchCardsInternal(filter, user.id)
+            }
+        }
+    }
+
+    private suspend fun observeSearchCardsInternal(filter: SearchFilter, userId: String): Flow<List<Card>> {
+        return localDataSource.observeCards(userId).map { cards ->
             cards.filter { card ->
                 // 搜索查询匹配
                 val matchesQuery = filter.query?.let { query ->
@@ -159,8 +192,9 @@ class CardRepositoryImpl(
     }
 
     override suspend fun createCard(card: Card): Card {
+        val userId = requireUserId()
         // 先保存到本地
-        localDataSource.insertCard(card)
+        localDataSource.insertCard(card, userId)
 
         // 然后同步到远程
         val request = card.toDto().let { dto ->
@@ -180,15 +214,16 @@ class CardRepositoryImpl(
         val remoteCard = remoteDataSource.createCard(request).toDomain()
 
         // 更新本地数据
-        localDataSource.updateCard(remoteCard)
+        localDataSource.updateCard(remoteCard, userId)
 
         return remoteCard
     }
 
     override suspend fun updateCard(card: Card): Card {
+        val userId = requireUserId()
         // 先更新本地
         val updatedCard = card.copy(updatedAt = Clock.System.now())
-        localDataSource.updateCard(updatedCard)
+        localDataSource.updateCard(updatedCard, userId)
 
         // 然后同步到远程
         val request = UpdateCardRequest(
@@ -205,15 +240,16 @@ class CardRepositoryImpl(
         val remoteCard = remoteDataSource.updateCard(card.id, request).toDomain()
 
         // 更新本地数据
-        localDataSource.updateCard(remoteCard)
+        localDataSource.updateCard(remoteCard, userId)
 
         return remoteCard
     }
 
     override suspend fun deleteCard(id: String): Boolean {
         return try {
+            val userId = requireUserId()
             // 先删除本地
-            localDataSource.deleteCard(id)
+            localDataSource.deleteCard(id, userId)
 
             // 然后删除远程
             remoteDataSource.deleteCard(id)
@@ -225,36 +261,58 @@ class CardRepositoryImpl(
     }
 
     override suspend fun toggleFavorite(cardId: String): Card {
-        val card = localDataSource.getCardById(cardId)
+        val userId = requireUserId()
+        val card = localDataSource.getCardById(cardId, userId)
             ?: throw IllegalStateException("Card not found: $cardId")
 
         // 先更新本地
         val updatedCard = card.copy(isFavorite = !card.isFavorite, updatedAt = Clock.System.now())
-        localDataSource.updateCard(updatedCard)
+        localDataSource.updateCard(updatedCard, userId)
 
         // 然后同步到远程
         val remoteCard = remoteDataSource.toggleFavorite(cardId).toDomain()
-        localDataSource.updateCard(remoteCard)
+        localDataSource.updateCard(remoteCard, userId)
 
         return remoteCard
     }
 
     // ReactiveCardRepository 接口实现
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeFavoriteCards(): Flow<List<Card>> {
-        return localDataSource.observeCards().map { cards ->
-            cards.filter { it.isFavorite }
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                localDataSource.observeCards(user.id).map { cards ->
+                    cards.filter { it.isFavorite }
+                }
+            }
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCardsByType(type: CardType): Flow<List<Card>> {
-        return localDataSource.observeCards().map { cards ->
-            cards.filter { it.type == type }
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                localDataSource.observeCards(user.id).map { cards ->
+                    cards.filter { it.type == type }
+                }
+            }
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCardsByTag(tag: String): Flow<List<Card>> {
-        return localDataSource.observeCards().map { cards ->
-            cards.filter { it.tags.contains(tag) }
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                localDataSource.observeCards(user.id).map { cards ->
+                    cards.filter { it.tags.contains(tag) }
+                }
+            }
         }
     }
 }

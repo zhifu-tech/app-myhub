@@ -9,13 +9,14 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
+import tech.zhifu.app.myhub.platform.compose.resources.settings
 import tech.zhifu.app.myhub.resources.Res
 import tech.zhifu.app.myhub.resources.all_cards
 import tech.zhifu.app.myhub.resources.dashboard
 import tech.zhifu.app.myhub.resources.favorites
 import tech.zhifu.app.myhub.resources.new_card
 import tech.zhifu.app.myhub.resources.profile
-import tech.zhifu.app.myhub.resources.settings
+import tech.zhifu.app.myhub.platform.compose.resources.Res as PlatformRes
 
 sealed class Screen(val route: String, val title: String) {
     object Dashboard : Screen("dashboard", "Dashboard")
@@ -32,6 +33,6 @@ sealed class NavItem(val screen: Screen, val icon: ImageVector, val labelKey: St
     object Dashboard : NavItem(Screen.Dashboard, Icons.Default.Dashboard, Res.string.dashboard)
     object Favorites : NavItem(Screen.Favorites, Icons.Default.Favorite, Res.string.favorites)
     object New : NavItem(Screen.New, Icons.Default.Add, Res.string.new_card)
-    object Settings : NavItem(Screen.Settings, Icons.Default.Settings, Res.string.settings)
+    object Settings : NavItem(Screen.Settings, Icons.Default.Settings, PlatformRes.string.settings)
     object Profile : NavItem(Screen.Profile, Icons.Default.Person, Res.string.profile)
 }

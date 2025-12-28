@@ -7,3 +7,4 @@ data class AppConfig(
     val language: String? = null,
     val isDarkMode: Boolean = true
 )
+

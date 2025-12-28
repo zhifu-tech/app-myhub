@@ -101,6 +101,8 @@ kotlin {
             // 数据层（必需：数据存储和网络）
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)
+            // Feature 模块
+            implementation(projects.feature.settings)
         }
 
         jvmMain.dependencies {

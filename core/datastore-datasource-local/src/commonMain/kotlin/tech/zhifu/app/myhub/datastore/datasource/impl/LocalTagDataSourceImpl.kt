@@ -17,45 +17,47 @@ class LocalTagDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalTagDataSource {
 
-    override suspend fun getAllTags(): List<Tag> {
-        return database.tagQueries.selectAll().awaitAsList().map { it.toTag() }
+    override suspend fun getAllTags(userId: String): List<Tag> {
+        return database.tagQueries.selectAll(userId).awaitAsList().map { it.toTag() }
     }
 
-    override suspend fun getTagById(id: String): Tag? {
-        return database.tagQueries.selectById(id).awaitAsOneOrNull()?.toTag()
+    override suspend fun getTagById(id: String, userId: String): Tag? {
+        return database.tagQueries.selectById(id, userId).awaitAsOneOrNull()?.toTag()
     }
 
-    override suspend fun getTagByName(name: String): Tag? {
-        return database.tagQueries.selectByName(name).awaitAsOneOrNull()?.toTag()
+    override suspend fun getTagByName(name: String, userId: String): Tag? {
+        return database.tagQueries.selectByName(name, userId).awaitAsOneOrNull()?.toTag()
     }
 
-    override suspend fun insertTag(tag: Tag) {
+    override suspend fun insertTag(tag: Tag, userId: String) {
         database.tagQueries.insertTag(
             id = tag.id,
             name = tag.name,
             color = tag.color,
             description = tag.description,
             card_count = tag.cardCount.toLong(),
-            created_at = tag.createdAt.toString()
+            created_at = tag.createdAt.toString(),
+            user_id = userId
         )
     }
 
-    override suspend fun updateTag(tag: Tag) {
+    override suspend fun updateTag(tag: Tag, userId: String) {
         database.tagQueries.updateTag(
             name = tag.name,
             color = tag.color,
             description = tag.description,
             card_count = tag.cardCount.toLong(),
-            id = tag.id
+            id = tag.id,
+            user_id = userId
         )
     }
 
-    override suspend fun deleteTag(id: String) {
-        database.tagQueries.deleteTag(id)
+    override suspend fun deleteTag(id: String, userId: String) {
+        database.tagQueries.deleteTag(id, userId)
     }
 
-    override fun observeTags(): Flow<List<Tag>> {
-        return database.tagQueries.selectAll()
+    override fun observeTags(userId: String): Flow<List<Tag>> {
+        return database.tagQueries.selectAll(userId)
             .asFlow()
             .mapLatest { query ->
                 query.awaitAsList().map { it.toTag() }

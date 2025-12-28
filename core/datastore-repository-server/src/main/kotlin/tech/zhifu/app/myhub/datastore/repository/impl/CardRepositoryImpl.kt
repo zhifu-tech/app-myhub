@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.SearchFilter
 import tech.zhifu.app.myhub.datastore.model.SortBy
@@ -12,20 +13,29 @@ import kotlin.time.Clock
  * 复用 LocalCardDataSource 的实现，避免代码重复
  */
 class CardRepositoryImpl(
-    private val localDataSource: LocalCardDataSource
+    private val localDataSource: LocalCardDataSource,
+    private val userContextProvider: UserContextProvider
 ) : CardRepository {
 
+    private suspend fun requireUserId(): String {
+        return userContextProvider.getCurrentUserId()
+            ?: throw IllegalStateException("User not authenticated")
+    }
+
     override suspend fun getAllCards(): List<Card> {
-        return localDataSource.getAllCards()
+        val userId = requireUserId()
+        return localDataSource.getAllCards(userId)
     }
 
     override suspend fun getCardById(id: String): Card? {
-        return localDataSource.getCardById(id)
+        val userId = requireUserId()
+        return localDataSource.getCardById(id, userId)
     }
 
     override suspend fun searchCards(filter: SearchFilter): List<Card> {
         // 获取所有卡片，然后进行过滤和排序
-        val allCards = localDataSource.getAllCards()
+        val userId = requireUserId()
+        val allCards = localDataSource.getAllCards(userId)
 
         return allCards.filter { card ->
             // 查询匹配
@@ -65,27 +75,30 @@ class CardRepositoryImpl(
     }
 
     override suspend fun createCard(card: Card): Card {
+        val userId = requireUserId()
         val cardToInsert = if (card.id.isBlank()) {
             card.copy(id = generateId(), createdAt = Clock.System.now(), updatedAt = Clock.System.now())
         } else {
             card.copy(updatedAt = Clock.System.now())
         }
-        localDataSource.insertCard(cardToInsert)
+        localDataSource.insertCard(cardToInsert, userId)
         return cardToInsert
     }
 
     override suspend fun updateCard(card: Card): Card {
-        val existing = localDataSource.getCardById(card.id)
+        val userId = requireUserId()
+        val existing = localDataSource.getCardById(card.id, userId)
             ?: throw IllegalArgumentException("Card not found: ${card.id}")
 
         val updatedCard = card.copy(updatedAt = Clock.System.now())
-        localDataSource.updateCard(updatedCard)
+        localDataSource.updateCard(updatedCard, userId)
         return updatedCard
     }
 
     override suspend fun deleteCard(id: String): Boolean {
         return try {
-            localDataSource.deleteCard(id)
+            val userId = requireUserId()
+            localDataSource.deleteCard(id, userId)
             true
         } catch (e: Exception) {
             false
@@ -93,7 +106,8 @@ class CardRepositoryImpl(
     }
 
     override suspend fun toggleFavorite(cardId: String): Card {
-        val existing = localDataSource.getCardById(cardId)
+        val userId = requireUserId()
+        val existing = localDataSource.getCardById(cardId, userId)
             ?: throw IllegalArgumentException("Card not found: $cardId")
 
         val updated = existing.copy(
@@ -101,7 +115,7 @@ class CardRepositoryImpl(
             updatedAt = Clock.System.now()
         )
 
-        localDataSource.updateCard(updated)
+        localDataSource.updateCard(updated, userId)
         return updated
     }
 

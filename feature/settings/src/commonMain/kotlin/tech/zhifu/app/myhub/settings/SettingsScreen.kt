@@ -25,32 +25,37 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.local.customAppThemeIsDark
-import tech.zhifu.app.myhub.resources.Res
-import tech.zhifu.app.myhub.resources.settings
+import org.koin.compose.koinInject
+import tech.zhifu.app.myhub.feature.settings.resources.Res
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearance_language
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_dark_mode
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_display_language
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_off
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_on
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_select_language
+import tech.zhifu.app.myhub.platform.compose.resources.settings
 import tech.zhifu.app.myhub.ui.utils.Language
-import tech.zhifu.app.myhub.ui.utils.LocalAppLanguage
-import tech.zhifu.app.myhub.ui.utils.updateAppLanguage
+import tech.zhifu.app.myhub.platform.compose.resources.Res as PlatformRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
-    val currentLanguage = LocalAppLanguage.current
-    var showLanguageDialog by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    viewModel: SettingsViewModel = koinInject<SettingsViewModel>()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(Res.string.settings)) }
+                title = { Text(stringResource(PlatformRes.string.settings)) }
             )
         }
     ) { padding ->
@@ -63,7 +68,7 @@ fun SettingsScreen() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Appearance & Language",
+                text = stringResource(Res.string.feature_settings_appearance_language),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -74,13 +79,20 @@ fun SettingsScreen() {
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             ) {
                 ListItem(
-                    headlineContent = { Text("Dark Mode") },
-                    supportingContent = { Text(if (customAppThemeIsDark) "On" else "Off") },
+                    headlineContent = { Text(stringResource(Res.string.feature_settings_dark_mode)) },
+                    supportingContent = {
+                        Text(
+                            if (uiState.isDarkMode)
+                                stringResource(Res.string.feature_settings_on)
+                            else
+                                stringResource(Res.string.feature_settings_off)
+                        )
+                    },
                     leadingContent = { Icon(Icons.Default.Palette, null) },
                     trailingContent = {
                         Switch(
-                            checked = customAppThemeIsDark,
-                            onCheckedChange = { customAppThemeIsDark = it }
+                            checked = uiState.isDarkMode,
+                            onCheckedChange = { viewModel.updateTheme(it) }
                         )
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -89,13 +101,13 @@ fun SettingsScreen() {
 
             // 语言设置项
             Surface(
-                onClick = { showLanguageDialog = true },
+                onClick = { viewModel.showLanguageDialog() },
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             ) {
                 ListItem(
-                    headlineContent = { Text("Display Language") },
-                    supportingContent = { Text(currentLanguage.label) },
+                    headlineContent = { Text(stringResource(Res.string.feature_settings_display_language)) },
+                    supportingContent = { Text(uiState.currentLanguage.label) },
                     leadingContent = { Icon(Icons.Default.Language, null) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
@@ -103,10 +115,10 @@ fun SettingsScreen() {
         }
     }
 
-    if (showLanguageDialog) {
+    if (uiState.showLanguageDialog) {
         AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Select Language") },
+            onDismissRequest = { viewModel.hideLanguageDialog() },
+            title = { Text(stringResource(Res.string.feature_settings_select_language)) },
             text = {
                 Column {
                     Language.entries.forEach { language ->
@@ -117,10 +129,9 @@ fun SettingsScreen() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = (language == currentLanguage),
+                                selected = (language == uiState.currentLanguage),
                                 onClick = {
-                                    updateAppLanguage(language)
-                                    showLanguageDialog = false
+                                    viewModel.updateLanguage(language)
                                 }
                             )
                             Text(
@@ -132,10 +143,11 @@ fun SettingsScreen() {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) {
-                    Text("Close")
+                TextButton(onClick = { viewModel.hideLanguageDialog() }) {
+                    Text(stringResource(Res.string.feature_settings_close))
                 }
             }
         )
     }
 }
+

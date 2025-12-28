@@ -1,0 +1,10 @@
+<resources>
+    <string name="feature_settings_appearance_language">外观和语言</string>
+    <string name="feature_settings_dark_mode">深色模式</string>
+    <string name="feature_settings_display_language">显示语言</string>
+    <string name="feature_settings_select_language">选择语言</string>
+    <string name="feature_settings_close">关闭</string>
+    <string name="feature_settings_on">开启</string>
+    <string name="feature_settings_off">关闭</string>
+</resources>
+

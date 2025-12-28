@@ -14,6 +14,7 @@ sqldelight {
         create("MyHubDatabase") {
             packageName.set("tech.zhifu.app.myhub.datastore.database")
             generateAsync.set(true)
+            version = 2
         }
     }
     linkSqlite = true

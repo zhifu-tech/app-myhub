@@ -4,7 +4,6 @@
     <string name="all_cards">すべてのカード</string>
     <string name="templates">テンプレート</string>
     <string name="favorites">お気に入り</string>
-    <string name="settings">設定</string>
     <string name="new_card">新規カード</string>
     <string name="profile">プロフィール</string>
     <string name="search_placeholder">内容、タグ、または著者で検索...</string>

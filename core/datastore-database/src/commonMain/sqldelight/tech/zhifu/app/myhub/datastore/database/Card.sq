@@ -11,13 +11,15 @@ CREATE TABLE card (
     is_template INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    last_reviewed_at TEXT
+    last_reviewed_at TEXT,
+    user_id TEXT NOT NULL DEFAULT ''
 );
 
 -- 卡片标签关联表（多对多关系）
 CREATE TABLE card_tag (
     card_id TEXT NOT NULL,
     tag_name TEXT NOT NULL,
+    user_id TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (card_id, tag_name),
     FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
 );
@@ -37,6 +39,7 @@ CREATE TABLE card_metadata (
     word_example TEXT,
     idea_priority TEXT,
     idea_status TEXT,
+    user_id TEXT NOT NULL DEFAULT '',
     FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
 );
 
@@ -47,6 +50,7 @@ CREATE TABLE checklist_item (
     text TEXT NOT NULL,
     is_completed INTEGER NOT NULL DEFAULT 0,
     item_order INTEGER NOT NULL DEFAULT 0,
+    user_id TEXT NOT NULL DEFAULT '',
     FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
 );
 
@@ -55,48 +59,56 @@ CREATE INDEX card_type_index ON card(type);
 CREATE INDEX card_favorite_index ON card(is_favorite);
 CREATE INDEX card_template_index ON card(is_template);
 CREATE INDEX card_updated_at_index ON card(updated_at);
+CREATE INDEX card_user_id_index ON card(user_id);
+CREATE INDEX card_user_type_index ON card(user_id, type);
+CREATE INDEX card_user_favorite_index ON card(user_id, is_favorite);
+CREATE INDEX card_user_updated_index ON card(user_id, updated_at);
 CREATE INDEX card_tag_card_id_index ON card_tag(card_id);
+CREATE INDEX card_tag_user_id_index ON card_tag(user_id);
+CREATE INDEX card_metadata_user_id_index ON card_metadata(user_id);
 CREATE INDEX checklist_item_card_id_index ON checklist_item(card_id);
+CREATE INDEX checklist_item_user_id_index ON checklist_item(user_id);
 
 -- 查询：获取所有卡片
 selectAll:
 SELECT * FROM card
+WHERE user_id = ?
 ORDER BY updated_at DESC;
 
 -- 查询：根据ID获取卡片
 selectById:
 SELECT * FROM card
-WHERE id = ?;
+WHERE id = ? AND user_id = ?;
 
 -- 查询：获取收藏的卡片
 selectFavorites:
 SELECT * FROM card
-WHERE is_favorite = 1
+WHERE is_favorite = 1 AND user_id = ?
 ORDER BY updated_at DESC;
 
 -- 查询：根据类型获取卡片
 selectByType:
 SELECT * FROM card
-WHERE type = ?
+WHERE type = ? AND user_id = ?
 ORDER BY updated_at DESC;
 
 -- 查询：根据标签获取卡片
 selectByTag:
 SELECT c.* FROM card c
 INNER JOIN card_tag ct ON c.id = ct.card_id
-WHERE ct.tag_name = ?
+WHERE ct.tag_name = ? AND c.user_id = ?
 ORDER BY c.updated_at DESC;
 
 -- 查询：搜索卡片（标题、内容、作者）
 searchCards:
 SELECT * FROM card
-WHERE (title LIKE '%' || ? || '%' OR content LIKE '%' || ? || '%' OR author LIKE '%' || ? || '%')
+WHERE (title LIKE '%' || ? || '%' OR content LIKE '%' || ? || '%' OR author LIKE '%' || ? || '%') AND user_id = ?
 ORDER BY updated_at DESC;
 
 -- 插入卡片
 insertCard:
-INSERT INTO card (id, type, title, content, author, source, language, is_favorite, is_template, created_at, updated_at, last_reviewed_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO card (id, type, title, content, author, source, language, is_favorite, is_template, created_at, updated_at, last_reviewed_at, user_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 更新卡片
 updateCard:
@@ -111,57 +123,58 @@ SET type = ?,
     is_template = ?,
     updated_at = ?,
     last_reviewed_at = ?
-WHERE id = ?;
+WHERE id = ? AND user_id = ?;
 
 -- 删除卡片
 deleteCard:
 DELETE FROM card
-WHERE id = ?;
+WHERE id = ? AND user_id = ?;
 
--- 删除所有卡片
+-- 删除所有卡片（按用户）
 deleteAll:
-DELETE FROM card;
+DELETE FROM card
+WHERE user_id = ?;
 
 -- 插入卡片标签
 insertCardTag:
-INSERT OR IGNORE INTO card_tag (card_id, tag_name)
-VALUES (?, ?);
+INSERT OR IGNORE INTO card_tag (card_id, tag_name, user_id)
+VALUES (?, ?, ?);
 
 -- 删除卡片的所有标签
 deleteCardTags:
 DELETE FROM card_tag
-WHERE card_id = ?;
+WHERE card_id = ? AND user_id = ?;
 
 -- 获取卡片的所有标签
 selectCardTags:
 SELECT tag_name FROM card_tag
-WHERE card_id = ?
+WHERE card_id = ? AND user_id = ?
 ORDER BY tag_name;
 
 -- 插入卡片元数据
 insertCardMetadata:
-INSERT OR REPLACE INTO card_metadata (card_id, quote_author, quote_category, code_language, code_snippet, article_url, article_summary, article_image_url, word_pronunciation, word_definition, word_example, idea_priority, idea_status)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO card_metadata (card_id, quote_author, quote_category, code_language, code_snippet, article_url, article_summary, article_image_url, word_pronunciation, word_definition, word_example, idea_priority, idea_status, user_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 获取卡片元数据
 selectCardMetadata:
 SELECT * FROM card_metadata
-WHERE card_id = ?;
+WHERE card_id = ? AND user_id = ?;
 
 -- 删除卡片元数据
 deleteCardMetadata:
 DELETE FROM card_metadata
-WHERE card_id = ?;
+WHERE card_id = ? AND user_id = ?;
 
 -- 插入待办清单项
 insertChecklistItem:
-INSERT INTO checklist_item (id, card_id, text, is_completed, item_order)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO checklist_item (id, card_id, text, is_completed, item_order, user_id)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- 获取卡片的待办清单项
 selectChecklistItems:
 SELECT * FROM checklist_item
-WHERE card_id = ?
+WHERE card_id = ? AND user_id = ?
 ORDER BY item_order;
 
 -- 更新待办清单项
@@ -170,10 +183,10 @@ UPDATE checklist_item
 SET text = ?,
     is_completed = ?,
     item_order = ?
-WHERE id = ?;
+WHERE id = ? AND user_id = ?;
 
 -- 删除卡片的待办清单项
 deleteChecklistItems:
 DELETE FROM checklist_item
-WHERE card_id = ?;
+WHERE card_id = ? AND user_id = ?;
 

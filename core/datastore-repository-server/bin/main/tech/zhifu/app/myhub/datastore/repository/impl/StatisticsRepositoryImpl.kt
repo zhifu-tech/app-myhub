@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.model.Statistics
 import tech.zhifu.app.myhub.datastore.repository.StatisticsRepository
 import kotlin.time.Clock
@@ -11,12 +12,19 @@ import kotlin.time.Duration.Companion.days
  * 使用 LocalCardDataSource 获取数据并计算统计信息
  */
 class StatisticsRepositoryImpl(
-    private val cardDataSource: LocalCardDataSource
+    private val cardDataSource: LocalCardDataSource,
+    private val userContextProvider: UserContextProvider
 ) : StatisticsRepository {
 
+    private suspend fun requireUserId(): String {
+        return userContextProvider.getCurrentUserId()
+            ?: throw IllegalStateException("User not authenticated")
+    }
+
     override suspend fun getStatistics(): Statistics {
+        val userId = requireUserId()
         // 从 LocalCardDataSource 获取卡片数据并计算统计信息
-        val cards = cardDataSource.getAllCards()
+        val cards = cardDataSource.getAllCards(userId)
 
         val totalCards = cards.size
         val favoriteCards = cards.count { it.isFavorite }

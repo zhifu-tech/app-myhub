@@ -15,13 +15,12 @@ class LocalStatisticsDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalStatisticsDataSource {
 
-    override suspend fun getStatistics(): Statistics? {
-        val statsRow = database.statisticsQueries.selectStatistics().awaitAsOneOrNull() ?: return null
-        val cardTypeStats = database.statisticsQueries.selectCardTypeStatistics()
+    override suspend fun getStatistics(userId: String): Statistics? {
+        val statsRow = database.statisticsQueries.selectStatistics(userId).awaitAsOneOrNull() ?: return null
+        val cardTypeStats = database.statisticsQueries.selectCardTypeStatistics(userId)
             .awaitAsList()
-            .associate { it.card_type to CardType.valueOf(it.card_type) to it.count.toInt() }
-            .mapKeys { it.key.second }
-        val tagStats = database.statisticsQueries.selectTagStatistics()
+            .associate { CardType.valueOf(it.card_type) to it.count.toInt() }
+        val tagStats = database.statisticsQueries.selectTagStatistics(userId)
             .awaitAsList()
             .associate { it.tag_name to it.count.toInt() }
 
@@ -35,22 +34,28 @@ class LocalStatisticsDataSourceImpl(
         )
     }
 
-    override suspend fun saveStatistics(statistics: Statistics) {
+    override suspend fun saveStatistics(statistics: Statistics, userId: String) {
         database.transaction {
+            val updatedAt = Clock.System.now().toString()
             // 保存主统计信息
+            // 使用 INSERT OR REPLACE，基于 user_id 查找现有记录的 id
+            // 参数顺序：user_id (查找), total_cards, favorite_cards, recent_edits, last_sync_time, updated_at, user_id (插入)
             database.statisticsQueries.updateStatistics(
-                total_cards = statistics.totalCards.toLong(),
-                favorite_cards = statistics.favoriteCards.toLong(),
-                recent_edits = statistics.recentEdits.toLong(),
-                last_sync_time = statistics.lastSyncTime,
-                updated_at = Clock.System.now().toString()
+                userId,  // 用于查找现有记录
+                statistics.totalCards.toLong(),
+                statistics.favoriteCards.toLong(),
+                statistics.recentEdits.toLong(),
+                statistics.lastSyncTime,
+                updatedAt,
+                userId  // 用于插入新记录
             )
 
             // 保存卡片类型统计
             statistics.cardsByType.forEach { (type, count) ->
                 database.statisticsQueries.updateCardTypeStatistics(
                     card_type = type.name,
-                    count = count.toLong()
+                    count = count.toLong(),
+                    user_id = userId
                 )
             }
 
@@ -58,14 +63,15 @@ class LocalStatisticsDataSourceImpl(
             statistics.cardsByTag.forEach { (tagName, count) ->
                 database.statisticsQueries.updateTagStatistics(
                     tag_name = tagName,
-                    count = count.toLong()
+                    count = count.toLong(),
+                    user_id = userId
                 )
             }
         }
     }
 
-    override suspend fun clearStatistics() {
-        database.statisticsQueries.resetStatistics(Clock.System.now().toString())
+    override suspend fun clearStatistics(userId: String) {
+        database.statisticsQueries.resetStatistics(Clock.System.now().toString(), userId)
     }
 }
 

@@ -6,11 +6,13 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalStatisticsDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTemplateDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalStatisticsDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTagDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTemplateDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalUserDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderImpl
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 
 /**
@@ -47,6 +49,13 @@ val localDataSourceModule = module {
     single<LocalStatisticsDataSource> {
         LocalStatisticsDataSourceImpl(
             database = get<MyHubDatabase>()
+        )
+    }
+    
+    // UserContextProvider 实现（客户端）
+    single<UserContextProvider> {
+        UserContextProviderImpl(
+            userDataSource = get<LocalUserDataSource>()
         )
     }
 }

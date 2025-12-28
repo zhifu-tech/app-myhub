@@ -33,3 +33,4 @@ fun ProvideAppLanguage(content: @Composable () -> Unit) {
 fun updateAppLanguage(language: Language) {
     customAppLocale = language.code
 }
+

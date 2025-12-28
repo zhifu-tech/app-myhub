@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository
 
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
+import tech.zhifu.app.myhub.datastore.datasource.TestUserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
@@ -21,12 +22,19 @@ import kotlin.time.Instant
  * CardRepository 测试（服务端）
  */
 class CardRepositoryTest {
+    
+    private val testUserId = "test-user-1"
+    
+    private fun createRepository(database: tech.zhifu.app.myhub.datastore.database.MyHubDatabase, userId: String = testUserId): CardRepositoryImpl {
+        val localDataSource = LocalCardDataSourceImpl(database)
+        val userContextProvider = TestUserContextProvider(userId)
+        return CardRepositoryImpl(localDataSource, userContextProvider)
+    }
 
     @Test
     fun `test create card`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE)
 
         // When
@@ -41,8 +49,7 @@ class CardRepositoryTest {
     @Test
     fun `test create card with blank id generates id`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("", CardType.QUOTE) // 空白ID
 
         // When
@@ -57,8 +64,7 @@ class CardRepositoryTest {
     @Test
     fun `test get all cards`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE)
         val card2 = createTestCard("2", CardType.CODE)
         repository.createCard(card1)
@@ -72,12 +78,52 @@ class CardRepositoryTest {
         assertTrue(result.any { it.id == "1" })
         assertTrue(result.any { it.id == "2" })
     }
+    
+    @Test
+    fun `test multi-user data isolation`() = runDatabaseTest { database ->
+        // Given
+        val userId1 = "user-1"
+        val userId2 = "user-2"
+        val repository1 = createRepository(database, userId1)
+        val repository2 = createRepository(database, userId2)
+        val card1 = createTestCard("1", CardType.QUOTE)
+        val card2 = createTestCard("2", CardType.CODE)
+        val card3 = createTestCard("3", CardType.IDEA)
+
+        // When - User 1 creates cards
+        repository1.createCard(card1)
+        repository1.createCard(card2)
+        
+        // User 2 creates a card
+        repository2.createCard(card3)
+        
+        // Then - User 1 should only see their cards
+        val user1Cards = repository1.getAllCards()
+        assertEquals(2, user1Cards.size)
+        assertTrue(user1Cards.any { it.id == "1" })
+        assertTrue(user1Cards.any { it.id == "2" })
+        assertTrue(user1Cards.none { it.id == "3" })
+        
+        // User 2 should only see their card
+        val user2Cards = repository2.getAllCards()
+        assertEquals(1, user2Cards.size)
+        assertTrue(user2Cards.any { it.id == "3" })
+        assertTrue(user2Cards.none { it.id == "1" })
+        assertTrue(user2Cards.none { it.id == "2" })
+        
+        // User 1 cannot access User 2's card
+        val user1Card3 = repository1.getCardById("3")
+        assertNull(user1Card3)
+        
+        // User 2 cannot access User 1's cards
+        val user2Card1 = repository2.getCardById("1")
+        assertNull(user2Card1)
+    }
 
     @Test
     fun `test get card by id`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE)
         repository.createCard(card)
 
@@ -93,8 +139,7 @@ class CardRepositoryTest {
     @Test
     fun `test get card by id when not exists`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
 
         // When
         val result = repository.getCardById("non-existent")
@@ -106,8 +151,7 @@ class CardRepositoryTest {
     @Test
     fun `test update card`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE, content = "Original Content")
         repository.createCard(card)
 
@@ -129,8 +173,7 @@ class CardRepositoryTest {
     @Test
     fun `test update card when not exists throws exception`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("non-existent", CardType.QUOTE)
 
         // When & Then
@@ -142,8 +185,7 @@ class CardRepositoryTest {
     @Test
     fun `test delete card`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE)
         repository.createCard(card)
 
@@ -159,8 +201,7 @@ class CardRepositoryTest {
     @Test
     fun `test delete card when not exists returns false`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
 
         // When
         val result = repository.deleteCard("non-existent")
@@ -172,8 +213,7 @@ class CardRepositoryTest {
     @Test
     fun `test toggle favorite`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE, isFavorite = false)
         repository.createCard(card)
 
@@ -192,8 +232,7 @@ class CardRepositoryTest {
     @Test
     fun `test toggle favorite twice`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card = createTestCard("1", CardType.QUOTE, isFavorite = false)
         repository.createCard(card)
 
@@ -209,8 +248,7 @@ class CardRepositoryTest {
     @Test
     fun `test toggle favorite when not exists throws exception`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
 
         // When & Then
         assertFailsWith<IllegalArgumentException> {
@@ -221,8 +259,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards by query`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, content = "Kotlin is great", title = "Kotlin")
         val card2 = createTestCard("2", CardType.CODE, content = "Java code example")
         val card3 = createTestCard("3", CardType.IDEA, content = "Kotlin multiplatform idea")
@@ -247,8 +284,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards by type filter`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE)
         val card2 = createTestCard("2", CardType.CODE)
         val card3 = createTestCard("3", CardType.IDEA)
@@ -269,8 +305,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards by tags filter`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, tags = listOf("tag1", "tag2"))
         val card2 = createTestCard("2", CardType.CODE, tags = listOf("tag1", "tag3"))
         val card3 = createTestCard("3", CardType.IDEA, tags = listOf("tag2"))
@@ -292,8 +327,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards by favorite filter`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, isFavorite = true)
         val card2 = createTestCard("2", CardType.CODE, isFavorite = false)
         val card3 = createTestCard("3", CardType.IDEA, isFavorite = true)
@@ -314,8 +348,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards by template filter`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, isTemplate = true)
         val card2 = createTestCard("2", CardType.CODE, isTemplate = false)
         val card3 = createTestCard("3", CardType.IDEA, isTemplate = true)
@@ -335,8 +368,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards sorting by created at desc`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val now = Clock.System.now()
         val card1 = createTestCard("1", CardType.QUOTE, createdAt = now.minus(Duration.parse("PT3H")))
         val card2 = createTestCard("2", CardType.CODE, createdAt = now.minus(Duration.parse("PT1H")))
@@ -359,8 +391,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards sorting by created at asc`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val now = Clock.System.now()
         val card1 = createTestCard("1", CardType.QUOTE, createdAt = now.minus(Duration.parse("PT3H")))
         val card2 = createTestCard("2", CardType.CODE, createdAt = now.minus(Duration.parse("PT1H")))
@@ -383,8 +414,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards sorting by title asc`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, title = "Zebra")
         val card2 = createTestCard("2", CardType.CODE, title = "Apple")
         val card3 = createTestCard("3", CardType.IDEA, title = "Banana")
@@ -405,8 +435,7 @@ class CardRepositoryTest {
     @Test
     fun `test search cards with multiple filters`() = runDatabaseTest { database ->
         // Given
-        val localDataSource = LocalCardDataSourceImpl(database)
-        val repository = CardRepositoryImpl(localDataSource)
+        val repository = createRepository(database)
         val card1 = createTestCard("1", CardType.QUOTE, isFavorite = true, tags = listOf("tag1"))
         val card2 = createTestCard("2", CardType.CODE, isFavorite = true, tags = listOf("tag2"))
         val card3 = createTestCard("3", CardType.QUOTE, isFavorite = false, tags = listOf("tag1"))

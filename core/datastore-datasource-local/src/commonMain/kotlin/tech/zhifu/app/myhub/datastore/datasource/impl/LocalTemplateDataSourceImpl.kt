@@ -23,15 +23,15 @@ class LocalTemplateDataSourceImpl(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun getAllTemplates(): List<Template> {
-        return database.templateQueries.selectAll().awaitAsList().map { it.toTemplate() }
+    override suspend fun getAllTemplates(userId: String): List<Template> {
+        return database.templateQueries.selectAll(userId).awaitAsList().map { it.toTemplate() }
     }
 
-    override suspend fun getTemplateById(id: String): Template? {
-        return database.templateQueries.selectById(id).awaitAsOneOrNull()?.toTemplate()
+    override suspend fun getTemplateById(id: String, userId: String): Template? {
+        return database.templateQueries.selectById(id, userId).awaitAsOneOrNull()?.toTemplate()
     }
 
-    override suspend fun insertTemplate(template: Template) {
+    override suspend fun insertTemplate(template: Template, userId: String) {
         database.templateQueries.insertTemplate(
             id = template.id,
             name = template.name,
@@ -45,11 +45,12 @@ class LocalTemplateDataSourceImpl(
             usage_count = template.usageCount.toLong(),
             is_system_template = if (template.isSystemTemplate) 1L else 0L,
             created_at = template.createdAt.toString(),
-            updated_at = template.updatedAt.toString()
+            updated_at = template.updatedAt.toString(),
+            user_id = if (template.isSystemTemplate) "system" else userId
         )
     }
 
-    override suspend fun updateTemplate(template: Template) {
+    override suspend fun updateTemplate(template: Template, userId: String) {
         database.templateQueries.updateTemplate(
             name = template.name,
             description = template.description,
@@ -61,16 +62,17 @@ class LocalTemplateDataSourceImpl(
             } else null,
             usage_count = template.usageCount.toLong(),
             updated_at = template.updatedAt.toString(),
-            id = template.id
+            id = template.id,
+            user_id = userId
         )
     }
 
-    override suspend fun deleteTemplate(id: String) {
-        database.templateQueries.deleteTemplate(id)
+    override suspend fun deleteTemplate(id: String, userId: String) {
+        database.templateQueries.deleteTemplate(id, userId)
     }
 
-    override fun observeTemplates(): Flow<List<Template>> {
-        return database.templateQueries.selectAll()
+    override fun observeTemplates(userId: String): Flow<List<Template>> {
+        return database.templateQueries.selectAll(userId)
             .asFlow()
             .mapLatest { query ->
                 query.awaitAsList().map { it.toTemplate() }
