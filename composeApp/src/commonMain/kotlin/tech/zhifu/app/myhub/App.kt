@@ -28,13 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import tech.zhifu.app.local.LocalAppEnvironment
-import tech.zhifu.app.local.LocalAppTheme
-import tech.zhifu.app.local.customAppLocale
-import tech.zhifu.app.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.config.getEnvironmentDescription
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
+import tech.zhifu.app.myhub.local.LocalAppEnvironment
+import tech.zhifu.app.myhub.local.LocalAppTheme
+import tech.zhifu.app.myhub.local.customAppLocale
+import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigationBar

@@ -94,12 +94,10 @@ kotlin {
             // ========== 项目模块依赖 ==========
             // 平台抽象层（必需：平台特定实现，包含日志工具）
             implementation(projects.core.platform)
-            // 平台 Compose UI 组件（必需：WindowSize 相关功能）
+            // 平台 Compose UI 组件（必需：WindowSize 相关功能，LocalAppTheme, LocalAppLocale 等）
             implementation(projects.core.platformCompose)
             // 日志
             implementation(projects.core.logger)
-            // 本地存储层（必需：LocalAppTheme, LocalAppLocale 等）
-            implementation(projects.core.local)
             // 数据层（必需：数据存储和网络）
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)

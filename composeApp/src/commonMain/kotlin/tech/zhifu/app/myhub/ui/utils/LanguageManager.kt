@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import tech.zhifu.app.local.LocalAppLocale
-import tech.zhifu.app.local.customAppLocale
+import tech.zhifu.app.myhub.local.LocalAppLocale
+import tech.zhifu.app.myhub.local.customAppLocale
 
 enum class Language(val code: String, val region: String?, val label: String) {
     English("en", null, "English"),

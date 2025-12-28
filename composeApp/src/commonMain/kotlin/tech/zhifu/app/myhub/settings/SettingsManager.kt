@@ -7,8 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import tech.zhifu.app.local.customAppLocale
-import tech.zhifu.app.local.customAppThemeIsDark
+import tech.zhifu.app.myhub.local.customAppLocale
+import tech.zhifu.app.myhub.local.customAppThemeIsDark
 
 object SettingsManager {
     private val settings: Settings = Settings()

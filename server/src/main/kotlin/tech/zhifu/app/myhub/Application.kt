@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -23,8 +22,8 @@ import tech.zhifu.app.myhub.api.tagsApi
 import tech.zhifu.app.myhub.api.templatesApi
 import tech.zhifu.app.myhub.api.usersApi
 import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
-import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.di.initKoin
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.CardService
 import tech.zhifu.app.myhub.service.StatisticsService
 import tech.zhifu.app.myhub.service.TagService
@@ -96,7 +95,10 @@ fun Application.module() {
             call.respond(HttpStatusCode.BadRequest, ErrorResponse(exception.message ?: "Invalid request"))
         }
         exception<Exception> { call, exception ->
-            call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Internal server error: ${exception.message}"))
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                ErrorResponse("Internal server error: ${exception.message}")
+            )
         }
     }
 

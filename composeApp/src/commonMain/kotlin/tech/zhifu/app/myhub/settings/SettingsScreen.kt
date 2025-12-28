@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.local.customAppThemeIsDark
+import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.resources.Res
 import tech.zhifu.app.myhub.resources.settings
 import tech.zhifu.app.myhub.ui.utils.Language
