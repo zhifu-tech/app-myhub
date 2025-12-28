@@ -14,6 +14,13 @@ kotlin {
             }
         }
 
+        androidMain {
+            dependencies {
+                // Android 平台使用 kotlin-logging-android
+                implementation(libs.kotlin.logging.android)
+            }
+        }
+
         jvmMain {
             dependencies {
                 implementation(libs.slf4j.api)

@@ -11,7 +11,7 @@ class UserContextProviderImpl(
     private val userDataSource: LocalUserDataSource
 ) : UserContextProvider {
     override suspend fun getCurrentUserId(): String? {
-        return userDataSource.getCurrentUser()?.id
+        return userDataSource.getCurrentUser()?.id ?: "user-001"
     }
 }
 
