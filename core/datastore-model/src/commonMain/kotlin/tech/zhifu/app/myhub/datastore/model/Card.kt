@@ -35,7 +35,8 @@ data class Card(
     val createdAt: Instant,
     val updatedAt: Instant,
     val lastReviewedAt: Instant? = null,
-    val metadata: CardMetadata? = null
+    val metadata: CardMetadata? = null,
+    val userId: String? = null // 用户ID，用于数据库版本 2 的用户关联
 )
 
 /**

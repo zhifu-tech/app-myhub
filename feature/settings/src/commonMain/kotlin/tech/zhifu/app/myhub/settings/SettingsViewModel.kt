@@ -2,14 +2,18 @@ package tech.zhifu.app.myhub.settings
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.local.customAppLocale
 import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.ui.utils.Language
 import tech.zhifu.app.myhub.ui.utils.updateAppLanguage
 
@@ -17,67 +21,64 @@ import tech.zhifu.app.myhub.ui.utils.updateAppLanguage
  * Settings ViewModel
  *
  * 管理 Settings 页面的状态和业务逻辑
+ * 使用新的设置架构（Setting 接口）
  */
 class SettingsViewModel(
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val settingsRepository: SettingsRepository
 ) {
     private val logger = logger("Settings")
 
-    private val _uiState = MutableStateFlow<SettingsUiState>(
-        SettingsUiState(
-            currentLanguage = Language.English,
-            isDarkMode = true,
-            isLoading = false,
-            error = null,
-            showLanguageDialog = false
-        )
-    )
-
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
-
-    init {
-        loadSettings()
-    }
+    private val themeSetting = settingsRepository.get<Boolean>("theme.is_dark")
+    private val languageSetting = settingsRepository.get<String>("language.code")
+    private val _showLanguageDialog = MutableStateFlow(false)
 
     /**
-     * 加载设置
-     * 从本地存储加载配置并同步到 UI 状态
+     * UI 状态（响应式）
+     * 自动从设置项 Flow 中组合生成
      */
-    private fun loadSettings() {
-        logger.info { "Loading settings from local storage" }
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+    val uiState: StateFlow<SettingsUiState> = combine(
+        themeSetting?.observe() ?: flowOf(true),
+        languageSetting?.observe() ?: flowOf("en"),
+        _showLanguageDialog
+    ) { isDark, languageCode, showDialog ->
+        val currentLanguage = languageCode.let { code ->
+            Language.entries.find { it.code == code }
+                ?: Language.entries.find {
+                    code.startsWith(it.code.split("-")[0])
+                }
+                ?: Language.SimplifiedChinese
+        }
 
+        // 同步到全局状态
+        customAppLocale = languageCode
+        customAppThemeIsDark = isDark
+
+        SettingsUiState(
+            currentLanguage = currentLanguage,
+            isDarkMode = isDark,
+            isLoading = false,
+            error = null,
+            showLanguageDialog = showDialog
+        )
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SettingsUiState()
+    )
+
+    init {
+        // 初始化时加载设置值
         coroutineScope.launch {
             try {
-                val config = SettingsManager.loadConfig()
-
-                // 确定当前语言
-                val currentLanguage = config.language?.let { langCode ->
-                    Language.entries.find { it.code == langCode }
-                        ?: Language.entries.find { langCode.startsWith(it.code.split("-")[0]) }
-                        ?: Language.English
-                } ?: Language.English
-
-                // 更新 UI 状态
-                _uiState.value = _uiState.value.copy(
-                    currentLanguage = currentLanguage,
-                    isDarkMode = config.isDarkMode,
-                    isLoading = false
-                )
-
-                // 同步到全局状态
-                customAppLocale = config.language
-                customAppThemeIsDark = config.isDarkMode
-
-                logger.info { "Settings loaded: language=${currentLanguage.code}, darkMode=${config.isDarkMode}" }
+                logger.info { "Loading settings" }
+                themeSetting?.get()
+                languageSetting?.get()
+                logger.info { "Settings loaded successfully" }
             } catch (e: Exception) {
                 logger.error(e) {
                     "Failed to load settings: ${e.message}"
                 }
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "Failed to load settings: ${e.message}"
-                )
             }
         }
     }
@@ -90,28 +91,14 @@ class SettingsViewModel(
 
         coroutineScope.launch {
             try {
-                val currentConfig = SettingsManager.loadConfig()
-                val newConfig = currentConfig.copy(language = language.code)
-
-                SettingsManager.saveConfig(newConfig)
-
-                // 更新全局状态
+                languageSetting?.set(language.code)
+                // 更新全局状态（SettingImpl 已经处理，这里确保同步）
                 updateAppLanguage(language)
-
-                // 更新 UI 状态
-                _uiState.value = _uiState.value.copy(
-                    currentLanguage = language,
-                    showLanguageDialog = false
-                )
-
                 logger.info { "Language updated successfully" }
             } catch (e: Exception) {
                 logger.error(e) {
                     "Failed to update language: ${e.message}"
                 }
-                _uiState.value = _uiState.value.copy(
-                    error = "Failed to update language: ${e.message}"
-                )
             }
         }
     }
@@ -124,27 +111,12 @@ class SettingsViewModel(
 
         coroutineScope.launch {
             try {
-                val currentConfig = SettingsManager.loadConfig()
-                val newConfig = currentConfig.copy(isDarkMode = isDarkMode)
-
-                SettingsManager.saveConfig(newConfig)
-
-                // 更新全局状态
-                customAppThemeIsDark = isDarkMode
-
-                // 更新 UI 状态
-                _uiState.value = _uiState.value.copy(
-                    isDarkMode = isDarkMode
-                )
-
+                themeSetting?.set(isDarkMode)
                 logger.info { "Theme updated successfully" }
             } catch (e: Exception) {
                 logger.error(e) {
                     "Failed to update theme: ${e.message}"
                 }
-                _uiState.value = _uiState.value.copy(
-                    error = "Failed to update theme: ${e.message}"
-                )
             }
         }
     }
@@ -153,21 +125,21 @@ class SettingsViewModel(
      * 显示语言选择对话框
      */
     fun showLanguageDialog() {
-        _uiState.value = _uiState.value.copy(showLanguageDialog = true)
+        _showLanguageDialog.value = true
     }
 
     /**
      * 隐藏语言选择对话框
      */
     fun hideLanguageDialog() {
-        _uiState.value = _uiState.value.copy(showLanguageDialog = false)
+        _showLanguageDialog.value = false
     }
 
     /**
      * 清除错误状态
      */
     fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
+        // 错误状态现在由 UI State 管理，如果需要可以添加
     }
 }
 

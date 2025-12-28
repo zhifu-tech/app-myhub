@@ -5,9 +5,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
-import tech.zhifu.app.myhub.datastore.database.manage.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
+import tech.zhifu.app.myhub.datastore.database.manage.resources.Res
 import tech.zhifu.app.myhub.datastore.model.Card
 
 /**
@@ -28,20 +28,26 @@ class CardDataLoader(
     /**
      * 从资源文件加载数据
      * @param resourcePath 资源文件路径，相对于 composeResources 目录（例如："database/init/card.json"）
+     * @param userId 用户ID，用于关联卡片数据
      */
     @OptIn(ExperimentalResourceApi::class)
-    suspend fun loadFromResource(resourcePath: String) = withContext(Dispatchers.Default) {
+    suspend fun loadFromResource(resourcePath: String, userId: String) = withContext(Dispatchers.Default) {
         val jsonString = Res.readBytes("files/$resourcePath").decodeToString()
         val cards = json.decodeFromString<List<Card>>(jsonString)
-        insertCards(cards)
+        insertCards(cards, userId)
     }
 
     /**
      * 插入卡片数据
+     * @param cards 卡片列表
+     * @param userId 用户ID，用于关联卡片数据（如果 JSON 中没有指定 userId）
      */
-    private suspend fun insertCards(cards: List<Card>) = withContext(Dispatchers.Default) {
+    private suspend fun insertCards(cards: List<Card>, userId: String) = withContext(Dispatchers.Default) {
         database.transaction {
             cards.forEach { card ->
+                // 优先使用 JSON 中的 userId，如果没有则使用传入的参数
+                val cardUserId = card.userId ?: userId
+                
                 // 插入卡片
                 database.cardQueries.insertCard(
                     id = card.id,
@@ -55,14 +61,16 @@ class CardDataLoader(
                     is_template = if (card.isTemplate) 1L else 0L,
                     created_at = card.createdAt.toString(),
                     updated_at = card.updatedAt.toString(),
-                    last_reviewed_at = card.lastReviewedAt?.toString()
+                    last_reviewed_at = card.lastReviewedAt?.toString(),
+                    user_id = cardUserId
                 )
 
                 // 插入标签关联
                 card.tags.forEach { tagName ->
                     database.cardQueries.insertCardTag(
                         card_id = card.id,
-                        tag_name = tagName
+                        tag_name = tagName,
+                        user_id = cardUserId
                     )
                 }
 
@@ -81,7 +89,8 @@ class CardDataLoader(
                         word_definition = metadata.wordDefinition,
                         word_example = metadata.wordExample,
                         idea_priority = metadata.ideaPriority,
-                        idea_status = metadata.ideaStatus
+                        idea_status = metadata.ideaStatus,
+                        user_id = cardUserId
                     )
                 }
 
@@ -92,7 +101,8 @@ class CardDataLoader(
                         card_id = card.id,
                         text = item.text,
                         is_completed = if (item.isCompleted) 1L else 0L,
-                        item_order = item.order.toLong()
+                        item_order = item.order.toLong(),
+                        user_id = cardUserId
                     )
                 }
             }
@@ -102,8 +112,8 @@ class CardDataLoader(
     /**
      * 清空卡片数据
      */
-    suspend fun clearData() = withContext(Dispatchers.Default) {
-        database.cardQueries.deleteAll()
+    suspend fun clearData(userId: String? = null) = withContext(Dispatchers.Default) {
+        database.cardQueries.deleteAll(userId ?: "")
     }
 }
 

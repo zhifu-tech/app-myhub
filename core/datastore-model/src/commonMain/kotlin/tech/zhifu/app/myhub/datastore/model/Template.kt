@@ -19,5 +19,6 @@ data class Template(
     val usageCount: Int = 0,
     val isSystemTemplate: Boolean = false, // 系统模板 vs 用户自定义模板
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val userId: String? = null // 用户ID，用于数据库版本 2 的用户关联（系统模板使用 "system"）
 )

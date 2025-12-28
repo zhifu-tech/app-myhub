@@ -19,7 +19,7 @@ actual class DatabaseDriverFactory {
         val databaseExists = databasePath.exists()
 
         if (!databaseExists) {
-            // 数据库文件不存在，创建新数据库和表
+            // 数据库文件不存在，创建新数据库和表（版本 2）
             MyHubDatabase.Schema.synchronous().create(driver)
         }
         // 如果数据库文件已存在，说明表已经创建，不需要再次创建

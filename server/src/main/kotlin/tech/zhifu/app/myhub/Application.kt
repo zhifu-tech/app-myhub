@@ -13,7 +13,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 import tech.zhifu.app.myhub.api.cardsApi
@@ -21,7 +20,6 @@ import tech.zhifu.app.myhub.api.statisticsApi
 import tech.zhifu.app.myhub.api.tagsApi
 import tech.zhifu.app.myhub.api.templatesApi
 import tech.zhifu.app.myhub.api.usersApi
-import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
 import tech.zhifu.app.myhub.di.initKoin
 import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.CardService
@@ -35,28 +33,6 @@ const val SERVER_PORT = 8083
 fun main() {
     // 初始化 Koin 依赖注入
     initKoin()
-
-    // 初始化数据库数据（可通过环境变量控制）
-    val shouldInitData = System.getenv("INIT_DATABASE")?.toBoolean() ?: true
-    if (shouldInitData) {
-        runBlocking {
-            try {
-                val databaseManager = GlobalContext.get().get<DatabaseManager>()
-                val clearBeforeLoad = System.getenv("CLEAR_DATABASE_BEFORE_INIT")?.toBoolean() ?: false
-                databaseManager.loadAllData(
-                    resourcePath = "database/init",
-                    clearBeforeLoad = clearBeforeLoad
-                )
-                println("✅ Database initialization completed successfully")
-            } catch (e: Exception) {
-                println("⚠️  Database initialization failed: ${e.message}")
-                e.printStackTrace()
-                // 继续启动服务器，即使初始化失败
-            }
-        }
-    } else {
-        println("ℹ️  Database initialization skipped (INIT_DATABASE=false)")
-    }
 
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
         .start(wait = true)

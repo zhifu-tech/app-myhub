@@ -34,15 +34,29 @@ class LocalUserDataSourceImpl(
 
     override suspend fun saveUser(user: User) {
         database.transaction {
-            // 保存用户信息
-            database.userQueries.insertUser(
-                id = user.id,
-                username = user.username,
-                email = user.email,
-                display_name = user.displayName,
-                avatar_url = user.avatarUrl,
-                created_at = user.createdAt.toString()
-            )
+            // 检查用户是否已存在
+            val existingUser = database.userQueries.selectUserById(user.id).awaitAsOneOrNull()
+            
+            if (existingUser != null) {
+                // 用户已存在，使用 UPDATE（保留原有的 created_at）
+                database.userQueries.updateUser(
+                    username = user.username,
+                    email = user.email,
+                    display_name = user.displayName,
+                    avatar_url = user.avatarUrl,
+                    id = user.id
+                )
+            } else {
+                // 用户不存在，使用 INSERT
+                database.userQueries.insertUser(
+                    id = user.id,
+                    username = user.username,
+                    email = user.email,
+                    display_name = user.displayName,
+                    avatar_url = user.avatarUrl,
+                    created_at = user.createdAt.toString()
+                )
+            }
 
             // 保存用户偏好设置
             user.preferences?.let { prefs ->

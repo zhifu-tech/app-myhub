@@ -50,14 +50,9 @@ class CardRepositoryImpl(
 
             logger.info { "Fetched ${remoteCards.size} cards from remote data source" }
 
-            // 保存到本地（更新或插入）
+            // 保存到本地（使用 INSERT OR REPLACE，自动处理更新或插入）
             remoteCards.forEach { card ->
-                val existingCard = localDataSource.getCardById(card.id, userId)
-                if (existingCard != null) {
-                    localDataSource.updateCard(card, userId)
-                } else {
-                    localDataSource.insertCard(card, userId)
-                }
+                localDataSource.insertCard(card, userId)
             }
             remoteCards
         } catch (e: Exception) {

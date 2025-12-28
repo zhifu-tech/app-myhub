@@ -13,7 +13,8 @@ data class Tag(
     val color: String? = null, // 十六进制颜色值，如 "#FF5733"
     val description: String? = null,
     val cardCount: Int = 0, // 使用该标签的卡片数量
-    val createdAt: Instant
+    val createdAt: Instant,
+    val userId: String? = null // 用户ID，用于数据库版本 2 的用户关联
 )
 
 /**

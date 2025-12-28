@@ -9,7 +9,8 @@
     "usageCount": 0,
     "isSystemTemplate": true,
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "userId": "user-001"
   },
   {
     "id": "template-002",
@@ -21,6 +22,7 @@
     "usageCount": 0,
     "isSystemTemplate": true,
     "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "userId": "user-001"
   }
 ]

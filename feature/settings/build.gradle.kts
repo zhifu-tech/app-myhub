@@ -26,23 +26,26 @@ kotlin {
             implementation(compose.components.resources)
             // Material Icons 扩展（必需：Icons.Default.* 图标）
             implementation(compose.materialIconsExtended)
-            
+
             // Kotlinx 库依赖
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
-            
+
             // 本地存储依赖
             implementation(libs.multiplatform.settings.no.arg)
             implementation(libs.multiplatform.settings)
-            
+
             // 依赖注入
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
-            
+
             // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
             implementation(projects.core.logger)
+
+            implementation(projects.core.datastoreModel)
+            implementation(projects.core.datastoreRepositoryClient)
         }
     }
 }

@@ -9,6 +9,7 @@
 - 支持从资源文件或文件系统加载数据
 - 支持重复加载（可以多次写入）
 - 支持清空数据后重新加载
+- **支持用户关联**：所有业务数据（Card、Tag、Template）会自动关联到用户
 
 ## 🏗️ 模块结构
 
@@ -72,13 +73,11 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 val databaseManager = DatabaseManager(database)
 
 // 加载所有表的数据（从资源文件）
+// 会自动使用第一个加载的用户ID关联业务数据
 databaseManager.loadAllData()
 
-// 加载指定表的数据
-databaseManager.loadTableData("card")
-
-// 从文件路径加载数据
-databaseManager.loadFromFile("/path/to/data/card.json", "card")
+// 指定用户ID加载数据
+databaseManager.loadAllData(defaultUserId = "user-123")
 ```
 
 ### 清空后重新加载
@@ -223,9 +222,13 @@ startKoin {
 ## 📌 注意事项
 
 1. **数据加载顺序**：加载所有数据时，会按依赖顺序加载：User -> Tag -> Card -> Template
-2. **重复加载**：可以多次调用加载方法，数据会被重复插入（除非使用 `clearBeforeLoad = true`）
-3. **事务处理**：每个表的数据加载都在事务中完成，确保数据一致性
-4. **平台差异**：
+2. **用户关联**：
+   - 所有业务数据（Card、Tag、Template）会自动关联到用户
+   - 默认使用第一个加载的用户ID，或通过 `defaultUserId` 参数指定
+   - 系统模板（`isSystemTemplate = true`）会自动使用 `"system"` 作为 `user_id`
+3. **重复加载**：可以多次调用加载方法，数据会被重复插入（除非使用 `clearBeforeLoad = true`）
+4. **事务处理**：每个表的数据加载都在事务中完成，确保数据一致性
+5. **平台差异**：
    - Android: 需要先调用 `ResourceLoader.init(context)`（ResourceLoader 位于 `core:platform` 模块）
    - JS: 资源加载需要特殊处理（可能需要 HTTP 请求）
    - iOS/JVM: 直接支持资源文件加载

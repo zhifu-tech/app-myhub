@@ -10,6 +10,7 @@
     "isTemplate": false,
     "createdAt": "2024-01-01T00:00:00Z",
     "updatedAt": "2024-01-01T00:00:00Z",
+    "userId": "user-001",
     "metadata": {
       "quoteAuthor": "Harold Abelson",
       "quoteCategory": "Programming"
@@ -26,6 +27,7 @@
     "isTemplate": false,
     "createdAt": "2024-01-02T00:00:00Z",
     "updatedAt": "2024-01-02T00:00:00Z",
+    "userId": "user-001",
     "metadata": {
       "codeLanguage": "kotlin",
       "codeSnippet": "fun main() {\n    println(\"Hello, World!\")\n}"

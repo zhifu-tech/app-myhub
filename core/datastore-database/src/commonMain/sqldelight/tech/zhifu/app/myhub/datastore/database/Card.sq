@@ -105,9 +105,9 @@ SELECT * FROM card
 WHERE (title LIKE '%' || ? || '%' OR content LIKE '%' || ? || '%' OR author LIKE '%' || ? || '%') AND user_id = ?
 ORDER BY updated_at DESC;
 
--- 插入卡片
+-- 插入卡片（如果已存在则替换）
 insertCard:
-INSERT INTO card (id, type, title, content, author, source, language, is_favorite, is_template, created_at, updated_at, last_reviewed_at, user_id)
+INSERT OR REPLACE INTO card (id, type, title, content, author, source, language, is_favorite, is_template, created_at, updated_at, last_reviewed_at, user_id)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 更新卡片

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.config.getEnvironmentDescription
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
@@ -35,14 +36,15 @@ import tech.zhifu.app.myhub.local.LocalAppEnvironment
 import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.local.customAppLocale
 import tech.zhifu.app.myhub.local.customAppThemeIsDark
+import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
 import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
-import tech.zhifu.app.myhub.settings.SettingsManager
 import tech.zhifu.app.myhub.settings.SettingsScreen
+import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
@@ -54,7 +56,8 @@ import tech.zhifu.app.myhub.ui.utils.ProvideAppLanguage
 @Composable
 @Preview
 fun App(
-    windowSize: DpSize? = null
+    windowSize: DpSize? = null,
+    settingsRepository: SettingsRepository = koinInject<SettingsRepository>()
 ) {
     // 启动时加载配置
     LaunchedEffect(Unit) {
@@ -71,16 +74,25 @@ fun App(
             logger.info { "========================" }
         }
 
-        val config = SettingsManager.loadConfig()
-        // 如果本地没有语言设置（第一次启动），尝试从服务器获取
-        if (config.language == null) {
-            SettingsManager.initFromServer { serverConfig ->
-                // initFromServer 内部会调用 saveConfig 并同步状态
-            }
-        } else {
-            // 如果本地有，直接同步到全局状态
-            customAppLocale = config.language
-            customAppThemeIsDark = config.isDarkMode
+        // 使用新的设置架构加载配置
+        val themeSetting = settingsRepository.get<Boolean>("theme.is_dark")
+        val languageSetting = settingsRepository.get<String>("language.code")
+        
+        try {
+            // 加载设置值（会自动从多个数据源获取）
+            val isDarkMode = themeSetting?.get() ?: true
+            val languageCode = languageSetting?.get() ?: "en"
+            
+            // 同步到全局状态
+            customAppLocale = languageCode
+            customAppThemeIsDark = isDarkMode
+            
+            logger.info { "Settings loaded: language=$languageCode, darkMode=$isDarkMode" }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to load settings: ${e.message}" }
+            // 使用默认值
+            customAppLocale = "en"
+            customAppThemeIsDark = true
         }
     }
 
