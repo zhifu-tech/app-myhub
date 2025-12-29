@@ -50,7 +50,6 @@ import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
 import tech.zhifu.app.myhub.ui.getWindowSize
-import tech.zhifu.app.myhub.ui.utils.ProvideAppLanguage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,93 +96,91 @@ fun App(
     }
 
     LocalAppEnvironment {
-        ProvideAppLanguage {
-            val isDark = LocalAppTheme.current
+        val isDark = LocalAppTheme.current
 
-            AppTheme(darkTheme = isDark) {
-                var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
+        AppTheme(darkTheme = isDark) {
+            var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
 
-                val actualWindowSize = windowSize ?: getWindowSize()
-                val sizeClass = calculateWindowSizeClass(actualWindowSize)
+            val actualWindowSize = windowSize ?: getWindowSize()
+            val sizeClass = calculateWindowSizeClass(actualWindowSize)
 
-                ProvideWindowSizeClass(sizeClass) {
-                    when (sizeClass) {
-                        WindowSizeClass.Compact -> {
-                            Scaffold(
-                                topBar = {
-                                    TopAppBar(
-                                        title = {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ProvideWindowSizeClass(sizeClass) {
+                when (sizeClass) {
+                    WindowSizeClass.Compact -> {
+                        Scaffold(
+                            topBar = {
+                                TopAppBar(
+                                    title = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Surface(
+                                                modifier = Modifier.size(32.dp),
+                                                color = MaterialTheme.colorScheme.primary,
+                                                shape = MaterialTheme.shapes.small
                                             ) {
-                                                Surface(
-                                                    modifier = Modifier.size(32.dp),
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    shape = MaterialTheme.shapes.small
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.AutoStories,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                                        modifier = Modifier.padding(6.dp)
-                                                    )
-                                                }
-                                                Column {
+                                                Icon(
+                                                    imageVector = Icons.Default.AutoStories,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.padding(6.dp)
+                                                )
+                                            }
+                                            Column {
+                                                Text(
+                                                    text = AppBuildConfig.appName,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                // 显示变体信息（仅在开发环境显示）
+                                                if (AppBuildConfig.enableDebugFeatures) {
                                                     Text(
-                                                        text = AppBuildConfig.appName,
-                                                        style = MaterialTheme.typography.titleMedium,
-                                                        fontWeight = FontWeight.Bold
+                                                        text = getEnvironmentDescription(),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
-                                                    // 显示变体信息（仅在开发环境显示）
-                                                    if (AppBuildConfig.enableDebugFeatures) {
-                                                        Text(
-                                                            text = getEnvironmentDescription(),
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                        )
-                                                    }
                                                 }
                                             }
                                         }
-                                    )
-                                },
-                                bottomBar = {
-                                    AppNavigationBar(
-                                        currentScreen = currentScreen,
-                                        onNavigate = { currentScreen = it }
-                                    )
-                                }
-                            ) { padding ->
-                                Box(modifier = Modifier.padding(padding)) {
-                                    ScreenContent(currentScreen)
-                                }
+                                    }
+                                )
+                            },
+                            bottomBar = {
+                                AppNavigationBar(
+                                    currentScreen = currentScreen,
+                                    onNavigate = { currentScreen = it }
+                                )
+                            }
+                        ) { padding ->
+                            Box(modifier = Modifier.padding(padding)) {
+                                ScreenContent(currentScreen)
                             }
                         }
+                    }
 
-                        WindowSizeClass.Medium -> {
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                AppNavigationRail(
-                                    currentScreen = currentScreen,
-                                    onNavigate = { currentScreen = it },
-                                    isExpanded = false
-                                )
-                                Box(modifier = Modifier.weight(1f)) {
-                                    ScreenContent(currentScreen)
-                                }
+                    WindowSizeClass.Medium -> {
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            AppNavigationRail(
+                                currentScreen = currentScreen,
+                                onNavigate = { currentScreen = it },
+                                isExpanded = false
+                            )
+                            Box(modifier = Modifier.weight(1f)) {
+                                ScreenContent(currentScreen)
                             }
                         }
+                    }
 
-                        WindowSizeClass.Expanded -> {
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                AppNavigationRail(
-                                    currentScreen = currentScreen,
-                                    onNavigate = { currentScreen = it },
-                                    isExpanded = true
-                                )
-                                Box(modifier = Modifier.weight(1f)) {
-                                    ScreenContent(currentScreen)
-                                }
+                    WindowSizeClass.Expanded -> {
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            AppNavigationRail(
+                                currentScreen = currentScreen,
+                                onNavigate = { currentScreen = it },
+                                isExpanded = true
+                            )
+                            Box(modifier = Modifier.weight(1f)) {
+                                ScreenContent(currentScreen)
                             }
                         }
                     }

@@ -41,8 +41,9 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_display_
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_off
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_on
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_select_language
+import tech.zhifu.app.myhub.language.Language
+import tech.zhifu.app.myhub.language.getLocalizedLabel
 import tech.zhifu.app.myhub.platform.resources.settings
-import tech.zhifu.app.myhub.ui.utils.Language
 import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,7 +147,7 @@ private fun LanguageSettingItem(
     ) {
         ListItem(
             headlineContent = { Text(stringResource(Res.string.feature_settings_display_language)) },
-            supportingContent = { Text(currentLanguage.label) },
+            supportingContent = { Text(currentLanguage.getLocalizedLabel()) },
             leadingContent = { Icon(Icons.Default.Language, null) },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
         )
@@ -179,7 +180,7 @@ private fun LanguageSelectionDialog(
                             onClick = { onLanguageSelected(language) }
                         )
                         Text(
-                            text = language.label,
+                            text = language.getLocalizedLabel(),
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }

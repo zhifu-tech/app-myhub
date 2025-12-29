@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.settings
 
-import tech.zhifu.app.myhub.ui.utils.Language
+import tech.zhifu.app.myhub.language.Language
 
 /**
  * Settings UI状态

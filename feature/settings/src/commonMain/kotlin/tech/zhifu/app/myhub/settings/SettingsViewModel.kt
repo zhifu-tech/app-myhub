@@ -14,8 +14,8 @@ import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.settings.domain.SettingsRepository
-import tech.zhifu.app.myhub.ui.utils.Language
-import tech.zhifu.app.myhub.ui.utils.updateAppLanguage
+import tech.zhifu.app.myhub.language.Language
+import tech.zhifu.app.myhub.language.toLanguage
 
 /**
  * Settings ViewModel
@@ -42,13 +42,7 @@ class SettingsViewModel(
         languageSetting?.observe() ?: flowOf("en"),
         _showLanguageDialog
     ) { isDark, languageCode, showDialog ->
-        val currentLanguage = languageCode.let { code ->
-            Language.entries.find { it.code == code }
-                ?: Language.entries.find {
-                    code.startsWith(it.code.split("-")[0])
-                }
-                ?: Language.SimplifiedChinese
-        }
+        val currentLanguage = languageCode.toLanguage()
 
         // 同步到全局状态
         customAppLocale = languageCode
@@ -92,8 +86,8 @@ class SettingsViewModel(
         coroutineScope.launch {
             try {
                 languageSetting?.set(language.code)
-                // 更新全局状态（SettingImpl 已经处理，这里确保同步）
-                updateAppLanguage(language)
+                // 同步更新全局状态
+                customAppLocale = language.code
                 logger.info { "Language updated successfully" }
             } catch (e: Exception) {
                 logger.error(e) {

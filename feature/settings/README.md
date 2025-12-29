@@ -462,13 +462,7 @@ class SettingsViewModel(
         languageSetting?.observe() ?: flowOf("en"),
         _showLanguageDialog
     ) { isDark, languageCode, showDialog ->
-        val currentLanguage = languageCode.let { code ->
-            Language.entries.find { it.code == code }
-                ?: Language.entries.find {
-                    code.startsWith(it.code.split("-")[0])
-                }
-                ?: Language.SimplifiedChinese
-        }
+        val currentLanguage = languageCode.toLanguage()
 
         // 同步到全局状态
         customAppLocale = languageCode
@@ -508,7 +502,8 @@ class SettingsViewModel(
     fun updateLanguage(language: Language) {
         coroutineScope.launch {
             languageSetting?.set(language.code)
-            updateAppLanguage(language)
+            // 同步更新全局状态
+            customAppLocale = language.code
         }
     }
 }
