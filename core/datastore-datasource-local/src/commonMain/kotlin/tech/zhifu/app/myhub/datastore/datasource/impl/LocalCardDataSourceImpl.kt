@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.datasource.impl
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
@@ -74,7 +75,7 @@ class LocalCardDataSourceImpl(
 
                 // 先删除已存在的待办清单项，避免重复插入
                 database.cardQueries.deleteChecklistItems(card.id, userId)
-                
+
                 // 插入待办清单项
                 metadata.checklistItems.forEach { item ->
                     database.cardQueries.insertChecklistItem(
@@ -166,6 +167,7 @@ class LocalCardDataSourceImpl(
         database.cardQueries.deleteAll(userId)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCards(userId: String): Flow<List<Card>> {
         return database.cardQueries.selectAll(userId)
             .asFlow()

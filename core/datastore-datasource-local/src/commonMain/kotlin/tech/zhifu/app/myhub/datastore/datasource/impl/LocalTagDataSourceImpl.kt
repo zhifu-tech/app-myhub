@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.datasource.impl
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
@@ -56,6 +57,7 @@ class LocalTagDataSourceImpl(
         database.tagQueries.deleteTag(id, userId)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeTags(userId: String): Flow<List<Tag>> {
         return database.tagQueries.selectAll(userId)
             .asFlow()
