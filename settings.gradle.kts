@@ -60,4 +60,5 @@ include(":component:mixed")
 
 include(":feature:settings")
 include(":feature:dashboard")
+include(":feature:profile")
 

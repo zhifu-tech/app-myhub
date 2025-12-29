@@ -1,0 +1,29 @@
+<resources>
+    <string name="feature_profile_title">プロフィール</string>
+    <string name="feature_profile_user_info">ユーザー情報</string>
+    <string name="feature_profile_edit_profile">プロフィール編集</string>
+    <string name="feature_profile_statistics">統計</string>
+    <string name="feature_profile_settings">設定</string>
+    <string name="feature_profile_data_management">データ管理</string>
+    <string name="feature_profile_account_management">アカウント管理</string>
+    <string name="feature_profile_about">について</string>
+    <string name="feature_profile_version">バージョン</string>
+    <string name="feature_profile_joined">参加日</string>
+    <string name="feature_profile_total_cards">総カード数</string>
+    <string name="feature_profile_favorite_cards">お気に入りカード</string>
+    <string name="feature_profile_recent_edits">最近の編集</string>
+    <string name="feature_profile_templates">テンプレート</string>
+    <string name="feature_profile_export_data">データエクスポート</string>
+    <string name="feature_profile_import_data">データインポート</string>
+    <string name="feature_profile_clear_cache">キャッシュクリア</string>
+    <string name="feature_profile_sign_out">サインアウト</string>
+    <string name="feature_profile_delete_account">アカウント削除</string>
+    <string name="feature_profile_edit_display_name">表示名</string>
+    <string name="feature_profile_edit_email">メール</string>
+    <string name="feature_profile_edit_avatar_url">アバターURL</string>
+    <string name="feature_profile_save">保存</string>
+    <string name="feature_profile_cancel">キャンセル</string>
+    <string name="feature_profile_no_user">ログインしていません</string>
+    <string name="feature_profile_loading">読み込み中...</string>
+</resources>
+

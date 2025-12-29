@@ -104,6 +104,7 @@ kotlin {
             // Feature 模块
             implementation(projects.feature.settings)
             implementation(projects.feature.dashboard)
+            implementation(projects.feature.profile)
             // Component 模块
             implementation(projects.component.card)
             implementation(projects.component.mixed)

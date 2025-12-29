@@ -64,6 +64,7 @@ fun AppNavigationRail(
     val items = listOf(
         NavItem.Dashboard,
         NavItem.Favorites,
+        NavItem.Profile,
         NavItem.Settings
     )
     val railWidth by animateDpAsState(targetValue = if (isExpanded) 280.dp else 80.dp)

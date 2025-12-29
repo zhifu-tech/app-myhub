@@ -1,0 +1,29 @@
+<resources>
+    <string name="feature_profile_title">個人資料</string>
+    <string name="feature_profile_user_info">用戶資訊</string>
+    <string name="feature_profile_edit_profile">編輯資料</string>
+    <string name="feature_profile_statistics">統計數據</string>
+    <string name="feature_profile_settings">設定</string>
+    <string name="feature_profile_data_management">數據管理</string>
+    <string name="feature_profile_account_management">帳戶管理</string>
+    <string name="feature_profile_about">關於</string>
+    <string name="feature_profile_version">版本</string>
+    <string name="feature_profile_joined">加入時間</string>
+    <string name="feature_profile_total_cards">總卡片數</string>
+    <string name="feature_profile_favorite_cards">收藏卡片</string>
+    <string name="feature_profile_recent_edits">最近編輯</string>
+    <string name="feature_profile_templates">模板</string>
+    <string name="feature_profile_export_data">導出數據</string>
+    <string name="feature_profile_import_data">導入數據</string>
+    <string name="feature_profile_clear_cache">清除緩存</string>
+    <string name="feature_profile_sign_out">登出</string>
+    <string name="feature_profile_delete_account">刪除帳戶</string>
+    <string name="feature_profile_edit_display_name">顯示名稱</string>
+    <string name="feature_profile_edit_email">郵箱</string>
+    <string name="feature_profile_edit_avatar_url">頭像連結</string>
+    <string name="feature_profile_save">保存</string>
+    <string name="feature_profile_cancel">取消</string>
+    <string name="feature_profile_no_user">未登錄</string>
+    <string name="feature_profile_loading">載入中...</string>
+</resources>
+

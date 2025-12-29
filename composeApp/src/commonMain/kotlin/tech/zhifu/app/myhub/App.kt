@@ -19,6 +19,7 @@ import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
 import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
+import tech.zhifu.app.myhub.profile.ProfileScreen
 import tech.zhifu.app.myhub.settings.SettingsScreen
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.AppErrorScreen
@@ -217,6 +218,10 @@ fun AppNavigation(currentScreen: Screen) {
     when (currentScreen) {
         is Screen.Dashboard -> DashboardScreen()
         is Screen.Settings -> SettingsScreen()
+        is Screen.Profile -> ProfileScreen(
+            onNavigateToSettings = { /* TODO: Navigate to Settings */ }
+        )
+
         else -> PlaceholderScreen(currentScreen)
     }
 }
