@@ -47,6 +47,11 @@ kotlin {
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)
         }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 

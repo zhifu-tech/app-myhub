@@ -73,81 +73,124 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            // 主题设置项
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.feature_settings_dark_mode)) },
-                    supportingContent = {
-                        Text(
-                            if (uiState.isDarkMode)
-                                stringResource(Res.string.feature_settings_on)
-                            else
-                                stringResource(Res.string.feature_settings_off)
-                        )
-                    },
-                    leadingContent = { Icon(Icons.Default.Palette, null) },
-                    trailingContent = {
-                        Switch(
-                            checked = uiState.isDarkMode,
-                            onCheckedChange = { viewModel.updateTheme(it) }
-                        )
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-            }
+            // 主题设置
+            ThemeSettingItem(
+                isDarkMode = uiState.isDarkMode,
+                onThemeChanged = { viewModel.updateTheme(it) }
+            )
 
-            // 语言设置项
-            Surface(
-                onClick = { viewModel.showLanguageDialog() },
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            ) {
-                ListItem(
-                    headlineContent = { Text(stringResource(Res.string.feature_settings_display_language)) },
-                    supportingContent = { Text(uiState.currentLanguage.label) },
-                    leadingContent = { Icon(Icons.Default.Language, null) },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                )
-            }
+            // 语言设置
+            LanguageSettingItem(
+                currentLanguage = uiState.currentLanguage,
+                onLanguageClick = { viewModel.showLanguageDialog() }
+            )
         }
     }
 
+    // 语言选择对话框
     if (uiState.showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.hideLanguageDialog() },
-            title = { Text(stringResource(Res.string.feature_settings_select_language)) },
-            text = {
-                Column {
-                    Language.entries.forEach { language ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = (language == uiState.currentLanguage),
-                                onClick = {
-                                    viewModel.updateLanguage(language)
-                                }
-                            )
-                            Text(
-                                text = language.label,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { viewModel.hideLanguageDialog() }) {
-                    Text(stringResource(Res.string.feature_settings_close))
-                }
-            }
+        LanguageSelectionDialog(
+            currentLanguage = uiState.currentLanguage,
+            onLanguageSelected = { viewModel.updateLanguage(it) },
+            onDismiss = { viewModel.hideLanguageDialog() }
         )
     }
+}
+
+/**
+ * 主题设置项
+ */
+@Composable
+private fun ThemeSettingItem(
+    isDarkMode: Boolean,
+    onThemeChanged: (Boolean) -> Unit
+) {
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.feature_settings_dark_mode)) },
+            supportingContent = {
+                Text(
+                    if (isDarkMode)
+                        stringResource(Res.string.feature_settings_on)
+                    else
+                        stringResource(Res.string.feature_settings_off)
+                )
+            },
+            leadingContent = { Icon(Icons.Default.Palette, null) },
+            trailingContent = {
+                Switch(
+                    checked = isDarkMode,
+                    onCheckedChange = onThemeChanged
+                )
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+        )
+    }
+}
+
+/**
+ * 语言设置项
+ */
+@Composable
+private fun LanguageSettingItem(
+    currentLanguage: Language,
+    onLanguageClick: () -> Unit
+) {
+    Surface(
+        onClick = onLanguageClick,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.feature_settings_display_language)) },
+            supportingContent = { Text(currentLanguage.label) },
+            leadingContent = { Icon(Icons.Default.Language, null) },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+        )
+    }
+}
+
+/**
+ * 语言选择对话框
+ */
+@Composable
+private fun LanguageSelectionDialog(
+    currentLanguage: Language,
+    onLanguageSelected: (Language) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.feature_settings_select_language)) },
+        text = {
+            Column {
+                Language.entries.forEach { language ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (language == currentLanguage),
+                            onClick = { onLanguageSelected(language) }
+                        )
+                        Text(
+                            text = language.label,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.feature_settings_close))
+            }
+        }
+    )
 }
 
