@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 /**
  * 本地设置存储实现
  */
-class LocalSettingStoreImpl(
+internal class LocalSettingStoreImpl(
     private val settings: Settings = Settings()
 ) : LocalSettingStore {
 

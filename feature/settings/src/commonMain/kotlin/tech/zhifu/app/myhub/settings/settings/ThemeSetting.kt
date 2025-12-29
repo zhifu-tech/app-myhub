@@ -13,7 +13,7 @@ import tech.zhifu.app.myhub.settings.domain.SettingScope
  * 作用域：USER（用户级设置）
  * 数据源优先级：用户偏好 > 本地存储 > 默认值（深色模式）
  */
-class ThemeSetting(
+internal class ThemeSetting(
     localStore: LocalSettingStore,
     userRepository: UserRepository?
 ) : Setting<Boolean> {

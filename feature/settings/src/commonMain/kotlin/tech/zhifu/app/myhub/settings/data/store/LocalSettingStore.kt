@@ -9,17 +9,17 @@ interface LocalSettingStore {
      * 获取设置值
      */
     suspend fun get(key: String): String?
-    
+
     /**
      * 设置值
      */
     suspend fun set(key: String, value: String)
-    
+
     /**
      * 删除设置值
      */
     suspend fun remove(key: String)
-    
+
     /**
      * 清空所有设置
      */
