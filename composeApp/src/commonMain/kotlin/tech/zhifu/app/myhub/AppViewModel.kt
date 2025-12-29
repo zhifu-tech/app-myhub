@@ -1,0 +1,168 @@
+package tech.zhifu.app.myhub
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import tech.zhifu.app.myhub.config.AppBuildConfig
+import tech.zhifu.app.myhub.local.customAppLocale
+import tech.zhifu.app.myhub.local.customAppThemeIsDark
+import tech.zhifu.app.myhub.logger.error
+import tech.zhifu.app.myhub.logger.info
+import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.navigation.Screen
+import tech.zhifu.app.myhub.settings.domain.SettingsRepository
+import tech.zhifu.app.myhub.settings.settings.languageSetting
+import tech.zhifu.app.myhub.settings.settings.themeSetting
+import tech.zhifu.app.myhub.ui.WindowSizeClass
+
+/**
+ * 应用级 ViewModel
+ *
+ * 职责：
+ * - 管理应用级状态（导航、主题、语言等）
+ * - 处理应用初始化
+ * - 协调各模块的状态
+ */
+class AppViewModel(
+    private val settingsRepository: SettingsRepository,
+    private val coroutineScope: CoroutineScope
+) {
+    private val logger = logger("App")
+
+    private val _uiState = MutableStateFlow<AppUiState>(AppUiState.Loading)
+    val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
+
+    private var currentScreen: Screen = Screen.Dashboard
+    private var isDarkTheme: Boolean = true
+    private var windowSizeClass: WindowSizeClass = WindowSizeClass.Compact
+
+    /**
+     * 初始化应用
+     *
+     * @param initialWindowSizeClass 初始窗口大小类（从 Composable 上下文传入）
+     */
+    fun initialize(initialWindowSizeClass: WindowSizeClass = WindowSizeClass.Compact) {
+        coroutineScope.launch {
+            try {
+                // 记录构建配置
+                if (AppBuildConfig.enableLogging) {
+                    logBuildConfig()
+                }
+
+                // 加载设置
+                loadSettings()
+
+                // 设置初始窗口大小类
+                windowSizeClass = initialWindowSizeClass
+
+                // 切换到就绪状态
+                _uiState.value = AppUiState.Ready(
+                    currentScreen = currentScreen,
+                    isDarkTheme = isDarkTheme,
+                    windowSizeClass = windowSizeClass
+                )
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to initialize app: ${e.message}" }
+                _uiState.value = AppUiState.Error(e)
+            }
+        }
+    }
+
+    /**
+     * 导航到指定屏幕
+     */
+    fun navigateTo(screen: Screen) {
+        if (currentScreen != screen) {
+            currentScreen = screen
+            updateReadyState()
+        }
+    }
+
+    /**
+     * 切换主题
+     */
+    fun toggleTheme() {
+        isDarkTheme = !isDarkTheme
+        coroutineScope.launch {
+            saveThemeSetting(isDarkTheme)
+        }
+        updateReadyState()
+    }
+
+    /**
+     * 更新窗口大小类
+     *
+     * @param newSizeClass 新的窗口大小类（从 Composable 上下文传入）
+     */
+    fun updateWindowSizeClass(newSizeClass: WindowSizeClass) {
+        if (windowSizeClass != newSizeClass) {
+            windowSizeClass = newSizeClass
+            updateReadyState()
+        }
+    }
+
+    /**
+     * 重试初始化
+     */
+    fun retry() {
+        _uiState.value = AppUiState.Loading
+        initialize()
+    }
+
+    private fun logBuildConfig() {
+        logger.info { "=== App Build Config ===" }
+        logger.info { "Environment: ${AppBuildConfig.environment}" }
+        logger.info { "Version Type: ${AppBuildConfig.versionType}" }
+        logger.info { "API Base URL: ${AppBuildConfig.apiBaseUrl}" }
+        logger.info { "App Name: ${AppBuildConfig.appName}" }
+        logger.info { "Application ID Suffix: ${AppBuildConfig.applicationIdSuffix}" }
+        logger.info { "Enable Logging: ${AppBuildConfig.enableLogging}" }
+        logger.info { "Enable Debug Features: ${AppBuildConfig.enableDebugFeatures}" }
+        logger.info { "========================" }
+    }
+
+    private suspend fun loadSettings() {
+        try {
+            val theme = settingsRepository.themeSetting
+            val language = settingsRepository.languageSetting
+
+            isDarkTheme = theme?.get() ?: true
+            val languageCode = language?.get() ?: "en"
+
+            // 同步到全局状态（如果需要）
+            customAppLocale = languageCode
+            customAppThemeIsDark = isDarkTheme
+
+            logger.info { "Settings loaded: language=$languageCode, darkMode=$isDarkTheme" }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to load settings: ${e.message}" }
+            // 使用默认值
+            isDarkTheme = true
+            customAppLocale = "en"
+            customAppThemeIsDark = true
+        }
+    }
+
+    private suspend fun saveThemeSetting(isDark: Boolean) {
+        try {
+            settingsRepository.themeSetting?.set(isDark)
+            customAppThemeIsDark = isDark
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to save theme setting: ${e.message}" }
+        }
+    }
+
+    private fun updateReadyState() {
+        val currentState = _uiState.value
+        if (currentState is AppUiState.Ready) {
+            _uiState.value = AppUiState.Ready(
+                currentScreen = currentScreen,
+                isDarkTheme = isDarkTheme,
+                windowSizeClass = windowSizeClass
+            )
+        }
+    }
+}
+

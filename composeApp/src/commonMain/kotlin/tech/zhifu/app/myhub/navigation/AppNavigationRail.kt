@@ -73,12 +73,12 @@ fun AppNavigationRail(
         containerColor = MaterialTheme.colorScheme.surface,
         header = {
             Column(
-                horizontalAlignment = if (isExpanded) Alignment.Companion.Start else Alignment.Companion.CenterHorizontally,
-                modifier = Modifier.Companion.fillMaxWidth()
+                horizontalAlignment = if (isExpanded) Alignment.Start else Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = if (isExpanded) 16.dp else 0.dp)
             ) {
                 HeaderSection(isExpanded = isExpanded)
-                Spacer(Modifier.Companion.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
                 AnimatedContent(
                     targetState = isExpanded,
@@ -87,13 +87,13 @@ fun AppNavigationRail(
                     if (expanded) {
                         ExtendedFloatingActionButton(
                             onClick = { /* TODO */ },
-                            modifier = Modifier.Companion.fillMaxWidth().padding(vertical = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
                         ) {
                             Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.Companion.width(12.dp))
+                            Spacer(Modifier.width(12.dp))
                             Text(stringResource(Res.string.new_card))
                         }
                     } else {
@@ -102,7 +102,7 @@ fun AppNavigationRail(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp),
-                            modifier = Modifier.Companion.padding(vertical = 8.dp)
+                            modifier = Modifier.padding(vertical = 8.dp)
                         ) {
                             Icon(
                                 Icons.Default.Add,
@@ -114,10 +114,10 @@ fun AppNavigationRail(
             }
         },
         content = {
-            Spacer(Modifier.Companion.height(16.dp))
+            Spacer(Modifier.height(16.dp))
             Column(
-                modifier = Modifier.Companion.fillMaxWidth(),
-                horizontalAlignment = Alignment.Companion.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items.forEach { item ->
@@ -133,9 +133,9 @@ fun AppNavigationRail(
                                 selected = currentScreen == item.screen,
                                 onClick = { onNavigate(item.screen) },
                                 icon = { Icon(item.icon, contentDescription = null) },
-                                modifier = Modifier.Companion.padding(horizontal = 12.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp),
                                 colors = NavigationDrawerItemDefaults.colors(
-                                    unselectedContainerColor = Color.Companion.Transparent
+                                    unselectedContainerColor = Color.Transparent
                                 )
                             )
                         } else {
@@ -160,8 +160,8 @@ fun AppNavigationRail(
                     }
                 }
             }
-            Spacer(Modifier.Companion.weight(1f))
-            Box(modifier = Modifier.Companion.padding(bottom = 16.dp)) {
+            Spacer(Modifier.weight(1f))
+            Box(modifier = Modifier.padding(bottom = 16.dp)) {
                 UserProfileSection(isExpanded = isExpanded)
             }
         }

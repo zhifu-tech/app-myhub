@@ -6,6 +6,12 @@ import tech.zhifu.app.myhub.settings.data.store.BooleanSettingSerializer
 import tech.zhifu.app.myhub.settings.data.store.LocalSettingStore
 import tech.zhifu.app.myhub.settings.domain.Setting
 import tech.zhifu.app.myhub.settings.domain.SettingScope
+import tech.zhifu.app.myhub.settings.domain.SettingsRepository
+
+private const val THEME_SETTING_KEY = "theme.is_dark"
+
+val SettingsRepository.themeSetting: Setting<Boolean>?
+    get() = get<Boolean>(THEME_SETTING_KEY)
 
 /**
  * 主题设置
@@ -17,7 +23,7 @@ internal class ThemeSetting(
     localStore: LocalSettingStore,
     userRepository: UserRepository?
 ) : Setting<Boolean> {
-    override val key = "theme.is_dark"
+    override val key = THEME_SETTING_KEY
     override val scope = SettingScope.USER
     override val defaultValue = true
 

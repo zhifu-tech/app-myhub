@@ -14,6 +14,8 @@ import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.settings.domain.SettingsRepository
+import tech.zhifu.app.myhub.settings.settings.languageSetting
+import tech.zhifu.app.myhub.settings.settings.themeSetting
 import tech.zhifu.app.myhub.language.Language
 import tech.zhifu.app.myhub.language.toLanguage
 
@@ -29,8 +31,8 @@ class SettingsViewModel(
 ) {
     private val logger = logger("Settings")
 
-    private val themeSetting = settingsRepository.get<Boolean>("theme.is_dark")
-    private val languageSetting = settingsRepository.get<String>("language.code")
+    private val themeSetting = settingsRepository.themeSetting
+    private val languageSetting = settingsRepository.languageSetting
     private val _showLanguageDialog = MutableStateFlow(false)
 
     /**

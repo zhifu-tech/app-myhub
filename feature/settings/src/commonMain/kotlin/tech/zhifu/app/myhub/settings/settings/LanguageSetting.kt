@@ -6,6 +6,12 @@ import tech.zhifu.app.myhub.settings.data.store.LocalSettingStore
 import tech.zhifu.app.myhub.settings.data.store.StringSettingSerializer
 import tech.zhifu.app.myhub.settings.domain.Setting
 import tech.zhifu.app.myhub.settings.domain.SettingScope
+import tech.zhifu.app.myhub.settings.domain.SettingsRepository
+
+private const val LANGUAGE_SETTING_KEY = "language.code"
+
+val SettingsRepository.languageSetting: Setting<String>?
+    get() = get<String>(LANGUAGE_SETTING_KEY)
 
 /**
  * 语言设置
@@ -17,8 +23,9 @@ class LanguageSetting(
     localStore: LocalSettingStore,
     userRepository: UserRepository?
 ) : Setting<String> {
-    override val key = "language.code"
+    override val key = LANGUAGE_SETTING_KEY
     override val scope = SettingScope.USER
+
     override val defaultValue = "en"
 
     private val setting = SettingImpl(

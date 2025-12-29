@@ -1,192 +1,223 @@
 package tech.zhifu.app.myhub
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.config.AppBuildConfig
-import tech.zhifu.app.myhub.config.getEnvironmentDescription
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
-import tech.zhifu.app.myhub.local.LocalAppTheme
-import tech.zhifu.app.myhub.local.customAppLocale
-import tech.zhifu.app.myhub.local.customAppThemeIsDark
-import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.info
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
 import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
 import tech.zhifu.app.myhub.settings.SettingsScreen
-import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.AppErrorScreen
+import tech.zhifu.app.myhub.ui.AppLoadingScreen
+import tech.zhifu.app.myhub.ui.AppTopBar
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
 import tech.zhifu.app.myhub.ui.getWindowSize
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * 应用主入口
+ *
+ * 职责：
+ * - 组合应用的核心组件（主题、导航、布局）
+ * - 提供全局 CompositionLocal
+ * - 处理响应式布局
+ */
 @Composable
 @Preview
 fun App(
     windowSize: DpSize? = null,
-    settingsRepository: SettingsRepository = koinInject<SettingsRepository>()
+    appViewModel: AppViewModel = koinInject()
 ) {
-    // 启动时加载配置
+    // 观察应用状态
+    val appState by appViewModel.uiState.collectAsState()
+
+    // 计算窗口大小类（在 Composable 上下文中）
+    val actualWindowSize = windowSize ?: getWindowSize()
+    val sizeClass = calculateWindowSizeClass(actualWindowSize)
+
+    // 初始化应用（仅在首次组合时执行）
     LaunchedEffect(Unit) {
-        // 记录当前变体配置（仅在开发环境）
-        if (AppBuildConfig.enableLogging) {
-            logger.info { "=== App Build Config ===" }
-            logger.info { "Environment: ${AppBuildConfig.environment}" }
-            logger.info { "Version Type: ${AppBuildConfig.versionType}" }
-            logger.info { "API Base URL: ${AppBuildConfig.apiBaseUrl}" }
-            logger.info { "App Name: ${AppBuildConfig.appName}" }
-            logger.info { "Application ID Suffix: ${AppBuildConfig.applicationIdSuffix}" }
-            logger.info { "Enable Logging: ${AppBuildConfig.enableLogging}" }
-            logger.info { "Enable Debug Features: ${AppBuildConfig.enableDebugFeatures}" }
-            logger.info { "========================" }
-        }
-
-        // 使用新的设置架构加载配置
-        val themeSetting = settingsRepository.get<Boolean>("theme.is_dark")
-        val languageSetting = settingsRepository.get<String>("language.code")
-
-        try {
-            // 加载设置值（会自动从多个数据源获取）
-            val isDarkMode = themeSetting?.get() ?: true
-            val languageCode = languageSetting?.get() ?: "en"
-
-            // 同步到全局状态
-            customAppLocale = languageCode
-            customAppThemeIsDark = isDarkMode
-
-            logger.info { "Settings loaded: language=$languageCode, darkMode=$isDarkMode" }
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to load settings: ${e.message}" }
-            // 使用默认值
-            customAppLocale = "en"
-            customAppThemeIsDark = true
-        }
+        appViewModel.initialize(initialWindowSizeClass = sizeClass)
     }
 
+    // 当窗口大小变化时更新 ViewModel
+    LaunchedEffect(sizeClass) {
+        appViewModel.updateWindowSizeClass(sizeClass)
+    }
+
+    // 根据加载状态显示不同内容
+    when (val state = appState) {
+        is AppUiState.Loading -> {
+            AppLoadingScreen()
+        }
+
+        is AppUiState.Ready -> {
+            AppContent(
+                windowSize = windowSize,
+                currentScreen = state.currentScreen,
+                onNavigate = appViewModel::navigateTo,
+                isDarkTheme = state.isDarkTheme,
+                windowSizeClass = state.windowSizeClass
+            )
+        }
+
+        is AppUiState.Error -> {
+            AppErrorScreen(
+                error = state.error,
+                onRetry = appViewModel::retry
+            )
+        }
+    }
+}
+
+/**
+ * 应用主要内容
+ */
+@Composable
+private fun AppContent(
+    windowSize: DpSize?,
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit,
+    isDarkTheme: Boolean,
+    windowSizeClass: WindowSizeClass
+) {
+    // 提供应用环境上下文
     LocalAppEnvironment {
-        val isDark = LocalAppTheme.current
-
-        AppTheme(darkTheme = isDark) {
-            var currentScreen by remember { mutableStateOf<Screen>(Screen.Dashboard) }
-
-            val actualWindowSize = windowSize ?: getWindowSize()
-            val sizeClass = calculateWindowSizeClass(actualWindowSize)
-
-            ProvideWindowSizeClass(sizeClass) {
-                when (sizeClass) {
-                    WindowSizeClass.Compact -> {
-                        Scaffold(
-                            topBar = {
-                                TopAppBar(
-                                    title = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-                                            Surface(
-                                                modifier = Modifier.size(32.dp),
-                                                color = MaterialTheme.colorScheme.primary,
-                                                shape = MaterialTheme.shapes.small
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.AutoStories,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                                    modifier = Modifier.padding(6.dp)
-                                                )
-                                            }
-                                            Column {
-                                                Text(
-                                                    text = AppBuildConfig.appName,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                                // 显示变体信息（仅在开发环境显示）
-                                                if (AppBuildConfig.enableDebugFeatures) {
-                                                    Text(
-                                                        text = getEnvironmentDescription(),
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                )
-                            },
-                            bottomBar = {
-                                AppNavigationBar(
-                                    currentScreen = currentScreen,
-                                    onNavigate = { currentScreen = it }
-                                )
-                            }
-                        ) { padding ->
-                            Box(modifier = Modifier.padding(padding)) {
-                                ScreenContent(currentScreen)
-                            }
-                        }
-                    }
-
-                    WindowSizeClass.Medium -> {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            AppNavigationRail(
-                                currentScreen = currentScreen,
-                                onNavigate = { currentScreen = it },
-                                isExpanded = false
-                            )
-                            Box(modifier = Modifier.weight(1f)) {
-                                ScreenContent(currentScreen)
-                            }
-                        }
-                    }
-
-                    WindowSizeClass.Expanded -> {
-                        Row(modifier = Modifier.fillMaxSize()) {
-                            AppNavigationRail(
-                                currentScreen = currentScreen,
-                                onNavigate = { currentScreen = it },
-                                isExpanded = true
-                            )
-                            Box(modifier = Modifier.weight(1f)) {
-                                ScreenContent(currentScreen)
-                            }
-                        }
-                    }
-                }
+        // 应用主题
+        AppTheme(darkTheme = isDarkTheme) {
+            // 提供窗口大小类
+            ProvideWindowSizeClass(windowSizeClass) {
+                // 响应式布局
+                ResponsiveAppLayout(
+                    windowSizeClass = windowSizeClass,
+                    currentScreen = currentScreen,
+                    onNavigate = onNavigate
+                )
             }
         }
+    }
+}
+
+/**
+ * 响应式应用布局
+ */
+@Composable
+private fun ResponsiveAppLayout(
+    windowSizeClass: WindowSizeClass,
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit
+) {
+    when (windowSizeClass) {
+        WindowSizeClass.Compact -> {
+            CompactLayout(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate
+            )
+        }
+
+        WindowSizeClass.Medium -> {
+            MediumLayout(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate
+            )
+        }
+
+        WindowSizeClass.Expanded -> {
+            ExpandedLayout(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate
+            )
+        }
+    }
+}
+
+/**
+ * 紧凑布局（移动端）
+ */
+@Composable
+private fun CompactLayout(
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit
+) {
+    Scaffold(
+        topBar = { AppTopBar() },
+        bottomBar = {
+            AppNavigationBar(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate
+            )
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            AppNavigation(currentScreen = currentScreen)
+        }
+    }
+}
+
+/**
+ * 中等布局（平板）
+ */
+@Composable
+private fun MediumLayout(
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxSize()) {
+        AppNavigationRail(
+            currentScreen = currentScreen,
+            onNavigate = onNavigate,
+            isExpanded = false
+        )
+        Box(modifier = Modifier.weight(1f)) {
+            AppNavigation(currentScreen = currentScreen)
+        }
+    }
+}
+
+/**
+ * 扩展布局（桌面）
+ */
+@Composable
+private fun ExpandedLayout(
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxSize()) {
+        AppNavigationRail(
+            currentScreen = currentScreen,
+            onNavigate = onNavigate,
+            isExpanded = true
+        )
+        Box(modifier = Modifier.weight(1f)) {
+            AppNavigation(currentScreen = currentScreen)
+        }
+    }
+}
+
+/**
+ * 应用导航容器
+ */
+@Composable
+fun AppNavigation(currentScreen: Screen) {
+    when (currentScreen) {
+        is Screen.Dashboard -> DashboardScreen()
+        is Screen.Settings -> SettingsScreen()
+        else -> PlaceholderScreen(currentScreen)
     }
 }
 

@@ -17,18 +17,18 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Avatar(size: Dp = 40.dp) {
     Box(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .size(size)
             .clip(CircleShape)
             .background(
-                Brush.Companion.linearGradient(
+                Brush.linearGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
                         MaterialTheme.colorScheme.tertiary
                     )
                 )
             ),
-        contentAlignment = Alignment.Companion.Center
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "JD",

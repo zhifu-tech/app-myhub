@@ -6,6 +6,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
+import tech.zhifu.app.myhub.AppViewModel
 import tech.zhifu.app.myhub.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.settings.di.settingsModule
@@ -29,6 +30,9 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
 
                 // Dashboard ViewModel
                 factoryOf(::DashboardViewModel)
+
+                // App ViewModel
+                factoryOf(::AppViewModel)
             }
         )
     }
