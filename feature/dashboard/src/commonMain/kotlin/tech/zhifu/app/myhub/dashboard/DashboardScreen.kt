@@ -43,13 +43,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.components.ArticleCard
-import tech.zhifu.app.myhub.components.ChecklistCard
-import tech.zhifu.app.myhub.components.CodeCard
-import tech.zhifu.app.myhub.components.DictionaryCard
-import tech.zhifu.app.myhub.components.IdeaCard
-import tech.zhifu.app.myhub.components.QuoteCard
+import tech.zhifu.app.myhub.component.card.ArticleCard
+import tech.zhifu.app.myhub.component.card.ChecklistCard
+import tech.zhifu.app.myhub.component.card.CodeCard
+import tech.zhifu.app.myhub.component.card.DictionaryCard
+import tech.zhifu.app.myhub.component.card.IdeaCard
+import tech.zhifu.app.myhub.component.card.QuoteCard
+import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_cards_to_review
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_days_ago
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_favorites
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_hours_ago
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_just_now
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_last_synced
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_minutes_ago
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_never_synced
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_cards_to_review
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recent_edits
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total_cards
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.windowSizeClass
 import kotlin.time.Clock
@@ -125,22 +141,17 @@ fun DashboardHeader(
 ) {
     // 格式化最后同步时间
     val syncTimeText = when {
-        lastSyncTime == null -> "Never synced"
+        lastSyncTime == null -> stringResource(Res.string.feature_dashboard_never_synced)
         else -> {
             val now = Clock.System.now().toEpochMilliseconds()
             val diff = now - lastSyncTime
             when {
-                diff < 60_000 -> "Just now" // 1分钟内
-                diff < 3_600_000 -> "${diff / 60_000} minutes ago" // 1小时内
-                diff < 86_400_000 -> "${diff / 3_600_000} hours ago" // 24小时内
-                else -> "${diff / 86_400_000} days ago"
+                diff < 60_000 -> stringResource(Res.string.feature_dashboard_just_now)
+                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, diff / 60_000)
+                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, diff / 3_600_000)
+                else -> stringResource(Res.string.feature_dashboard_days_ago, diff / 86_400_000)
             }
         }
-    }
-
-    // 获取问候语
-    val greeting = when {
-        else -> "Good evening, Scholar" // 可以根据时间调整
     }
 
     Surface(
@@ -157,16 +168,16 @@ fun DashboardHeader(
         ) {
             Column {
                 Text(
-                    text = greeting,
+                    text = stringResource(Res.string.feature_dashboard_good_evening),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = if (recentEditsCount > 0) {
-                        "You have $recentEditsCount cards to review today."
+                        stringResource(Res.string.feature_dashboard_cards_to_review, recentEditsCount)
                     } else {
-                        "No cards to review today."
+                        stringResource(Res.string.feature_dashboard_no_cards_to_review)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -178,7 +189,7 @@ fun DashboardHeader(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Last synced: $syncTimeText",
+                    text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -219,7 +230,7 @@ fun DashboardToolbar(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Search card content, tags, or authors...",
+                        text = stringResource(Res.string.feature_dashboard_search_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
@@ -264,7 +275,7 @@ fun DashboardToolbar(
                                     .background(MaterialTheme.colorScheme.primary)
                             )
                             Text(
-                                text = "${statistics.totalCards} Total",
+                                text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total_cards)}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -284,7 +295,7 @@ fun DashboardToolbar(
                                     .background(Color(0xFFFFB020))
                             )
                             Text(
-                                text = "${statistics.favoriteCards} Favorites",
+                                text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -343,9 +354,21 @@ fun StatsCardsRow(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        StatCard("Total Cards", "${statistics.totalCards}", Modifier.weight(1f))
-        StatCard("Recent Edits", "${statistics.recentEdits}", Modifier.weight(1f))
-        StatCard("Favorites", "${statistics.favoriteCards}", Modifier.weight(1f))
+        StatCard(
+            label = stringResource(Res.string.feature_dashboard_total),
+            value = "${statistics.totalCards}",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            label = stringResource(Res.string.feature_dashboard_recent_edits),
+            value = "${statistics.recentEdits}",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            label = stringResource(Res.string.feature_dashboard_favorites),
+            value = "${statistics.favoriteCards}",
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

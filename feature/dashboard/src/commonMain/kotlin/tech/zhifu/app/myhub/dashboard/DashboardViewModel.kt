@@ -188,3 +188,4 @@ class DashboardViewModel(
         _uiState.value = _uiState.value.copy(error = null)
     }
 }
+

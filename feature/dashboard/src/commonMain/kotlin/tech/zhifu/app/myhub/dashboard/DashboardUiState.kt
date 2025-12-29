@@ -14,3 +14,4 @@ data class DashboardUiState(
     val error: String? = null,
     val lastSyncTime: Long? = null
 )
+

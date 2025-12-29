@@ -103,6 +103,10 @@ kotlin {
             implementation(projects.core.datastoreRepositoryClient)
             // Feature 模块
             implementation(projects.feature.settings)
+            implementation(projects.feature.dashboard)
+            // Component 模块
+            implementation(projects.component.card)
+            implementation(projects.component.mixed)
         }
 
         jvmMain.dependencies {

@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.components
+package tech.zhifu.app.myhub.component.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -329,3 +329,4 @@ private fun M3ChecklistItem(text: String, checked: Boolean) {
         )
     }
 }
+

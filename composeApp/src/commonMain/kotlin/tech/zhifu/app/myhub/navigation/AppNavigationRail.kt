@@ -44,7 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.components.Avatar
+import tech.zhifu.app.myhub.component.mixed.Avatar
 import tech.zhifu.app.myhub.resources.Res
 import tech.zhifu.app.myhub.resources.app_name
 import tech.zhifu.app.myhub.resources.new_card

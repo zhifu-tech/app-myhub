@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.components.Avatar
+import tech.zhifu.app.myhub.component.mixed.Avatar
 
 /**
  * Bottom Navigation Bar for Mobile

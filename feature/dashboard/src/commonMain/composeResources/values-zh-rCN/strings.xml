@@ -1,0 +1,18 @@
+<resources>
+    <string name="feature_dashboard_dashboard">仪表盘</string>
+    <string name="feature_dashboard_search_placeholder">搜索卡片内容、标签或作者...</string>
+    <string name="feature_dashboard_good_evening">晚上好，学者</string>
+    <string name="feature_dashboard_cards_to_review">你今天有 %d 张卡片需要复习。</string>
+    <string name="feature_dashboard_no_cards_to_review">今天没有需要复习的卡片。</string>
+    <string name="feature_dashboard_last_synced">上次同步：%s</string>
+    <string name="feature_dashboard_never_synced">从未同步</string>
+    <string name="feature_dashboard_just_now">刚刚</string>
+    <string name="feature_dashboard_minutes_ago">%d 分钟前</string>
+    <string name="feature_dashboard_hours_ago">%d 小时前</string>
+    <string name="feature_dashboard_days_ago">%d 天前</string>
+    <string name="feature_dashboard_total_cards">总计</string>
+    <string name="feature_dashboard_recent_edits">最近编辑</string>
+    <string name="feature_dashboard_favorites">收藏</string>
+    <string name="feature_dashboard_total">总计卡片</string>
+</resources>
+

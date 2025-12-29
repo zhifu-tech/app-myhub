@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.components
+package tech.zhifu.app.myhub.component.mixed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,3 +37,4 @@ fun Avatar(size: Dp = 40.dp) {
         )
     }
 }
+
