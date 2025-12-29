@@ -9,14 +9,14 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
-import tech.zhifu.app.myhub.platform.compose.resources.settings
+import tech.zhifu.app.myhub.platform.resources.settings
 import tech.zhifu.app.myhub.resources.Res
 import tech.zhifu.app.myhub.resources.all_cards
 import tech.zhifu.app.myhub.resources.dashboard
 import tech.zhifu.app.myhub.resources.favorites
 import tech.zhifu.app.myhub.resources.new_card
 import tech.zhifu.app.myhub.resources.profile
-import tech.zhifu.app.myhub.platform.compose.resources.Res as PlatformRes
+import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
 
 sealed class Screen(val route: String, val title: String) {
     object Dashboard : Screen("dashboard", "Dashboard")

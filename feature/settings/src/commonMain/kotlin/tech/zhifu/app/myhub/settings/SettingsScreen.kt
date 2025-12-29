@@ -41,9 +41,9 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_display_
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_off
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_on
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_select_language
-import tech.zhifu.app.myhub.platform.compose.resources.settings
+import tech.zhifu.app.myhub.platform.resources.settings
 import tech.zhifu.app.myhub.ui.utils.Language
-import tech.zhifu.app.myhub.platform.compose.resources.Res as PlatformRes
+import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

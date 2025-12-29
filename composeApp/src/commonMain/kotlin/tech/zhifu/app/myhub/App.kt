@@ -77,16 +77,16 @@ fun App(
         // 使用新的设置架构加载配置
         val themeSetting = settingsRepository.get<Boolean>("theme.is_dark")
         val languageSetting = settingsRepository.get<String>("language.code")
-        
+
         try {
             // 加载设置值（会自动从多个数据源获取）
             val isDarkMode = themeSetting?.get() ?: true
             val languageCode = languageSetting?.get() ?: "en"
-            
+
             // 同步到全局状态
             customAppLocale = languageCode
             customAppThemeIsDark = isDarkMode
-            
+
             logger.info { "Settings loaded: language=$languageCode, darkMode=$isDarkMode" }
         } catch (e: Exception) {
             logger.error(e) { "Failed to load settings: ${e.message}" }
