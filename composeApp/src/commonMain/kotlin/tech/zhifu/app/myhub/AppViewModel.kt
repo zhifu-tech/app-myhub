@@ -4,6 +4,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.local.customAppLocale
@@ -38,6 +42,11 @@ class AppViewModel(
     private var isDarkTheme: Boolean = true
     private var windowSizeClass: WindowSizeClass = WindowSizeClass.Compact
 
+    init {
+        // 监听主题设置变化
+        observeThemeSetting()
+    }
+
     /**
      * 初始化应用
      *
@@ -51,7 +60,7 @@ class AppViewModel(
                     logBuildConfig()
                 }
 
-                // 加载设置
+                // 加载设置（初始值）
                 loadSettings()
 
                 // 设置初始窗口大小类
@@ -68,6 +77,37 @@ class AppViewModel(
                 _uiState.value = AppUiState.Error(e)
             }
         }
+    }
+
+    /**
+     * 监听主题设置变化
+     */
+    private fun observeThemeSetting() {
+        val themeSetting = settingsRepository.themeSetting
+        themeSetting?.observe()
+            ?.onStart {
+                // 初始值
+                coroutineScope.launch {
+                    try {
+                        val initialValue = themeSetting.get()
+                        isDarkTheme = initialValue
+                        customAppThemeIsDark = initialValue
+                        updateReadyState()
+                    } catch (e: Exception) {
+                        logger.error(e) { "Failed to get initial theme: ${e.message}" }
+                    }
+                }
+            }
+            ?.catch { e ->
+                logger.error(e) { "Failed to observe theme setting: ${e.message}" }
+            }
+            ?.onEach { isDark ->
+                logger.info { "Theme changed: isDark=$isDark" }
+                isDarkTheme = isDark
+                customAppThemeIsDark = isDark
+                updateReadyState()
+            }
+            ?.launchIn(coroutineScope)
     }
 
     /**

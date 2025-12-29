@@ -12,9 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,12 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.component.card.ArticleCard
-import tech.zhifu.app.myhub.component.card.ChecklistCard
-import tech.zhifu.app.myhub.component.card.CodeCard
-import tech.zhifu.app.myhub.component.card.DictionaryCard
-import tech.zhifu.app.myhub.component.card.IdeaCard
-import tech.zhifu.app.myhub.component.card.QuoteCard
+import tech.zhifu.app.myhub.component.CardComponent
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_cards_to_review
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_days_ago
@@ -65,7 +60,6 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_car
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recent_edits
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total_cards
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.windowSizeClass
 import kotlin.time.Clock
@@ -84,49 +78,51 @@ fun DashboardScreen(
         WindowSizeClass.Expanded -> 3
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 顶部头部
-        DashboardHeader(
-            recentEditsCount = uiState.statistics.recentEdits,
-            lastSyncTime = uiState.lastSyncTime,
-            onRefresh = { viewModel.refresh() }
-        )
-
-        // 搜索栏和工具栏
-        DashboardToolbar(
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            statistics = uiState.statistics,
-            sizeClass = sizeClass
-        )
-
-        // 统计卡片（移动端显示）
-        if (sizeClass == WindowSizeClass.Compact) {
-            StatsCardsRow(statistics = uiState.statistics)
-        }
-
-        // 内容卡片网格
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            contentPadding = PaddingValues(24.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(listOf("quote", "code", "idea", "article", "dictionary", "checklist")) { type ->
-                when (type) {
-                    "quote" -> QuoteCard()
-                    "code" -> CodeCard()
-                    "idea" -> IdeaCard()
-                    "article" -> ArticleCard()
-                    "dictionary" -> DictionaryCard()
-                    "checklist" -> ChecklistCard()
+            // 顶部头部（sticky）
+            DashboardHeader(
+                recentEditsCount = uiState.statistics.recentEdits,
+                lastSyncTime = uiState.lastSyncTime,
+                onRefresh = { viewModel.refresh() }
+            )
+
+            // 搜索栏和工具栏
+            DashboardToolbar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                statistics = uiState.statistics,
+                sizeClass = sizeClass
+            )
+
+            // 统计卡片（移动端显示）
+            if (sizeClass == WindowSizeClass.Compact) {
+                StatsCardsRow(statistics = uiState.statistics)
+            }
+
+            // 内容卡片瀑布流布局（可滚动区域）
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(columns),
+                contentPadding = PaddingValues(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalItemSpacing = 24.dp,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                items(uiState.recentCards) { card ->
+                    CardComponent(
+                        card = card,
+                        onEdit = { viewModel.editCard(it.id) },
+                        onFavorite = { viewModel.toggleFavorite(it.id) },
+                        onCardClick = { viewModel.viewCard(it.id) }
+                    )
                 }
             }
         }
@@ -157,48 +153,57 @@ fun DashboardHeader(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
-        tonalElevation = 1.dp
+        tonalElevation = 0.dp
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            Column {
-                Text(
-                    text = stringResource(Res.string.feature_dashboard_good_evening),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = if (recentEditsCount > 0) {
-                        stringResource(Res.string.feature_dashboard_cards_to_review, recentEditsCount)
-                    } else {
-                        stringResource(Res.string.feature_dashboard_no_cards_to_review)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                IconButton(onClick = onRefresh) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                Column {
+                    Text(
+                        text = stringResource(Res.string.feature_dashboard_good_evening),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    Text(
+                        text = if (recentEditsCount > 0) {
+                            stringResource(Res.string.feature_dashboard_cards_to_review, recentEditsCount)
+                        } else {
+                            stringResource(Res.string.feature_dashboard_no_cards_to_review)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                    IconButton(
+                        onClick = onRefresh,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -215,7 +220,7 @@ fun DashboardToolbar(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.background,
-        tonalElevation = 1.dp
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
@@ -223,94 +228,111 @@ fun DashboardToolbar(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 搜索栏
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text(
-                        text = stringResource(Res.string.feature_dashboard_search_placeholder),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                )
-            )
-
-            // 工具栏
+            // 搜索栏和工具栏行
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 统计信息（桌面端显示）
-                if (sizeClass != WindowSizeClass.Compact) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.primary)
-                            )
-                            Text(
-                                text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total_cards)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        HorizontalDivider(
-                            modifier = Modifier.height(16.dp),
-                            color = MaterialTheme.colorScheme.outline
+                // 搜索栏
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp),
+                    placeholder = {
+                        Text(
+                            text = stringResource(Res.string.feature_dashboard_search_placeholder),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
                         )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(Color(0xFFFFB020))
-                            )
-                            Text(
-                                text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    singleLine = true
+                )
 
-                // 视图切换
+                // 工具栏（统计信息和视图切换）
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // 统计信息（桌面端显示）
+                    if (sizeClass != WindowSizeClass.Compact) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                            modifier = Modifier.height(44.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0xFF10b981)) // emerald-500
+                                    )
+                                    Text(
+                                        text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .width(1.dp)
+                                        .height(16.dp)
+                                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0xFFf59e0b)) // amber-500
+                                    )
+                                    Text(
+                                        text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // 视图切换
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(44.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(4.dp),
@@ -319,21 +341,30 @@ fun DashboardToolbar(
                             Surface(
                                 color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.padding(4.dp)
+                                modifier = Modifier.size(36.dp),
+                                tonalElevation = 1.dp
                             ) {
-                                IconButton(onClick = { /* TODO */ }) {
+                                IconButton(
+                                    onClick = { /* TODO */ },
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
                                     Icon(
                                         imageVector = Icons.Default.GridView,
                                         contentDescription = "Grid View",
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
-                            IconButton(onClick = { /* TODO */ }) {
+                            IconButton(
+                                onClick = { /* TODO */ },
+                                modifier = Modifier.size(36.dp)
+                            ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ViewList,
                                     contentDescription = "List View",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -383,22 +414,24 @@ fun StatCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 4.dp)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

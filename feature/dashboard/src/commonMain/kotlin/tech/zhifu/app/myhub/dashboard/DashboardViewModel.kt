@@ -187,5 +187,38 @@ class DashboardViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
+
+    /**
+     * 编辑卡片
+     */
+    fun editCard(cardId: String) {
+        logger.info { "Edit card: $cardId" }
+        // TODO: 导航到编辑页面
+    }
+
+    /**
+     * 切换收藏状态
+     */
+    fun toggleFavorite(cardId: String) {
+        coroutineScope.launch {
+            try {
+                cardRepository.toggleFavorite(cardId)
+                logger.info { "Toggled favorite for card: $cardId" }
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to toggle favorite: ${e.message}" }
+                _uiState.value = _uiState.value.copy(
+                    error = "Failed to toggle favorite: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * 查看卡片详情
+     */
+    fun viewCard(cardId: String) {
+        logger.info { "View card: $cardId" }
+        // TODO: 导航到详情页面
+    }
 }
 

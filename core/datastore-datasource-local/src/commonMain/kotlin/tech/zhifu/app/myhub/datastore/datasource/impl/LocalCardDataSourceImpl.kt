@@ -72,6 +72,9 @@ class LocalCardDataSourceImpl(
                     user_id = userId
                 )
 
+                // 先删除已存在的待办清单项，避免重复插入
+                database.cardQueries.deleteChecklistItems(card.id, userId)
+                
                 // 插入待办清单项
                 metadata.checklistItems.forEach { item ->
                     database.cardQueries.insertChecklistItem(
@@ -83,6 +86,9 @@ class LocalCardDataSourceImpl(
                         user_id = userId
                     )
                 }
+            } else {
+                // 如果没有元数据，删除现有的 checklist items
+                database.cardQueries.deleteChecklistItems(card.id, userId)
             }
         }
     }

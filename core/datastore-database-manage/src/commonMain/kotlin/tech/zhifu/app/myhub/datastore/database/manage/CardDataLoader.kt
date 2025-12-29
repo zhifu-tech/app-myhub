@@ -47,7 +47,7 @@ class CardDataLoader(
             cards.forEach { card ->
                 // 优先使用 JSON 中的 userId，如果没有则使用传入的参数
                 val cardUserId = card.userId ?: userId
-                
+
                 // 插入卡片
                 database.cardQueries.insertCard(
                     id = card.id,

@@ -11,6 +11,7 @@ import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.profile.di.profileModule
 import tech.zhifu.app.myhub.settings.di.settingsModule
+import tech.zhifu.app.myhub.component.card.di.cardModule
 
 fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
     startKoin {
@@ -24,6 +25,8 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             settingsModule(),
             dashboardModule(),
             profileModule(),
+            // Component modules
+            cardModule,
             module {
                 // 提供 ViewModel 使用的 CoroutineScope
                 // 使用 Dispatchers.Default 作为默认调度器

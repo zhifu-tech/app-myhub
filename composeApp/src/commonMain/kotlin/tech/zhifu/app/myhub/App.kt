@@ -15,6 +15,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
+import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
@@ -68,11 +69,13 @@ fun App(
         }
 
         is AppUiState.Ready -> {
+            // 直接使用 customAppThemeIsDark，确保主题切换实时生效
+            // customAppThemeIsDark 是 mutableStateOf，变化时会自动触发重组
             AppContent(
                 windowSize = windowSize,
                 currentScreen = state.currentScreen,
                 onNavigate = appViewModel::navigateTo,
-                isDarkTheme = state.isDarkTheme,
+                isDarkTheme = customAppThemeIsDark,
                 windowSizeClass = state.windowSizeClass
             )
         }

@@ -168,7 +168,7 @@ WHERE card_id = ? AND user_id = ?;
 
 -- 插入待办清单项
 insertChecklistItem:
-INSERT INTO checklist_item (id, card_id, text, is_completed, item_order, user_id)
+INSERT OR REPLACE INTO checklist_item (id, card_id, text, is_completed, item_order, user_id)
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- 获取卡片的待办清单项
