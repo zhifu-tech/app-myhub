@@ -1,18 +1,18 @@
 <resources>
-    <string name="feature_dashboard_dashboard">儀表盤</string>
-    <string name="feature_dashboard_search_placeholder">搜索卡片內容、標籤或作者...</string>
-    <string name="feature_dashboard_good_evening">晚上好，學者</string>
-    <string name="feature_dashboard_cards_to_review">你今天有 %d 張卡片需要復習。</string>
-    <string name="feature_dashboard_no_cards_to_review">今天沒有需要復習的卡片。</string>
-    <string name="feature_dashboard_last_synced">上次同步：%s</string>
-    <string name="feature_dashboard_never_synced">從未同步</string>
-    <string name="feature_dashboard_just_now">剛剛</string>
-    <string name="feature_dashboard_minutes_ago">%d 分鐘前</string>
-    <string name="feature_dashboard_hours_ago">%d 小時前</string>
-    <string name="feature_dashboard_days_ago">%d 天前</string>
-    <string name="feature_dashboard_total_cards">總計</string>
-    <string name="feature_dashboard_recent_edits">最近編輯</string>
-    <string name="feature_dashboard_favorites">收藏</string>
-    <string name="feature_dashboard_total">總計卡片</string>
+  <string name="feature_dashboard_dashboard">儀表盤</string>
+  <string name="feature_dashboard_search_placeholder">搜索卡片內容、標籤或作者...</string>
+  <string name="feature_dashboard_good_evening">晚上好，學者</string>
+  <string name="feature_dashboard_cards_to_review">你今天有 %1$d 張卡片需要復習。</string>
+  <string name="feature_dashboard_no_cards_to_review">今天沒有需要復習的卡片。</string>
+  <string name="feature_dashboard_last_synced">上次同步：%1$s</string>
+  <string name="feature_dashboard_never_synced">從未同步</string>
+  <string name="feature_dashboard_just_now">剛剛</string>
+  <string name="feature_dashboard_minutes_ago">%1$d 分鐘前</string>
+  <string name="feature_dashboard_hours_ago">%1$d 小時前</string>
+  <string name="feature_dashboard_days_ago">%1$d 天前</string>
+  <string name="feature_dashboard_total_cards">總計</string>
+  <string name="feature_dashboard_recent_edits">最近編輯</string>
+  <string name="feature_dashboard_favorites">收藏</string>
+  <string name="feature_dashboard_total">總計卡片</string>
 </resources>
 

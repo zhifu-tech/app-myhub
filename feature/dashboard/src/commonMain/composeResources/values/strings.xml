@@ -1,18 +1,18 @@
 <resources>
-    <string name="feature_dashboard_dashboard">Dashboard</string>
-    <string name="feature_dashboard_search_placeholder">Search card content, tags, or authors...</string>
-    <string name="feature_dashboard_good_evening">Good evening, Scholar</string>
-    <string name="feature_dashboard_cards_to_review">You have %d cards to review today.</string>
-    <string name="feature_dashboard_no_cards_to_review">No cards to review today.</string>
-    <string name="feature_dashboard_last_synced">Last synced: %s</string>
-    <string name="feature_dashboard_never_synced">Never synced</string>
-    <string name="feature_dashboard_just_now">Just now</string>
-    <string name="feature_dashboard_minutes_ago">%d minutes ago</string>
-    <string name="feature_dashboard_hours_ago">%d hours ago</string>
-    <string name="feature_dashboard_days_ago">%d days ago</string>
-    <string name="feature_dashboard_total_cards">Total</string>
-    <string name="feature_dashboard_recent_edits">Recent Edits</string>
-    <string name="feature_dashboard_favorites">Favorites</string>
-    <string name="feature_dashboard_total">Total Cards</string>
+  <string name="feature_dashboard_dashboard">Dashboard</string>
+  <string name="feature_dashboard_search_placeholder">Search card content, tags, or authors...</string>
+  <string name="feature_dashboard_good_evening">Good evening, Scholar</string>
+  <string name="feature_dashboard_cards_to_review">You have %1$d cards to review today.</string>
+  <string name="feature_dashboard_no_cards_to_review">No cards to review today.</string>
+  <string name="feature_dashboard_last_synced">Last synced: %1$s</string>
+  <string name="feature_dashboard_never_synced">Never synced</string>
+  <string name="feature_dashboard_just_now">Just now</string>
+  <string name="feature_dashboard_minutes_ago">%1$d minutes ago</string>
+  <string name="feature_dashboard_hours_ago">%1$d hours ago</string>
+  <string name="feature_dashboard_days_ago">%1$d days ago</string>
+  <string name="feature_dashboard_total_cards">Total</string>
+  <string name="feature_dashboard_recent_edits">Recent Edits</string>
+  <string name="feature_dashboard_favorites">Favorites</string>
+  <string name="feature_dashboard_total">Total Cards</string>
 </resources>
 

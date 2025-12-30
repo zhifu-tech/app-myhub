@@ -1,5 +1,12 @@
 package tech.zhifu.app.myhub.dashboard
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,6 +98,7 @@ fun DashboardScreen(
             DashboardHeader(
                 recentEditsCount = uiState.statistics.recentEdits,
                 lastSyncTime = uiState.lastSyncTime,
+                isLoading = uiState.isLoading,
                 onRefresh = { viewModel.refresh() }
             )
 
@@ -133,6 +142,7 @@ fun DashboardScreen(
 fun DashboardHeader(
     recentEditsCount: Int,
     lastSyncTime: Long?,
+    isLoading: Boolean,
     onRefresh: () -> Unit
 ) {
     // 格式化最后同步时间
@@ -143,9 +153,9 @@ fun DashboardHeader(
             val diff = now - lastSyncTime
             when {
                 diff < 60_000 -> stringResource(Res.string.feature_dashboard_just_now)
-                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, diff / 60_000)
-                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, diff / 3_600_000)
-                else -> stringResource(Res.string.feature_dashboard_days_ago, diff / 86_400_000)
+                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, (diff / 60_000))
+                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, (diff / 3_600_000))
+                else -> stringResource(Res.string.feature_dashboard_days_ago, (diff / 86_400_000))
             }
         }
     }
@@ -193,20 +203,61 @@ fun DashboardHeader(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium
                     )
-                    IconButton(
-                        onClick = onRefresh,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    // 刷新按钮（带旋转动画）
+                    RefreshButton(
+                        isLoading = isLoading,
+                        onRefresh = onRefresh
+                    )
                 }
             }
         }
+    }
+}
+
+/**
+ * 刷新按钮组件
+ * 在加载时显示旋转动画并禁用按钮
+ */
+@Composable
+fun RefreshButton(
+    isLoading: Boolean,
+    onRefresh: () -> Unit
+) {
+    // 根据加载状态使用不同的动画
+    val rotationAngle = if (isLoading) {
+        // 加载时使用无限旋转动画
+        val infiniteTransition = rememberInfiniteTransition(label = "refresh_rotation")
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "rotation"
+        )
+    } else {
+        // 停止加载时平滑回到 0 度
+        animateFloatAsState(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 200, easing = LinearEasing),
+            label = "rotation_reset"
+        )
+    }
+
+    IconButton(
+        onClick = onRefresh,
+        enabled = !isLoading,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Refresh,
+            contentDescription = "Refresh",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(20.dp)
+                .rotate(rotationAngle.value)
+        )
     }
 }
 
@@ -436,4 +487,3 @@ fun StatCard(
         }
     }
 }
-

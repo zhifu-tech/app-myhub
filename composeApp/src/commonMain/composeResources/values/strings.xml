@@ -8,7 +8,7 @@
     <string name="profile">Profile</string>
     <string name="search_placeholder">Search card content, tags, or authors...</string>
     <string name="good_evening">Good evening, Scholar</string>
-    <string name="cards_to_review">You have %d cards to review today.</string>
+    <string name="cards_to_review">You have %1$d cards to review today.</string>
     <string name="last_synced">Last synced: Just now</string>
     <string name="total_cards">Total</string>
     <string name="recent_edits">Recent Edits</string>
