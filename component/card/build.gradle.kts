@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "tech.zhifu.app.myhub.component.card.resources"
+    generateResClass = always
+}
+
 kotlin {
     android {
         namespace = "tech.zhifu.app.myhub.component.card"
@@ -20,6 +26,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
             // Material Icons 扩展（必需：Icons.Default.* 图标）
             implementation(compose.materialIconsExtended)
             // 依赖注入

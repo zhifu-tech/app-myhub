@@ -8,7 +8,7 @@ import tech.zhifu.app.myhub.datastore.model.Card
  * 卡片组件工厂函数类型
  * 用于创建和渲染特定类型的卡片组件
  */
-typealias CardComponentFactory = @Composable (
+internal typealias CardComponentFactory = @Composable (
     card: Card,
     onEdit: (Card) -> Unit,
     onFavorite: (Card) -> Unit,

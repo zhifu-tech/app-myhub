@@ -1,0 +1,23 @@
+<resources>
+  <string name="component_card_type_quote">引用</string>
+  <string name="component_card_type_code">コードスニペット</string>
+  <string name="component_card_type_idea">アイデア</string>
+  <string name="component_card_type_article">記事</string>
+  <string name="component_card_type_dictionary">単語</string>
+  <string name="component_card_type_checklist">チェックリスト</string>
+  
+  <!-- 月份名称 -->
+  <string name="component_card_month_jan">1月</string>
+  <string name="component_card_month_feb">2月</string>
+  <string name="component_card_month_mar">3月</string>
+  <string name="component_card_month_apr">4月</string>
+  <string name="component_card_month_may">5月</string>
+  <string name="component_card_month_jun">6月</string>
+  <string name="component_card_month_jul">7月</string>
+  <string name="component_card_month_aug">8月</string>
+  <string name="component_card_month_sep">9月</string>
+  <string name="component_card_month_oct">10月</string>
+  <string name="component_card_month_nov">11月</string>
+  <string name="component_card_month_dec">12月</string>
+</resources>
+

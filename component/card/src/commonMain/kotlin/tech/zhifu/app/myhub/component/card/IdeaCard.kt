@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.component.card.utils.formatRelativeTime
 import tech.zhifu.app.myhub.datastore.model.Card
 
 @Composable
@@ -63,10 +62,8 @@ fun IdeaCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    // 使用 remember 缓存格式化结果
-    val relativeTime = remember(card.createdAt) {
-        card.createdAt.formatRelativeTime()
-    }
+    // 格式化日期（支持多语言）
+    val relativeTime = card.formatCreatedTime()
 
     Card(
         modifier = modifier

@@ -36,7 +36,8 @@ class DashboardViewModel(
             favoriteCards = emptyList(),
             isLoading = false,
             error = null,
-            lastSyncTime = null
+            lastSyncTime = null,
+            viewType = ViewType.GRID
         )
     )
 
@@ -274,6 +275,24 @@ class DashboardViewModel(
     fun viewCard(cardId: String) {
         logger.info { "View card: $cardId" }
         // TODO: 导航到详情页面
+    }
+
+    /**
+     * 切换视图类型
+     */
+    fun toggleViewType() {
+        val newViewType = when (_uiState.value.viewType) {
+            ViewType.GRID -> ViewType.LIST
+            ViewType.LIST -> ViewType.GRID
+        }
+        _uiState.value = _uiState.value.copy(viewType = newViewType)
+    }
+
+    /**
+     * 设置视图类型
+     */
+    fun setViewType(viewType: ViewType) {
+        _uiState.value = _uiState.value.copy(viewType = viewType)
     }
 }
 

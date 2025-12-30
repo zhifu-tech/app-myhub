@@ -88,24 +88,24 @@ class DashboardViewModel(
     private val coroutineScope: CoroutineScope
 ) {
     val uiState: StateFlow<DashboardUiState>
-    
+
     /**
      * 加载 Dashboard 数据
      * 同时监听统计信息和卡片数据的变化
      */
     private fun loadDashboardData()
-    
+
     /**
      * 刷新 Dashboard 数据
      * 触发统计信息和卡片数据的刷新
      */
     fun refresh()
-    
+
     /**
      * 同步数据（从服务器拉取最新数据）
      */
     fun sync()
-    
+
     /**
      * 清除错误状态
      */
@@ -124,6 +124,14 @@ class DashboardViewModel(
 
 ```kotlin
 /**
+ * 视图类型枚举
+ */
+enum class ViewType {
+    GRID,   // 瀑布流视图
+    LIST    // 列表视图
+}
+
+/**
  * Dashboard UI状态
  */
 data class DashboardUiState(
@@ -132,7 +140,8 @@ data class DashboardUiState(
     val favoriteCards: List<Card> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val lastSyncTime: Long? = null
+    val lastSyncTime: Long? = null,
+    val viewType: ViewType = ViewType.GRID
 )
 ```
 
@@ -144,6 +153,7 @@ data class DashboardUiState(
 - `isLoading`: 加载状态
 - `error`: 错误信息
 - `lastSyncTime`: 最后同步时间
+- `viewType`: 视图类型（Grid 或 List）
 
 ### 3. DashboardScreen
 
@@ -161,9 +171,12 @@ fun DashboardScreen(
 **UI 组件**：
 
 - **DashboardHeader**: 顶部头部（问候语、最近编辑数、同步状态、刷新按钮）
-- **DashboardToolbar**: 工具栏（搜索栏、统计卡片、视图切换）
+- **DashboardToolbar**: 工具栏（搜索栏、统计卡片、视图切换按钮）
 - **StatsCardsRow**: 统计卡片行（移动端显示）
-- **LazyVerticalGrid**: 内容卡片网格（响应式布局）
+- **DashboardGridView**: 瀑布流网格视图（使用 LazyVerticalStaggeredGrid）
+- **DashboardListView**: 列表视图（使用 LazyColumn，支持响应式布局）
+  - **ListViewHeader**: 列表表头（桌面端显示列标题）
+  - **ListViewItem**: 列表项（使用 Card 扩展方法显示信息）
 
 ## 📁 模块结构
 
@@ -241,44 +254,55 @@ cardRepository.observeFavoriteCards()
 
 ### 响应式布局
 
-Dashboard 支持响应式布局，根据窗口大小自动调整列数：
+Dashboard 支持响应式布局，根据窗口大小自动调整列数和布局：
 
 ```kotlin
 @Composable
 fun DashboardScreen(...) {
     val sizeClass = windowSizeClass()
-    val columns = when (sizeClass) {
-        WindowSizeClass.Compact -> 1   // 移动端：1 列
-        WindowSizeClass.Medium -> 2    // 平板：2 列
-        WindowSizeClass.Expanded -> 3  // 桌面：3 列
+    val columns = when {
+        sizeClass.isCompact -> 1   // 移动端：1 列
+        sizeClass.isMedium -> 2     // 平板：2 列
+        sizeClass.isExpanded -> 3   // 桌面：3 列
     }
-    
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
-        ...
-    )
+
+    // 根据视图类型显示不同的布局
+    when (uiState.viewType) {
+        ViewType.GRID -> DashboardGridView(...)
+        ViewType.LIST -> DashboardListView(...)
+    }
 }
 ```
+
+**响应式特性**：
+
+- **Grid 视图**：根据窗口大小自动调整列数（1/2/3 列）
+- **List 视图**：
+  - 移动端：只显示图标、标题和内容预览
+  - 桌面端：显示完整信息（图标、标题、内容、标签、时间、操作按钮）
 
 ### 数据同步策略
 
 1. **初始化加载**：
-    - 从服务器获取所有卡片
-    - 刷新统计信息
-    - 开始监听数据变化
+
+   - 从服务器获取所有卡片
+   - 刷新统计信息
+   - 开始监听数据变化
 
 2. **自动更新**：
-    - 通过 Flow 监听本地数据库变化
-    - 实时更新 UI 状态
+
+   - 通过 Flow 监听本地数据库变化
+   - 实时更新 UI 状态
 
 3. **手动刷新**：
-    - 用户点击刷新按钮
-    - 重新从服务器获取数据
-    - 更新统计信息
+
+   - 用户点击刷新按钮
+   - 重新从服务器获取数据
+   - 更新统计信息
 
 4. **同步状态**：
-    - 显示最后同步时间
-    - 格式化时间显示（刚刚、X 分钟前、X 小时前、X 天前）
+   - 显示最后同步时间
+   - 格式化时间显示（刚刚、X 分钟前、X 小时前、X 天前）
 
 ## 💡 使用示例
 
@@ -313,12 +337,12 @@ fun dashboardModule() = module {
 fun CustomDashboardScreen() {
     val viewModel: DashboardViewModel = koinInject()
     val uiState by viewModel.uiState.collectAsState()
-    
+
     // 自定义 UI 实现
     Column {
         // 显示统计信息
         Text("Total Cards: ${uiState.statistics.totalCards}")
-        
+
         // 刷新按钮
         Button(onClick = { viewModel.refresh() }) {
             Text("Refresh")
@@ -344,9 +368,12 @@ fun CustomDashboardScreen() {
 
 ### 交互功能
 
-- **搜索**：搜索卡片内容、标签或作者
-- **刷新**：手动刷新数据
-- **视图切换**：列表视图/网格视图（未来功能）
+- **搜索**：搜索卡片内容、标签或作者（实时搜索，支持多语言占位符）
+- **刷新**：手动刷新数据（带动画效果）
+- **视图切换**：列表视图/网格视图切换（✅ 已实现）
+  - Grid 视图：瀑布流布局，适合浏览大量卡片
+  - List 视图：列表布局，适合快速查看和操作
+- **卡片操作**：编辑、收藏、点击查看（在列表视图中，桌面端显示操作按钮）
 - **筛选**：按类型、标签筛选卡片（未来功能）
 
 ## 🌐 国际化支持
@@ -364,7 +391,9 @@ Dashboard 模块支持多语言：
 
 ### 布局结构
 
-```
+#### Grid 视图布局
+
+```text
 ┌─────────────────────────────────────────┐
 │  Dashboard Header                       │
 │  - 问候语                               │
@@ -374,10 +403,15 @@ Dashboard 模块支持多语言：
 ├─────────────────────────────────────────┤
 │  Dashboard Toolbar                      │
 │  - 搜索栏                               │
-│  - 统计卡片（移动端）                   │
-│  - 视图切换按钮（未来）                 │
+│  - 统计卡片（桌面端）                   │
+│  - 视图切换按钮                         │
 ├─────────────────────────────────────────┤
-│  Content Grid                           │
+│  Stats Cards Row（移动端）              │
+│  ┌─────┐ ┌─────┐ ┌─────┐               │
+│  │Total│ │Edit │ │Fav  │               │
+│  └─────┘ └─────┘ └─────┘               │
+├─────────────────────────────────────────┤
+│  Content Grid (Staggered)               │
 │  ┌─────┐ ┌─────┐ ┌─────┐               │
 │  │Card │ │Card │ │Card │               │
 │  └─────┘ └─────┘ └─────┘               │
@@ -387,32 +421,104 @@ Dashboard 模块支持多语言：
 └─────────────────────────────────────────┘
 ```
 
+#### List 视图布局
+
+```text
+┌─────────────────────────────────────────┐
+│  Dashboard Header                       │
+│  - 问候语                               │
+│  - 最近编辑数                           │
+│  - 最后同步时间                         │
+│  - 刷新按钮                             │
+├─────────────────────────────────────────┤
+│  Dashboard Toolbar                      │
+│  - 搜索栏                               │
+│  - 统计卡片（桌面端）                   │
+│  - 视图切换按钮                         │
+├─────────────────────────────────────────┤
+│  List Header（桌面端）                   │
+│  Name & Content | Tags | Time | Actions │
+├─────────────────────────────────────────┤
+│  List Items                             │
+│  ┌───────────────────────────────────┐ │
+│  │ [Icon] Title | Preview | Tags | ...│ │
+│  └───────────────────────────────────┘ │
+│  ┌───────────────────────────────────┐ │
+│  │ [Icon] Title | Preview | Tags | ...│ │
+│  └───────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+```
+
 ### 响应式设计
+
+#### Grid 视图
 
 - **移动端** (Compact): 单列布局，统计卡片显示在工具栏下方
 - **平板** (Medium): 双列布局，统计卡片显示在工具栏中
 - **桌面** (Expanded): 三列布局，统计卡片显示在工具栏中
+
+#### List 视图
+
+- **移动端** (Compact):
+  - 只显示图标、标题和内容预览
+  - 隐藏标签、时间和操作按钮
+  - 简化布局，优化移动端体验
+- **桌面端** (Medium/Expanded):
+  - 显示完整信息：图标、标题、内容预览、标签、时间、操作按钮
+  - 显示列表表头（列标题）
+  - 支持 hover 效果和快速操作
 
 ## 🔄 数据同步
 
 ### 同步流程
 
 1. **应用启动**：
-    - 自动从服务器获取最新数据
-    - 开始监听本地数据库变化
+
+   - 自动从服务器获取最新数据
+   - 开始监听本地数据库变化
 
 2. **数据更新**：
-    - 本地数据库变化 → Flow 触发 → UI 自动更新
-    - 服务器数据变化 → 手动刷新 → 更新本地数据库 → Flow 触发 → UI 更新
+
+   - 本地数据库变化 → Flow 触发 → UI 自动更新
+   - 服务器数据变化 → 手动刷新 → 更新本地数据库 → Flow 触发 → UI 更新
 
 3. **错误处理**：
-    - 网络错误：显示错误信息，使用本地缓存数据
-    - 数据错误：记录日志，使用默认值
+   - 网络错误：显示错误信息，使用本地缓存数据
+   - 数据错误：记录日志，使用默认值
+
+## 🔧 Card 扩展方法使用
+
+Dashboard 使用 Card 扩展方法来统一获取卡片显示信息：
+
+```kotlin
+@Composable
+private fun ListViewItem(card: Card) {
+    // @Composable 函数需要提前定义
+    val cardTitle = card.getDisplayTitle()
+    val formattedDate = card.formatUpdatedTime()
+
+    // 多次使用的值提前定义
+    val iconColor = card.typeIconColor
+
+    // 只使用一次的值直接使用
+    // card.getContentPreview()
+    // card.typeIconText
+}
+```
+
+**使用的扩展方法**：
+
+- `Card.getDisplayTitle()`: 获取显示标题（支持多语言）
+- `Card.getContentPreview()`: 获取内容预览
+- `Card.typeIconColor`: 获取图标颜色
+- `Card.typeIconText`: 获取图标文本
+- `Card.formatUpdatedTime()`: 格式化更新时间（支持多语言）
 
 ## 🚀 未来计划
 
 ### 短期计划
 
+- [ ] 实现搜索功能逻辑（当前仅 UI）
 - [ ] 添加卡片类型统计图表
 - [ ] 添加待复习卡片提醒
 - [ ] 优化加载性能（分页加载）
@@ -443,14 +549,19 @@ Dashboard 模块支持多语言：
 - ✅ 国际化支持
 - ✅ 响应式布局
 - ✅ 错误处理
+- ✅ 视图切换功能（Grid/List）
+- ✅ 列表视图实现（ListViewItem、ListViewHeader）
+- ✅ 搜索功能优化（多语言占位符、样式优化）
+- ✅ Card 扩展方法集成（getDisplayTitle、getContentPreview、typeIconColor、typeIconText、formatUpdatedTime）
+- ✅ WindowSizeClass 扩展方法（isCompact、isMedium、isExpanded）
 
 **待实现**：
 
 - 🔄 卡片类型统计图表
 - 🔄 待复习卡片提醒
 - 🔄 下拉刷新功能
-- 🔄 视图切换功能
 - 🔄 筛选功能
+- 🔄 搜索功能实现（当前仅 UI，待接入搜索逻辑）
 
 ## 📚 参考
 
@@ -474,4 +585,3 @@ Dashboard 模块支持多语言：
 - **core/datastore-model**: 提供数据模型（Card、Statistics）
 - **component/card**: 提供卡片 UI 组件
 - **core/platform**: 提供平台抽象（窗口大小、主题等）
-

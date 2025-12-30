@@ -3,8 +3,6 @@ package tech.zhifu.app.myhub.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
@@ -55,4 +53,26 @@ fun ProvideWindowSizeClass(
  */
 @Composable
 fun windowSizeClass(): WindowSizeClass = LocalWindowSizeClass.current
+
+/**
+ * WindowSizeClass 扩展方法
+ */
+
+/**
+ * 判断是否为紧凑型（手机）布局
+ */
+val WindowSizeClass.isCompact: Boolean
+    get() = this == WindowSizeClass.Compact
+
+/**
+ * 判断是否为中等型（平板）布局
+ */
+val WindowSizeClass.isMedium: Boolean
+    get() = this == WindowSizeClass.Medium
+
+/**
+ * 判断是否为扩展型（桌面）布局
+ */
+val WindowSizeClass.isExpanded: Boolean
+    get() = this == WindowSizeClass.Expanded
 

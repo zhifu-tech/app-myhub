@@ -30,6 +30,9 @@ import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
 import tech.zhifu.app.myhub.ui.getWindowSize
+import tech.zhifu.app.myhub.ui.isCompact
+import tech.zhifu.app.myhub.ui.isExpanded
+import tech.zhifu.app.myhub.ui.isMedium
 
 /**
  * 应用主入口
@@ -126,22 +129,22 @@ private fun ResponsiveAppLayout(
     currentScreen: Screen,
     onNavigate: (Screen) -> Unit
 ) {
-    when (windowSizeClass) {
-        WindowSizeClass.Compact -> {
+    when {
+        windowSizeClass.isCompact -> {
             CompactLayout(
                 currentScreen = currentScreen,
                 onNavigate = onNavigate
             )
         }
 
-        WindowSizeClass.Medium -> {
+        windowSizeClass.isMedium -> {
             MediumLayout(
                 currentScreen = currentScreen,
                 onNavigate = onNavigate
             )
         }
 
-        WindowSizeClass.Expanded -> {
+        windowSizeClass.isExpanded -> {
             ExpandedLayout(
                 currentScreen = currentScreen,
                 onNavigate = onNavigate

@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.component.card.utils.formatCardDate
 import tech.zhifu.app.myhub.datastore.model.Card
 
 @Composable
@@ -57,11 +56,6 @@ fun QuoteCard(
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
-
-    // 使用 remember 缓存格式化结果
-    val formattedDate = remember(card.updatedAt) {
-        card.updatedAt.formatCardDate()
-    }
 
     // 使用 remember 缓存数据提取
     val author = remember(card) {
@@ -139,7 +133,7 @@ fun QuoteCard(
                         )
                     }
                     Text(
-                        text = formattedDate,
+                        text = card.formatUpdatedTime(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
