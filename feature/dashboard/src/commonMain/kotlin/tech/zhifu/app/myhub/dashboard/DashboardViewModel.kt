@@ -30,21 +30,10 @@ class DashboardViewModel(
     private val logger = logger("Dashboard")
 
     private val _uiState = MutableStateFlow<DashboardUiState>(
-        DashboardUiState(
-            statistics = Statistics(),
-            recentCards = emptyList(),
-            favoriteCards = emptyList(),
-            isLoading = false,
-            error = null,
-            lastSyncTime = null,
-            viewType = ViewType.GRID
-        )
+        DashboardUiState.InitialLoading()
     )
 
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
-
-    // 标记是否正在进行手动刷新（用于防止监听器干扰刷新状态）
-    private var isRefreshing = false
 
     init {
         loadDashboardData()
@@ -56,7 +45,7 @@ class DashboardViewModel(
      */
     private fun loadDashboardData() {
         logger.info { "Loading dashboard data from server" }
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        _uiState.value = DashboardUiState.InitialLoading()
 
         // 先从服务器获取数据
         coroutineScope.launch {
@@ -72,26 +61,39 @@ class DashboardViewModel(
                 logger.error(e) {
                     "Failed to load data from server: ${e.message}"
                 }
-                _uiState.value = _uiState.value.copy(
-                    error = "Failed to load data from server: ${e.message}"
-                )
+                // 首次加载失败，保持 InitialLoading 状态（或可以转换为 Content 状态显示错误）
+                // 这里保持 InitialLoading，让监听器处理错误
             }
         }
 
         // 监听统计信息
         statisticsRepository.observeStatistics()
             .catch { e ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to load statistics"
-                )
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentState.lastSyncTime,
+                        error = e.message ?: "Failed to load statistics"
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        error = e.message ?: "Failed to load statistics"
+                    )
+                }
             }
             .onEach { statistics ->
                 // 始终保留更更新的 lastSyncTime（避免被旧的统计信息覆盖）
-                val currentLastSyncTime = _uiState.value.lastSyncTime
+                val currentState = _uiState.value
+                val currentLastSyncTime = when (currentState) {
+                    is DashboardUiState.InitialLoading -> currentState.lastSyncTime
+                    is DashboardUiState.Content -> currentState.lastSyncTime
+                }
                 val newLastSyncTime = when {
-                    // 如果正在进行手动刷新，保留刷新时设置的 lastSyncTime
-                    isRefreshing -> currentLastSyncTime
+                    // 如果正在刷新，保留刷新时设置的 lastSyncTime
+                    currentState is DashboardUiState.Content && currentState.isRefreshing -> currentLastSyncTime
                     // 如果当前 lastSyncTime 不为 null，且比统计信息中的更新，保留它
                     currentLastSyncTime != null &&
                         statistics.lastSyncTime != null &&
@@ -103,20 +105,40 @@ class DashboardViewModel(
                     else -> statistics.lastSyncTime
                 }
 
-                _uiState.value = _uiState.value.copy(
-                    statistics = statistics,
-                    lastSyncTime = newLastSyncTime
-                )
+                // 更新状态，根据当前状态决定转换
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = statistics,
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = newLastSyncTime
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        statistics = statistics,
+                        lastSyncTime = newLastSyncTime
+                    )
+                }
             }
             .launchIn(coroutineScope)
 
         // 监听所有卡片，用于获取最近编辑的卡片
         cardRepository.observeAllCards()
             .catch { e ->
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to load cards"
-                )
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentState.lastSyncTime,
+                        error = e.message ?: "Failed to load cards"
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        error = e.message ?: "Failed to load cards"
+                    )
+                }
             }
             .onEach { cards ->
                 // 获取最近编辑的卡片（按 updated_at 排序，取前 10 个）
@@ -124,24 +146,56 @@ class DashboardViewModel(
                     .sortedByDescending { it.updatedAt }
                     .take(10)
 
-                _uiState.value = _uiState.value.copy(
-                    recentCards = recentCards,
-                    isLoading = if (isRefreshing) _uiState.value.isLoading else false
-                )
+                // 更新状态，根据当前状态决定转换
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = recentCards,
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentState.lastSyncTime
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        recentCards = recentCards
+                    )
+                }
             }
             .launchIn(coroutineScope)
 
         // 监听收藏的卡片
         cardRepository.observeFavoriteCards()
             .catch { e ->
-                _uiState.value = _uiState.value.copy(
-                    error = e.message ?: "Failed to load favorite cards"
-                )
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentState.lastSyncTime,
+                        error = e.message ?: "Failed to load favorite cards"
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        error = e.message ?: "Failed to load favorite cards"
+                    )
+                }
             }
             .onEach { favoriteCards ->
-                _uiState.value = _uiState.value.copy(
-                    favoriteCards = favoriteCards
-                )
+                // 更新状态，根据当前状态决定转换
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = favoriteCards,
+                        lastSyncTime = currentState.lastSyncTime
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        favoriteCards = favoriteCards
+                    )
+                }
             }
             .launchIn(coroutineScope)
     }
@@ -154,8 +208,21 @@ class DashboardViewModel(
     fun refresh() {
         coroutineScope.launch {
             val startTime = Clock.System.now().toEpochMilliseconds()
-            isRefreshing = true // 标记开始刷新
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            
+            // 保存当前状态数据，用于刷新时保持显示
+            val currentState = _uiState.value
+            val preservedData = when (currentState) {
+                is DashboardUiState.InitialLoading -> null
+                is DashboardUiState.Content -> currentState
+            }
+
+            // 如果有数据，设置为刷新状态（保持数据显示）
+            if (preservedData != null) {
+                _uiState.value = preservedData.copy(
+                    isRefreshing = true,
+                    error = null // 清除之前的错误
+                )
+            }
 
             try {
                 // 刷新统计信息
@@ -163,10 +230,23 @@ class DashboardViewModel(
                 // 数据返回后立即更新 UI（不等待动画）
                 // 手动设置同步时间为当前时间，确保时间戳正确更新
                 val currentSyncTime = Clock.System.now().toEpochMilliseconds()
-                _uiState.value = _uiState.value.copy(
-                    statistics = statistics,
-                    lastSyncTime = currentSyncTime
-                )
+
+                // 更新状态，保持 Content 状态但更新数据和刷新状态
+                _uiState.value = when (preservedData) {
+                    is DashboardUiState.Content -> preservedData.copy(
+                        statistics = statistics,
+                        lastSyncTime = currentSyncTime,
+                        isRefreshing = true // 保持刷新状态，等待动画结束
+                    )
+
+                    null -> DashboardUiState.Content(
+                        statistics = statistics,
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentSyncTime,
+                        isRefreshing = true
+                    )
+                }
 
                 // 刷新卡片数据（通过重新获取所有卡片触发更新）
                 cardRepository.getAllCards()
@@ -180,8 +260,11 @@ class DashboardViewModel(
                     delay(remainingTime)
                 }
 
-                isRefreshing = false // 标记刷新结束
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                // 刷新完成，清除刷新状态
+                val finalState = _uiState.value
+                if (finalState is DashboardUiState.Content) {
+                    _uiState.value = finalState.copy(isRefreshing = false)
+                }
             } catch (e: Exception) {
                 logger.error(e) { "Failed to refresh: ${e.message}" }
                 // 即使出错，也确保动画至少持续 2 秒
@@ -193,11 +276,22 @@ class DashboardViewModel(
                     delay(remainingTime)
                 }
 
-                isRefreshing = false // 标记刷新结束
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Failed to refresh"
-                )
+                // 更新为错误状态，但保留已有数据和刷新状态
+                _uiState.value = when (preservedData) {
+                    is DashboardUiState.Content -> preservedData.copy(
+                        error = e.message ?: "Failed to refresh",
+                        isRefreshing = false
+                    )
+
+                    null -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = null,
+                        error = e.message ?: "Failed to refresh",
+                        isRefreshing = false
+                    )
+                }
             }
         }
     }
@@ -225,11 +319,21 @@ class DashboardViewModel(
                 val statistics = statisticsRepository.refreshStatistics()
                 val currentSyncTime = Clock.System.now().toEpochMilliseconds()
 
-                // 静默更新 UI（不设置 isLoading，避免显示加载动画）
-                _uiState.value = _uiState.value.copy(
-                    statistics = statistics,
-                    lastSyncTime = currentSyncTime
-                )
+                // 静默更新 UI（不改变状态类型，只更新数据，不显示加载动画）
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = statistics,
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentSyncTime
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        statistics = statistics,
+                        lastSyncTime = currentSyncTime
+                    )
+                }
             } catch (e: Exception) {
                 logger.error(e) { "Failed to sync: ${e.message}" }
                 // 后台同步失败不显示错误，避免打扰用户
@@ -239,9 +343,13 @@ class DashboardViewModel(
 
     /**
      * 清除错误状态
+     * 如果当前是 Content 状态且有错误，清除错误
      */
     fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
+        val currentState = _uiState.value
+        if (currentState is DashboardUiState.Content && currentState.error != null) {
+            _uiState.value = currentState.copy(error = null)
+        }
     }
 
     /**
@@ -262,9 +370,20 @@ class DashboardViewModel(
                 logger.info { "Toggled favorite for card: $cardId" }
             } catch (e: Exception) {
                 logger.error(e) { "Failed to toggle favorite: ${e.message}" }
-                _uiState.value = _uiState.value.copy(
-                    error = "Failed to toggle favorite: ${e.message}"
-                )
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                        statistics = Statistics(),
+                        recentCards = emptyList(),
+                        favoriteCards = emptyList(),
+                        lastSyncTime = currentState.lastSyncTime,
+                        error = "Failed to toggle favorite: ${e.message}"
+                    )
+
+                    is DashboardUiState.Content -> currentState.copy(
+                        error = "Failed to toggle favorite: ${e.message}"
+                    )
+                }
             }
         }
     }
@@ -281,18 +400,24 @@ class DashboardViewModel(
      * 切换视图类型
      */
     fun toggleViewType() {
-        val newViewType = when (_uiState.value.viewType) {
-            ViewType.GRID -> ViewType.LIST
-            ViewType.LIST -> ViewType.GRID
+        val currentState = _uiState.value
+        if (currentState is DashboardUiState.Content) {
+            val newViewType = when (currentState.viewType) {
+                ViewType.GRID -> ViewType.LIST
+                ViewType.LIST -> ViewType.GRID
+            }
+            _uiState.value = currentState.copy(viewType = newViewType)
         }
-        _uiState.value = _uiState.value.copy(viewType = newViewType)
     }
 
     /**
      * 设置视图类型
      */
     fun setViewType(viewType: ViewType) {
-        _uiState.value = _uiState.value.copy(viewType = viewType)
+        val currentState = _uiState.value
+        if (currentState is DashboardUiState.Content) {
+            _uiState.value = currentState.copy(viewType = viewType)
+        }
     }
 }
 

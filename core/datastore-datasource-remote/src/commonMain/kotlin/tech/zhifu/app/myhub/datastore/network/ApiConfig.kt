@@ -12,7 +12,9 @@ import kotlin.concurrent.Volatile
 object ApiConfig {
     // 基础URL - 可以通过 setBaseUrl 动态设置
     private const val DEFAULT_PORT = 8083
-    private const val DEFAULT_BASE_URL = "http://localhost:$DEFAULT_PORT"
+
+    //    private const val DEFAULT_BASE_URL = "http://localhost:$DEFAULT_PORT"
+    private const val DEFAULT_BASE_URL = "http://192.168.0.123:$DEFAULT_PORT" // // FIXME: 2026/1/3  @zzf
 
     @Volatile
     private var _baseUrl: String? = null

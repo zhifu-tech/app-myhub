@@ -169,6 +169,47 @@ check_xcode() {
     fi
 }
 
+# 检查并终止占用端口的进程
+check_and_kill_port() {
+    local port="${1:-8083}"
+    
+    # 检查端口是否被占用
+    local pid=$(lsof -ti :"$port" 2>/dev/null)
+    
+    if [ -n "$pid" ]; then
+        print_warning "检测到端口 $port 被进程占用 (PID: $pid)"
+        print_info "正在终止占用端口的进程..."
+        
+        # 尝试优雅终止
+        kill "$pid" 2>/dev/null
+        
+        # 等待进程终止（最多等待 3 秒）
+        local count=0
+        while [ $count -lt 3 ] && kill -0 "$pid" 2>/dev/null; do
+            sleep 1
+            count=$((count + 1))
+        done
+        
+        # 如果进程仍在运行，强制终止
+        if kill -0 "$pid" 2>/dev/null; then
+            print_warning "进程未响应，强制终止..."
+            kill -9 "$pid" 2>/dev/null
+        fi
+        
+        # 再次检查端口是否已释放
+        if lsof -ti :"$port" >/dev/null 2>&1; then
+            print_error "无法释放端口 $port，请手动检查"
+            return 1
+        else
+            print_success "端口 $port 已释放"
+            return 0
+        fi
+    else
+        print_info "端口 $port 未被占用"
+        return 0
+    fi
+}
+
 # ============================================
 # 命令执行函数
 # ============================================
@@ -194,11 +235,21 @@ run_web() {
 # 运行服务器
 run_server() {
     local mode="${1:-normal}"
+    local server_port="${SERVER_PORT:-8083}"
     
     case "$mode" in
         dev|development)
             print_info "正在启动服务器（开发模式，支持热重载）..."
             print_info "数据库: SQLite (默认)"
+            print_info "端口: $server_port"
+            
+            # 检查并终止占用端口的进程
+            if ! check_and_kill_port "$server_port"; then
+                print_error "无法启动服务器，端口 $server_port 仍被占用"
+                exit 1
+            fi
+            
+            echo ""
             ./gradlew :server:run -Pdevelopment
             ;;
         postgres|postgresql)

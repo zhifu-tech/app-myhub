@@ -133,27 +133,77 @@ enum class ViewType {
 
 /**
  * Dashboard UI状态
+ * 
+ * 使用 sealed class 表示不同的状态，确保状态互斥和类型安全
+ * 
+ * 设计说明：
+ * - InitialLoading: 首次加载，无数据可显示
+ * - Content: 有数据的状态，可以同时显示数据和加载状态（刷新时）
  */
-data class DashboardUiState(
-    val statistics: Statistics = Statistics(),
-    val recentCards: List<Card> = emptyList(),
-    val favoriteCards: List<Card> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val lastSyncTime: Long? = null,
-    val viewType: ViewType = ViewType.GRID
-)
+sealed class DashboardUiState {
+    /**
+     * 初始加载状态
+     * 应用正在初始化或首次加载数据，无数据可显示
+     */
+    data class InitialLoading(
+        val lastSyncTime: Long? = null
+    ) : DashboardUiState()
+    
+    /**
+     * 内容状态（有数据）
+     * 应用已加载完成，可以正常显示数据
+     * 支持同时显示数据和加载状态（如刷新时）
+     */
+    data class Content(
+        val statistics: Statistics,
+        val recentCards: List<Card>,
+        val favoriteCards: List<Card>,
+        val lastSyncTime: Long?,
+        val viewType: ViewType = ViewType.GRID,
+        val isRefreshing: Boolean = false,  // 刷新时仍显示数据
+        val error: String? = null            // 错误时仍显示数据
+    ) : DashboardUiState()
+}
 ```
 
 **状态说明**：
 
-- `statistics`: 统计信息（总卡片数、最近编辑数、收藏数等）
-- `recentCards`: 最近编辑的卡片列表（最多 10 个）
-- `favoriteCards`: 收藏的卡片列表
-- `isLoading`: 加载状态
-- `error`: 错误信息
-- `lastSyncTime`: 最后同步时间
-- `viewType`: 视图类型（Grid 或 List）
+- **`InitialLoading`**: 初始加载状态，无数据可显示
+  - `lastSyncTime`: 最后同步时间（如果有）
+  
+- **`Content`**: 内容状态，有数据可正常显示
+  - `statistics`: 统计信息（总卡片数、最近编辑数、收藏数等）
+  - `recentCards`: 最近编辑的卡片列表（最多 10 个）
+  - `favoriteCards`: 收藏的卡片列表
+  - `lastSyncTime`: 最后同步时间
+  - `viewType`: 视图类型（Grid 或 List）
+  - `isRefreshing`: 是否正在刷新（刷新时仍显示数据，只显示加载动画）
+  - `error`: 错误信息（如果有，错误时仍显示数据）
+
+**设计优势**：
+
+- **类型安全**：使用 sealed class 确保编译时检查所有状态分支
+- **状态互斥**：不可能同时处于多个状态（如 InitialLoading 和 Content）
+- **清晰的状态转换**：状态转换逻辑明确，易于理解和维护
+- **同时显示数据和加载状态**：刷新时数据保持可见，只显示加载动画，提供更好的用户体验
+- **错误时保留数据**：错误时仍可显示已有数据，用户可以继续操作
+
+**设计对比**：
+
+相比传统的 `Loading`、`Ready`、`Error` 分离设计，新的 `InitialLoading` 和 `Content` 设计具有以下优势：
+
+1. **更好的用户体验**：
+   - 刷新时数据保持可见，用户不会看到空白屏幕
+   - 错误时仍可查看和操作已有数据，而不是完全无法使用
+
+2. **更符合实际场景**：
+   - Dashboard 通常已有缓存数据，首次加载和刷新是不同的场景
+   - 错误通常是临时性的，不应该完全阻止用户使用应用
+
+3. **状态管理更简单**：
+   - 不需要在多个状态间复制数据
+   - `Content` 状态统一管理所有数据相关字段
+   - `isRefreshing` 和 `error` 作为标志位，不影响数据展示
 
 ### 3. DashboardScreen
 
@@ -208,22 +258,40 @@ feature/dashboard/
 
 ### 响应式数据监听
 
-Dashboard 使用 Flow 实现响应式数据更新：
+Dashboard 使用 Flow 实现响应式数据更新，状态管理采用 sealed class 确保类型安全：
 
 ```kotlin
 // 监听统计信息
 statisticsRepository.observeStatistics()
     .catch { e ->
-        _uiState.value = _uiState.value.copy(
-            isLoading = false,
-            error = e.message ?: "Failed to load statistics"
-        )
+        val currentState = _uiState.value
+        _uiState.value = when (currentState) {
+            is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                statistics = Statistics(),
+                recentCards = emptyList(),
+                favoriteCards = emptyList(),
+                lastSyncTime = currentState.lastSyncTime,
+                error = e.message ?: "Failed to load statistics"
+            )
+            is DashboardUiState.Content -> currentState.copy(
+                error = e.message ?: "Failed to load statistics"
+            )
+        }
     }
     .onEach { statistics ->
-        _uiState.value = _uiState.value.copy(
-            statistics = statistics,
-            lastSyncTime = statistics.lastSyncTime
-        )
+        val currentState = _uiState.value
+        _uiState.value = when (currentState) {
+            is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                statistics = statistics,
+                recentCards = emptyList(),
+                favoriteCards = emptyList(),
+                lastSyncTime = statistics.lastSyncTime
+            )
+            is DashboardUiState.Content -> currentState.copy(
+                statistics = statistics,
+                lastSyncTime = statistics.lastSyncTime
+            )
+        }
     }
     .launchIn(coroutineScope)
 
@@ -235,19 +303,36 @@ cardRepository.observeAllCards()
             .sortedByDescending { it.updatedAt }
             .take(10)
 
-        _uiState.value = _uiState.value.copy(
-            recentCards = recentCards,
-            isLoading = false
-        )
+        val currentState = _uiState.value
+        _uiState.value = when (currentState) {
+            is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                statistics = Statistics(),
+                recentCards = recentCards,
+                favoriteCards = emptyList(),
+                lastSyncTime = currentState.lastSyncTime
+            )
+            is DashboardUiState.Content -> currentState.copy(
+                recentCards = recentCards
+            )
+        }
     }
     .launchIn(coroutineScope)
 
 // 监听收藏的卡片
 cardRepository.observeFavoriteCards()
     .onEach { favoriteCards ->
-        _uiState.value = _uiState.value.copy(
-            favoriteCards = favoriteCards
-        )
+        val currentState = _uiState.value
+        _uiState.value = when (currentState) {
+            is DashboardUiState.InitialLoading -> DashboardUiState.Content(
+                statistics = Statistics(),
+                recentCards = emptyList(),
+                favoriteCards = favoriteCards,
+                lastSyncTime = currentState.lastSyncTime
+            )
+            is DashboardUiState.Content -> currentState.copy(
+                favoriteCards = favoriteCards
+            )
+        }
     }
     .launchIn(coroutineScope)
 ```
@@ -266,10 +351,28 @@ fun DashboardScreen(...) {
         sizeClass.isExpanded -> 3   // 桌面：3 列
     }
 
-    // 根据视图类型显示不同的布局
-    when (uiState.viewType) {
-        ViewType.GRID -> DashboardGridView(...)
-        ViewType.LIST -> DashboardListView(...)
+    // 根据状态类型显示不同的 UI
+    when (val state = uiState) {
+        is DashboardUiState.InitialLoading -> {
+            // 显示初始加载指示器（无数据）
+        }
+        is DashboardUiState.Content -> {
+            // 显示数据内容
+            DashboardHeader(
+                isLoading = state.isRefreshing  // 刷新时显示加载动画
+            )
+            
+            // 根据视图类型显示不同的布局
+            when (state.viewType) {
+                ViewType.GRID -> DashboardGridView(...)
+                ViewType.LIST -> DashboardListView(...)
+            }
+            
+            // 显示错误信息（如果有且不在刷新中）
+            if (state.error != null && !state.isRefreshing) {
+                // 显示错误提示
+            }
+        }
     }
 }
 ```
@@ -297,12 +400,21 @@ fun DashboardScreen(...) {
 3. **手动刷新**：
 
    - 用户点击刷新按钮
+   - 设置 `isRefreshing = true`（数据保持可见，显示加载动画）
    - 重新从服务器获取数据
    - 更新统计信息
+   - 数据返回后立即更新 UI
+   - 确保动画至少持续 2 秒
+   - 刷新完成后设置 `isRefreshing = false`
 
 4. **同步状态**：
    - 显示最后同步时间
    - 格式化时间显示（刚刚、X 分钟前、X 小时前、X 天前）
+
+5. **错误处理**：
+   - 错误时设置 `error` 字段，但数据保持可见
+   - 用户可以继续查看和操作已有数据
+   - 提供重试机制清除错误状态
 
 ## 💡 使用示例
 
@@ -339,13 +451,36 @@ fun CustomDashboardScreen() {
     val uiState by viewModel.uiState.collectAsState()
 
     // 自定义 UI 实现
-    Column {
-        // 显示统计信息
-        Text("Total Cards: ${uiState.statistics.totalCards}")
+    when (val state = uiState) {
+        is DashboardUiState.InitialLoading -> {
+            // 显示初始加载状态（无数据）
+            CircularProgressIndicator()
+        }
+        is DashboardUiState.Content -> {
+            Column {
+                // 显示统计信息
+                Text("Total Cards: ${state.statistics.totalCards}")
 
-        // 刷新按钮
-        Button(onClick = { viewModel.refresh() }) {
-            Text("Refresh")
+                // 刷新按钮（刷新时显示加载动画）
+                Button(
+                    onClick = { viewModel.refresh() },
+                    enabled = !state.isRefreshing
+                ) {
+                    if (state.isRefreshing) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                    } else {
+                        Text("Refresh")
+                    }
+                }
+                
+                // 显示错误信息（如果有）
+                if (state.error != null) {
+                    Text(
+                        text = "Error: ${state.error}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
 }
@@ -369,7 +504,10 @@ fun CustomDashboardScreen() {
 ### 交互功能
 
 - **搜索**：搜索卡片内容、标签或作者（实时搜索，支持多语言占位符）
-- **刷新**：手动刷新数据（带动画效果）
+- **刷新**：手动刷新数据（带动画效果，刷新时数据保持可见）
+  - 刷新时设置 `isRefreshing = true`，显示加载动画
+  - 数据返回后立即更新，但动画至少持续 2 秒
+  - 刷新完成后设置 `isRefreshing = false`
 - **视图切换**：列表视图/网格视图切换（✅ 已实现）
   - Grid 视图：瀑布流布局，适合浏览大量卡片
   - List 视图：列表布局，适合快速查看和操作
@@ -548,12 +686,14 @@ private fun ListViewItem(card: Card) {
 - ✅ 多平台支持（Android、iOS、Desktop、Web）
 - ✅ 国际化支持
 - ✅ 响应式布局
-- ✅ 错误处理
+- ✅ 错误处理（错误时保留数据显示）
 - ✅ 视图切换功能（Grid/List）
 - ✅ 列表视图实现（ListViewItem、ListViewHeader）
 - ✅ 搜索功能优化（多语言占位符、样式优化）
 - ✅ Card 扩展方法集成（getDisplayTitle、getContentPreview、typeIconColor、typeIconText、formatUpdatedTime）
 - ✅ WindowSizeClass 扩展方法（isCompact、isMedium、isExpanded）
+- ✅ 状态管理优化（sealed class 设计，支持同时显示数据和加载状态）
+- ✅ 刷新功能优化（刷新时数据保持可见，只显示加载动画）
 
 **待实现**：
 

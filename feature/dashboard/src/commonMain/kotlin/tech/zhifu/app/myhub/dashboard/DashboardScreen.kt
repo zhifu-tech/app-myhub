@@ -112,58 +112,83 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // 顶部头部（sticky）
-            DashboardHeader(
-                recentEditsCount = uiState.statistics.recentEdits,
-                lastSyncTime = uiState.lastSyncTime,
-                isLoading = uiState.isLoading,
-                onRefresh = { viewModel.refresh() }
-            )
-
-            // 搜索栏和工具栏
-            DashboardToolbar(
-                searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it },
-                statistics = uiState.statistics,
-                sizeClass = sizeClass,
-                viewType = uiState.viewType,
-                onViewTypeChange = { viewModel.setViewType(it) }
-            )
-
-            // 统计卡片（移动端显示）
-            if (sizeClass.isCompact) {
-                StatsCardsRow(statistics = uiState.statistics)
-            }
-
-            // 根据视图类型显示不同的布局
-            when (uiState.viewType) {
-                ViewType.GRID -> {
-                    DashboardGridView(
-                        cards = uiState.recentCards,
-                        columns = columns,
-                        onEdit = { viewModel.editCard(it.id) },
-                        onFavorite = { viewModel.toggleFavorite(it.id) },
-                        onCardClick = { viewModel.viewCard(it.id) },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f)
+        when (val state = uiState) {
+            is DashboardUiState.InitialLoading -> {
+                // 显示初始加载状态（无数据）
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    // 可以在这里添加加载指示器
+                    Text(
+                        text = "Loading...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                ViewType.LIST -> {
-                    DashboardListView(
-                        cards = uiState.recentCards,
-                        sizeClass = sizeClass,
-                        onEdit = { viewModel.editCard(it.id) },
-                        onFavorite = { viewModel.toggleFavorite(it.id) },
-                        onCardClick = { viewModel.viewCard(it.id) },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f)
+            }
+            
+            is DashboardUiState.Content -> {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // 顶部头部（sticky）
+                    DashboardHeader(
+                        recentEditsCount = state.statistics.recentEdits,
+                        lastSyncTime = state.lastSyncTime,
+                        isLoading = state.isRefreshing, // 显示刷新动画
+                        onRefresh = { viewModel.refresh() }
                     )
+
+                    // 搜索栏和工具栏
+                    DashboardToolbar(
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { searchQuery = it },
+                        statistics = state.statistics,
+                        sizeClass = sizeClass,
+                        viewType = state.viewType,
+                        onViewTypeChange = { viewModel.setViewType(it) }
+                    )
+
+                    // 统计卡片（移动端显示）
+                    if (sizeClass.isCompact) {
+                        StatsCardsRow(statistics = state.statistics)
+                    }
+
+                    // 根据视图类型显示不同的布局
+                    when (state.viewType) {
+                        ViewType.GRID -> {
+                            DashboardGridView(
+                                cards = state.recentCards,
+                                columns = columns,
+                                onEdit = { viewModel.editCard(it.id) },
+                                onFavorite = { viewModel.toggleFavorite(it.id) },
+                                onCardClick = { viewModel.viewCard(it.id) },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .weight(1f)
+                            )
+                        }
+
+                        ViewType.LIST -> {
+                            DashboardListView(
+                                cards = state.recentCards,
+                                sizeClass = sizeClass,
+                                onEdit = { viewModel.editCard(it.id) },
+                                onFavorite = { viewModel.toggleFavorite(it.id) },
+                                onCardClick = { viewModel.viewCard(it.id) },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .weight(1f)
+                            )
+                        }
+                    }
+                    
+                    // 错误提示（如果有错误且不在刷新中）
+                    if (state.error != null && !state.isRefreshing) {
+                        // TODO: 可以在这里添加错误提示 UI
+                    }
                 }
             }
         }

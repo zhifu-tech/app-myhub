@@ -7,6 +7,7 @@
     <domain includeSubdomains="true">10.0.2.2</domain>
     <!-- Android 模拟器使用 10.0.2.2 访问主机 localhost -->
     <domain includeSubdomains="true">192.168.0.114</domain>
+    <domain includeSubdomains="true">192.168.0.123</domain>
   </domain-config>
 
   <!-- 生产环境：默认只允许 HTTPS -->
