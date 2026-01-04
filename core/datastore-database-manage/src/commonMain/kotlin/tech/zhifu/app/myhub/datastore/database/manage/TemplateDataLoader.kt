@@ -58,7 +58,7 @@ class TemplateDataLoader(
 
                 // 优先使用 JSON 中的 userId，如果没有则根据 isSystemTemplate 决定
                 // 系统模板使用 "system" 作为 user_id，用户模板使用传入的 user_id
-                val templateUserId = template.userId 
+                val templateUserId = template.userId
                     ?: if (template.isSystemTemplate) "system" else userId
 
                 database.templateQueries.insertTemplate(

@@ -9,6 +9,7 @@ val Project.libsCatalog
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 fun KotlinMultiplatformExtension.iosTargets(): List<KotlinNativeTarget> = listOf(
+    iosX64(),
     iosArm64(),
     iosSimulatorArm64()
 )

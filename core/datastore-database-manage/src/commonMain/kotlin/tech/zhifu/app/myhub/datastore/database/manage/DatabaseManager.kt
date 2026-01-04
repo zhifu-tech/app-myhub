@@ -57,10 +57,18 @@ class DatabaseManager(
      * 清空所有表的数据
      */
     suspend fun clearAllData() = withContext(Dispatchers.Default) {
-        cardLoader.clearData()
-        tagLoader.clearData()
+        // 先获取第一个用户ID（用于清空业务数据）
+        val userId = getFirstUserId()
+        
+        if (userId != null) {
+            // 清空业务数据（需要 userId）
+            cardLoader.clearData(userId)
+            tagLoader.clearData(userId)
+            templateLoader.clearData(userId)
+        }
+        
+        // 清空用户数据（删除所有用户，这会触发外键级联删除）
         userLoader.clearData()
-        templateLoader.clearData()
     }
 }
 

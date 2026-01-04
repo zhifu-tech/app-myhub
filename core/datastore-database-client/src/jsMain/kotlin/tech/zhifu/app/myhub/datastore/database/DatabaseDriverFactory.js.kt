@@ -1,20 +1,17 @@
 package tech.zhifu.app.myhub.datastore.database
 
-import app.cash.sqldelight.Query
 import app.cash.sqldelight.Transacter
-import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlCursor
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlPreparedStatement
-import app.cash.sqldelight.driver.worker.WebWorkerDriver
+import app.cash.sqldelight.driver.worker.createDefaultWebWorkerDriver
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import org.w3c.dom.Worker
 
 /**
  * JavaScript 平台的数据库驱动工厂实现
@@ -22,9 +19,10 @@ import org.w3c.dom.Worker
  */
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-        val driver = WebWorkerDriver(
-            Worker(js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)"""))
-        )
+//        val driver = WebWorkerDriver(
+//            Worker(js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)"""))
+//        )
+        val driver = createDefaultWebWorkerDriver()
         val initDeferred = CompletableDeferred<Unit>()
 
         MainScope().launch {
@@ -50,18 +48,16 @@ actual class DatabaseDriverFactory {
     private class InitializingDriver(
         private val delegate: SqlDriver,
         private val initDeferred: CompletableDeferred<Unit>
-    ) : SqlDriver {
+    ) : SqlDriver by delegate {
         override fun <R> executeQuery(
             identifier: Int?,
             sql: String,
             mapper: (SqlCursor) -> QueryResult<R>,
             parameters: Int,
             binders: (SqlPreparedStatement.() -> Unit)?
-        ): QueryResult<R> {
-            return QueryResult.AsyncValue {
-                initDeferred.await()
-                delegate.executeQuery(identifier, sql, mapper, parameters, binders).await()
-            }
+        ): QueryResult<R> = QueryResult.AsyncValue {
+            initDeferred.await()
+            delegate.executeQuery(identifier, sql, mapper, parameters, binders).await()
         }
 
         override fun execute(
@@ -69,38 +65,14 @@ actual class DatabaseDriverFactory {
             sql: String,
             parameters: Int,
             binders: (SqlPreparedStatement.() -> Unit)?
-        ): QueryResult<Long> {
-            return QueryResult.AsyncValue {
-                initDeferred.await()
-                delegate.execute(identifier, sql, parameters, binders).await()
-            }
+        ): QueryResult<Long> = QueryResult.AsyncValue {
+            initDeferred.await()
+            delegate.execute(identifier, sql, parameters, binders).await()
         }
 
-        override fun newTransaction(): QueryResult<Transacter.Transaction> {
-            return QueryResult.AsyncValue {
-                initDeferred.await()
-                delegate.newTransaction().await()
-            }
-        }
-
-        override fun currentTransaction(): Transacter.Transaction? {
-            return delegate.currentTransaction()
-        }
-
-        override fun addListener(vararg queryKeys: String, listener: Query.Listener) {
-            delegate.addListener(*queryKeys, listener = listener)
-        }
-
-        override fun removeListener(vararg queryKeys: String, listener: Query.Listener) {
-            delegate.removeListener(*queryKeys, listener = listener)
-        }
-
-        override fun notifyListeners(vararg queryKeys: String) {
-            delegate.notifyListeners(*queryKeys)
-        }
-
-        override fun close() {
-            delegate.close()
+        override fun newTransaction(): QueryResult<Transacter.Transaction> = QueryResult.AsyncValue {
+            initDeferred.await()
+            delegate.newTransaction().await()
         }
     }
 }

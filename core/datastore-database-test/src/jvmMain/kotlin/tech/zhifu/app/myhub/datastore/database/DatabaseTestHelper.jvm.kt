@@ -23,13 +23,45 @@ actual suspend fun createTestDatabase(): MyHubDatabase {
  */
 actual fun destroyTestDatabase(database: MyHubDatabase) {
     try {
-        val driverField = database.javaClass.getDeclaredField("driver")
-        driverField.isAccessible = true
-        val driver = driverField.get(database) as? SqlDriver
+        // SQLDelight 生成的数据库类可能有不同的字段名，尝试多个可能的名称
+        val possibleFieldNames = listOf("driver", "driver\$delegate", "\$driver")
+        
+        var driver: SqlDriver? = null
+        for (fieldName in possibleFieldNames) {
+            try {
+                val driverField = database.javaClass.getDeclaredField(fieldName)
+                driverField.isAccessible = true
+                val fieldValue = driverField.get(database)
+                if (fieldValue is SqlDriver) {
+                    driver = fieldValue
+                    break
+                }
+            } catch (e: NoSuchFieldException) {
+                // 继续尝试下一个字段名
+                continue
+            }
+        }
+        
+        // 如果直接字段访问失败，尝试通过所有字段查找
+        if (driver == null) {
+            val fields = database.javaClass.declaredFields
+            for (field in fields) {
+                if (SqlDriver::class.java.isAssignableFrom(field.type)) {
+                    field.isAccessible = true
+                    val fieldValue = field.get(database)
+                    if (fieldValue is SqlDriver) {
+                        driver = fieldValue
+                        break
+                    }
+                }
+            }
+        }
+        
         driver?.close()
     } catch (e: Exception) {
         // 如果反射失败，忽略错误（测试已经结束）
-        println("destroyTestDatabase error: $e")
+        // 对于内存数据库，连接关闭后会自动销毁
+        println("destroyTestDatabase error: $e") // 注释掉以避免测试输出噪音
     }
 }
 

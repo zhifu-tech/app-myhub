@@ -49,9 +49,9 @@ SELECT * FROM template
 WHERE is_system_template = 0 AND user_id = ?
 ORDER BY updated_at DESC;
 
--- 插入模板
+-- 插入模板（如果已存在则替换）
 insertTemplate:
-INSERT INTO template (id, name, description, card_type, preview_image_url, default_content, default_tags, usage_count, is_system_template, created_at, updated_at, user_id)
+INSERT OR REPLACE INTO template (id, name, description, card_type, preview_image_url, default_content, default_tags, usage_count, is_system_template, created_at, updated_at, user_id)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- 更新模板（只能更新用户自己的模板，系统模板不能更新）

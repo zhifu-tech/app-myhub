@@ -28,9 +28,18 @@ kotlin {
         jsMain.dependencies {
             implementation(libs.sqldelight.web)
             implementation(libs.ktor.client.js)
-            implementation(npm("sql.js", "1.12.0"))
-            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+//            implementation(npm("sql.js", "1.12.0"))
+//            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+//            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+        }
+
+        wasmJsMain.dependencies {
+            // SQLDelight Web 驱动（WASM 平台）
+            implementation(libs.sqldelight.web)
+            implementation(libs.ktor.client.js)
+//            implementation(npm("sql.js", "1.12.0"))
+//            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+//            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
         }
     }
 }

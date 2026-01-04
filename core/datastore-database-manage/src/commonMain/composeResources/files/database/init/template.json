@@ -5,7 +5,9 @@
     "description": "用于创建引言卡片的模板",
     "cardType": "QUOTE",
     "defaultContent": "在这里输入引言内容",
-    "defaultTags": ["名言"],
+    "defaultTags": [
+      "名言"
+    ],
     "usageCount": 0,
     "isSystemTemplate": true,
     "createdAt": "2024-01-01T00:00:00Z",
@@ -18,7 +20,9 @@
     "description": "用于创建代码片段的模板",
     "cardType": "CODE",
     "defaultContent": "// 在这里输入代码",
-    "defaultTags": ["代码"],
+    "defaultTags": [
+      "代码"
+    ],
     "usageCount": 0,
     "isSystemTemplate": true,
     "createdAt": "2024-01-01T00:00:00Z",

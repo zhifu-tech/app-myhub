@@ -38,9 +38,9 @@ WHERE user_id = ?
 ORDER BY card_count DESC
 LIMIT ?;
 
--- 插入标签
+-- 插入标签（如果已存在则替换）
 insertTag:
-INSERT INTO tag (id, name, color, description, card_count, created_at, user_id)
+INSERT OR REPLACE INTO tag (id, name, color, description, card_count, created_at, user_id)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- 更新标签

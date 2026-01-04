@@ -5,11 +5,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
-import tech.zhifu.app.myhub.datastore.database.manage.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
+import tech.zhifu.app.myhub.datastore.database.manage.resources.Res
 import tech.zhifu.app.myhub.datastore.model.User
-import tech.zhifu.app.myhub.datastore.model.UserPreferences
 
 /**
  * 用户数据加载器

@@ -6,7 +6,7 @@ import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
 
 /**
  * 数据库管理器依赖注入模块
- * 
+ *
  * 提供 DatabaseManager 实例，用于从 JSON 文件加载数据到数据库
  */
 val databaseManagerModule = module {

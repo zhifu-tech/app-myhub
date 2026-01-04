@@ -16,6 +16,13 @@ kotlin {
         namespace = "tech.zhifu.app.myhub.datastore.database.manage"
     }
 
+    // iOS 平台需要链接 SQLite 库
+    iosTargets().forEach { iosTarget ->
+        iosTarget.binaries.all {
+            linkerOpts += listOf("-lsqlite3")
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             // 平台模块（提供 ResourceLoader）
@@ -59,6 +66,10 @@ kotlin {
 
         jsMain.dependencies {
             // SQLDelight Web 驱动
+            implementation(libs.sqldelight.web)
+        }
+        wasmJsMain.dependencies {
+            // SQLDelight Web 驱动（WASM 平台）
             implementation(libs.sqldelight.web)
         }
     }
