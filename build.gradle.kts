@@ -23,4 +23,5 @@ plugins {
 
     // myhub
     alias(libs.plugins.myhub.kmp) apply false
+    alias(libs.plugins.myhub.kmp.web) apply false
 }

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.web)
 }
 
 kotlin {
@@ -42,7 +43,6 @@ kotlin {
 
         jsMain.dependencies {
             implementation(libs.sqldelight.web)
-            implementation(libs.ktor.client.js)
             implementation(npm("sql.js", "1.12.0"))
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))

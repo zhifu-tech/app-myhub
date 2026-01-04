@@ -126,3 +126,4 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 
 myhub-kmp = { id = "myhub-kmp" }
+myhub-kmp-web = { id = "myhub-kmp-web" }

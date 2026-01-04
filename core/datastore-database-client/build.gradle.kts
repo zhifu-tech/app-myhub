@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.web)
 }
 
 kotlin {
