@@ -14,6 +14,8 @@ import kotlin.time.Clock
  */
 class LocalStatisticsDataSourceTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test save and get statistics`() = runDatabaseTest { database ->
         // Given
@@ -21,8 +23,8 @@ class LocalStatisticsDataSourceTest {
         val statistics = createTestStatistics()
 
         // When
-        dataSource.saveStatistics(statistics)
-        val result = dataSource.getStatistics()
+        dataSource.saveStatistics(statistics, testUserId)
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         assertNotNull(result)
@@ -49,8 +51,8 @@ class LocalStatisticsDataSourceTest {
         )
 
         // When
-        dataSource.saveStatistics(statistics)
-        val result = dataSource.getStatistics()
+        dataSource.saveStatistics(statistics, testUserId)
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         assertNotNull(result)
@@ -77,8 +79,8 @@ class LocalStatisticsDataSourceTest {
         )
 
         // When
-        dataSource.saveStatistics(statistics)
-        val result = dataSource.getStatistics()
+        dataSource.saveStatistics(statistics, testUserId)
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         assertNotNull(result)
@@ -92,11 +94,11 @@ class LocalStatisticsDataSourceTest {
         // Given
         val dataSource = LocalStatisticsDataSourceImpl(database)
         val statistics = createTestStatistics()
-        dataSource.saveStatistics(statistics)
+        dataSource.saveStatistics(statistics, testUserId)
 
         // When
-        dataSource.clearStatistics()
-        val result = dataSource.getStatistics()
+        dataSource.clearStatistics(testUserId)
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         // 清空后应该返回默认值或 null
@@ -113,7 +115,7 @@ class LocalStatisticsDataSourceTest {
         val dataSource = LocalStatisticsDataSourceImpl(database)
 
         // When
-        val result = dataSource.getStatistics()
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         // 初始状态下可能返回 null 或默认值
@@ -132,7 +134,7 @@ class LocalStatisticsDataSourceTest {
             cardsByTag = emptyMap(),
             lastSyncTime = null
         )
-        dataSource.saveStatistics(statistics1)
+        dataSource.saveStatistics(statistics1, testUserId)
 
         // When
         val statistics2 = Statistics(
@@ -143,8 +145,8 @@ class LocalStatisticsDataSourceTest {
             cardsByTag = emptyMap(),
             lastSyncTime = Clock.System.now().toEpochMilliseconds()
         )
-        dataSource.saveStatistics(statistics2)
-        val result = dataSource.getStatistics()
+        dataSource.saveStatistics(statistics2, testUserId)
+        val result = dataSource.getStatistics(testUserId)
 
         // Then
         assertNotNull(result)

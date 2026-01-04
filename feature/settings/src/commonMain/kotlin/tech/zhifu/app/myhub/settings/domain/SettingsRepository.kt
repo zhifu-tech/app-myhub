@@ -24,3 +24,4 @@ interface SettingsRepository {
     fun getAll(): List<Setting<*>>
 }
 
+

@@ -4,6 +4,7 @@ import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
+import tech.zhifu.app.myhub.datastore.repository.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.repository.impl.StatisticsRepositoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,20 +18,23 @@ import kotlin.time.Duration.Companion.days
  */
 class StatisticsRepositoryTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test get statistics`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
 
         // 创建测试卡片
         val card1 = createTestCard("1", CardType.QUOTE, isFavorite = true, tags = listOf("tag1"))
         val card2 = createTestCard("2", CardType.CODE, isFavorite = true, tags = listOf("tag1", "tag2"))
         val card3 = createTestCard("3", CardType.IDEA, isFavorite = false, tags = listOf("tag2"))
 
-        cardDataSource.insertCard(card1)
-        cardDataSource.insertCard(card2)
-        cardDataSource.insertCard(card3)
+        cardDataSource.insertCard(card1, testUserId)
+        cardDataSource.insertCard(card2, testUserId)
+        cardDataSource.insertCard(card3, testUserId)
 
         // When
         val result = repository.getStatistics()
@@ -51,7 +55,8 @@ class StatisticsRepositoryTest {
     fun `test get statistics with empty database`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
 
         // When
         val result = repository.getStatistics()
@@ -69,9 +74,10 @@ class StatisticsRepositoryTest {
     fun `test refresh statistics`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
         val card = createTestCard("1", CardType.QUOTE)
-        cardDataSource.insertCard(card)
+        cardDataSource.insertCard(card, testUserId)
 
         // When
         val refreshedStats = repository.refreshStatistics()
@@ -85,15 +91,16 @@ class StatisticsRepositoryTest {
     fun `test get statistics with recent edits`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
 
         // 创建最近编辑的卡片（7天内）
         val recentCard = createTestCard("1", CardType.QUOTE, updatedAt = Clock.System.now().minus(1.days))
         // 创建旧的卡片（超过7天）
         val oldCard = createTestCard("2", CardType.CODE, updatedAt = Clock.System.now().minus(10.days))
 
-        cardDataSource.insertCard(recentCard)
-        cardDataSource.insertCard(oldCard)
+        cardDataSource.insertCard(recentCard, testUserId)
+        cardDataSource.insertCard(oldCard, testUserId)
 
         // When
         val result = repository.getStatistics()
@@ -108,17 +115,18 @@ class StatisticsRepositoryTest {
     fun `test get statistics with card type breakdown`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
 
         val quoteCard1 = createTestCard("1", CardType.QUOTE)
         val quoteCard2 = createTestCard("2", CardType.QUOTE)
         val codeCard = createTestCard("3", CardType.CODE)
         val ideaCard = createTestCard("4", CardType.IDEA)
 
-        cardDataSource.insertCard(quoteCard1)
-        cardDataSource.insertCard(quoteCard2)
-        cardDataSource.insertCard(codeCard)
-        cardDataSource.insertCard(ideaCard)
+        cardDataSource.insertCard(quoteCard1, testUserId)
+        cardDataSource.insertCard(quoteCard2, testUserId)
+        cardDataSource.insertCard(codeCard, testUserId)
+        cardDataSource.insertCard(ideaCard, testUserId)
 
         // When
         val result = repository.getStatistics()
@@ -134,15 +142,16 @@ class StatisticsRepositoryTest {
     fun `test get statistics with tag breakdown`() = runDatabaseTest { database ->
         // Given
         val cardDataSource = LocalCardDataSourceImpl(database)
-        val repository = StatisticsRepositoryImpl(cardDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(cardDataSource, userContextProvider)
 
         val card1 = createTestCard("1", CardType.QUOTE, tags = listOf("tag1", "tag2"))
         val card2 = createTestCard("2", CardType.CODE, tags = listOf("tag1", "tag3"))
         val card3 = createTestCard("3", CardType.IDEA, tags = listOf("tag2"))
 
-        cardDataSource.insertCard(card1)
-        cardDataSource.insertCard(card2)
-        cardDataSource.insertCard(card3)
+        cardDataSource.insertCard(card1, testUserId)
+        cardDataSource.insertCard(card2, testUserId)
+        cardDataSource.insertCard(card3, testUserId)
 
         // When
         val result = repository.getStatistics()

@@ -1,12 +1,12 @@
 package tech.zhifu.app.myhub.datastore.repository
 
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
-import tech.zhifu.app.myhub.datastore.datasource.TestUserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.SearchFilter
 import tech.zhifu.app.myhub.datastore.model.SortBy
+import tech.zhifu.app.myhub.datastore.repository.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,12 +22,15 @@ import kotlin.time.Instant
  * CardRepository 测试（服务端）
  */
 class CardRepositoryTest {
-    
+
     private val testUserId = "test-user-1"
-    
-    private fun createRepository(database: tech.zhifu.app.myhub.datastore.database.MyHubDatabase, userId: String = testUserId): CardRepositoryImpl {
+
+    private fun createRepository(
+        database: tech.zhifu.app.myhub.datastore.database.MyHubDatabase,
+        userId: String = testUserId
+    ): CardRepositoryImpl {
         val localDataSource = LocalCardDataSourceImpl(database)
-        val userContextProvider = TestUserContextProvider(userId)
+        val userContextProvider = UserContextProviderStub(userId)
         return CardRepositoryImpl(localDataSource, userContextProvider)
     }
 
@@ -78,7 +81,7 @@ class CardRepositoryTest {
         assertTrue(result.any { it.id == "1" })
         assertTrue(result.any { it.id == "2" })
     }
-    
+
     @Test
     fun `test multi-user data isolation`() = runDatabaseTest { database ->
         // Given
@@ -93,28 +96,28 @@ class CardRepositoryTest {
         // When - User 1 creates cards
         repository1.createCard(card1)
         repository1.createCard(card2)
-        
+
         // User 2 creates a card
         repository2.createCard(card3)
-        
+
         // Then - User 1 should only see their cards
         val user1Cards = repository1.getAllCards()
         assertEquals(2, user1Cards.size)
         assertTrue(user1Cards.any { it.id == "1" })
         assertTrue(user1Cards.any { it.id == "2" })
         assertTrue(user1Cards.none { it.id == "3" })
-        
+
         // User 2 should only see their card
         val user2Cards = repository2.getAllCards()
         assertEquals(1, user2Cards.size)
         assertTrue(user2Cards.any { it.id == "3" })
         assertTrue(user2Cards.none { it.id == "1" })
         assertTrue(user2Cards.none { it.id == "2" })
-        
+
         // User 1 cannot access User 2's card
         val user1Card3 = repository1.getCardById("3")
         assertNull(user1Card3)
-        
+
         // User 2 cannot access User 1's cards
         val user2Card1 = repository2.getCardById("1")
         assertNull(user2Card1)

@@ -3,7 +3,9 @@ package tech.zhifu.app.myhub.datastore.repository
 import kotlinx.coroutines.flow.first
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTagDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.LocalUserDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTagDataSourceStub
+import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.model.Tag
 import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
 import kotlin.test.Test
@@ -18,12 +20,16 @@ import kotlin.time.Clock
  */
 class TagRepositoryTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test create tag`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag = createTestTag("1", "tag1")
 
         // When
@@ -40,7 +46,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag1 = createTestTag("1", "tag1")
         val tag2 = createTestTag("2", "tag1") // 同名标签
 
@@ -66,7 +74,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag1 = createTestTag("1", "tag1")
         val tag2 = createTestTag("2", "tag2")
         repository.createTag(tag1)
@@ -86,7 +96,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 
@@ -104,7 +116,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag = createTestTag("1", "unique-tag")
         repository.createTag(tag)
 
@@ -122,7 +136,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 
@@ -143,7 +159,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 
@@ -161,7 +179,9 @@ class TagRepositoryTest {
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
         val remoteDataSource = RemoteTagDataSourceStub()
-        val repository = TagRepositoryImpl(localDataSource, remoteDataSource)
+        val userDataSource = LocalUserDataSourceImpl(database)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val tag1 = createTestTag("1", "tag1", cardCount = 10)
         val tag2 = createTestTag("2", "tag2", cardCount = 5)
         val tag3 = createTestTag("3", "tag3", cardCount = 15)

@@ -31,3 +31,4 @@ data class EditProfileDialogState(
     val avatarUrl: String = ""
 )
 
+

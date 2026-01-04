@@ -1,20 +1,18 @@
 package tech.zhifu.app.myhub.datastore.repository
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
-import tech.zhifu.app.myhub.datastore.datasource.TestUserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalUserDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteCardDataSourceStub
+import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.SearchFilter
 import tech.zhifu.app.myhub.datastore.model.SortBy
 import tech.zhifu.app.myhub.datastore.model.User
 import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
-import kotlin.time.Clock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -27,29 +25,30 @@ import kotlin.time.Instant
  * CardRepository 测试
  */
 class CardRepositoryTest {
-    
+
     private val testUserId = "test-user-1"
-    
-    private fun createRepository(database: tech.zhifu.app.myhub.datastore.database.MyHubDatabase, userId: String = testUserId): CardRepositoryImpl {
+
+    private suspend fun createRepository(
+        database: MyHubDatabase,
+        userId: String = testUserId
+    ): CardRepositoryImpl {
         val localDataSource = LocalCardDataSourceImpl(database)
         val userDataSource = LocalUserDataSourceImpl(database)
         val remoteDataSource = RemoteCardDataSourceStub()
-        val userContextProvider = TestUserContextProvider(userId)
-        
+        val userContextProvider = UserContextProviderStub(userId)
+
         // 设置当前用户
-        kotlinx.coroutines.runBlocking {
-            val user = User(
-                id = userId,
-                username = "testuser",
-                email = "test@example.com",
-                displayName = "Test User",
-                avatarUrl = null,
-                createdAt = Clock.System.now(),
-                preferences = null
-            )
-            userDataSource.saveUser(user)
-        }
-        
+        val user = User(
+            id = userId,
+            username = "testuser",
+            email = "test@example.com",
+            displayName = "Test User",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user)
+
         return CardRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
     }
 
@@ -273,7 +272,7 @@ class CardRepositoryTest {
         val timestamps = result.map { it.createdAt.epochSeconds }
         assertEquals(timestamps.sortedDescending(), timestamps)
     }
-    
+
     @Test
     fun `test multi-user data isolation`() = runDatabaseTest { database ->
         // Given
@@ -288,17 +287,17 @@ class CardRepositoryTest {
         // When - User 1 creates cards
         repository1.createCard(card1)
         repository1.createCard(card2)
-        
+
         // User 2 creates a card
         repository2.createCard(card3)
-        
+
         // Then - User 1 should only see their cards
         val user1Cards = repository1.getAllCards()
         assertEquals(2, user1Cards.size)
         assertTrue(user1Cards.any { it.id == "1" })
         assertTrue(user1Cards.any { it.id == "2" })
         assertTrue(user1Cards.none { it.id == "3" })
-        
+
         // User 2 should only see their card
         val user2Cards = repository2.getAllCards()
         assertEquals(1, user2Cards.size)
@@ -306,7 +305,7 @@ class CardRepositoryTest {
         assertTrue(user2Cards.none { it.id == "1" })
         assertTrue(user2Cards.none { it.id == "2" })
     }
-    
+
     @Test
     fun `test flow updates when user switches`() = runDatabaseTest { database ->
         // Given
@@ -315,67 +314,54 @@ class CardRepositoryTest {
         val userDataSource = LocalUserDataSourceImpl(database)
         val localDataSource = LocalCardDataSourceImpl(database)
         val remoteDataSource = RemoteCardDataSourceStub()
-        val userContextProvider = TestUserContextProvider(userId1)
-        
+        val userContextProvider = UserContextProviderStub(userId1)
+
         // 设置用户
-        kotlinx.coroutines.runBlocking {
-            val user1 = User(
-                id = userId1,
-                username = "user1",
-                email = "user1@example.com",
-                displayName = "User 1",
-                avatarUrl = null,
-                createdAt = Clock.System.now(),
-                preferences = null
-            )
-            val user2 = User(
-                id = userId2,
-                username = "user2",
-                email = "user2@example.com",
-                displayName = "User 2",
-                avatarUrl = null,
-                createdAt = Clock.System.now(),
-                preferences = null
-            )
-            userDataSource.saveUser(user1)
-        }
-        
+        val user1 = User(
+            id = userId1,
+            username = "user1",
+            email = "user1@example.com",
+            displayName = "User 1",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user1)
+
         val repository = CardRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
-        
+
         // When - User 1 creates cards
         val card1 = createTestCard("1", CardType.QUOTE)
         val card2 = createTestCard("2", CardType.CODE)
         repository.createCard(card1)
         repository.createCard(card2)
-        
+
         // Observe cards for User 1
         val flow = repository.observeAllCards()
         val user1Result = flow.first()
         assertEquals(2, user1Result.size)
-        
+
         // Switch to User 2
-        kotlinx.coroutines.runBlocking {
-            val user2 = User(
-                id = userId2,
-                username = "user2",
-                email = "user2@example.com",
-                displayName = "User 2",
-                avatarUrl = null,
-                createdAt = Clock.System.now(),
-                preferences = null
-            )
-            userDataSource.saveUser(user2)
-        }
+        val user2 = User(
+            id = userId2,
+            username = "user2",
+            email = "user2@example.com",
+            displayName = "User 2",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user2)
         userContextProvider.setUserId(userId2)
-        
+
         // User 2 should see empty list (no cards yet)
         val user2Result = flow.first()
         assertTrue(user2Result.isEmpty() || user2Result.size == 0)
-        
+
         // User 2 creates a card
         val card3 = createTestCard("3", CardType.IDEA)
         repository.createCard(card3)
-        
+
         // User 2 should now see their card
         val user2ResultAfterCreate = flow.first()
         assertEquals(1, user2ResultAfterCreate.size)

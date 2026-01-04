@@ -10,3 +10,4 @@ fun profileModule() = module {
     factoryOf(::ProfileViewModel)
 }
 
+

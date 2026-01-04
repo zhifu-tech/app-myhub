@@ -4,6 +4,7 @@ import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTemplateDataSourceImpl
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.Template
+import tech.zhifu.app.myhub.datastore.repository.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.repository.impl.TemplateRepositoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,11 +18,14 @@ import kotlin.time.Clock
  */
 class TemplateRepositoryTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test create template`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
 
         // When
@@ -38,7 +42,8 @@ class TemplateRepositoryTest {
     fun `test get all templates`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template1 = createTestTemplate("1", "Template 1", CardType.QUOTE)
         val template2 = createTestTemplate("2", "Template 2", CardType.CODE)
         repository.createTemplate(template1)
@@ -57,7 +62,8 @@ class TemplateRepositoryTest {
     fun `test get template by id`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
         repository.createTemplate(template)
 
@@ -75,7 +81,8 @@ class TemplateRepositoryTest {
     fun `test update template`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
         repository.createTemplate(template)
 
@@ -98,7 +105,8 @@ class TemplateRepositoryTest {
     fun `test delete template`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
         repository.createTemplate(template)
 
@@ -115,7 +123,8 @@ class TemplateRepositoryTest {
     fun `test template with default tags`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val template = createTestTemplate(
             "1",
             "Template 1",
@@ -138,7 +147,8 @@ class TemplateRepositoryTest {
     fun `test template with system and user templates`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTemplateDataSourceImpl(database)
-        val repository = TemplateRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TemplateRepositoryImpl(localDataSource, userContextProvider)
         val systemTemplate = createTestTemplate("1", "System Template", CardType.QUOTE, isSystemTemplate = true)
         val userTemplate = createTestTemplate("2", "User Template", CardType.CODE, isSystemTemplate = false)
         repository.createTemplate(systemTemplate)

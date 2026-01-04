@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalStatisticsDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteStatisticsDataSourceStub
+import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.Statistics
 import tech.zhifu.app.myhub.datastore.repository.impl.StatisticsRepositoryImpl
@@ -16,14 +17,17 @@ import kotlin.time.Clock
  */
 class StatisticsRepositoryTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test get statistics`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalStatisticsDataSourceImpl(database)
         val remoteDataSource = RemoteStatisticsDataSourceStub()
-        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource, userContextProvider)
         val statistics = createTestStatistics()
-        localDataSource.saveStatistics(statistics)
+        localDataSource.saveStatistics(statistics, testUserId)
 
         // When
         val result = repository.getStatistics()
@@ -40,7 +44,8 @@ class StatisticsRepositoryTest {
         // Given
         val localDataSource = LocalStatisticsDataSourceImpl(database)
         val remoteDataSource = RemoteStatisticsDataSourceStub(Statistics()) // 返回空统计
-        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource, userContextProvider)
 
         // When
         val result = repository.getStatistics()
@@ -57,9 +62,10 @@ class StatisticsRepositoryTest {
         // Given
         val localDataSource = LocalStatisticsDataSourceImpl(database)
         val remoteDataSource = RemoteStatisticsDataSourceStub()
-        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource, userContextProvider)
         val statistics = createTestStatistics()
-        localDataSource.saveStatistics(statistics)
+        localDataSource.saveStatistics(statistics, testUserId)
 
         // When
         val refreshedStats = repository.refreshStatistics()
@@ -74,7 +80,8 @@ class StatisticsRepositoryTest {
         // Given
         val localDataSource = LocalStatisticsDataSourceImpl(database)
         val remoteDataSource = RemoteStatisticsDataSourceStub()
-        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource, userContextProvider)
         val statistics = Statistics(
             totalCards = 10,
             favoriteCards = 5,
@@ -87,7 +94,7 @@ class StatisticsRepositoryTest {
             cardsByTag = emptyMap(),
             lastSyncTime = null
         )
-        localDataSource.saveStatistics(statistics)
+        localDataSource.saveStatistics(statistics, testUserId)
 
         // When
         val result = repository.getStatistics()
@@ -104,7 +111,8 @@ class StatisticsRepositoryTest {
         // Given
         val localDataSource = LocalStatisticsDataSourceImpl(database)
         val remoteDataSource = RemoteStatisticsDataSourceStub()
-        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = StatisticsRepositoryImpl(localDataSource, remoteDataSource, userContextProvider)
         val statistics = Statistics(
             totalCards = 10,
             favoriteCards = 5,
@@ -117,7 +125,7 @@ class StatisticsRepositoryTest {
             ),
             lastSyncTime = null
         )
-        localDataSource.saveStatistics(statistics)
+        localDataSource.saveStatistics(statistics, testUserId)
 
         // When
         val result = repository.getStatistics()

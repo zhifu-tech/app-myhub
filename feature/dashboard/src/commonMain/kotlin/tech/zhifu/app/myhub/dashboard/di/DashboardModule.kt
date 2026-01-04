@@ -10,3 +10,4 @@ fun dashboardModule() = module {
     factoryOf(::DashboardViewModel)
 }
 
+

@@ -48,3 +48,4 @@ class LongSettingSerializer : SettingSerializer<Long> {
     override fun deserialize(value: String): Long = value.toLong()
 }
 
+

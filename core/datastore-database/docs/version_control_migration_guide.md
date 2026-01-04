@@ -190,3 +190,4 @@ SELECT * FROM sqlite_master WHERE type='table' AND name='_sqlite_schema';
 2. **现有数据库测试**：保留现有数据库，运行应用，验证迁移执行
 3. **版本升级测试**：从版本 1 升级到版本 2，验证数据迁移
 
+

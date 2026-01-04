@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository
 import tech.zhifu.app.myhub.datastore.database.runDatabaseTest
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTagDataSourceImpl
 import tech.zhifu.app.myhub.datastore.model.Tag
+import tech.zhifu.app.myhub.datastore.repository.datasource.impl.UserContextProviderStub
 import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,11 +17,14 @@ import kotlin.time.Clock
  */
 class TagRepositoryTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test create tag`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag = createTestTag("1", "tag1")
 
         // When
@@ -36,7 +40,8 @@ class TagRepositoryTest {
     fun `test create tag with duplicate name fails`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag1 = createTestTag("1", "tag1")
         val tag2 = createTestTag("2", "tag1") // 同名标签
 
@@ -61,7 +66,8 @@ class TagRepositoryTest {
     fun `test get all tags`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag1 = createTestTag("1", "tag1")
         val tag2 = createTestTag("2", "tag2")
         repository.createTag(tag1)
@@ -80,7 +86,8 @@ class TagRepositoryTest {
     fun `test get tag by id`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 
@@ -97,7 +104,8 @@ class TagRepositoryTest {
     fun `test get tag by name`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag = createTestTag("1", "unique-tag")
         repository.createTag(tag)
 
@@ -114,7 +122,8 @@ class TagRepositoryTest {
     fun `test update tag`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 
@@ -134,7 +143,8 @@ class TagRepositoryTest {
     fun `test delete tag`() = runDatabaseTest { database ->
         // Given
         val localDataSource = LocalTagDataSourceImpl(database)
-        val repository = TagRepositoryImpl(localDataSource)
+        val userContextProvider = UserContextProviderStub(testUserId)
+        val repository = TagRepositoryImpl(localDataSource, userContextProvider)
         val tag = createTestTag("1", "tag1")
         repository.createTag(tag)
 

@@ -16,6 +16,8 @@ import kotlinx.coroutines.test.runTest
  */
 expect suspend fun createTestDatabase(): MyHubDatabase
 
+const val TEST_USER_ID = "test-user-1"
+
 /**
  * 清空测试数据库
  *
@@ -24,11 +26,11 @@ expect suspend fun createTestDatabase(): MyHubDatabase
  */
 private suspend fun clearTestDatabase(database: MyHubDatabase) {
     database.transaction {
-        database.cardQueries.deleteAll()
-        database.tagQueries.deleteAll()
-        database.userQueries.deleteAll()
-        database.templateQueries.deleteAll()
-        database.statisticsQueries.deleteAll()
+        database.cardQueries.deleteAll(TEST_USER_ID)
+        database.tagQueries.deleteAll(TEST_USER_ID)
+        database.userQueries.deleteAll(TEST_USER_ID)
+        database.templateQueries.deleteAll(TEST_USER_ID)
+        database.statisticsQueries.deleteAll(TEST_USER_ID)
     }
 }
 

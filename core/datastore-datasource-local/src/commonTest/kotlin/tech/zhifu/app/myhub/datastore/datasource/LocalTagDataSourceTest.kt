@@ -16,6 +16,8 @@ import kotlin.time.Clock
  */
 class LocalTagDataSourceTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test insert and get tag`() = runDatabaseTest { database ->
         // Given
@@ -23,8 +25,8 @@ class LocalTagDataSourceTest {
         val tag = createTestTag("1", "tag1")
 
         // When
-        dataSource.insertTag(tag)
-        val result = dataSource.getTagById("1")
+        dataSource.insertTag(tag, testUserId)
+        val result = dataSource.getTagById("1", testUserId)
 
         // Then
         assertNotNull(result)
@@ -41,10 +43,10 @@ class LocalTagDataSourceTest {
         val tag3 = createTestTag("3", "tag3")
 
         // When
-        dataSource.insertTag(tag1)
-        dataSource.insertTag(tag2)
-        dataSource.insertTag(tag3)
-        val result = dataSource.getAllTags()
+        dataSource.insertTag(tag1, testUserId)
+        dataSource.insertTag(tag2, testUserId)
+        dataSource.insertTag(tag3, testUserId)
+        val result = dataSource.getAllTags(testUserId)
 
         // Then
         assertEquals(3, result.size)
@@ -60,8 +62,8 @@ class LocalTagDataSourceTest {
         val tag = createTestTag("1", "unique-tag")
 
         // When
-        dataSource.insertTag(tag)
-        val result = dataSource.getTagByName("unique-tag")
+        dataSource.insertTag(tag, testUserId)
+        val result = dataSource.getTagByName("unique-tag", testUserId)
 
         // Then
         assertNotNull(result)
@@ -74,12 +76,12 @@ class LocalTagDataSourceTest {
         // Given
         val dataSource = LocalTagDataSourceImpl(database)
         val tag = createTestTag("1", "tag1")
-        dataSource.insertTag(tag)
+        dataSource.insertTag(tag, testUserId)
 
         // When
         val updatedTag = tag.copy(name = "updated-tag", color = "#FF0000")
-        dataSource.updateTag(updatedTag)
-        val result = dataSource.getTagById("1")
+        dataSource.updateTag(updatedTag, testUserId)
+        val result = dataSource.getTagById("1", testUserId)
 
         // Then
         assertNotNull(result)
@@ -92,11 +94,11 @@ class LocalTagDataSourceTest {
         // Given
         val dataSource = LocalTagDataSourceImpl(database)
         val tag = createTestTag("1", "tag1")
-        dataSource.insertTag(tag)
+        dataSource.insertTag(tag, testUserId)
 
         // When
-        dataSource.deleteTag("1")
-        val result = dataSource.getTagById("1")
+        dataSource.deleteTag("1", testUserId)
+        val result = dataSource.getTagById("1", testUserId)
 
         // Then
         assertNull(result)
@@ -110,11 +112,11 @@ class LocalTagDataSourceTest {
         val tag2 = createTestTag("2", "tag2")
 
         // When
-        val flow = dataSource.observeTags()
-        dataSource.insertTag(tag1)
+        val flow = dataSource.observeTags(testUserId)
+        dataSource.insertTag(tag1, testUserId)
         val firstResult = flow.first()
 
-        dataSource.insertTag(tag2)
+        dataSource.insertTag(tag2, testUserId)
         val secondResult = flow.first()
 
         // Then
@@ -129,8 +131,8 @@ class LocalTagDataSourceTest {
         val tag = createTestTag("1", "tag1", color = "#FF5733", description = "Test description")
 
         // When
-        dataSource.insertTag(tag)
-        val result = dataSource.getTagById("1")
+        dataSource.insertTag(tag, testUserId)
+        val result = dataSource.getTagById("1", testUserId)
 
         // Then
         assertNotNull(result)

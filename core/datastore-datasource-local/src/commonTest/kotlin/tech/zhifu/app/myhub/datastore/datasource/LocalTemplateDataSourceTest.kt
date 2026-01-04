@@ -17,6 +17,8 @@ import kotlin.time.Clock
  */
 class LocalTemplateDataSourceTest {
 
+    private val testUserId = "test-user-1"
+
     @Test
     fun `test insert and get template`() = runDatabaseTest { database ->
         // Given
@@ -24,8 +26,8 @@ class LocalTemplateDataSourceTest {
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
 
         // When
-        dataSource.insertTemplate(template)
-        val result = dataSource.getTemplateById("1")
+        dataSource.insertTemplate(template, testUserId)
+        val result = dataSource.getTemplateById("1", testUserId)
 
         // Then
         assertNotNull(result)
@@ -43,10 +45,10 @@ class LocalTemplateDataSourceTest {
         val template3 = createTestTemplate("3", "Template 3", CardType.IDEA)
 
         // When
-        dataSource.insertTemplate(template1)
-        dataSource.insertTemplate(template2)
-        dataSource.insertTemplate(template3)
-        val result = dataSource.getAllTemplates()
+        dataSource.insertTemplate(template1, testUserId)
+        dataSource.insertTemplate(template2, testUserId)
+        dataSource.insertTemplate(template3, testUserId)
+        val result = dataSource.getAllTemplates(testUserId)
 
         // Then
         assertEquals(3, result.size)
@@ -60,15 +62,15 @@ class LocalTemplateDataSourceTest {
         // Given
         val dataSource = LocalTemplateDataSourceImpl(database)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
-        dataSource.insertTemplate(template)
+        dataSource.insertTemplate(template, testUserId)
 
         // When
         val updatedTemplate = template.copy(
             name = "Updated Template",
             description = "Updated description"
         )
-        dataSource.updateTemplate(updatedTemplate)
-        val result = dataSource.getTemplateById("1")
+        dataSource.updateTemplate(updatedTemplate, testUserId)
+        val result = dataSource.getTemplateById("1", testUserId)
 
         // Then
         assertNotNull(result)
@@ -81,11 +83,11 @@ class LocalTemplateDataSourceTest {
         // Given
         val dataSource = LocalTemplateDataSourceImpl(database)
         val template = createTestTemplate("1", "Template 1", CardType.QUOTE)
-        dataSource.insertTemplate(template)
+        dataSource.insertTemplate(template, testUserId)
 
         // When
-        dataSource.deleteTemplate("1")
-        val result = dataSource.getTemplateById("1")
+        dataSource.deleteTemplate("1", testUserId)
+        val result = dataSource.getTemplateById("1", testUserId)
 
         // Then
         assertNull(result)
@@ -99,11 +101,11 @@ class LocalTemplateDataSourceTest {
         val template2 = createTestTemplate("2", "Template 2", CardType.CODE)
 
         // When
-        val flow = dataSource.observeTemplates()
-        dataSource.insertTemplate(template1)
+        val flow = dataSource.observeTemplates(testUserId)
+        dataSource.insertTemplate(template1, testUserId)
         val firstResult = flow.first()
 
-        dataSource.insertTemplate(template2)
+        dataSource.insertTemplate(template2, testUserId)
         val secondResult = flow.first()
 
         // Then
@@ -123,8 +125,8 @@ class LocalTemplateDataSourceTest {
         )
 
         // When
-        dataSource.insertTemplate(template)
-        val result = dataSource.getTemplateById("1")
+        dataSource.insertTemplate(template, testUserId)
+        val result = dataSource.getTemplateById("1", testUserId)
 
         // Then
         assertNotNull(result)
@@ -142,10 +144,10 @@ class LocalTemplateDataSourceTest {
         val userTemplate = createTestTemplate("2", "User Template", CardType.CODE, isSystemTemplate = false)
 
         // When
-        dataSource.insertTemplate(systemTemplate)
-        dataSource.insertTemplate(userTemplate)
-        val systemResult = dataSource.getTemplateById("1")
-        val userResult = dataSource.getTemplateById("2")
+        dataSource.insertTemplate(systemTemplate, testUserId)
+        dataSource.insertTemplate(userTemplate, testUserId)
+        val systemResult = dataSource.getTemplateById("1", testUserId)
+        val userResult = dataSource.getTemplateById("2", testUserId)
 
         // Then
         assertNotNull(systemResult)
