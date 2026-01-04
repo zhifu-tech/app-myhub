@@ -10,12 +10,12 @@ import kotlin.time.Clock
 
 /**
  * 数据库基础功能测试
- * 
+ *
  * 注意：这些测试针对版本 2 的 Schema（包含 user_id 字段）
  * 真正的迁移测试（从版本 1 到版本 2）需要在集成测试中进行
  */
 class DatabaseTest {
-    
+
     private val testUserId = "test-user-1"
 
     @Test
@@ -30,7 +30,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         val result = database.cardQueries.selectAll(testUserId).awaitAsList()
         assertNotNull(result)
         assertEquals(0, result.size)
@@ -48,7 +48,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         insertTestCard(database, "test-1", "Test Content", testUserId)
 
         val result = database.cardQueries.selectById("test-1", testUserId).awaitAsOneOrNull()
@@ -70,7 +70,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         assertFailsWith<RuntimeException> {
             database.transaction {
                 database.cardQueries.insertCard(
@@ -108,7 +108,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         insertTestCard(database, "card-1", "Content", testUserId)
 
         database.cardQueries.insertCardTag("card-1", "tag1", testUserId)
@@ -129,7 +129,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         insertTestCard(database, "card-1", "Content", testUserId)
         database.cardQueries.insertCardTag("card-1", "tag1", testUserId)
         database.cardQueries.insertCardTag("card-1", "tag2", testUserId)
@@ -139,14 +139,14 @@ class DatabaseTest {
         val tags = database.cardQueries.selectCardTags("card-1", testUserId).awaitAsList()
         assertEquals(0, tags.size)
     }
-    
+
     @Test
     fun `test user data isolation`() = runDatabaseTest { database ->
         // Given - 创建两个用户
         val userId1 = "user-1"
         val userId2 = "user-2"
         val now = Clock.System.now().toString()
-        
+
         database.userQueries.insertUser(
             id = userId1,
             username = "user1",
@@ -155,7 +155,7 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         database.userQueries.insertUser(
             id = userId2,
             username = "user2",
@@ -164,28 +164,28 @@ class DatabaseTest {
             avatar_url = null,
             created_at = now
         )
-        
+
         // When - 插入不同用户的数据
         insertTestCard(database, "card-1", "User 1 Card", userId1)
         insertTestCard(database, "card-2", "User 2 Card", userId2)
-        
+
         // Then - 验证用户数据隔离
         val user1Cards = database.cardQueries.selectAll(userId1).awaitAsList()
         assertEquals(1, user1Cards.size)
         assertEquals("card-1", user1Cards[0].id)
-        
+
         val user2Cards = database.cardQueries.selectAll(userId2).awaitAsList()
         assertEquals(1, user2Cards.size)
         assertEquals("card-2", user2Cards[0].id)
-        
+
         // 验证用户无法访问其他用户的数据
         val user1Card2 = database.cardQueries.selectById("card-2", userId1).awaitAsOneOrNull()
         assertEquals(null, user1Card2)
     }
 
     private suspend fun insertTestCard(
-        database: MyHubDatabase, 
-        id: String, 
+        database: MyHubDatabase,
+        id: String,
         content: String = "Content",
         userId: String = testUserId
     ) {

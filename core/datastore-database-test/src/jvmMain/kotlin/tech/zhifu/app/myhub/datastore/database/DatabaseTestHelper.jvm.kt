@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.database
 
 import app.cash.sqldelight.async.coroutines.synchronous
+import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 
 /**
@@ -15,5 +16,20 @@ actual suspend fun createTestDatabase(): MyHubDatabase {
     }
     MyHubDatabase.Schema.synchronous().create(driver)
     return MyHubDatabase(driver)
+}
+
+/**
+ * JVM 平台：使用反射访问 driver 并关闭
+ */
+actual fun destroyTestDatabase(database: MyHubDatabase) {
+    try {
+        val driverField = database.javaClass.getDeclaredField("driver")
+        driverField.isAccessible = true
+        val driver = driverField.get(database) as? SqlDriver
+        driver?.close()
+    } catch (e: Exception) {
+        // 如果反射失败，忽略错误（测试已经结束）
+        println("destroyTestDatabase error: $e")
+    }
 }
 

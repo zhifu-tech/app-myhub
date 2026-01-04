@@ -19,3 +19,18 @@ actual suspend fun createTestDatabase(): MyHubDatabase {
     return MyHubDatabase(driver)
 }
 
+/**
+ * Android 平台：使用反射访问 driver 并关闭
+ */
+actual fun destroyTestDatabase(database: MyHubDatabase) {
+    try {
+        val driverField = database.javaClass.getDeclaredField("driver")
+        driverField.isAccessible = true
+        val driver = driverField.get(database) as? app.cash.sqldelight.db.SqlDriver
+        driver?.close()
+    } catch (e: Exception) {
+        // 如果反射失败，忽略错误（测试已经结束）
+        println("destroyTestDatabase error: $e")
+    }
+}
+

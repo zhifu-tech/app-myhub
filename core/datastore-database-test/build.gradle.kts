@@ -19,11 +19,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.datastoreDatabase)
+            implementation(projects.core.platform)
             implementation(libs.kotlinx.coroutines.test)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.koin.core)
         }
 
         androidMain.dependencies {

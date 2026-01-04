@@ -45,7 +45,7 @@ include(":core:platform-compose")
 
 include(":core:datastore-model")
 include(":core:datastore-database")
-//include(":core:datastore-database-test")
+include(":core:datastore-database-test")
 //include(":core:datastore-database-manage")
 //include(":core:datastore-database-client")
 //include(":core:datastore-database-server")

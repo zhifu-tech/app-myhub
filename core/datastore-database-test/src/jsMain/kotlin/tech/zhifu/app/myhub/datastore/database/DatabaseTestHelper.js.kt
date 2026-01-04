@@ -20,3 +20,16 @@ actual suspend fun createTestDatabase(): MyHubDatabase {
     return MyHubDatabase(driver)
 }
 
+/**
+ * JS 平台：直接访问 driver 并关闭
+ * 
+ * 注意：SQLDelight 生成的数据库类在 JS 平台上可能没有 driver 属性。
+ * 对于内存数据库，关闭 driver 会销毁整个数据库。
+ * 如果无法访问 driver，则忽略（内存数据库会在测试结束后自动销毁）。
+ */
+actual fun destroyTestDatabase(database: MyHubDatabase) {
+    // JS 平台暂时使用空实现，因为无法直接访问 driver
+    // 内存数据库会在测试结束后自动销毁
+    // 如果需要，可以通过 js() 函数访问 driver，但这不是必需的
+}
+
