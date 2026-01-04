@@ -91,6 +91,19 @@ class TemplateRepositoryTest {
         val remoteDataSource = RemoteTemplateDataSourceStub()
         val userDataSource = LocalUserDataSourceImpl(database)
         val userContextProvider = UserContextProviderStub(testUserId)
+        
+        // Save user first so observeUser() can work correctly
+        val user = tech.zhifu.app.myhub.datastore.model.User(
+            id = testUserId,
+            username = "testuser",
+            email = "test@example.com",
+            displayName = "Test User",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user)
+        
         val repository = TemplateRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val template1 = createTestTemplate("1", "Template 1", CardType.QUOTE)
         val template2 = createTestTemplate("2", "Template 2", CardType.CODE)
@@ -115,6 +128,19 @@ class TemplateRepositoryTest {
         val remoteDataSource = RemoteTemplateDataSourceStub()
         val userDataSource = LocalUserDataSourceImpl(database)
         val userContextProvider = UserContextProviderStub(testUserId)
+        
+        // Save user first so observeUser() can work correctly
+        val user = tech.zhifu.app.myhub.datastore.model.User(
+            id = testUserId,
+            username = "testuser",
+            email = "test@example.com",
+            displayName = "Test User",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user)
+        
         val repository = TemplateRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val systemTemplate = createTestTemplate("1", "System Template", CardType.QUOTE, isSystemTemplate = true)
         val userTemplate = createTestTemplate("2", "User Template", CardType.CODE, isSystemTemplate = false)
@@ -137,6 +163,19 @@ class TemplateRepositoryTest {
         val remoteDataSource = RemoteTemplateDataSourceStub()
         val userDataSource = LocalUserDataSourceImpl(database)
         val userContextProvider = UserContextProviderStub(testUserId)
+        
+        // Save user first so observeUser() can work correctly
+        val user = tech.zhifu.app.myhub.datastore.model.User(
+            id = testUserId,
+            username = "testuser",
+            email = "test@example.com",
+            displayName = "Test User",
+            avatarUrl = null,
+            createdAt = Clock.System.now(),
+            preferences = null
+        )
+        userDataSource.saveUser(user)
+        
         val repository = TemplateRepositoryImpl(localDataSource, remoteDataSource, userContextProvider, userDataSource)
         val systemTemplate = createTestTemplate("1", "System Template", CardType.QUOTE, isSystemTemplate = true)
         val userTemplate = createTestTemplate("2", "User Template", CardType.CODE, isSystemTemplate = false)

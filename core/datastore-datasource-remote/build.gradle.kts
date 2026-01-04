@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.web)
     alias(libs.plugins.kotlinSerialization)
 }
 
@@ -50,6 +51,10 @@ kotlin {
         }
 
         jsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+
+        wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
         }
     }

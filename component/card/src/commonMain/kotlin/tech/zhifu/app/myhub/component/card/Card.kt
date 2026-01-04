@@ -93,7 +93,7 @@ val Card.typeIconText: String
 fun Card.formatUpdatedTime(): String {
     val localDateTime = updatedAt.toLocalDateTime(TimeZone.currentSystemDefault())
     val monthName = getMonthName(localDateTime.month.number)
-    val day = localDateTime.dayOfMonth
+    val day = localDateTime.day
     val year = localDateTime.year
     return "$monthName $day, $year"
 }
@@ -106,7 +106,7 @@ fun Card.formatUpdatedTime(): String {
 fun Card.formatCreatedTime(): String {
     val localDateTime = createdAt.toLocalDateTime(TimeZone.currentSystemDefault())
     val monthName = getMonthName(localDateTime.month.number)
-    val day = localDateTime.dayOfMonth
+    val day = localDateTime.day
     val year = localDateTime.year
     return "$monthName $day, $year"
 }

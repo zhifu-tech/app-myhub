@@ -35,13 +35,14 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-//include(":server")
-//include(":composeApp")
-//include(":androidApp")
+include(":server")
+include(":composeApp")
+include(":androidApp")
 
 include(":core:logger")
 include(":core:platform")
 include(":core:platform-compose")
+
 
 include(":core:datastore-model")
 
@@ -52,14 +53,16 @@ include(":core:datastore-database-client")
 include(":core:datastore-database-server")
 
 include(":core:datastore-datasource-local")
-//include(":core:datastore-datasource-remote")
-//include(":core:datastore-repository")
-//include(":core:datastore-repository-client")
-//include(":core:datastore-repository-server")
-//
-//include(":component:card")
-//include(":component:mixed")
-//
-//include(":feature:settings")
-//include(":feature:dashboard")
-//include(":feature:profile")
+include(":core:datastore-datasource-remote")
+
+include(":core:datastore-repository")
+include(":core:datastore-repository-client")
+include(":core:datastore-repository-server")
+
+
+include(":component:card")
+include(":component:mixed")
+
+include(":feature:settings")
+include(":feature:dashboard")
+include(":feature:profile")

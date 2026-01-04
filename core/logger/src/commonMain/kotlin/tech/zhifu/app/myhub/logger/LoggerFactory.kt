@@ -14,8 +14,12 @@ fun logger(vararg tags: String): Logger {
 }
 
 private val config by lazy {
-    getKoin().get<LoggerConfig>().apply {
-        configPlatform()
+    try {
+        getKoin().get<LoggerConfig>().apply {
+            configPlatform()
+        }
+    } catch (e: Exception) {
+        LoggerConfig("ZhifuTech")
     }
 }
 

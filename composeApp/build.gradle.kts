@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.web)
     // Compose Multiplatform 插件（必需：使用 Compose Multiplatform UI）
     alias(libs.plugins.composeMultiplatform)
     // Compose 编译器插件（必需：编译 Compose 代码）
@@ -42,11 +43,18 @@ kotlin {
         binaries.executable()
     }
 
-    sourceSets {
-        // ========== 默认使用 devFree 变体（开发时） ==========
-        // 可以通过 Gradle 任务参数或环境变量切换变体
-        // 例如：./gradlew build -PbuildVariant=prodPremium
+    @Suppress("OPT_IN_USAGE")
+    wasmJs {
+        outputModuleName.set("composeApp")
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
+    }
 
+    sourceSets {
         commonMain.dependencies {
             // ========== Compose UI 依赖 ==========
             // Compose 运行时（必需：所有 Compose 组件的基础）
@@ -114,6 +122,22 @@ kotlin {
             // Desktop 相关
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+        }
+
+        wasmJsMain.dependencies {
+            // Webpack 插件依赖（用于 sqljs-config.js）
+            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+            implementation(npm("sql.js", "1.12.0"))
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+        }
+
+        jsMain.dependencies {
+            // Webpack 插件依赖（用于 sqljs-config.js）
+            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+            implementation(npm("sql.js", "1.12.0"))
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
         }
     }
 }
