@@ -2,16 +2,11 @@ package tech.zhifu.app.myhub.logger
 
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KMarkerFactory
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.Marker
 
-internal actual fun logger(name: String): Logger =
-    wrapKLogger(KotlinLogging.logger(name))
-
-actual fun logger(func: () -> Unit): Logger =
-    wrapKLogger(KotlinLogging.logger(func))
-
-private fun wrapKLogger(delegate: KLogger): Logger = object : Logger {
+internal class LoggerImpl(
+    private val delegate: KLogger
+) : Logger {
     override fun isTraceEnabled() = delegate.isTraceEnabled()
     override fun trace(
         marker: Any?,
@@ -53,4 +48,3 @@ private fun Any?.asMarker(): Marker? = when (this) {
     is String -> KMarkerFactory.getMarker(this)
     else -> null
 }
-

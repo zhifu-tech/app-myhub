@@ -51,3 +51,4 @@ actual fun getWindowSize(): DpSize {
 
     return size
 }
+

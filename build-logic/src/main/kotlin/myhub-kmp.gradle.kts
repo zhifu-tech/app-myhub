@@ -40,6 +40,17 @@ configure<KotlinMultiplatformExtension> {
         }
     }
 
+    @Suppress("OPT_IN_USAGE")
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
+    }
+
     js {
         browser {
             testTask {
@@ -98,5 +109,6 @@ configure<KotlinMultiplatformExtension> {
         iosMain.get().injectPlatformVariant("ios")
         jvmMain.get().injectPlatformVariant("jvm")
         jsMain.get().injectPlatformVariant("js")
+        wasmJsMain.get().injectPlatformVariant("wasmJsØ")
     }
 }

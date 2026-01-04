@@ -18,7 +18,6 @@ enum class WindowSizeClass {
 /**
  * 计算窗口尺寸类别
  */
-@Composable
 fun calculateWindowSizeClass(width: DpSize): WindowSizeClass {
     val widthDp = width.width
     return when {

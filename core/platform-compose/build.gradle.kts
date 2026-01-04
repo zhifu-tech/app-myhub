@@ -27,6 +27,20 @@ kotlin {
                 implementation(compose.foundation)
             }
         }
+
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+                // Compose UI 依赖（测试需要 DpSize 等类型）
+                implementation(compose.ui)
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation(libs.kotlin.testJunit)
+            }
+        }
     }
 }
 

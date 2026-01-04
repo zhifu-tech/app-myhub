@@ -16,5 +16,17 @@ kotlin {
                 implementation(libs.koin.core)
             }
         }
+
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation(libs.kotlin.testJunit)
+            }
+        }
     }
 }

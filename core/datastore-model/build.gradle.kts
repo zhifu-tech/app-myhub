@@ -17,6 +17,12 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            // 序列化测试需要
+            implementation(libs.kotlinx.serialization.json)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotlin.testJunit)
         }
     }
 }

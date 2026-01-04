@@ -11,6 +11,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.logging)
+                implementation(libs.koin.core)
             }
         }
 
@@ -25,6 +26,18 @@ kotlin {
             dependencies {
                 implementation(libs.slf4j.api)
                 implementation(libs.slf4j.simple)
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+
+        jvmTest {
+            dependencies {
+                implementation(libs.kotlin.testJunit)
             }
         }
     }
