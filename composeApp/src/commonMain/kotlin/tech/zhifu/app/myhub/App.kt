@@ -12,10 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
-import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
@@ -35,15 +35,9 @@ import tech.zhifu.app.myhub.ui.isExpanded
 import tech.zhifu.app.myhub.ui.isMedium
 
 /**
- * 应用主入口
- *
- * 职责：
- * - 组合应用的核心组件（主题、导航、布局）
- * - 提供全局 CompositionLocal
- * - 处理响应式布局
+ * 应用主入口 (Stateful)
  */
 @Composable
-@Preview
 fun App(
     windowSize: DpSize? = null,
     appViewModel: AppViewModel = koinInject()
@@ -51,11 +45,11 @@ fun App(
     // 观察应用状态
     val appState by appViewModel.uiState.collectAsState()
 
-    // 计算窗口大小类（在 Composable 上下文中）
+    // 计算窗口大小类
     val actualWindowSize = windowSize ?: getWindowSize()
     val sizeClass = calculateWindowSizeClass(actualWindowSize)
 
-    // 初始化应用（仅在首次组合时执行）
+    // 初始化应用
     LaunchedEffect(Unit) {
         appViewModel.initialize(initialWindowSizeClass = sizeClass)
     }
@@ -65,6 +59,22 @@ fun App(
         appViewModel.updateWindowSizeClass(sizeClass)
     }
 
+    App(
+        appState = appState,
+        onNavigate = appViewModel::navigateTo,
+        onRetry = appViewModel::retry
+    )
+}
+
+/**
+ * 应用主入口 (Stateless) - 方便测试和预览
+ */
+@Composable
+fun App(
+    appState: AppUiState,
+    onNavigate: (Screen) -> Unit,
+    onRetry: () -> Unit
+) {
     // 根据加载状态显示不同内容
     when (val state = appState) {
         is AppUiState.Loading -> {
@@ -72,13 +82,10 @@ fun App(
         }
 
         is AppUiState.Ready -> {
-            // 直接使用 customAppThemeIsDark，确保主题切换实时生效
-            // customAppThemeIsDark 是 mutableStateOf，变化时会自动触发重组
             AppContent(
-                windowSize = windowSize,
                 currentScreen = state.currentScreen,
-                onNavigate = appViewModel::navigateTo,
-                isDarkTheme = customAppThemeIsDark,
+                onNavigate = onNavigate,
+                isDarkTheme = state.isDarkTheme, // 使用 state 中的主题设置，而不是全局变量
                 windowSizeClass = state.windowSizeClass
             )
         }
@@ -86,7 +93,7 @@ fun App(
         is AppUiState.Error -> {
             AppErrorScreen(
                 error = state.error,
-                onRetry = appViewModel::retry
+                onRetry = onRetry
             )
         }
     }
@@ -97,7 +104,6 @@ fun App(
  */
 @Composable
 private fun AppContent(
-    windowSize: DpSize?,
     currentScreen: Screen,
     onNavigate: (Screen) -> Unit,
     isDarkTheme: Boolean,
@@ -232,11 +238,19 @@ fun AppNavigation(currentScreen: Screen) {
     }
 }
 
+@Preview
 @Composable
-fun ScreenContent(screen: Screen) {
-    when (screen) {
-        is Screen.Dashboard -> DashboardScreen()
-        is Screen.Settings -> SettingsScreen()
-        else -> PlaceholderScreen(screen)
+fun AppPreview() {
+    // 使用 KoinContext 包装预览，防止 koinInject() 在预览环境中抛出异常
+    KoinContext {
+        App(
+            appState = AppUiState.Ready(
+                currentScreen = Screen.Dashboard,
+                isDarkTheme = false,
+                windowSizeClass = WindowSizeClass.Expanded
+            ),
+            onNavigate = {},
+            onRetry = {}
+        )
     }
 }

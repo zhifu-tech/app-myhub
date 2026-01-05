@@ -233,25 +233,103 @@ fun DashboardScreen(
 ```text
 feature/dashboard/
 ├── src/
-│   └── commonMain/
-│       ├── kotlin/
-│       │   └── tech/zhifu/app/myhub/dashboard/
-│       │       ├── DashboardScreen.kt          # UI 组件
-│       │       ├── DashboardViewModel.kt        # ViewModel
-│       │       ├── DashboardUiState.kt          # UI 状态
-│       │       └── di/
-│       │           └── DashboardModule.kt      # 依赖注入模块
-│       └── composeResources/
-│           └── values/
-│               ├── strings.xml                 # 默认字符串资源
-│               ├── values-zh-rCN/
-│               │   └── strings.xml            # 简体中文
-│               ├── values-zh-rTW/
-│               │   └── strings.xml            # 繁体中文
-│               └── values-ja/
-│                   └── strings.xml             # 日语
+│   ├── commonMain/
+│   │   ├── kotlin/
+│   │   │   └── tech/zhifu/app/myhub/dashboard/
+│   │   │       ├── DashboardScreen.kt          # UI 组件
+│   │   │       ├── DashboardViewModel.kt        # ViewModel
+│   │   │       ├── DashboardUiState.kt          # UI 状态
+│   │   │       └── di/
+│   │   │           └── DashboardModule.kt      # 依赖注入模块
+│   │   └── composeResources/
+│   │       └── values/
+│   │           ├── strings.xml                 # 默认字符串资源
+│   │           ├── values-zh-rCN/
+│   │           │   └── strings.xml            # 简体中文
+│   │           ├── values-zh-rTW/
+│   │           │   └── strings.xml            # 繁体中文
+│   │           └── values-ja/
+│   │               └── strings.xml             # 日语
+│   └── devMain/                                # 预览支持
+│       └── kotlin/
+│           └── tech/zhifu/app/myhub/dashboard/
+│               └── DashboardScreen.dev.kt      # Preview 函数
 ├── build.gradle.kts                            # 构建配置
 └── README.md                                   # 本文档
+```
+
+## 🧪 Preview 支持
+
+Dashboard 模块提供了完整的 Preview 支持，位于 `devMain` source set 中。
+
+### Preview 文件结构
+
+```text
+src/devMain/kotlin/tech/zhifu/app/myhub/dashboard/
+└── DashboardScreen.dev.kt
+```
+
+### Preview 特性
+
+Preview 文件包含以下预览场景：
+
+#### DashboardScreen 完整预览
+
+- **浅色主题（网格视图）** - 展示 Dashboard 在浅色主题下的网格布局
+- **深色主题（列表视图）** - 展示 Dashboard 在深色主题下的列表布局
+- **加载状态** - 展示刷新时的加载动画效果
+
+#### 组件独立预览
+
+- **DashboardHeader** - 头部组件预览
+  - 浅色主题
+  - 深色主题
+  - 加载状态（带旋转动画）
+
+- **DashboardToolbar** - 工具栏组件预览
+  - 浅色主题
+  - 深色主题
+
+- **StatsCardsRow** - 统计卡片行预览
+
+- **DashboardGridView** - 网格视图预览
+  - 紧凑布局（1列）
+  - 中等布局（2列）
+  - 扩展布局（3列）
+
+- **DashboardListView** - 列表视图预览
+  - 紧凑布局（移动端）
+  - 扩展布局（桌面端）
+
+### 示例数据生成
+
+Preview 文件提供了示例数据生成函数：
+
+- `createSampleStatistics()` - 创建示例统计信息
+- `createSampleCards()` - 创建包含多种卡片类型的示例数据（QUOTE、CODE、IDEA、ARTICLE、DICTIONARY、CHECKLIST）
+
+### 使用 Preview
+
+在 Android Studio 或 IntelliJ IDEA 中：
+
+1. 打开 `DashboardScreen.dev.kt` 文件
+2. 点击 Preview 函数左侧的预览图标
+3. 查看 Dashboard 在不同主题、布局和状态下的外观
+
+### Preview 环境初始化
+
+Preview 文件会自动初始化必要的 Koin 依赖（如 `cardModule`），确保预览环境正常工作。
+
+```kotlin
+// Preview 文件会自动调用 initPreviewKoin() 初始化 Koin
+private fun initPreviewKoin() {
+    val koin = KoinPlatformTools.defaultContext().getOrNull()
+    if (koin == null) {
+        startKoin {
+            modules(cardModule)
+        }
+    }
+}
 ```
 
 ## 🔧 实现细节
@@ -694,6 +772,7 @@ private fun ListViewItem(card: Card) {
 - ✅ WindowSizeClass 扩展方法（isCompact、isMedium、isExpanded）
 - ✅ 状态管理优化（sealed class 设计，支持同时显示数据和加载状态）
 - ✅ 刷新功能优化（刷新时数据保持可见，只显示加载动画）
+- ✅ Preview 支持（devMain source set）
 
 **待实现**：
 
@@ -725,3 +804,22 @@ private fun ListViewItem(card: Card) {
 - **core/datastore-model**: 提供数据模型（Card、Statistics）
 - **component/card**: 提供卡片 UI 组件
 - **core/platform**: 提供平台抽象（窗口大小、主题等）
+
+## 📦 依赖配置
+
+### Preview 支持
+
+Dashboard 模块的 Preview 功能需要以下依赖：
+
+```kotlin
+dependencies {
+    // Preview 支持
+    implementation(compose.components.uiToolingPreview)
+}
+
+dependencies {
+    "androidRuntimeClasspath"(compose.uiTooling)
+}
+```
+
+这些依赖已在 `build.gradle.kts` 中配置，确保 Preview 功能正常工作。

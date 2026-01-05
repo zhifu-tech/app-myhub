@@ -43,7 +43,14 @@ kotlin {
 
             // Component 模块
             implementation(projects.component.card)
+
+            // Preview 支持
+            implementation(compose.components.uiToolingPreview)
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(compose.uiTooling)
 }
 
