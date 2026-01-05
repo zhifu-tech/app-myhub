@@ -17,6 +17,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.platformCompose)
             // 数据模型依赖
             implementation(projects.core.datastoreModel)
             // kotlinx-datetime 用于日期格式化
@@ -32,7 +33,13 @@ kotlin {
             // 依赖注入
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
+
+            implementation(compose.components.uiToolingPreview)
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(compose.uiTooling)
 }
 

@@ -13,6 +13,7 @@ Card Component 模块提供了 MyHub 应用中使用的各种卡片组件。这�
 5. **可扩展性**：易于接入真实数据和扩展新功能
 6. **跨平台支持**：基于 Compose Multiplatform，支持 Android、iOS、Desktop、Web
 7. **测试友好**：每个组件可独立测试
+8. **解耦架构**：通过 CardComponent 接口实现组件解耦，符合开闭原则
 
 ## 🏗️ 架构设计
 
@@ -32,10 +33,19 @@ Card Component 模块提供了 MyHub 应用中使用的各种卡片组件。这�
 │  └──────────────────────────────────────────────────┘  │
 │                     │                                    │
 │  ┌──────────────────▼────────────────────────────────┐  │
-│  │  CardComponentFactory Map (Koin 注入)            │  │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐         │  │
-│  │  │QuoteCard │ │CodeCard  │ │IdeaCard  │ ...     │  │
-│  │  └──────────┘ └──────────┘ └──────────┘         │  │
+│  │  Map<CardType, CardComponent> (Koin 注入)        │  │
+│  │  ┌──────────────┐ ┌──────────────┐              │  │
+│  │  │QuoteCard     │ │CodeCard      │              │  │
+│  │  │Component     │ │Component     │ ...          │  │
+│  │  └──────────────┘ └──────────────┘              │  │
+│  └──────────────────────────────────────────────────┘  │
+│                     │                                    │
+│  ┌──────────────────▼────────────────────────────────┐  │
+│  │  CardComponent 接口                                │  │
+│  │  - CardComponent()                                 │  │
+│  │  - getDisplayTitle()                               │  │
+│  │  - getTypeIconColor()                              │  │
+│  │  - getTypeIconText()                               │  │
 │  └──────────────────────────────────────────────────┘  │
 └────────────────────┬────────────────────────────────────┘
                      │
@@ -45,53 +55,67 @@ Card Component 模块提供了 MyHub 应用中使用的各种卡片组件。这�
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 基于 Koin DI 的组件注册机制
+### 基于 CardComponent 接口的解耦架构
 
-Card Component 模块使用 **Koin 依赖注入**实现组件类型的自动路由，符合**开闭原则**：
+Card Component 模块使用 **CardComponent 接口**实现组件类型的解耦，符合**开闭原则**和**单一职责原则**：
 
 #### 核心组件
 
-1. **CardComponentFactory** - 卡片组件工厂类型
+1. **CardComponent 接口** - 卡片组件接口
 
-   - 文件：`CardComponentFactory.kt`
-   - 定义统一的组件工厂函数签名
+   - 文件：`CardComponent.kt`
+   - 定义统一的组件接口，包含：
+     - `CardComponent()` - 渲染卡片组件
+     - `getDisplayTitle()` - 获取显示标题
+     - `getTypeIconColor()` - 获取图标颜色
+     - `getTypeIconText()` - 获取图标文本
 
-2. **CardComponent** - 统一卡片组件
+2. **CardComponents** - 统一卡片组件入口
 
-   - 文件：`component/CardComponent.kt`
+   - 文件：`CardComponents.kt`
    - 通过 Koin 注入组件映射表
    - 根据 `Card.type` 自动选择对应的组件
+   - 提供 Card 扩展方法和属性
 
 3. **CardModule** - Koin 模块
    - 文件：`di/CardModule.kt`
-   - 注册所有卡片类型到组件工厂的映射
+   - 注册所有卡片类型到 CardComponent 实现的映射
    - 集中管理所有卡片组件注册
+
+4. **具体 Component 实现**
+   - `QuoteCardComponent` - 引言卡片组件实现
+   - `CodeCardComponent` - 代码卡片组件实现
+   - `IdeaCardComponent` - 想法卡片组件实现
+   - `ArticleCardComponent` - 文章卡片组件实现
+   - `DictionaryCardComponent` - 字典卡片组件实现
+   - `ChecklistCardComponent` - 清单卡片组件实现
 
 #### 工作流程
 
 ```text
 CardComponent(card)
     ↓
-通过 Koin 注入 Map<CardType, CardComponentFactory>
+通过 Koin 注入 Map<CardType, CardComponent>
     ↓
-根据 card.type 查找对应的工厂函数
+根据 card.type 查找对应的 Component 实例
     ↓
-调用工厂函数渲染对应的卡片组件
+调用 Component.CardComponent() 渲染对应的卡片组件
 ```
 
 #### 优势
 
-- ✅ **符合开闭原则**：新增卡片类型只需在 Koin 模块中注册，无需修改使用代码
-- ✅ **完全解耦**：使用 Koin DI 实现组件与使用方的解耦
+- ✅ **符合开闭原则**：新增卡片类型只需创建新的 Component 实现，无需修改使用代码
+- ✅ **完全解耦**：使用接口实现组件与使用方的解耦
 - ✅ **集中管理**：所有卡片组件注册集中在一个地方
 - ✅ **类型安全**：编译时检查，运行时错误提示清晰
 - ✅ **易于测试**：可以轻松 Mock 或替换组件映射
+- ✅ **职责分离**：每种卡片类型的显示逻辑、图标样式等都在对应的 Component 中
 
 ### 组件设计原则
 
 1. **单一职责**：每个卡片组件只负责一种类型的卡片展示
 2. **独立文件**：每个组件独立为单独文件，便于维护和测试
-3. **统一接口**：所有组件遵循相同的 API 模式（`modifier` 参数）
+3. **统一接口**：所有组件遵循 CardComponent 接口
 4. **主题适配**：使用 `isSystemInDarkTheme()` 自动适配主题
 5. **交互统一**：所有组件支持 hover 效果和点击交互
 6. **纯函数组件**：卡片组件是展示型组件，不包含业务逻辑，数据通过参数传入，事件通过回调传出
@@ -138,6 +162,7 @@ Card Component 模块遵循清晰的架构分层原则：
        card: Card,                    // 数据输入（来自父组件）
        onEdit: (Card) -> Unit = {},   // 事件输出（回调给父组件）
        onFavorite: (Card) -> Unit = {},
+       onCardClick: (Card) -> Unit = {},
        modifier: Modifier = Modifier
    ) {
        // 只有 UI 展示逻辑，没有业务逻辑
@@ -160,144 +185,129 @@ Card Component 模块遵循清晰的架构分层原则：
 **MVVM 应该用在页面级别（Screen Level）**，适用于：
 
 1. **需要与 Repository 交互**
-
-   ```kotlin
-   class DashboardViewModel(
-       private val cardRepository: CardRepository
-   ) {
-       val uiState: StateFlow<DashboardUiState>
-       fun loadCards()
-       fun toggleFavorite(cardId: String)
-   }
-   ```
-
 2. **有复杂的状态管理**
-
-   - 多个数据源的组合
-   - 状态转换和计算
-   - 加载、错误、成功等状态
-
 3. **有业务逻辑处理**
-
-   - 数据验证
-   - 业务规则
-   - 数据转换
-
 4. **需要数据同步**
-   - 与服务器同步
-   - 本地缓存管理
-   - 实时更新
-
-#### 实际架构示例
-
-**页面级别（使用 MVVM）**：
-
-```kotlin
-// feature/dashboard/DashboardViewModel.kt
-class DashboardViewModel(
-    private val cardRepository: CardRepository
-) {
-    val uiState: StateFlow<DashboardUiState>
-
-    fun toggleFavorite(cardId: String) {
-        // 业务逻辑：更新收藏状态
-        cardRepository.updateCard(...)
-    }
-}
-
-// feature/dashboard/DashboardScreen.kt
-@Composable
-fun DashboardScreen(viewModel: DashboardViewModel = koinInject()) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    LazyVerticalGrid(...) {
-        items(uiState.cards) { card ->
-            // 组件级别：纯函数，不需要 ViewModel
-            QuoteCard(
-                card = card,
-                onFavorite = { viewModel.toggleFavorite(it.id) }
-            )
-        }
-    }
-}
-```
-
-**组件级别（纯函数）**：
-
-```kotlin
-// component/card/QuoteCard.kt
-@Composable
-fun QuoteCard(
-    card: Card,
-    onEdit: (Card) -> Unit = {},
-    onFavorite: (Card) -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    // 只有 UI 展示，没有业务逻辑
-    Card(...) {
-        IconButton(onClick = { onFavorite(card) }) {
-            Icon(...)
-        }
-    }
-}
-```
-
-#### 设计原则总结
-
-| 层级   | 组件类型       | 是否使用 MVVM | 职责                                           |
-| ------ | -------------- | ------------- | ---------------------------------------------- |
-| 页面级 | Screen         | ✅ 使用       | 管理业务状态、与 Repository 交互、处理业务逻辑 |
-| 组件级 | Card Component | ❌ 不使用     | UI 展示、数据展示、事件回调                    |
-
-**判断标准**：
-
-- ✅ **需要 MVVM**：需要与 Repository 交互、有复杂状态管理、有业务逻辑处理
-- ❌ **不需要 MVVM**：纯 UI 展示、数据来自参数、事件通过回调、无业务逻辑
-
-#### 架构优势
-
-采用这种分层架构的优势：
-
-1. **职责清晰**
-
-   - 页面负责业务逻辑
-   - 组件负责 UI 展示
-   - 各司其职，易于理解
-
-2. **易于测试**
-
-   - 组件是纯函数，输入输出明确
-   - ViewModel 可独立测试
-   - 无需 Mock 复杂依赖
-
-3. **高度复用**
-
-   - 组件可在多处使用
-   - 不依赖特定数据源
-   - 易于组合和扩展
-
-4. **解耦设计**
-   - 组件与业务逻辑分离
-   - 组件不依赖 Repository
-   - 便于维护和重构
 
 ## 📦 核心组件
 
-### Card 扩展方法
+### CardComponent 接口
+
+定义所有卡片组件必须实现的接口。
+
+**文件：** `CardComponent.kt`
+
+**接口定义：**
+
+```kotlin
+internal interface CardComponent {
+    @Composable
+    fun CardComponent(
+        card: Card,
+        onEdit: (Card) -> Unit = {},
+        onFavorite: (Card) -> Unit = {},
+        onCardClick: (Card) -> Unit = {},
+        modifier: Modifier = Modifier,
+    )
+
+    @Composable
+    fun getDisplayTitle(card: Card): String
+
+    fun getTypeIconColor(): Color
+
+    fun getTypeIconText(): String
+}
+```
+
+**实现示例：**
+
+```kotlin
+class QuoteCardComponent : CardComponent {
+    @Composable
+    override fun CardComponent(
+        card: Card,
+        onEdit: (Card) -> Unit,
+        onFavorite: (Card) -> Unit,
+        onCardClick: (Card) -> Unit,
+        modifier: Modifier
+    ) = QuoteCard(
+        card = card,
+        onEdit = onEdit,
+        onFavorite = onFavorite,
+        onCardClick = onCardClick,
+        modifier = modifier
+    )
+
+    @Composable
+    override fun getDisplayTitle(card: Card): String {
+        return card.metadata?.quoteAuthor
+            ?: stringResource(Res.string.component_card_type_quote)
+    }
+
+    override fun getTypeIconColor(): Color {
+        return Color(0xFF8B5CF6) // purple
+    }
+
+    override fun getTypeIconText(): String {
+        return "Q"
+    }
+}
+```
+
+### CardComponents - 统一入口
+
+统一的卡片组件入口，根据 `Card.type` 自动选择对应的组件进行渲染。
+
+**文件：** `CardComponents.kt`
+
+**特性：**
+
+- 通过 Koin DI 注入组件映射表
+- 自动路由到对应的卡片组件
+- 统一的 API 接口
+- 符合开闭原则：新增卡片类型无需修改使用代码
+- 提供 Card 扩展方法和属性
+
+**API：**
+
+```kotlin
+@Composable
+fun CardComponent(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
+    modifier: Modifier = Modifier
+)
+```
+
+**使用示例：**
+
+```kotlin
+items(cards) { card ->
+    CardComponent(
+        card = card,
+        onEdit = { viewModel.editCard(it.id) },
+        onFavorite = { viewModel.toggleFavorite(it.id) },
+        onCardClick = { viewModel.viewCard(it.id) }
+    )
+}
+```
+
+### Card 扩展方法和属性
 
 提供卡片显示相关的扩展方法和属性，支持多语言和统一的数据展示。
 
-**文件：** `Card.kt`
+**文件：** `CardComponents.kt`
 
-**扩展方法：**
-
-#### 1. `Card.getDisplayTitle()` - 获取显示标题
+#### 1. `Card.displayTitle` - 获取显示标题
 
 根据卡片类型返回合适的标题，支持多语言。
 
 ```kotlin
-@Composable
-fun Card.getDisplayTitle(): String
+val Card.displayTitle: String
+    @Composable
+    get() = toComponent().getDisplayTitle(this)
 ```
 
 **特性：**
@@ -306,13 +316,14 @@ fun Card.getDisplayTitle(): String
 - 如果没有 `title`，根据卡片类型返回默认标题
 - 支持多语言（通过 Compose Resources）
 - Quote 类型优先使用 `metadata?.quoteAuthor`
+- 通过 CardComponent 接口获取，实现解耦
 
 **使用示例：**
 
 ```kotlin
 @Composable
 fun ListViewItem(card: Card) {
-    val cardTitle = card.getDisplayTitle()
+    val cardTitle = card.displayTitle
     Text(text = cardTitle)
 }
 ```
@@ -345,7 +356,14 @@ val shortPreview = card.getContentPreview(maxLength = 50)
 
 ```kotlin
 val Card.typeIconColor: Color
+    @Composable
+    get() = toComponent().getTypeIconColor()
 ```
+
+**特性：**
+
+- 通过 CardComponent 接口获取，实现解耦
+- 每种卡片类型有独立的颜色定义
 
 **颜色映射：**
 
@@ -359,11 +377,14 @@ val Card.typeIconColor: Color
 **使用示例：**
 
 ```kotlin
-val iconColor = card.typeIconColor
-Box(
-    modifier = Modifier.background(iconColor.copy(alpha = 0.2f))
-) {
-    // 图标内容
+@Composable
+fun ListViewItem(card: Card) {
+    val iconColor = card.typeIconColor
+    Box(
+        modifier = Modifier.background(iconColor.copy(alpha = 0.2f))
+    ) {
+        // 图标内容
+    }
 }
 ```
 
@@ -373,7 +394,14 @@ Box(
 
 ```kotlin
 val Card.typeIconText: String
+    @Composable
+    get() = toComponent().getTypeIconText()
 ```
+
+**特性：**
+
+- 通过 CardComponent 接口获取，实现解耦
+- 每种卡片类型有独立的文本定义
 
 **文本映射：**
 
@@ -387,122 +415,46 @@ val Card.typeIconText: String
 **使用示例：**
 
 ```kotlin
-val iconText = card.typeIconText
-Text(
-    text = iconText,
-    color = card.typeIconColor
-)
-```
-
-### 多语言支持
-
-Card 扩展方法支持多语言，通过 Compose Resources 实现。
-
-**资源文件结构：**
-
-```
-composeResources/
-├── values/strings.xml              # 英语（默认）
-├── values-zh-rCN/strings.xml      # 简体中文
-├── values-zh-rTW/strings.xml       # 繁体中文
-└── values-ja/strings.xml           # 日语
-```
-
-**资源键：**
-
-- `component_card_type_quote` - Quote
-- `component_card_type_code` - Code Snippet
-- `component_card_type_idea` - Idea
-- `component_card_type_article` - Article
-- `component_card_type_dictionary` - Word
-- `component_card_type_checklist` - Checklist
-
-**在 Dashboard 中的使用：**
-
-```kotlin
 @Composable
-private fun ListViewItem(card: Card) {
-    // 使用扩展方法获取显示信息
-    val cardTitle = card.getDisplayTitle()  // 支持多语言
-    val contentPreview = card.getContentPreview()
-    val iconColor = card.typeIconColor
+fun ListViewItem(card: Card) {
     val iconText = card.typeIconText
-
-    // 使用这些信息渲染 UI
-    Row {
-        // 图标
-        Box(background = iconColor) {
-            Text(text = iconText)
-        }
-        // 标题和预览
-        Column {
-            Text(text = cardTitle)
-            Text(text = contentPreview)
-        }
-    }
+    Text(
+        text = iconText,
+        color = card.typeIconColor
+    )
 }
 ```
 
-### CardComponent - 统一卡片组件
+#### 5. `Card.formatUpdatedTime()` - 格式化更新时间
 
-统一的卡片组件入口，根据 `Card.type` 自动选择对应的组件进行渲染。
-
-**文件：** `component/CardComponent.kt`
-
-**特性：**
-
-- 通过 Koin DI 注入组件映射表
-- 自动路由到对应的卡片组件
-- 统一的 API 接口
-- 符合开闭原则：新增卡片类型无需修改使用代码
-
-**API：**
+格式化卡片的更新时间为 "Oct 24, 2023" 格式，支持多语言。
 
 ```kotlin
 @Composable
-fun CardComponent(
-    card: Card,
-    onEdit: (Card) -> Unit = {},
-    onFavorite: (Card) -> Unit = {},
-    onCardClick: (Card) -> Unit = {},
-    modifier: Modifier = Modifier
-)
+fun Card.formatUpdatedTime(): String
 ```
 
 **使用示例：**
 
 ```kotlin
-items(cards) { card ->
-    CardComponent(
-        card = card,
-        onEdit = { viewModel.editCard(it.id) },
-        onFavorite = { viewModel.toggleFavorite(it.id) },
-        onCardClick = { viewModel.viewCard(it.id) }
-    )
+@Composable
+fun CardItem(card: Card) {
+    Text(text = card.formatUpdatedTime())
 }
 ```
 
-### CardComponentFactory - 卡片组件工厂
+#### 6. `Card.formatCreatedTime()` - 格式化创建时间
 
-定义卡片组件工厂函数类型，用于 Koin 模块注册。
-
-**文件：** `CardComponentFactory.kt`
-
-**定义：**
+格式化卡片的创建时间为 "Oct 24, 2023" 格式，支持多语言。
 
 ```kotlin
-typealias CardComponentFactory = @Composable (
-    card: Card,
-    onEdit: (Card) -> Unit,
-    onFavorite: (Card) -> Unit,
-    onCardClick: (Card) -> Unit,
-    modifier: Modifier
-) -> Unit
+@Composable
+fun Card.formatCreatedTime(): String
 ```
 
 ### CardModule - Koin 模块
 
-注册所有卡片类型到组件工厂的映射。
+注册所有卡片类型到 CardComponent 实现的映射。
 
 **文件：** `di/CardModule.kt`
 
@@ -510,25 +462,36 @@ typealias CardComponentFactory = @Composable (
 
 ```kotlin
 val cardModule = module {
-    single<Map<CardType, CardComponentFactory>> {
+    single<Map<CardType, CardComponent>> {
         mapOf(
-            CardType.QUOTE to { card, onEdit, onFavorite, onCardClick, modifier ->
-                QuoteCard(card, onEdit, onFavorite, onCardClick, modifier)
-            },
-            // ... 其他类型
+            CardType.QUOTE to QuoteCardComponent(),
+            CardType.CODE to CodeCardComponent(),
+            CardType.IDEA to IdeaCardComponent(),
+            CardType.ARTICLE to ArticleCardComponent(),
+            CardType.DICTIONARY to DictionaryCardComponent(),
+            CardType.CHECKLIST to ChecklistCardComponent()
         )
     }
 }
 ```
 
 **新增卡片类型：**
-只需在 `CardModule.kt` 中添加一行注册即可，无需修改使用代码。
 
-### 1. QuoteCard - 引言卡片
+只需：
+1. 创建对应的 `XXXCardComponent` 类实现 `CardComponent` 接口
+2. 在 `CardModule.kt` 中添加一行注册即可
+
+无需修改使用代码。
+
+### 具体卡片组件
+
+#### 1. QuoteCard - 引言卡片
 
 用于展示名言、引言等文本内容，支持分类标签和作者信息。
 
 **文件：** `QuoteCard.kt`
+
+**Component 实现：** `QuoteCardComponent.kt`
 
 **特性：**
 
@@ -559,11 +522,13 @@ fun QuoteCard(
 - `card.updatedAt` → 日期（自动格式化为 "Oct 24, 2023"）
 - `card.isFavorite` → 收藏状态
 
-### 2. CodeCard - 代码卡片
+#### 2. CodeCard - 代码卡片
 
 用于展示代码片段，支持语法高亮和标签。
 
 **文件：** `CodeCard.kt`
+
+**Component 实现：** `CodeCardComponent.kt`
 
 **特性：**
 
@@ -578,15 +543,21 @@ fun QuoteCard(
 ```kotlin
 @Composable
 fun CodeCard(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 )
 ```
 
-### 3. IdeaCard - 想法卡片
+#### 3. IdeaCard - 想法卡片
 
 用于展示想法、灵感等内容，使用黄色主题。
 
 **文件：** `IdeaCard.kt`
+
+**Component 实现：** `IdeaCardComponent.kt`
 
 **特性：**
 
@@ -600,15 +571,21 @@ fun CodeCard(
 ```kotlin
 @Composable
 fun IdeaCard(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 )
 ```
 
-### 4. ArticleCard - 文章卡片
+#### 4. ArticleCard - 文章卡片
 
 用于展示文章摘要，支持渐变头部和来源链接。
 
 **文件：** `ArticleCard.kt`
+
+**Component 实现：** `ArticleCardComponent.kt`
 
 **特性：**
 
@@ -623,15 +600,21 @@ fun IdeaCard(
 ```kotlin
 @Composable
 fun ArticleCard(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 )
 ```
 
-### 5. DictionaryCard - 字典卡片
+#### 5. DictionaryCard - 字典卡片
 
 用于展示单词定义，支持发音和例句。
 
 **文件：** `DictionaryCard.kt`
+
+**Component 实现：** `DictionaryCardComponent.kt`
 
 **特性：**
 
@@ -646,15 +629,21 @@ fun ArticleCard(
 ```kotlin
 @Composable
 fun DictionaryCard(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 )
 ```
 
-### 6. ChecklistCard - 清单卡片
+#### 6. ChecklistCard - 清单卡片
 
 用于展示待办事项列表，支持勾选状态。
 
 **文件：** `ChecklistCard.kt`
+
+**Component 实现：** `ChecklistCardComponent.kt`
 
 **特性：**
 
@@ -668,14 +657,11 @@ fun DictionaryCard(
 ```kotlin
 @Composable
 fun ChecklistCard(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
-)
-
-// 私有组件
-@Composable
-private fun ChecklistItem(
-    text: String,
-    checked: Boolean
 )
 ```
 
@@ -688,32 +674,43 @@ component/card/
 ├── docs/                       # 设计文档
 │   ├── card_data_integration.md
 │   └── card_data_synchronization.md
-└── src/commonMain/
-    ├── composeResources/          # 多语言资源文件
-    │   ├── values/                # 默认语言（英语）
-    │   │   └── strings.xml
-    │   ├── values-zh-rCN/         # 简体中文
-    │   │   └── strings.xml
-    │   ├── values-zh-rTW/         # 繁体中文
-    │   │   └── strings.xml
-    │   └── values-ja/             # 日语
-    │       └── strings.xml
-    └── kotlin/tech/zhifu/app/myhub/
-        ├── component/
-        │   └── CardComponent.kt    # 统一卡片组件（通过 Koin DI 路由）
-        └── component/card/
-            ├── Card.kt              # Card 扩展方法（显示信息、多语言支持）
-            ├── CardComponentFactory.kt  # 卡片组件工厂类型定义
-            ├── QuoteCard.kt           # 引言卡片组件（已支持数据驱动）
-            ├── CodeCard.kt            # 代码卡片组件
-            ├── IdeaCard.kt            # 想法卡片组件
-            ├── ArticleCard.kt         # 文章卡片组件
-            ├── DictionaryCard.kt      # 字典卡片组件
-            ├── ChecklistCard.kt        # 清单卡片组件（包含 ChecklistItem）
-            ├── di/
-            │   └── CardModule.kt      # Koin 模块（注册所有卡片组件）
-            └── utils/
-                └── CardDateFormatter.kt # 日期格式化工具
+└── src/
+    ├── commonMain/
+    │   ├── composeResources/          # 多语言资源文件
+    │   │   ├── values/                # 默认语言（英语）
+    │   │   │   └── strings.xml
+    │   │   ├── values-zh-rCN/         # 简体中文
+    │   │   │   └── strings.xml
+    │   │   ├── values-zh-rTW/         # 繁体中文
+    │   │   │   └── strings.xml
+    │   │   └── values-ja/             # 日语
+    │   │       └── strings.xml
+    │   └── kotlin/tech/zhifu/app/myhub/
+    │       └── component/card/
+    │           ├── CardComponent.kt           # CardComponent 接口定义
+    │           ├── CardComponents.kt         # 统一入口和 Card 扩展方法
+    │           ├── QuoteCard.kt              # 引言卡片组件
+    │           ├── QuoteCardComponent.kt     # 引言卡片 Component 实现
+    │           ├── CodeCard.kt               # 代码卡片组件
+    │           ├── CodeCardComponent.kt      # 代码卡片 Component 实现
+    │           ├── IdeaCard.kt               # 想法卡片组件
+    │           ├── IdeaCardComponent.kt      # 想法卡片 Component 实现
+    │           ├── ArticleCard.kt            # 文章卡片组件
+    │           ├── ArticleCardComponent.kt   # 文章卡片 Component 实现
+    │           ├── DictionaryCard.kt         # 字典卡片组件
+    │           ├── DictionaryCardComponent.kt # 字典卡片 Component 实现
+    │           ├── ChecklistCard.kt          # 清单卡片组件
+    │           ├── ChecklistCardComponent.kt # 清单卡片 Component 实现
+    │           └── di/
+    │               └── CardModule.kt         # Koin 模块（注册所有卡片组件）
+    └── devMain/                              # 预览支持
+        └── kotlin/zhifu/app/myhub/component/card/
+            ├── QuoteCard.dev.kt              # QuoteCard 预览
+            ├── ArticleCard.dev.kt            # ArticleCard 预览
+            ├── CodeCard.dev.kt               # CodeCard 预览
+            ├── IdeaCard.dev.kt               # IdeaCard 预览
+            ├── ChecklistCard.dev.kt         # ChecklistCard 预览
+            └── DictionaryCard.dev.kt        # DictionaryCard 预览
 ```
 
 ## 🔧 实现细节
@@ -734,7 +731,11 @@ component/card/
 
 ```kotlin
 @Composable
-fun ExampleCard(modifier: Modifier = Modifier) {
+fun ExampleCard(
+    card: Card,
+    onCardClick: (Card) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
@@ -744,7 +745,7 @@ fun ExampleCard(modifier: Modifier = Modifier) {
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = { /* TODO */ }
+                onClick = { onCardClick(card) }
             ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isHovered) 4.dp else 1.dp
@@ -759,7 +760,7 @@ fun ExampleCard(modifier: Modifier = Modifier) {
 
 - **Hover 检测**：使用 `MutableInteractionSource` 和 `collectIsHoveredAsState()`
 - **动态阴影**：hover 时阴影从 1dp 提升到 4dp
-- **点击交互**：所有卡片支持点击（当前为 TODO，待接入真实数据）
+- **点击交互**：所有卡片支持点击回调
 
 ### 主题适配
 
@@ -774,6 +775,30 @@ val backgroundColor = if (isDark) {
 }
 ```
 
+### 多语言支持
+
+Card 扩展方法支持多语言，通过 Compose Resources 实现。
+
+**资源文件结构：**
+
+```
+composeResources/
+├── values/strings.xml              # 英语（默认）
+├── values-zh-rCN/strings.xml      # 简体中文
+├── values-zh-rTW/strings.xml       # 繁体中文
+└── values-ja/strings.xml           # 日语
+```
+
+**资源键：**
+
+- `component_card_type_quote` - Quote
+- `component_card_type_code` - Code Snippet
+- `component_card_type_idea` - Idea
+- `component_card_type_article` - Article
+- `component_card_type_dictionary` - Word
+- `component_card_type_checklist` - Checklist
+- `component_card_month_jan` ~ `component_card_month_dec` - 月份名称
+
 ## 💡 使用示例
 
 ### 1. 使用统一组件（推荐）
@@ -781,7 +806,7 @@ val backgroundColor = if (isDark) {
 使用 `CardComponent` 统一组件，自动根据卡片类型路由到对应的组件：
 
 ```kotlin
-import tech.zhifu.app.myhub.component.CardComponent
+import tech.zhifu.app.myhub.component.card.CardComponent
 
 @Composable
 fun CardGrid(cards: List<Card>) {
@@ -813,7 +838,7 @@ fun CardGrid(cards: List<Card>) {
 
 ```kotlin
 // feature/dashboard/src/commonMain/kotlin/.../DashboardScreen.kt
-import tech.zhifu.app.myhub.component.CardComponent
+import tech.zhifu.app.myhub.component.card.CardComponent
 
 LazyVerticalGrid(
     columns = GridCells.Fixed(columns),
@@ -832,7 +857,35 @@ LazyVerticalGrid(
 }
 ```
 
-### 3. 直接使用单个组件
+### 3. 使用 Card 扩展方法和属性
+
+```kotlin
+@Composable
+fun ListViewItem(card: Card) {
+    // 使用扩展方法和属性获取显示信息
+    val cardTitle = card.displayTitle  // 支持多语言
+    val contentPreview = card.getContentPreview()
+    val iconColor = card.typeIconColor
+    val iconText = card.typeIconText
+    val updatedTime = card.formatUpdatedTime()
+
+    // 使用这些信息渲染 UI
+    Row {
+        // 图标
+        Box(background = iconColor) {
+            Text(text = iconText)
+        }
+        // 标题和预览
+        Column {
+            Text(text = cardTitle)
+            Text(text = contentPreview)
+            Text(text = updatedTime)
+        }
+    }
+}
+```
+
+### 4. 直接使用单个组件
 
 如果需要直接使用特定的卡片组件（如 QuoteCard）：
 
@@ -854,7 +907,7 @@ fun QuoteCardList(cards: List<Card>) {
 }
 ```
 
-### 4. 新增卡片类型
+### 5. 新增卡片类型
 
 假设新增 `NoteCard`：
 
@@ -873,237 +926,81 @@ fun QuoteCardList(cards: List<Card>) {
    }
    ```
 
-2. **在 CardModule 中注册**：
+2. **创建 Component 实现**：`NoteCardComponent.kt`
 
    ```kotlin
-   // di/CardModule.kt
-   CardType.NOTE to { card, onEdit, onFavorite, onCardClick, modifier ->
-       NoteCard(card, onEdit, onFavorite, onCardClick, modifier)
+   class NoteCardComponent : CardComponent {
+       @Composable
+       override fun CardComponent(
+           card: Card,
+           onEdit: (Card) -> Unit,
+           onFavorite: (Card) -> Unit,
+           onCardClick: (Card) -> Unit,
+           modifier: Modifier
+       ) = NoteCard(
+           card = card,
+           onEdit = onEdit,
+           onFavorite = onFavorite,
+           onCardClick = onCardClick,
+           modifier = modifier
+       )
+
+       @Composable
+       override fun getDisplayTitle(card: Card): String {
+           return card.title ?: stringResource(Res.string.component_card_type_note)
+       }
+
+       override fun getTypeIconColor(): Color {
+           return Color(0xFF6366F1) // indigo
+       }
+
+       override fun getTypeIconText(): String {
+           return "N"
+       }
    }
    ```
 
-3. **完成**：`CardComponent` 自动支持新类型，无需修改使用代码
+3. **在 CardModule 中注册**：
 
-## 🔄 数据接入状态
+   ```kotlin
+   // di/CardModule.kt
+   CardType.NOTE to NoteCardComponent()
+   ```
 
-### 当前状态
+4. **完成**：`CardComponent` 自动支持新类型，无需修改使用代码
 
-- ✅ **QuoteCard**：已支持数据驱动 API，使用 `Card` 数据模型
-- ⏳ **其他卡片组件**：暂未实现数据驱动 API，仍使用示例数据
+## 🧪 Preview 支持
 
-### 已实现的组件
+所有卡片组件都提供了 Preview 支持，位于 `devMain` source set 中。
 
-#### QuoteCard
+### Preview 文件结构
 
-已完全接入真实数据，支持：
-
-- 使用 `Card` 数据模型
-- 数据映射（content、author、category、date、isFavorite）
-- 日期格式化（使用 `kotlinx-datetime`）
-- 回调处理（onEdit、onFavorite、onCardClick）
-
-**使用示例：**
-
-```kotlin
-QuoteCard(
-    card = myCard,
-    onEdit = { /* 编辑逻辑 */ },
-    onFavorite = { /* 收藏逻辑 */ },
-    onCardClick = { /* 点击逻辑 */ }
-)
+```
+src/devMain/kotlin/zhifu/app/myhub/component/card/
+├── QuoteCard.dev.kt
+├── ArticleCard.dev.kt
+├── CodeCard.dev.kt
+├── IdeaCard.dev.kt
+├── ChecklistCard.dev.kt
+└── DictionaryCard.dev.kt
 ```
 
-### 待实现的组件
+### Preview 特性
 
-其他卡片组件（CodeCard、IdeaCard、ArticleCard、DictionaryCard、ChecklistCard）计划按照相同模式接入数据。
+每个 Preview 文件包含：
 
-### 未来 API 设计
+- **浅色主题预览** - 展示组件在浅色主题下的外观
+- **深色主题预览** - 展示组件在深色主题下的外观
+- **不同状态预览** - 如收藏状态、长文本等
+- **示例数据生成** - 使用 `createSampleXXXCard()` 辅助函数
 
-计划为每个组件添加数据模型参数，支持真实数据绑定：
+### 使用 Preview
 
-#### QuoteCard
+在 Android Studio 或 IntelliJ IDEA 中：
 
-```kotlin
-@Composable
-fun QuoteCard(
-    quote: Quote,                    // 数据模型
-    onEdit: (Quote) -> Unit = {},     // 编辑回调
-    onFavorite: (Quote) -> Unit = {}, // 收藏回调
-    modifier: Modifier = Modifier
-)
-
-data class Quote(
-    val id: String,
-    val content: String,
-    val author: String,
-    val category: String,
-    val date: Long,
-    val isFavorite: Boolean
-)
-```
-
-#### CodeCard
-
-```kotlin
-@Composable
-fun CodeCard(
-    code: CodeSnippet,                // 数据模型
-    onEdit: (CodeSnippet) -> Unit = {},
-    modifier: Modifier = Modifier
-)
-
-data class CodeSnippet(
-    val id: String,
-    val title: String,
-    val code: String,
-    val language: String,
-    val tags: List<String>
-)
-```
-
-#### IdeaCard
-
-```kotlin
-@Composable
-fun IdeaCard(
-    idea: Idea,                       // 数据模型
-    onEdit: (Idea) -> Unit = {},
-    modifier: Modifier = Modifier
-)
-
-data class Idea(
-    val id: String,
-    val content: String,
-    val createdAt: Long
-)
-```
-
-#### ArticleCard
-
-```kotlin
-@Composable
-fun ArticleCard(
-    article: Article,                 // 数据模型
-    onReadSource: (Article) -> Unit = {},
-    modifier: Modifier = Modifier
-)
-
-data class Article(
-    val id: String,
-    val title: String,
-    val summary: String,
-    val sourceUrl: String?,
-    val authors: List<String>
-)
-```
-
-#### DictionaryCard
-
-```kotlin
-@Composable
-fun DictionaryCard(
-    word: Word,                       // 数据模型
-    onPronounce: (Word) -> Unit = {},
-    modifier: Modifier = Modifier
-)
-
-data class Word(
-    val id: String,
-    val word: String,
-    val pronunciation: String,
-    val definition: String,
-    val example: String?
-)
-```
-
-#### ChecklistCard
-
-```kotlin
-@Composable
-fun ChecklistCard(
-    checklist: Checklist,            // 数据模型
-    onItemToggle: (String, Boolean) -> Unit = {},
-    modifier: Modifier = Modifier
-)
-
-data class Checklist(
-    val id: String,
-    val title: String,
-    val items: List<ChecklistItem>
-)
-
-data class ChecklistItem(
-    val id: String,
-    val text: String,
-    val checked: Boolean
-)
-```
-
-## 🧪 测试
-
-### 测试计划
-
-Card Component 模块计划包含完整的测试套件，覆盖所有组件和交互。
-
-### 测试结构（计划）
-
-```text
-component/card/src/commonTest/kotlin/tech/zhifu/app/myhub/component/card/
-├── QuoteCardTest.kt              # 引言卡片测试
-├── CodeCardTest.kt               # 代码卡片测试
-├── IdeaCardTest.kt               # 想法卡片测试
-├── ArticleCardTest.kt            # 文章卡片测试
-├── DictionaryCardTest.kt         # 字典卡片测试
-├── ChecklistCardTest.kt          # 清单卡片测试
-└── test/
-    └── MockHelpers.kt            # Mock 工具类
-```
-
-### 测试覆盖范围（计划）
-
-#### UI 渲染测试
-
-- ✅ 组件正常渲染
-- ✅ 深色/浅色主题适配
-- ✅ 不同屏幕尺寸适配
-- ✅ 数据绑定正确显示
-
-#### 交互行为测试
-
-- ✅ Hover 效果（阴影变化）
-- ✅ 点击交互
-- ✅ 编辑按钮显示/隐藏
-- ✅ 状态切换（如 ChecklistItem 的勾选状态）
-
-#### 数据绑定测试
-
-- ✅ 空数据处理
-- ✅ 长文本截断
-- ✅ 特殊字符处理
-- ✅ 日期格式化
-
-### 测试工具（计划）
-
-**MockHelpers** - 共享的 Mock 对象
-
-- `createTestQuote()` - 创建测试引言
-- `createTestCodeSnippet()` - 创建测试代码片段
-- `createTestIdea()` - 创建测试想法
-- `createTestArticle()` - 创建测试文章
-- `createTestWord()` - 创建测试单词
-- `createTestChecklist()` - 创建测试清单
-
-### 运行测试（计划）
-
-```bash
-# 运行所有平台的测试
-./gradlew :component:card:allTests
-
-# 运行特定平台的测试
-./gradlew :component:card:jvmTest
-./gradlew :component:card:jsTest
-./gradlew :component:card:iosSimulatorArm64Test
-```
+1. 打开对应的 `.dev.kt` 文件
+2. 点击 Preview 函数左侧的预览图标
+3. 查看组件在不同主题和状态下的外观
 
 ## 🚀 落地计划
 
@@ -1115,40 +1012,39 @@ component/card/src/commonTest/kotlin/tech/zhifu/app/myhub/component/card/
 - [x] 支持深色/浅色主题
 - [x] 组件独立为单独文件
 
-### 阶段 2：Koin DI 组件注册机制 ✅
+### 阶段 2：CardComponent 接口架构 ✅
 
-- [x] 创建 CardComponentFactory 类型定义
-- [x] 创建统一的 CardComponent 组件
+- [x] 创建 CardComponent 接口
+- [x] 创建所有 Component 实现
 - [x] 创建 CardModule Koin 模块
 - [x] 在主 Koin 配置中引入 cardModule
 - [x] 更新 DashboardScreen 使用 CardComponent
-- [x] 实现基于 Koin DI 的组件自动路由
+- [x] 实现基于接口的组件自动路由
 
-### 阶段 3：数据模型设计和接入 🔄
+### 阶段 3：Card 扩展方法和属性 ✅
 
-- [x] 定义卡片数据模型（使用 `Card` 数据模型）
-- [x] 设计组件 API（参数、回调）
-- [x] QuoteCard 实现数据驱动 API
-- [x] 创建日期格式化工具（CardDateFormatter）
-- [x] 在 Dashboard 中接入真实数据
-- [ ] 其他卡片组件实现数据驱动 API
-- [x] 实现编辑、收藏等交互回调
-- [x] 优化性能（使用 remember 缓存）
+- [x] 实现 `displayTitle` 扩展属性
+- [x] 实现 `typeIconColor` 扩展属性
+- [x] 实现 `typeIconText` 扩展属性
+- [x] 实现 `getContentPreview()` 扩展方法
+- [x] 实现 `formatUpdatedTime()` 扩展方法
+- [x] 实现 `formatCreatedTime()` 扩展方法
+- [x] 所有扩展方法通过 CardComponent 接口获取，实现解耦
 
-### 阶段 4：单元测试 🔄
+### 阶段 4：Preview 支持 ✅
+
+- [x] 添加 Compose Preview 支持
+- [x] 为每个组件创建预览函数
+- [x] 支持深色/浅色主题预览
+- [x] 支持不同数据状态预览
+
+### 阶段 5：单元测试 🔄
 
 - [ ] 添加 UI 渲染测试
 - [ ] 添加交互行为测试
 - [ ] 添加数据绑定测试
 - [ ] 创建 Mock 工具类
 - [ ] 所有平台测试通过
-
-### 阶段 5：预览支持 🔄
-
-- [ ] 添加 Compose Preview 支持
-- [ ] 为每个组件创建预览函数
-- [ ] 支持深色/浅色主题预览
-- [ ] 支持不同数据状态预览
 
 ### 阶段 6：动画和可访问性 🔄
 
@@ -1165,24 +1061,19 @@ component/card/src/commonTest/kotlin/tech/zhifu/app/myhub/component/card/
 - ✅ 统一的视觉风格和交互效果
 - ✅ 深色/浅色主题支持
 - ✅ Hover 效果和动态阴影
-- ✅ 组件化架构设计
-- ✅ 基于 Koin DI 的组件注册机制
-- ✅ CardComponent 统一组件
-- ✅ QuoteCard 数据驱动 API 实现
-- ✅ 日期格式化工具（CardDateFormatter）
-- ✅ Dashboard 中接入真实数据
-- ✅ Card 扩展方法（getDisplayTitle、getContentPreview、typeIconColor、typeIconText）
+- ✅ CardComponent 接口架构
+- ✅ 所有 Component 实现
+- ✅ Card 扩展方法和属性（通过接口解耦）
 - ✅ 多语言支持（通过 Compose Resources）
-- ✅ 列表视图支持（DashboardListView）
+- ✅ Preview 支持（devMain source set）
+- ✅ Dashboard 中接入真实数据
 
 **进行中**：
 
-- 🔄 其他卡片组件实现数据驱动 API（CodeCard、IdeaCard 等）
+- 🔄 单元测试编写
 
 **待开始**：
 
-- ⏳ 单元测试编写
-- ⏳ Compose Preview 支持
 - ⏳ 动画效果增强
 - ⏳ 可访问性支持
 
@@ -1196,11 +1087,13 @@ dependencies {
     implementation(compose.material3)
     implementation(compose.ui)
     implementation(compose.components.resources)  // 多语言资源支持
-    // Material Icons 扩展
     implementation(compose.materialIconsExtended)
+    implementation(compose.components.uiToolingPreview)  // Preview 支持
 
     // 数据模型依赖
     implementation(projects.core.datastoreModel)
+    implementation(projects.core.platformCompose)
+    
     // kotlinx-datetime 用于日期格式化
     implementation(libs.kotlinx.datetime)
 
@@ -1237,14 +1130,13 @@ compose.resources {
 ### 参考设计
 
 - **Material Design 3**：遵循 Material 3 设计规范
-- **Dashboard UI**：参考 `/Users/zzf/Downloads/stitch_dashboard/code.html`
-- **卡片样式**：还原参考设计中的卡片样式和交互效果
+- **Dashboard UI**：参考设计中的卡片样式和交互效果
 
 ### 设计原则
 
 - **单一职责原则**：每个卡片组件只负责一种类型
 - **开闭原则**：对扩展开放，对修改关闭
-- **依赖倒置原则**：依赖 Material3 抽象组件
+- **依赖倒置原则**：依赖 CardComponent 接口抽象
 - **接口隔离原则**：每个组件独立，互不依赖
 
 ## 🤝 贡献
@@ -1255,8 +1147,11 @@ compose.resources {
 2. ✅ 支持深色/浅色主题
 3. ✅ 添加适当的交互效果
 4. ✅ 保持组件独立（不依赖其他卡片组件）
-5. ✅ 通过 lint 检查
-6. ✅ 更新相关文档
+5. ✅ 实现 CardComponent 接口
+6. ✅ 在 CardModule 中注册
+7. ✅ 添加 Preview 支持（devMain）
+8. ✅ 通过 lint 检查
+9. ✅ 更新相关文档
 
 ---
 

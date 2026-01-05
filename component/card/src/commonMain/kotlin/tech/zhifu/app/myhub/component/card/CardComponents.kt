@@ -1,11 +1,13 @@
 package tech.zhifu.app.myhub.component.card
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.card.resources.Res
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_apr
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_aug
@@ -19,37 +21,59 @@ import tech.zhifu.app.myhub.component.card.resources.component_card_month_may
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_nov
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_oct
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_sep
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_article
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_checklist
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_code
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_dictionary
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_idea
-import tech.zhifu.app.myhub.component.card.resources.component_card_type_quote
 import tech.zhifu.app.myhub.datastore.model.Card
 import tech.zhifu.app.myhub.datastore.model.CardType
 
+private lateinit var factories: Map<CardType, CardComponent>
+
+@Composable
+private fun Card.toComponent(): CardComponent {
+    if (!::factories.isInitialized) {
+        factories = koinInject()
+    }
+    return factories[type]
+        ?: error("No component factory registered for card type: $type")
+}
+
 /**
- * Card 扩展方法
- * 提供卡片显示相关的属性和方法
+ * 统一的卡片组件
+ * 根据 Card.type 自动选择对应的组件进行渲染
+ *
+ * 通过 Koin 注入卡片组件工厂映射表，实现组件类型的自动路由
  */
+@Composable
+fun CardComponent(
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
+    modifier: Modifier = Modifier,
+) = card.toComponent()
+    .CardComponent(card, onEdit, onFavorite, onCardClick, modifier)
 
 /**
  * 获取卡片的显示标题
  * 根据卡片类型返回合适的标题，支持多语言
  */
-@Composable
-fun Card.getDisplayTitle(): String {
-    return title ?: when (type) {
-        CardType.QUOTE -> metadata?.quoteAuthor ?: stringResource(Res.string.component_card_type_quote)
-        CardType.CODE -> stringResource(Res.string.component_card_type_code)
-        CardType.IDEA -> stringResource(Res.string.component_card_type_idea)
-        CardType.ARTICLE -> stringResource(Res.string.component_card_type_article)
-        CardType.DICTIONARY -> content.split(" ").firstOrNull()
-            ?: stringResource(Res.string.component_card_type_dictionary)
+val Card.displayTitle: String
+    @Composable
+    get() = toComponent().getDisplayTitle(this)
 
-        CardType.CHECKLIST -> stringResource(Res.string.component_card_type_checklist)
-    }
-}
+/**
+ * 获取卡片类型的图标颜色
+ * 通过 CardComponent 接口获取，实现解耦
+ */
+val Card.typeIconColor: Color
+    @Composable
+    get() = toComponent().getTypeIconColor()
+
+/**
+ * 获取卡片类型的图标文本
+ * 通过 CardComponent 接口获取，实现解耦
+ */
+val Card.typeIconText: String
+    @Composable
+    get() = toComponent().getTypeIconText()
 
 /**
  * 获取卡片内容的预览（截取前N个字符）
@@ -58,32 +82,6 @@ fun Card.getContentPreview(maxLength: Int = 80): String {
     val preview = content.take(maxLength)
     return if (content.length > maxLength) "$preview..." else preview
 }
-
-/**
- * 获取卡片类型的图标颜色
- */
-val Card.typeIconColor: Color
-    get() = when (type) {
-        CardType.QUOTE -> Color(0xFF8B5CF6) // purple
-        CardType.CODE -> Color(0xFF10B981) // green
-        CardType.IDEA -> Color(0xFFF59E0B) // amber
-        CardType.ARTICLE -> Color(0xFF3B82F6) // blue
-        CardType.DICTIONARY -> Color(0xFF06B6D4) // cyan
-        CardType.CHECKLIST -> Color(0xFFEF4444) // red
-    }
-
-/**
- * 获取卡片类型的图标文本
- */
-val Card.typeIconText: String
-    get() = when (type) {
-        CardType.QUOTE -> "Q"
-        CardType.CODE -> "C"
-        CardType.IDEA -> "I"
-        CardType.ARTICLE -> "A"
-        CardType.DICTIONARY -> "D"
-        CardType.CHECKLIST -> "✓"
-    }
 
 /**
  * 格式化卡片的更新时间

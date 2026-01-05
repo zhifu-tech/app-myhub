@@ -63,10 +63,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.component.CardComponent
+import tech.zhifu.app.myhub.component.card.CardComponent
+import tech.zhifu.app.myhub.component.card.displayTitle
 import tech.zhifu.app.myhub.component.card.formatUpdatedTime
 import tech.zhifu.app.myhub.component.card.getContentPreview
-import tech.zhifu.app.myhub.component.card.getDisplayTitle
 import tech.zhifu.app.myhub.component.card.typeIconColor
 import tech.zhifu.app.myhub.component.card.typeIconText
 import tech.zhifu.app.myhub.datastore.model.Card
@@ -128,7 +128,7 @@ fun DashboardScreen(
                     )
                 }
             }
-            
+
             is DashboardUiState.Content -> {
                 Column(
                     modifier = Modifier.fillMaxSize()
@@ -184,7 +184,7 @@ fun DashboardScreen(
                             )
                         }
                     }
-                    
+
                     // 错误提示（如果有错误且不在刷新中）
                     if (state.error != null && !state.isRefreshing) {
                         // TODO: 可以在这里添加错误提示 UI
@@ -760,7 +760,6 @@ private fun ListViewItem(
 
     // 获取卡片显示信息（使用 Card 扩展方法）
     // @Composable 函数需要提前定义，确保在 Composable 上下文中正确调用
-    val cardTitle = card.getDisplayTitle()
     val formattedDate = card.formatUpdatedTime()
 
     // 多次使用的值提前定义，避免重复计算
@@ -828,7 +827,7 @@ private fun ListViewItem(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = cardTitle,
+                        text = card.displayTitle,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isHovered) {

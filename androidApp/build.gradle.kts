@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     // Android 应用插件
     alias(libs.plugins.androidApplication)
-    // Kotlin Android 插件
-    kotlin("android")
     // Compose 编译器插件 @Composable
     alias(libs.plugins.composeCompiler)
 }

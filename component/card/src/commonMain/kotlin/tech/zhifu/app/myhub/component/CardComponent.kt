@@ -21,9 +21,32 @@ fun CardComponent(
     onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val cardComponentMap: Map<CardType, CardComponentFactory> = koinInject()
-    val factory = cardComponentMap[card.type]
-        ?: error("No component factory registered for card type: ${card.type}")
+    val cardComponent = card.getCardComponent()
+    cardComponent.CardComponent(card, onEdit, onFavorite, onCardClick, modifier)
+}
 
-    factory(card, onEdit, onFavorite, onCardClick, modifier)
+private lateinit var factories: Map<CardType, CardComponent>
+
+@Composable
+private fun Card.getMixFactory(): CardComponent {
+    if (!::factories.isInitialized) {
+        factories = koinInject()
+    }
+    return factories[type]
+        ?: error("No component factory registered for card type: $type")
+}
+
+internal interface CardComponent {
+    @Suppress("NotConstructor")
+    @Composable
+    fun CardComponent(
+        card: Card,
+        onEdit: (Card) -> Unit = {},
+        onFavorite: (Card) -> Unit = {},
+        onCardClick: (Card) -> Unit = {},
+        modifier: Modifier = Modifier,
+    )
+
+    @Composable
+    fun getDisplayTitle(card: Card): String
 }
