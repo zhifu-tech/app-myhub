@@ -12,7 +12,7 @@ import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteStatisticsDataSource
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTagDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTemplateDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteUserDataSourceImpl
-import tech.zhifu.app.myhub.datastore.network.di.networkModule
+import tech.zhifu.app.myhub.network.di.networkModule
 
 /**
  * 远程数据源依赖注入模块

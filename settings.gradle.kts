@@ -43,6 +43,8 @@ include(":core:logger")
 include(":core:platform")
 include(":core:platform-compose")
 
+include(":core:network")
+include(":core:network-test")
 
 include(":core:datastore-model")
 
@@ -54,6 +56,7 @@ include(":core:datastore-database-server")
 
 include(":core:datastore-datasource-local")
 include(":core:datastore-datasource-remote")
+
 
 include(":core:datastore-repository")
 include(":core:datastore-repository-client")

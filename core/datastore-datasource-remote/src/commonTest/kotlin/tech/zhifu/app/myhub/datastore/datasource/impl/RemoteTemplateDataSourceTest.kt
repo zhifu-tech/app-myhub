@@ -7,11 +7,11 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTemplateDataSource
-import tech.zhifu.app.myhub.datastore.datasource.TestUtils.createMockHttpClient
+import tech.zhifu.app.myhub.network.test.createMockHttpClient
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.Template
-import tech.zhifu.app.myhub.datastore.network.ApiConfig
-import tech.zhifu.app.myhub.datastore.network.ApiException
+import tech.zhifu.app.myhub.network.ApiConfig
+import tech.zhifu.app.myhub.network.ApiException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

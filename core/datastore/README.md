@@ -468,7 +468,7 @@ repositoryModule (core:datastore-repository-server)
   - `RemoteTemplateDataSourceTest`
   - `RemoteUserDataSourceTest`
   - `RemoteStatisticsDataSourceTest`
-  - `TestUtils` - 测试工具类（`createMockHttpClient`）
+  - `createMockHttpClient` - Mock HTTP 客户端工具（在 `core:network-test` 中）
 
 - **`core:datastore-repository-client`** - Repository 单元测试
 
@@ -485,7 +485,7 @@ repositoryModule (core:datastore-repository-server)
 ### 测试工具
 
 - `runDatabaseTest` - 跨平台数据库测试辅助函数（在 `core:datastore-database-test` 中）
-- `createMockHttpClient` - Mock HTTP 客户端工具（在 `core:datastore-datasource-remote` 中）
+- `createMockHttpClient` - Mock HTTP 客户端工具（在 `core:network-test` 中）
 
 ---
 

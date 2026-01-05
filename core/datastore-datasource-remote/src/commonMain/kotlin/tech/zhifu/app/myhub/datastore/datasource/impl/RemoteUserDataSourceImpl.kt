@@ -10,9 +10,9 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
 import tech.zhifu.app.myhub.datastore.model.User
-import tech.zhifu.app.myhub.datastore.network.ApiConfig
-import tech.zhifu.app.myhub.datastore.network.ApiException
-import tech.zhifu.app.myhub.datastore.network.NetworkException
+import tech.zhifu.app.myhub.network.ApiConfig
+import tech.zhifu.app.myhub.network.ApiException
+import tech.zhifu.app.myhub.network.NetworkException
 
 /**
  * 远程用户数据源实现（使用Ktor Client）

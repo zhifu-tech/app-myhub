@@ -122,7 +122,6 @@ core/datastore-datasource-remote/
 │       └── kotlin/
 │           └── tech/zhifu/app/myhub/datastore/datasource/
 │               ├── RemoteCardDataSourceTest.kt
-│               └── TestUtils.kt
 └── build.gradle.kts
 ```
 
@@ -173,7 +172,7 @@ startKoin {
 在应用启动时配置 API 基础 URL：
 
 ```kotlin
-import tech.zhifu.app.myhub.datastore.network.ApiConfig
+import tech.zhifu.app.myhub.network.ApiConfig
 
 // 在应用初始化时调用
 ApiConfig.setBaseUrl("https://api.example.com")

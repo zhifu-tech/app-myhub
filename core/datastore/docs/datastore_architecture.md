@@ -320,7 +320,7 @@ Repository (CardRepository)
   - RemoteTemplateDataSourceTest
   - RemoteUserDataSourceTest
   - RemoteStatisticsDataSourceTest
-  - TestUtils - Mock HTTP 客户端工具
+  - createMockHttpClient - Mock HTTP 客户端工具（在 `core:network-test` 模块中）
 
 - ✅ **Repository 测试**（在 `core:datastore-repository-client` 中）
   - CardRepositoryTest
