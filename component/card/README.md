@@ -294,6 +294,19 @@ items(cards) { card ->
 }
 ```
 
+**内部实现：**
+
+```kotlin
+@Composable
+private fun Card.toComponent(): CardComponent {
+    if (!::factories.isInitialized) {
+        factories = koinInject()
+    }
+    return factories[type]
+        ?: error("No component factory registered for card type: $type")
+}
+```
+
 ### Card 扩展方法和属性
 
 提供卡片显示相关的扩展方法和属性，支持多语言和统一的数据展示。
@@ -434,6 +447,13 @@ fun ListViewItem(card: Card) {
 fun Card.formatUpdatedTime(): String
 ```
 
+**特性：**
+
+- 使用 `kotlinx.datetime` 进行跨平台日期格式化
+- 支持多语言月份名称（通过 Compose Resources）
+- 格式：`{月份} {日期}, {年份}`（如 "Oct 24, 2023"）
+- **注意**：这是 `@Composable` 函数，必须在 Compose 环境中使用
+
 **使用示例：**
 
 ```kotlin
@@ -451,6 +471,13 @@ fun CardItem(card: Card) {
 @Composable
 fun Card.formatCreatedTime(): String
 ```
+
+**特性：**
+
+- 与 `formatUpdatedTime()` 相同的格式化逻辑
+- 使用创建时间 `createdAt` 字段
+- 支持多语言月份名称
+- **注意**：这是 `@Composable` 函数，必须在 Compose 环境中使用
 
 ### CardModule - Koin 模块
 
@@ -929,7 +956,7 @@ fun QuoteCardList(cards: List<Card>) {
 2. **创建 Component 实现**：`NoteCardComponent.kt`
 
    ```kotlin
-   class NoteCardComponent : CardComponent {
+   internal class NoteCardComponent : CardComponent {
        @Composable
        override fun CardComponent(
            card: Card,
@@ -967,7 +994,42 @@ fun QuoteCardList(cards: List<Card>) {
    CardType.NOTE to NoteCardComponent()
    ```
 
-4. **完成**：`CardComponent` 自动支持新类型，无需修改使用代码
+4. **添加 Preview 支持**（可选）：
+
+   ```kotlin
+   // src/devMain/kotlin/.../NoteCard.dev.kt
+   @Preview
+   @Composable
+   private fun NoteCardLightPreview() {
+       AppTheme(darkTheme = false) {
+           NoteCard(
+               card = createSampleNoteCard(),
+               modifier = Modifier.padding(16.dp)
+           )
+       }
+   }
+   ```
+
+5. **添加单元测试**（可选）：
+
+   ```kotlin
+   // src/commonTest/kotlin/.../NoteCardComponentTest.kt
+   class NoteCardComponentTest {
+       private val component = NoteCardComponent()
+       
+       @Test
+       fun `test getTypeIconColor returns indigo`() {
+           assertEquals(Color(0xFF6366F1), component.getTypeIconColor())
+       }
+       
+       @Test
+       fun `test getTypeIconText returns N`() {
+           assertEquals("N", component.getTypeIconText())
+       }
+   }
+   ```
+
+6. **完成**：`CardComponent` 自动支持新类型，无需修改使用代码
 
 ## 🧪 Preview 支持
 

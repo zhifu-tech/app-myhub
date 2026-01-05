@@ -28,11 +28,13 @@ fun QuoteCard(
 ```
 
 **优点：**
+
 - ✅ 单一入口点，维护简单
 - ✅ 向后兼容（card 为 null 时使用示例数据）
 - ✅ 避免维护两套逻辑
 
 **实现要点：**
+
 - 在组件内部处理 null 判断
 - 使用示例数据作为默认值
 - 回调函数使用安全调用操作符 `?.invoke()`
@@ -57,32 +59,37 @@ fun QuoteCard(
 ```kotlin
 @Composable
 fun QuoteCard(
-    card: Card? = null,
-    onEdit: ((Card) -> Unit)? = null,
-    onFavorite: ((Card) -> Unit)? = null,
-    onCardClick: ((Card) -> Unit)? = null,
+    card: Card,
+    onEdit: (Card) -> Unit = {},
+    onFavorite: (Card) -> Unit = {},
+    onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // 使用示例数据或传入的数据
-    val displayCard = card ?: defaultQuoteCard
-    
     // 直接使用 Card 的字段
-    val author = displayCard.metadata?.quoteAuthor 
-        ?: displayCard.author 
-        ?: "Unknown Author"
-    
-    val category = displayCard.metadata?.quoteCategory ?: "GENERAL"
-    val formattedDate = displayCard.updatedAt.formatCardDate()
-    
+    val author = remember(card) {
+        card.metadata?.quoteAuthor
+            ?: card.author
+            ?: "Unknown Author"
+    }
+
+    val category = remember(card) {
+        card.metadata?.quoteCategory ?: "GENERAL"
+    }
+
+    // 使用 Card 扩展方法格式化日期
+    val formattedDate = card.formatUpdatedTime()
+
     // ... UI 实现
 }
 ```
 
 **优势：**
+
 - ✅ 不增加额外的数据模型
 - ✅ 减少数据转换开销
 - ✅ 保持数据模型单一
 - ✅ 易于维护
+- ✅ 通过 CardComponent 接口实现解耦
 
 ## 📅 日期格式化
 
@@ -106,31 +113,32 @@ import kotlinx.datetime.toLocalDateTime
 
 /**
  * 格式化卡片日期为 "Oct 24, 2023" 格式
- * 
+ *
  * 将 kotlin.time.Instant 转换为 kotlinx.datetime.Instant 进行格式化
  */
 fun kotlin.time.Instant.formatCardDate(): String {
     // 转换为 kotlinx.datetime.Instant
     val kxInstant = KxInstant.fromEpochSeconds(this.epochSeconds)
-    
+
     // 转换为本地时间
     val localDateTime = kxInstant.toLocalDateTime(TimeZone.currentSystemDefault())
-    
+
     // 格式化
     val monthNames = listOf(
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     )
-    
+
     val monthName = monthNames.getOrNull(localDateTime.monthNumber - 1) ?: "Jan"
     val day = localDateTime.dayOfMonth
     val year = localDateTime.year
-    
+
     return "$monthName $day, $year"
 }
 ```
 
 **关键点：**
+
 - ✅ 使用 `kotlinx.datetime` 进行跨平台格式化
 - ✅ `kotlin.time.Instant` 已做平台差异化处理
 - ✅ 通过 `fromEpochSeconds()` 转换为 `kotlinx.datetime.Instant`
@@ -246,7 +254,7 @@ fun QuoteCard(
 ) {
     // 使用示例数据或传入的数据
     val displayCard = card ?: defaultQuoteCard
-    
+
     // ... UI 实现
 }
 ```
@@ -255,11 +263,11 @@ fun QuoteCard(
 
 ```kotlin
 // 在组件内部直接处理空值
-val author = displayCard.metadata?.quoteAuthor 
-    ?: displayCard.author 
+val author = displayCard.metadata?.quoteAuthor
+    ?: displayCard.author
     ?: "Unknown Author"
 
-val category = displayCard.metadata?.quoteCategory 
+val category = displayCard.metadata?.quoteCategory
     ?: "GENERAL"
 
 val formattedDate = displayCard.updatedAt.formatCardDate()
@@ -302,7 +310,7 @@ Card(
         .clickable(
             interactionSource = interactionSource,
             indication = null,
-            onClick = { 
+            onClick = {
                 if (displayCard != defaultQuoteCard) {
                     onCardClick?.invoke(displayCard)
                 }
@@ -327,58 +335,70 @@ fun QuoteCard(
     val displayCard = remember(card) {
         card ?: defaultQuoteCard
     }
-    
+
     // 使用 remember 缓存格式化结果
     val formattedDate = remember(displayCard.updatedAt) {
         displayCard.updatedAt.formatCardDate()
     }
-    
+
     // 使用 remember 缓存数据提取
     val author = remember(displayCard) {
-        displayCard.metadata?.quoteAuthor 
-            ?: displayCard.author 
+        displayCard.metadata?.quoteAuthor
+            ?: displayCard.author
             ?: "Unknown Author"
     }
-    
+
     val category = remember(displayCard) {
         displayCard.metadata?.quoteCategory ?: "GENERAL"
     }
-    
+
     // ... UI 实现
 }
 ```
 
 ## 📋 实现步骤
 
-### 阶段 1：准备工作
+### 阶段 1：准备工作 ✅
 
 1. ✅ 检查依赖关系
+
    - 确认 `component/card` 已依赖 `core:datastore-model`
    - 确认已依赖 `kotlinx-datetime`
-   - 如未依赖，在 `build.gradle.kts` 中添加
+   - 已在 `build.gradle.kts` 中添加
 
 2. ✅ 创建工具目录
-   - 创建 `utils` 目录
+   - 日期格式化功能已集成到 `CardComponents.kt` 中
 
-### 阶段 2：日期格式化工具
+### 阶段 2：日期格式化工具 ✅
 
-1. 创建 `CardDateFormatter.kt`（通用实现，无需平台特定代码）
-2. 使用 `kotlinx-datetime` 进行格式化
-3. 添加单元测试
+1. ✅ 日期格式化功能已实现
+   - 使用 `kotlinx-datetime` 进行跨平台格式化
+   - 支持多语言月份名称（通过 Compose Resources）
+   - 已集成到 `CardComponents.kt` 中
 
-### 阶段 3：QuoteCard 重构
+### 阶段 3：QuoteCard 重构 ✅
 
-1. 修改函数签名为单一函数 + 可选参数
-2. 实现 null 判断和默认值处理
-3. 直接使用 `Card` 数据模型（不创建 QuoteDisplayData）
-4. 实现回调处理逻辑（使用安全调用）
-5. 使用 `remember` 优化性能
+1. ✅ 函数签名已更新为单一函数 + 必需参数
+   - `card: Card` 为必需参数（不再使用可选参数）
+   - 所有回调函数都有默认值
+2. ✅ 直接使用 `Card` 数据模型
+3. ✅ 实现回调处理逻辑
+4. ✅ 使用 `remember` 优化性能
 
-### 阶段 4：测试和文档
+### 阶段 4：CardComponent 接口架构 ✅
 
-1. 更新 README 文档
-2. 添加使用示例
-3. 验证向后兼容性
+1. ✅ 创建 CardComponent 接口
+2. ✅ 实现所有 Component 类
+3. ✅ 更新 CardModule 使用接口
+4. ✅ 实现 Card 扩展方法通过接口获取
+
+### 阶段 5：测试和文档 ✅
+
+1. ✅ 更新 README 文档
+2. ✅ 添加使用示例
+3. ✅ 添加单元测试
+4. ✅ 创建 Mock 工具类
+5. ✅ 验证所有功能
 
 ## ⚠️ 注意事项
 
@@ -525,7 +545,6 @@ fun ChecklistCard(
 3. **跨平台日期格式化**：使用 kotlinx-datetime，无需平台特定实现
 4. **项目一致性**：与项目现有架构保持一致
 
-**文档版本：** v2.0  
-**创建日期：** 2024年  
-**最后更新：** 2024年
-
+**文档版本：** v1.0  
+**创建日期：** 2025 年  
+**最后更新：** 2026 年
