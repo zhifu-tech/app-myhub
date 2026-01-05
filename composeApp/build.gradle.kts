@@ -125,19 +125,17 @@ kotlin {
         }
 
         wasmJsMain.dependencies {
-            // Webpack 插件依赖（用于 sqljs-config.js）
+            // Webpack 插件依赖
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))
             implementation(npm("sql.js", "1.12.0"))
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
         }
 
         jsMain.dependencies {
-            // Webpack 插件依赖（用于 sqljs-config.js）
+            // Webpack 插件依赖
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))
             implementation(npm("sql.js", "1.12.0"))
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
         }
     }
 }
