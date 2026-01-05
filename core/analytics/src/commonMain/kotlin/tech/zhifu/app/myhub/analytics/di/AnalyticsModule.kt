@@ -10,7 +10,6 @@ import tech.zhifu.app.myhub.analytics.AnalyticsConfig
 import tech.zhifu.app.myhub.analytics.AnalyticsConsent
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
-import tech.zhifu.app.myhub.analytics.AnalyticsProviderRegistrar
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.DefaultAnalyticsConsent
 
@@ -19,8 +18,7 @@ import tech.zhifu.app.myhub.analytics.DefaultAnalyticsConsent
  */
 fun analyticsModule(
     config: () -> AnalyticsConfig,
-    consent: AnalyticsConsent = DefaultAnalyticsConsent(),
-    registrar: AnalyticsProviderRegistrar? = null
+    consent: AnalyticsConsent = DefaultAnalyticsConsent()
 ): Module = module {
     single<AnalyticsConfig> { config() }
 
@@ -28,8 +26,8 @@ fun analyticsModule(
 
     single<AnalyticsProviderFactory> {
         val factory = AnalyticsProviderFactory()
-        // 注册平台特定的 Provider
-        registrar?.register(factory)
+        // 自动注册平台特定的 Provider
+        getAnalyticsRegistrar()?.register(factory)
         factory
     }
 

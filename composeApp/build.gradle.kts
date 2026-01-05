@@ -106,6 +106,8 @@ kotlin {
             implementation(projects.core.platformCompose)
             // 日志
             implementation(projects.core.logger)
+            // 统计框架
+            implementation(projects.core.analytics)
             // 数据层（必需：数据存储和网络）
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)

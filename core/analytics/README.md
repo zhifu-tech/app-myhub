@@ -19,12 +19,11 @@
 ```kotlin
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
-import tech.zhifu.app.myhub.analytics.provider.JvmAnalyticsRegistrar
 
 fun initKoin() {
     val appScope = AppCoroutineScope()
 
-    startKoin {
+    val koinApplication = startKoin {
         modules(
             single<AppCoroutineScope> { appScope },
             analyticsModule(
@@ -40,18 +39,22 @@ fun initKoin() {
                             )
                         )
                     )
-                },
-                registrar = JvmAnalyticsRegistrar() // Desktop 平台
+                }
+                // 注意：平台特定的 Provider 注册器已内置在 analyticsModule 中
+                // 无需手动传入 registrar 参数
             )
         )
     }
 
     // 初始化统计服务
     appScope.launch {
-        getKoin().get<AnalyticsManager>().initialize()
+        delay(100)
+        koinApplication.koin.get<AnalyticsManager>().initialize()
     }
 }
 ```
+
+**注意**：平台特定的 Provider 注册器（如 `JvmAnalyticsRegistrar`）已通过 `expect/actual` 机制内置在 `core:analytics` 模块中，应用层无需关心平台特定的实现细节。
 
 ### 2. 在业务代码中使用
 
@@ -128,6 +131,7 @@ class DashboardViewModel(
 - ✅ 实现 ConsoleProvider（用于测试和 Desktop）
 - ✅ 实现 FileProvider（用于 Desktop QA）
 - ✅ 编写单元测试（30+ 测试用例，100% 通过率）
+- ✅ 平台特定的 Provider 注册器内置（expect/actual 机制）
 
 #### 核心功能 ✅
 
@@ -139,6 +143,7 @@ class DashboardViewModel(
 - ✅ AppCoroutineScope 应用级协程作用域
 - ✅ Debug 模式自动注入 ConsoleProvider
 - ✅ 批量事件接口（logEvents）
+- ✅ 平台特定注册器自动发现机制（expect/actual）
 
 ### 🚧 待办事项
 
@@ -168,9 +173,10 @@ class DashboardViewModel(
 
 #### 阶段四：集成和优化（1-2 周）
 
-- ⏳ 集成到应用
+- ✅ 集成到应用
 
-  - ⏳ 在 composeApp 中集成
+  - ✅ 在 composeApp 中集成 ConsoleProvider
+  - ✅ 平台特定注册器内置到 core:analytics 模块
   - ⏳ 在各个 Feature 模块中添加统计埋点
 
 - ⏳ 性能优化
@@ -188,9 +194,10 @@ class DashboardViewModel(
 ### 📝 下一步计划
 
 1. **优先实现 FirebaseProvider(Android)** - 作为生产级样板
-2. **在 composeApp 中集成 ConsoleProvider** - 验证埋点体验
+2. ✅ **在 composeApp 中集成 ConsoleProvider** - 已完成，已验证埋点体验
 3. **实现友盟适配器** - 支持国内用户
 4. **添加集成测试** - 验证端到端流程
+5. **实现 Android/iOS 平台特定的 Provider 注册器** - 为 Firebase/Umeng 等 SDK 做准备
 
 ---
 

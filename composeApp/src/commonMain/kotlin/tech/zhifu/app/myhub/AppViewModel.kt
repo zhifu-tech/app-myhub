@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import tech.zhifu.app.myhub.analytics.AnalyticsEvent
+import tech.zhifu.app.myhub.analytics.AnalyticsService
+import tech.zhifu.app.myhub.analytics.AnalyticsValue
 import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.local.customAppLocale
 import tech.zhifu.app.myhub.local.customAppThemeIsDark
@@ -31,7 +34,8 @@ import tech.zhifu.app.myhub.ui.WindowSizeClass
  */
 class AppViewModel(
     private val settingsRepository: SettingsRepository,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val analyticsService: AnalyticsService? = null
 ) {
     private val logger = logger("App")
 
@@ -55,6 +59,17 @@ class AppViewModel(
     fun initialize(initialWindowSizeClass: WindowSizeClass = WindowSizeClass.Compact) {
         coroutineScope.launch {
             try {
+                // 记录应用启动事件
+                analyticsService?.logEvent(
+                    AnalyticsEvent(
+                        name = "app_started",
+                        parameters = mapOf(
+                            "environment" to AnalyticsValue.Str(AppBuildConfig.environment.name),
+                            "version_type" to AnalyticsValue.Str(AppBuildConfig.versionType.name)
+                        )
+                    )
+                )
+
                 // 记录构建配置
                 if (AppBuildConfig.enableLogging) {
                     logBuildConfig()
@@ -116,6 +131,14 @@ class AppViewModel(
     fun navigateTo(screen: Screen) {
         if (currentScreen != screen) {
             currentScreen = screen
+            // 记录屏幕切换事件
+            analyticsService?.setScreen(screen.route, screen::class.simpleName)
+            analyticsService?.logEvent(
+                AnalyticsEvent.screenView(
+                    screenName = screen.route,
+                    screenClass = screen::class.simpleName
+                )
+            )
             updateReadyState()
         }
     }
