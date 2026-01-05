@@ -36,6 +36,19 @@ kotlin {
 
             implementation(compose.components.uiToolingPreview)
         }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            // Compose UI 依赖（测试需要）
+            implementation(compose.ui)
+            implementation(compose.runtime)
+            // 数据模型依赖（测试需要）
+            implementation(projects.core.datastoreModel)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotlin.testJunit)
+        }
     }
 }
 
