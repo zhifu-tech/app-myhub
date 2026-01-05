@@ -46,6 +46,8 @@ kotlin {
 
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)
+            // Preview 支持
+            implementation(compose.components.uiToolingPreview)
         }
 
         commonTest.dependencies {
@@ -55,3 +57,6 @@ kotlin {
     }
 }
 
+dependencies {
+    "androidRuntimeClasspath"(compose.uiTooling)
+}

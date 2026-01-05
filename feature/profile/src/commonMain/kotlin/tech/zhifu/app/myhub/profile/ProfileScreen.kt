@@ -166,7 +166,7 @@ fun ProfileScreen(
  * 按照设计图：居中垂直布局，深色背景，头像居中带编辑图标
  */
 @Composable
-private fun ProfileHeaderCard(
+internal fun ProfileHeaderCard(
     user: tech.zhifu.app.myhub.datastore.model.User,
     onEditClick: () -> Unit
 ) {
@@ -288,7 +288,7 @@ private fun ProfileHeaderCard(
  * 统计数据卡片
  */
 @Composable
-private fun ProfileStatsCard(
+internal fun ProfileStatsCard(
     statistics: tech.zhifu.app.myhub.datastore.model.Statistics?
 ) {
     if (statistics == null) return
@@ -338,7 +338,7 @@ private fun ProfileStatsCard(
  * 统计项
  */
 @Composable
-private fun StatItem(
+internal fun StatItem(
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -373,7 +373,7 @@ private fun StatItem(
  * 配置入口列表
  */
 @Composable
-private fun ProfileSettingsList(
+internal fun ProfileSettingsList(
     onSettingsClick: () -> Unit
 ) {
     Surface(
@@ -458,7 +458,7 @@ private fun ProfileSettingsList(
  * 关于信息
  */
 @Composable
-private fun ProfileAboutSection() {
+internal fun ProfileAboutSection() {
     Surface(
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -487,7 +487,7 @@ private fun ProfileAboutSection() {
  * 编辑资料对话框
  */
 @Composable
-private fun EditProfileDialog(
+internal fun EditProfileDialog(
     state: EditProfileDialogState,
     onDismiss: () -> Unit,
     onSave: (String, String, String) -> Unit

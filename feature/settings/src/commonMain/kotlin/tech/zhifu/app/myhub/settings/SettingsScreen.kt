@@ -102,7 +102,7 @@ fun SettingsScreen(
  * 主题设置项
  */
 @Composable
-private fun ThemeSettingItem(
+fun ThemeSettingItem(
     isDarkMode: Boolean,
     onThemeChanged: (Boolean) -> Unit
 ) {
@@ -136,7 +136,7 @@ private fun ThemeSettingItem(
  * 语言设置项
  */
 @Composable
-private fun LanguageSettingItem(
+internal fun LanguageSettingItem(
     currentLanguage: Language,
     onLanguageClick: () -> Unit
 ) {
@@ -158,7 +158,7 @@ private fun LanguageSettingItem(
  * 语言选择对话框
  */
 @Composable
-private fun LanguageSelectionDialog(
+internal fun LanguageSelectionDialog(
     currentLanguage: Language,
     onLanguageSelected: (Language) -> Unit,
     onDismiss: () -> Unit

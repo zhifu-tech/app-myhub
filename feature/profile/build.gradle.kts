@@ -43,8 +43,15 @@ kotlin {
 
             // 共享组件
             implementation(projects.component.mixed) // Avatar 组件
+
+            // Preview 支持
+            implementation(compose.components.uiToolingPreview)
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(compose.uiTooling)
 }
 
 

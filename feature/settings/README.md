@@ -153,6 +153,71 @@ interface LocalSettingStore {
 
 ```text
 feature/settings/
+├── src/
+│   ├── commonMain/
+│   │   ├── kotlin/
+│   │   │   └── tech/zhifu/app/myhub/settings/
+│   │   │       ├── SettingsScreen.kt          # UI 组件
+│   │   │       ├── SettingsViewModel.kt        # ViewModel
+│   │   │       ├── SettingsUiState.kt          # UI 状态
+│   │   │       ├── settings/                   # 设置项实现
+│   │   │       ├── data/                       # 数据层
+│   │   │       ├── domain/                     # 领域层
+│   │   │       └── di/
+│   │   │           └── SettingsModule.kt      # 依赖注入模块
+│   │   └── composeResources/
+│   │       └── values/
+│   │           ├── strings.xml                 # 默认字符串资源
+│   │           ├── values-zh-rCN/
+│   │           │   └── strings.xml            # 简体中文
+│   │           ├── values-zh-rTW/
+│   │           │   └── strings.xml            # 繁体中文
+│   │           └── values-ja/
+│   │               └── strings.xml             # 日语
+│   └── devMain/                                # 预览支持
+│       └── kotlin/
+│           └── tech/zhifu/app/myhub/settings/
+│               └── SettingsScreen.dev.kt       # Preview 函数
+├── build.gradle.kts                            # 构建配置
+└── README.md                                   # 本文档
+```
+
+## 🧪 Preview 支持
+
+Settings 模块提供了完整的 Preview 支持，位于 `devMain` source set 中。
+
+### Preview 文件结构
+
+```text
+src/devMain/kotlin/tech/zhifu/app/myhub/settings/
+└── SettingsScreen.dev.kt
+```
+
+### Preview 特性
+
+Preview 文件包含以下预览场景：
+
+#### SettingsScreen 完整预览
+
+- **浅色主题** - 展示 Settings 在浅色主题下的外观
+- **深色主题** - 展示 Settings 在深色主题下的外观
+
+### 使用 Preview
+
+在 Android Studio 或 IntelliJ IDEA 中：
+
+1. 打开 `SettingsScreen.dev.kt` 文件
+2. 点击 Preview 函数左侧的预览图标
+3. 查看 Settings 在不同主题下的外观
+
+### Preview 环境初始化
+
+Preview 文件使用示例数据，无需额外的依赖初始化。
+
+## 📁 模块结构（旧版）
+
+```text
+feature/settings/
 ├── domain/
 │   ├── Setting.kt                    # 设置项接口
 │   ├── SettingScope.kt              # 设置作用域枚举
@@ -832,6 +897,7 @@ class ThemeSettingTest {
 - ✅ 设置值自动同步到用户偏好（USER 作用域）
 - ✅ **完整的单元测试套件（50+ 测试用例）**
 - ✅ **所有平台测试通过（JVM、JS、iOS）**
+- ✅ Preview 支持（devMain source set）
 
 **待扩展**：
 
