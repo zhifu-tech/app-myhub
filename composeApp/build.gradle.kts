@@ -67,8 +67,10 @@ kotlin {
             implementation(compose.ui)
             // Compose 资源组件（必需：使用 composeResources）
             implementation(compose.components.resources)
-            // Compose Preview 工具（必需：@Preview 注解）
-            implementation(compose.components.uiToolingPreview)
+            if (project.isDev()) {
+                // Compose Preview 工具（必需：@Preview 注解）
+                implementation(compose.components.uiToolingPreview)
+            }
             // Material Icons 扩展（必需：Icons.Default.* 图标）
             implementation(compose.materialIconsExtended)
 
@@ -100,6 +102,8 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             // ========== 项目模块依赖 ==========
+            // App Build Config（必需：应用构建配置）
+            implementation(projects.core.appBuildConfig)
             // 平台抽象层（必需：平台特定实现，包含日志工具）
             implementation(projects.core.platform)
             // 平台 Compose UI 组件（必需：WindowSize 相关功能，LocalAppTheme, LocalAppLocale 等）

@@ -44,8 +44,10 @@ kotlin {
             // Component 模块
             implementation(projects.component.card)
 
-            // Preview 支持
-            implementation(compose.components.uiToolingPreview)
+            // Preview 支持（仅在 dev 环境）
+            if (project.isDev()) {
+                implementation(compose.components.uiToolingPreview)
+            }
         }
     }
 }

@@ -88,9 +88,9 @@ class DashboardViewModel(
 
 ### ConsoleProvider
 
-- **平台**：JVM、JS、WASM
-- **用途**：测试和 Desktop 平台调试
-- **输出**：控制台输出
+- **平台**：所有平台（Android、iOS、JVM、JS、WASM）
+- **用途**：所有平台的测试和调试环境
+- **输出**：通过 logger 输出到控制台
 
 ### FileProvider
 
@@ -128,10 +128,11 @@ class DashboardViewModel(
 - ✅ 实现 AnalyticsManager
 - ✅ 实现 AnalyticsConfig 和配置管理
 - ✅ 创建 Koin DI 模块
-- ✅ 实现 ConsoleProvider（用于测试和 Desktop）
+- ✅ 实现 ConsoleProvider（所有平台默认支持）
 - ✅ 实现 FileProvider（用于 Desktop QA）
 - ✅ 编写单元测试（30+ 测试用例，100% 通过率）
 - ✅ 平台特定的 Provider 注册器内置（expect/actual 机制）
+- ✅ 所有平台默认注册 ConsoleProvider（Android、iOS、JVM、JS、WASM）
 
 #### 核心功能 ✅
 

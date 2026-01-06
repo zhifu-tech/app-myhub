@@ -34,7 +34,9 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
 
-            implementation(compose.components.uiToolingPreview)
+            if (project.isDev()) {
+                implementation(compose.components.uiToolingPreview)
+            }
         }
 
         commonTest.dependencies {

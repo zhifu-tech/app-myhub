@@ -61,47 +61,50 @@ configure<KotlinMultiplatformExtension> {
         }
     }
 
-    // 1. 解析当前激活的变体组件 (例如 "devFree" -> env="dev", tier="free")
-    val activeVariant = (project.findProperty("appVariant") ?: "devFree").toString()
-
-    val isDev = activeVariant.startsWith("dev", ignoreCase = true)
-    val env = if (isDev) "dev" else "prod"
+    // 1. 解析当前激活的变体组件（独立参数）
+    val env = project.getVariantEnvironment()
+    val tier = project.getVariantTier()
+    val channel = project.getVariantChannel() // 渠道，默认值为 "channel"
     val envTitle = env.replaceFirstChar { it.uppercase() }
-
-    val isPremium = activeVariant.contains("Premium", ignoreCase = true)
-    val tier = if (isPremium) "premium" else "free"
     val tierTitle = tier.replaceFirstChar { it.uppercase() }
-
-    val variantTitle = activeVariant.replaceFirstChar { it.uppercase() }
+    val channelTitle = channel.replaceFirstChar { it.uppercase() }
 
     sourceSets {
         // 2. 注入业务逻辑 (Common)
         commonMain.get().apply {
-            // 注入环境通用目录 (e.g., src/devMain)
+            // 注入环境目录 (e.g., src/devMain)
             kotlin.srcDir("src/${env}Main/kotlin")
-            // 注入级别通用目录 (e.g., src/freeMain)
+            // 注入级别目录 (e.g., src/freeMain)
             kotlin.srcDir("src/${tier}Main/kotlin")
-            // 注入完整变体目录 (e.g., src/devFreeMain)
-            kotlin.srcDir("src/${activeVariant}Main/kotlin")
+            // 注入渠道目录 (e.g., src/googlePlayMain)，如果指定了渠道
+            channel?.let {
+                kotlin.srcDir("src/${it}Main/kotlin")
+            }
 
             resources.srcDir("src/${env}Main/resources")
             resources.srcDir("src/${tier}Main/resources")
-            resources.srcDir("src/${activeVariant}Main/resources")
+            channel?.let {
+                resources.srcDir("src/${it}Main/resources")
+            }
         }
 
-        // 3. 辅助函数：注入平台特定的变体组合目录
+        // 3. 辅助函数：注入平台特定的变体目录
         fun KotlinSourceSet.injectPlatformVariant(platform: String) {
             val p = platform.lowercase()
             // 注入平台环境代码 (e.g., src/androidDevMain)
             kotlin.srcDir("src/${p}${envTitle}Main/kotlin")
             // 注入平台级别代码 (e.g., src/androidFreeMain)
             kotlin.srcDir("src/${p}${tierTitle}Main/kotlin")
-            // 注入平台全变体代码 (e.g., src/androidDevFreeMain)
-            kotlin.srcDir("src/${p}${variantTitle}Main/kotlin")
+            // 注入平台渠道代码 (e.g., src/androidGooglePlayMain)，如果指定了渠道
+            channelTitle?.let {
+                kotlin.srcDir("src/${p}${it}Main/kotlin")
+            }
 
             resources.srcDir("src/${p}${envTitle}Main/resources")
             resources.srcDir("src/${p}${tierTitle}Main/resources")
-            resources.srcDir("src/${p}${variantTitle}Main/resources")
+            channelTitle?.let {
+                resources.srcDir("src/${p}${it}Main/resources")
+            }
         }
 
         // 应用到各平台默认源集

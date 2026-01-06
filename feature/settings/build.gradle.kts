@@ -47,7 +47,9 @@ kotlin {
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)
             // Preview 支持
-            implementation(compose.components.uiToolingPreview)
+            if (project.isDev()) {
+                implementation(compose.components.uiToolingPreview)
+            }
         }
 
         commonTest.dependencies {

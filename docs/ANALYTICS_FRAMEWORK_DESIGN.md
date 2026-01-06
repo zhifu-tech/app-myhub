@@ -203,6 +203,8 @@ core/analytics/
     │       ├── AnalyticsManager.kt            # 统计管理器
     │       ├── AnalyticsConfig.kt            # 统计配置
     │       ├── Region.kt                     # 地区枚举
+    │       ├── provider/
+    │       │   └── ConsoleProvider.kt         # 控制台输出（所有平台）
     │       └── di/
     │           └── AnalyticsModule.kt        # Koin DI 模块
     │
@@ -225,7 +227,6 @@ core/analytics/
     ├── jvmMain/
     │   └── kotlin/tech/zhifu/app/myhub/analytics/
     │       └── provider/
-    │           ├── ConsoleProvider.kt         # Desktop 控制台输出
     │           └── FileProvider.kt            # Desktop 文件输出（CSV/JSON）
     │
     ├── jsMain/
@@ -941,16 +942,25 @@ class FirebaseProvider : BaseAnalyticsProvider() {
 }
 ```
 
-#### ConsoleProvider（控制台输出 - Desktop/测试）
+#### ConsoleProvider（控制台输出 - 所有平台/测试）
 
 ```kotlin
 /**
  * 控制台输出 Provider
- * 用于 Desktop 平台和测试环境
+ * 用于所有平台的测试和调试环境
+ * 通过 logger 输出统计事件，便于开发和调试
  */
-class ConsoleProvider : BaseAnalyticsProvider() {
+class ConsoleProvider(
+    private val logger: Logger = logger("Analytics.ConsoleProvider")
+) : BaseAnalyticsProvider() {
     override val name = "Console"
-    override val supportedPlatforms = setOf(Platform.JVM, Platform.JS, Platform.WASM)
+    override val supportedPlatforms = setOf(
+        Platform.ANDROID,
+        Platform.IOS,
+        Platform.JVM,
+        Platform.JS,
+        Platform.WASM
+    )
     override val supportedRegions = setOf(Region.DOMESTIC, Region.OVERSEAS)
 
     override suspend fun initialize(config: ProviderConfig) {
@@ -958,28 +968,45 @@ class ConsoleProvider : BaseAnalyticsProvider() {
     }
 
     override fun doLogEvent(event: AnalyticsEvent) {
-        println("[Analytics] Event: ${event.name}")
-        event.parameters.forEach { (key, value) ->
-            println("  $key: $value")
+        val params = buildString {
+            append("Event: ${event.name}")
+            if (event.parameters.isNotEmpty()) {
+                append("\n  Parameters:")
+                event.parameters.forEach { (key, value) ->
+                    append("\n    $key: ${formatValue(value)}")
+                }
+            }
+            event.value?.let { append("\n  value: $it") }
+            event.currency?.let { append("\n  currency: $it") }
         }
-        event.value?.let { println("  value: $it") }
-        event.currency?.let { println("  currency: $it") }
+        logger.info { params }
     }
 
     override fun setUserProperty(key: String, value: AnalyticsValue?) {
-        println("[Analytics] UserProperty: $key = $value")
+        logger.info { "UserProperty: $key = ${value?.let { formatValue(it) } ?: "null"}" }
     }
 
     override fun setUserId(userId: String?) {
-        println("[Analytics] UserId: $userId")
+        logger.info { "UserId: $userId" }
     }
 
     override fun setScreen(screenName: String, screenClass: String?) {
-        println("[Analytics] Screen: $screenName (class: $screenClass)")
+        val screenInfo = buildString {
+            append("Screen: $screenName")
+            screenClass?.let { append(" (class: $it)") }
+        }
+        logger.info { screenInfo }
     }
 
     override fun reset() {
-        println("[Analytics] Reset")
+        logger.info { "Reset" }
+    }
+
+    private fun formatValue(value: AnalyticsValue): String = when (value) {
+        is AnalyticsValue.Str -> value.value
+        is AnalyticsValue.Num -> value.value.toString()
+        is AnalyticsValue.Int -> value.value.toString()
+        is AnalyticsValue.Bool -> value.value.toString()
     }
 }
 ```
@@ -1151,7 +1178,13 @@ object AnalyticsConfigFactory {
 ```kotlin
 // androidMain/kotlin/.../AndroidAnalyticsRegistrar.kt
 class AndroidAnalyticsRegistrar : AnalyticsProviderRegistrar {
+    private val commonRegistrar = CommonAnalyticsRegistrar()
+
     override fun register(factory: AnalyticsProviderFactory) {
+        // 先注册通用 Provider（ConsoleProvider - 所有平台都支持）
+        commonRegistrar.register(factory)
+
+        // 注册 Android 特定的 Provider
         factory.register(ProviderType.UMENG) { config ->
             UmengProvider().apply {
                 // Android 特定初始化
@@ -1172,7 +1205,13 @@ class AndroidAnalyticsRegistrar : AnalyticsProviderRegistrar {
 ```kotlin
 // iosMain/kotlin/.../IosAnalyticsRegistrar.kt
 class IosAnalyticsRegistrar : AnalyticsProviderRegistrar {
+    private val commonRegistrar = CommonAnalyticsRegistrar()
+
     override fun register(factory: AnalyticsProviderFactory) {
+        // 先注册通用 Provider（ConsoleProvider - 所有平台都支持）
+        commonRegistrar.register(factory)
+
+        // 注册 iOS 特定的 Provider
         factory.register(ProviderType.UMENG) { config ->
             UmengProvider().apply {
                 // iOS 特定初始化
@@ -1183,6 +1222,49 @@ class IosAnalyticsRegistrar : AnalyticsProviderRegistrar {
             FirebaseProvider().apply {
                 // iOS 特定初始化
             }
+        }
+    }
+}
+```
+
+#### JVM 平台注册器（Desktop）
+
+```kotlin
+// jvmMain/kotlin/.../JvmAnalyticsRegistrar.kt
+class JvmAnalyticsRegistrar : AnalyticsProviderRegistrar {
+    private val commonRegistrar = CommonAnalyticsRegistrar()
+
+    override fun register(factory: AnalyticsProviderFactory) {
+        // 先注册通用 Provider（ConsoleProvider）
+        commonRegistrar.register(factory)
+
+        // 注册 JVM 平台特定的 FileProvider
+        factory.register(ProviderType.FILE) { config ->
+            val outputDir = config.customParams["outputDir"] ?: "./analytics"
+            val format = when (config.customParams["format"]?.uppercase()) {
+                "CSV" -> FileProvider.FileFormat.CSV
+                else -> FileProvider.FileFormat.JSON
+            }
+            FileProvider(outputDir = outputDir, format = format)
+        }
+    }
+}
+```
+
+#### JS/WASM 平台注册器（Web）
+
+```kotlin
+// jsMain/kotlin/.../JsAnalyticsRegistrar.kt
+class JsAnalyticsRegistrar : AnalyticsProviderRegistrar {
+    private val commonRegistrar = CommonAnalyticsRegistrar()
+
+    override fun register(factory: AnalyticsProviderFactory) {
+        // 先注册通用 Provider（ConsoleProvider）
+        commonRegistrar.register(factory)
+
+        // 注册 Web 特定的 Provider
+        factory.register(ProviderType.GOOGLE_ANALYTICS) { config ->
+            GoogleAnalyticsProvider(config)
         }
     }
 }
@@ -1351,7 +1433,7 @@ fun DashboardScreen(
 
 2. **实现基础适配器**
 
-   - ConsoleProvider（用于测试和 Desktop）
+   - ConsoleProvider（用于所有平台的测试和调试，通过 logger 输出）
    - MockProvider（用于单元测试）
 
 3. **编写单元测试**
@@ -1457,7 +1539,9 @@ fun DashboardScreen(
 
 - `AnalyticsProviderFactory` 使用 Registry 模式
 - **新增**：`AnalyticsProviderRegistrar` 接口，各平台模块实现
-- **新增**：Android/iOS 平台注册器示例
+- **新增**：`CommonAnalyticsRegistrar` 注册所有平台都支持的 Provider（如 ConsoleProvider）
+- **新增**：所有平台（Android、iOS、JVM、JS、WASM）默认注册 ConsoleProvider
+- **新增**：Android/iOS/JVM/JS/WASM 平台注册器实现
 - 支持动态注册 Provider
 - 支持插件式扩展（未来可支持 feature module）
 
@@ -1475,7 +1559,7 @@ fun DashboardScreen(
 
 **原因**：Web 世界统计模型与移动端不同，不要强行对齐
 
-**方案**：Web 平台只实现 `GoogleAnalyticsProvider` 和 `ConsoleProvider`
+**方案**：Web 平台只实现 `GoogleAnalyticsProvider` 和 `ConsoleProvider`（ConsoleProvider 支持所有平台）
 
 ### 8. ✅ 事件命名规范：AnalyticsEvents 对象
 

@@ -21,7 +21,9 @@ kotlin {
             implementation(compose.ui)
 
             // Preview 支持
-            implementation(compose.components.uiToolingPreview)
+            if (project.isDev()) {
+                implementation(compose.components.uiToolingPreview)
+            }
         }
     }
 }

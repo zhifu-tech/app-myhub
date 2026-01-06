@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.config.AppBuildConfig
-import tech.zhifu.app.myhub.config.getEnvironmentDescription
 
 /**
  * 应用顶部栏
@@ -49,18 +48,18 @@ fun AppTopBar() {
                 }
                 Column {
                     Text(
-                        text = AppBuildConfig.appName,
+                        text = AppBuildConfig.APP_NAME,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    // 显示变体信息（仅在开发环境显示）
-                    if (AppBuildConfig.enableDebugFeatures) {
-                        Text(
-                            text = getEnvironmentDescription(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+//                    // 显示变体信息（仅在开发环境显示）
+//                    if (AppBuildConfig.enableDebugFeatures) {
+//                        Text(
+//                            text = getEnvironmentDescription(),
+//                            style = MaterialTheme.typography.labelSmall,
+//                            color = MaterialTheme.colorScheme.onSurfaceVariant
+//                        )
+//                    }
                 }
             }
         }

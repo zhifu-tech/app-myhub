@@ -64,8 +64,8 @@ class AppViewModel(
                     AnalyticsEvent(
                         name = "app_started",
                         parameters = mapOf(
-                            "environment" to AnalyticsValue.Str(AppBuildConfig.environment.name),
-                            "version_type" to AnalyticsValue.Str(AppBuildConfig.versionType.name)
+                            "environment" to AnalyticsValue.Str(AppBuildConfig.appEnv),
+                            "version_type" to AnalyticsValue.Str(AppBuildConfig.appTier)
                         )
                     )
                 )
@@ -176,11 +176,7 @@ class AppViewModel(
 
     private fun logBuildConfig() {
         logger.info { "=== App Build Config ===" }
-        logger.info { "Environment: ${AppBuildConfig.environment}" }
-        logger.info { "Version Type: ${AppBuildConfig.versionType}" }
-        logger.info { "API Base URL: ${AppBuildConfig.apiBaseUrl}" }
-        logger.info { "App Name: ${AppBuildConfig.appName}" }
-        logger.info { "Application ID Suffix: ${AppBuildConfig.applicationIdSuffix}" }
+        logger.info { "App Name: ${AppBuildConfig.APP_NAME}" }
         logger.info { "Enable Logging: ${AppBuildConfig.enableLogging}" }
         logger.info { "Enable Debug Features: ${AppBuildConfig.enableDebugFeatures}" }
         logger.info { "========================" }
