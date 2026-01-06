@@ -42,10 +42,12 @@ MyHub KMP 项目支持多维度变体系统，允许你根据不同的环境和�
 
 ### 变体激活
 
-变体通过独立的 Gradle 属性激活，每个维度都是独立的：
+变体通过独立的 Gradle 属性激活，每个维度都是独立的。可以通过以下三种方式设置：
+
+#### 方式 1：命令行参数（推荐用于临时构建）
 
 ```bash
-# 基本构建（使用默认值：dev + free）
+# 基本构建（使用默认值：dev + free + channel）
 ./gradlew build
 
 # 指定环境
@@ -66,11 +68,34 @@ MyHub KMP 项目支持多维度变体系统，允许你根据不同的环境和�
 ./gradlew build -PappEnv=dev -PappTier=free -PappChannel=umeng
 ```
 
+#### 方式 2：gradle.properties 文件（推荐用于默认配置）
+
+在项目根目录的 `gradle.properties` 文件中配置：
+
+```properties
+# 构建变体配置
+appEnv=dev
+appTier=free
+appChannel=channel
+```
+
+这样配置后，直接运行 `./gradlew build` 就会使用这些默认值。
+
+#### 配置优先级
+
+配置的优先级从高到低：
+1. **命令行参数** `-PappEnv=prod`（最高优先级）
+2. **gradle.properties** 文件（项目级配置）
+3. **~/.gradle/gradle.properties** 文件（用户级配置）
+4. **代码中的默认值**（`dev`, `free`, `channel`）
+
+**注意：** `local.properties` 文件不用于构建变体配置，它仅用于 Android SDK 路径等本地配置。如果需要个人本地配置，可以使用用户级的 `~/.gradle/gradle.properties` 文件。
+
 **默认值：**
 
 - `appEnv`: 默认为 `dev`
 - `appTier`: 默认为 `free`
-- `appChannel`: 默认为 `null`（不指定则不使用渠道特定配置）
+- `appChannel`: 默认为 `channel`
 
 **注意：** 变体参数是独立的，不存在组合逻辑。每个维度单独判断和注入目录。
 
@@ -94,7 +119,7 @@ val tier = project.getVariantTier() // "free" 或 "premium"
 val tier = project.getVariantTier("premium") // 指定默认值
 
 // 获取当前变体的渠道类型
-val channel = project.getVariantChannel() // "googlePlay", "umeng" 等，如果未指定则返回 null
+val channel = project.getVariantChannel() // "googlePlay", "umeng" 等，如果未指定则返回 "channel"（默认值）
 ```
 
 #### 环境判断函数
@@ -1047,7 +1072,7 @@ kotlin {
 1. **变体激活**：通过独立的 Gradle 属性设置变体维度：
    - `appEnv`: 环境（`dev` 或 `prod`，默认 `dev`）
    - `appTier`: 级别（`free` 或 `premium`，默认 `free`）
-   - `appChannel`: 渠道（如 `googlePlay`, `umeng`，可选，默认 `null`）
+   - `appChannel`: 渠道（如 `googlePlay`, `umeng`，可选，默认 `channel`）
 2. **条件判断**：在 `build.gradle.kts` 中使用 `project.isDev()`, `project.isPremium()` 等函数判断当前变体
 3. **依赖应用**：根据条件判断结果，只有匹配当前变体的依赖才会被添加到对应的源集
 4. **目录注入**：插件自动根据当前变体注入相应的源集目录（如 `src/devMain`, `src/premiumMain`）

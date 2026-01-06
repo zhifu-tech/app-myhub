@@ -6,7 +6,6 @@ object AppBuildConfig :
     AppBuildChannelConfig by AppBuildChannelConfigImpl() {
 
     const val APP_NAME: String = "MyHub"
-    val applicationIdSuffix: String? = null // 不再使用组合后缀
 }
 
 interface AppBuildEnvConfig {

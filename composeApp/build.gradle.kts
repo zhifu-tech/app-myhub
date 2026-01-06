@@ -11,6 +11,8 @@ plugins {
     alias(libs.plugins.composeHotReload)
     // Kotlin 序列化插件（必需：使用 @Serializable）
     alias(libs.plugins.kotlinSerialization)
+    // CocoaPods 支持（用于 iOS 平台依赖管理）
+    kotlin("native.cocoapods")
 }
 
 compose.resources {
@@ -31,6 +33,52 @@ kotlin {
             freeCompilerArgs += listOf("-Xbinary=bundleId=tech.zhifu.app.myhub")
             linkerOpts += listOf("-lsqlite3")
         }
+        // 为 CocoaPods 构建的 Framework 也添加 SQLite3 链接
+        // 注意：podDebugFramework 和 podReleaseFramework 需要单独配置
+        iosTarget.binaries.all {
+            if (this is org.jetbrains.kotlin.gradle.plugin.mpp.Framework) {
+                linkerOpts += listOf("-lsqlite3")
+            }
+        }
+    }
+
+    // CocoaPods 配置（默认使用 CocoaPods 管理 iOS 依赖）
+    cocoapods {
+        // Pod 仓库摘要
+        summary = "MyHub Compose App"
+        // Pod 主页
+        homepage = "https://github.com/zhifu-tech/app-myhub"
+        // Pod 版本
+        version = "1.0.0"
+        // Pod 名称（可选，默认使用 Gradle 项目名称）
+        name = "composeApp"
+
+        // 框架配置
+        // 注意：使用静态链接可能有助于解决 Firebase 依赖链接问题
+        framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+
+        // 指定 Podfile 路径（关键：让 CocoaPods 插件自动管理）
+        podfile = project.file("../iosApp/Podfile")
+
+        // iOS 部署目标（使用外部定义的变量）
+        ios.deploymentTarget = "15.0"
+
+        // 添加 SQLite3 库链接（用于 SQLDelight NativeSqliteDriver）
+        // 注意：
+        // 1. linkerOpts 用于 Gradle 构建 Framework 时链接 SQLite3
+        // 2. extraSpecAttributes["libraries"] 用于 podspec，告诉 Xcode 项目需要链接系统库
+        // 3. 对于静态 Framework，Framework 本身已包含 SQLite3 符号，但 podspec 中的声明
+        //    可以确保 Xcode 项目正确配置链接器标志（即使 Config.xcconfig 中已有 OTHER_LDFLAGS）
+        // 4. 建议保留此配置，以确保 CocoaPods/Xcode 构建的一致性
+        extraSpecAttributes["libraries"] = "'sqlite3'"
+
+        // 注意：Firebase pods 不需要在 cocoapods 块中手动添加
+        // dev.gitlive:firebase-analytics 会自动处理 FirebaseCore 和 FirebaseAnalytics 的 CocoaPods 依赖
+        // 在 cocoapods 块中手动添加会导致符号重复定义错误（symbol multiply defined）
+        // Firebase pods 应该在 Podfile 中直接添加（见 iosApp/Podfile），这样可以在 Xcode 构建时正确链接
     }
 
     js {
@@ -127,7 +175,7 @@ kotlin {
         jvmMain.dependencies {
             // Desktop 相关
             implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.kotlinx.coroutines.swing)
         }
 
         wasmJsMain.dependencies {

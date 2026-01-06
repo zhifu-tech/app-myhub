@@ -13,8 +13,7 @@ object ApiConfig {
     // 基础URL - 可以通过 setBaseUrl 动态设置
     private const val DEFAULT_PORT = 8083
 
-    //    private const val DEFAULT_BASE_URL = "http://localhost:$DEFAULT_PORT"
-    private const val DEFAULT_BASE_URL = "http://192.168.0.123:$DEFAULT_PORT" // // FIXME: 2026/1/3  @zzf
+    private const val DEFAULT_REMOTE_IP = "192.168.0.123"
 
     @Volatile
     private var _baseUrl: String? = null
@@ -24,7 +23,8 @@ object ApiConfig {
      * 优先级：
      * 1. 通过 setBaseUrl 设置的 URL
      * 2. 系统属性 myhub.api.base.url
-     * 3. 默认值
+     * 3. 环境变量 MYHUB_API_BASE_URL
+     * 4. 默认值 (10.0.2.2 for Android emulator or 192.168.0.123)
      */
     val BASE_URL: String
         get() {
@@ -32,14 +32,17 @@ object ApiConfig {
                 logger.info { "Using configured API base URL: $_baseUrl" }
                 return _baseUrl!!
             }
-            // 尝试从系统属性获取（Android 平台）
+
+            // 尝试从系统属性获取（Android 平台或 JVM）
             val systemPropertyUrl = getSystemProperty("myhub.api.base.url")
-            if (systemPropertyUrl != null) {
+            if (!systemPropertyUrl.isNullOrBlank()) {
                 logger.info { "Using system property API base URL: $systemPropertyUrl" }
                 return systemPropertyUrl
             }
-            logger.warn { "Using default API base URL: $DEFAULT_BASE_URL" }
-            return DEFAULT_BASE_URL
+
+            val defaultUrl = "http://$DEFAULT_REMOTE_IP:$DEFAULT_PORT"
+            logger.warn { "Using default API base URL: $defaultUrl" }
+            return defaultUrl
         }
 
     /**
@@ -61,4 +64,3 @@ object ApiConfig {
     const val CONNECT_TIMEOUT = 30_000L
     const val SOCKET_TIMEOUT = 30_000L
 }
-

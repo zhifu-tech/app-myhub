@@ -20,6 +20,8 @@ import tech.zhifu.app.myhub.component.card.di.cardModule
 import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
+import tech.zhifu.app.myhub.logger.LoggerConfig
+import tech.zhifu.app.myhub.logger.di.loggerModule
 import tech.zhifu.app.myhub.profile.di.profileModule
 import tech.zhifu.app.myhub.settings.di.settingsModule
 
@@ -31,6 +33,12 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
         platformSpecificConfig?.invoke(this)
 
         modules(
+            loggerModule {
+                LoggerConfig(
+                    appName = "Myhub",
+                    useAndroidLogger = true
+                )
+            },
             platformModule(),
             // Data module dependencies
             repositoryModule,

@@ -370,9 +370,18 @@ run_ios() {
     
     local device_type="${1:-auto}"
     
+    # 使用 .xcworkspace（CocoaPods 集成）或 .xcodeproj（非 CocoaPods）
+    local xcode_workspace="iosApp/iosApp.xcworkspace"
     local xcode_project="iosApp/iosApp.xcodeproj"
-    if [ ! -d "$xcode_project" ]; then
-        print_error "未找到 Xcode 项目: $xcode_project"
+    
+    if [ -d "$xcode_workspace" ]; then
+        local xcode_target="$xcode_workspace"
+        print_info "使用 CocoaPods 工作空间: $xcode_workspace"
+    elif [ -d "$xcode_project" ]; then
+        local xcode_target="$xcode_project"
+        print_info "使用 Xcode 项目: $xcode_project"
+    else
+        print_error "未找到 Xcode 项目或工作空间"
         exit 1
     fi
     
@@ -394,7 +403,11 @@ run_ios() {
     export OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED="NO"
     
     # 尝试构建 framework（如果失败也不影响，Xcode 会自动构建）
-    ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode 2>/dev/null || {
+    # 注意：使用 CocoaPods 时，应该使用 syncFramework 而不是 embedAndSignAppleFrameworkForXcode
+    ./gradlew :composeApp:syncFramework \
+        -Pkotlin.native.cocoapods.platform=iphonesimulator \
+        -Pkotlin.native.cocoapods.archs="arm64" \
+        -Pkotlin.native.cocoapods.configuration=Debug 2>/dev/null || {
         print_warning "预构建 Framework 失败，将在 Xcode 中自动构建"
     }
     
@@ -418,9 +431,9 @@ run_ios() {
             ;;
     esac
     
-    print_info "正在打开 Xcode 项目..."
-    open "$xcode_project"
-    print_success "Xcode 项目已打开"
+    print_info "正在打开 Xcode..."
+    open "$xcode_target"
+    print_success "Xcode 已打开"
     
     print_info "请在 Xcode 中选择目标设备并点击运行按钮"
     echo ""

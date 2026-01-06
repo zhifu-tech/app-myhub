@@ -77,13 +77,13 @@ configure<KotlinMultiplatformExtension> {
             // 注入级别目录 (e.g., src/freeMain)
             kotlin.srcDir("src/${tier}Main/kotlin")
             // 注入渠道目录 (e.g., src/googlePlayMain)，如果指定了渠道
-            channel?.let {
+            channel.let {
                 kotlin.srcDir("src/${it}Main/kotlin")
             }
 
             resources.srcDir("src/${env}Main/resources")
             resources.srcDir("src/${tier}Main/resources")
-            channel?.let {
+            channel.let {
                 resources.srcDir("src/${it}Main/resources")
             }
         }
@@ -96,13 +96,13 @@ configure<KotlinMultiplatformExtension> {
             // 注入平台级别代码 (e.g., src/androidFreeMain)
             kotlin.srcDir("src/${p}${tierTitle}Main/kotlin")
             // 注入平台渠道代码 (e.g., src/androidGooglePlayMain)，如果指定了渠道
-            channelTitle?.let {
+            channelTitle.let {
                 kotlin.srcDir("src/${p}${it}Main/kotlin")
             }
 
             resources.srcDir("src/${p}${envTitle}Main/resources")
             resources.srcDir("src/${p}${tierTitle}Main/resources")
-            channelTitle?.let {
+            channelTitle.let {
                 resources.srcDir("src/${p}${it}Main/resources")
             }
         }

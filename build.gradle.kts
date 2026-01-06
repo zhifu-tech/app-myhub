@@ -20,8 +20,10 @@ plugins {
     // 其他功能插件
     alias(libs.plugins.ktor) apply false
     alias(libs.plugins.sqldelight) apply false
+    alias(libs.plugins.google.services) apply false
 
     // myhub
     alias(libs.plugins.myhub.kmp) apply false
     alias(libs.plugins.myhub.kmp.web) apply false
+    alias(libs.plugins.myhub.android) apply false
 }

@@ -29,6 +29,28 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        androidMain.dependencies {
+            // Firebase Android SDK（仅在 googlePlay 渠道）
+            if (project.isChannel("googlePlay")) {
+                implementation("dev.gitlive:firebase-analytics:2.4.0")
+                implementation(project.dependencies.platform("com.google.firebase:firebase-bom:34.7.0"))
+            }
+        }
+
+        iosMain.dependencies {
+            // Firebase iOS SDK（仅在 googlePlay 渠道）
+            if (project.isChannel("googlePlay")) {
+                implementation("dev.gitlive:firebase-analytics:2.4.0")
+            }
+        }
+
+        jsMain.dependencies {
+            // Firebase JS SDK（仅在 googlePlay 渠道）
+            if (project.isChannel("googlePlay")) {
+                implementation("dev.gitlive:firebase-analytics:2.4.0")
+            }
+        }
+
         jvmMain.dependencies {
             // JVM 平台特定依赖（FileProvider 需要文件操作）
         }

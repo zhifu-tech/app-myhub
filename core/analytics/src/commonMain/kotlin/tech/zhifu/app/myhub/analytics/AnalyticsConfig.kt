@@ -34,12 +34,8 @@ data class ProviderConfig(
  * 提供商类型
  */
 enum class ProviderType {
-    UMENG,           // 友盟+
-    SENSORS,         // 神策数据
-    FIREBASE,        // Firebase Analytics
-    GOOGLE_ANALYTICS, // Google Analytics (GA4)
-    MIXPANEL,        // Mixpanel
-    AMPLITUDE,       // Amplitude
     CONSOLE,         // 控制台输出（用于测试和 Desktop）
-    FILE             // 文件输出（用于 Desktop QA）
+    FILE,             // 文件输出（用于 Desktop QA）
+    FIREBASE,        // Firebase Analytics
+    UMENG,           // 友盟+
 }

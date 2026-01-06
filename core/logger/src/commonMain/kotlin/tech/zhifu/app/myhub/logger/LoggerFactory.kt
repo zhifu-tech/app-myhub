@@ -3,24 +3,31 @@ package tech.zhifu.app.myhub.logger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.koin.mp.KoinPlatform.getKoin
 
-val logger by lazy { logger() }
+/**
+ * 默认 Logger 实例 (使用应用默认名称)
+ */
+val logger: Logger by lazy { logger() }
 
 /**
- * 获取指定名称的 Logger 实例
+ * 工厂函数：通过 String 标签创建 Logger
  */
 fun logger(vararg tags: String): Logger {
-    val name = listOf(config.appName, *tags).joinToString(":")
+    val name = if (tags.isEmpty()) {
+        loggerConfig.appName
+    } else {
+        (listOf(loggerConfig.appName) + tags).joinToString(":")
+    }
     return LoggerImpl(KotlinLogging.logger(name))
 }
 
-private val config by lazy {
-    try {
-        getKoin().get<LoggerConfig>().apply {
-            configPlatform()
-        }
-    } catch (e: Exception) {
-        LoggerConfig("ZhifuTech")
-    }
+/**
+ * 配置项的懒加载逻辑
+ */
+private val loggerConfig by lazy {
+    val config = runCatching { getKoin().getOrNull<LoggerConfig>() }.getOrNull()
+        ?: LoggerConfig("ZhifuTech")
+
+    config.apply { configPlatform() }
 }
 
 internal expect fun LoggerConfig.configPlatform()

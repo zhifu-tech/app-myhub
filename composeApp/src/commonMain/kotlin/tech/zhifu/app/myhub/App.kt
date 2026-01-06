@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
@@ -237,7 +236,6 @@ fun AppNavigation(currentScreen: Screen) {
     }
 }
 
-@Preview
 @Composable
 fun AppPreview() {
     // 使用 KoinContext 包装预览，防止 koinInject() 在预览环境中抛出异常

@@ -1,50 +1,21 @@
 plugins {
-    // Android 应用插件
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.myhub.android)
     // Compose 编译器插件 @Composable
     alias(libs.plugins.composeCompiler)
 }
 
+if (project.isChannel("googlePlay")) {
+    // 使用 get().pluginId 获取 ID
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+}
+
 android {
     namespace = "tech.zhifu.app.myhub.app"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "tech.zhifu.app.myhub"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    // ========== 变体配置 ==========
-    flavorDimensions += "environment"
-    flavorDimensions += "version"
-
-    productFlavors {
-        // 环境维度
-        create("dev") {
-            dimension = "environment"
-            applicationIdSuffix = ".dev"
-            versionNameSuffix = "-dev"
-        }
-        create("prod") {
-            dimension = "environment"
-        }
-
-        // 版本维度
-        create("free") {
-            dimension = "version"
-            applicationIdSuffix = ".free"
-            versionNameSuffix = "-free"
-        }
-        create("premium") {
-            dimension = "version"
-            applicationIdSuffix = ".premium"
-            versionNameSuffix = "-premium"
-        }
     }
 
     buildTypes {
@@ -62,26 +33,12 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
-}
-
-configurations.all {
-    // 排除 kotlin-logging-android-debug，避免与 kotlin-logging-android 的重复类错误
-    exclude(group = "io.github.oshai", module = "kotlin-logging-android-debug")
 }
 
 dependencies {
@@ -104,10 +61,4 @@ dependencies {
     // 注意：使用 Android 特定的 Preview，不是 Compose Multiplatform 的 Preview
     implementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
-
-    // ========== 测试依赖 ==========
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.testExt.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

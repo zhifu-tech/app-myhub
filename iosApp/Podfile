@@ -1,0 +1,51 @@
+target 'iosApp' do
+  use_frameworks!
+  # iOS 部署目标：统一为 15.0
+  platform :ios, '15.0'
+  pod 'composeApp', :path => '../composeApp'
+  
+  # Firebase pods（仅在 googlePlay 渠道需要）
+  # 注意：dev.gitlive:firebase-analytics 会自动处理依赖，但在 Xcode 构建时需要明确声明
+  # 检查 gradle.properties 中的 appChannel 设置
+  # 如果 appChannel=googlePlay，则添加 Firebase pods
+  gradle_properties_path = File.join(__dir__, '..', 'gradle.properties')
+  is_google_play = false
+  if File.exist?(gradle_properties_path)
+    gradle_props = File.read(gradle_properties_path)
+    is_google_play = gradle_props.match(/^appChannel\s*=\s*googlePlay\s*$/) || gradle_props.match(/^appChannel\s*=\s*googlePlay\s*#/)
+  end
+  # 也可以通过环境变量覆盖
+  is_google_play = true if ENV['APP_CHANNEL'] == 'googlePlay'
+  
+  if is_google_play
+    pod 'FirebaseCore'
+    pod 'FirebaseAnalytics'
+  end
+  
+  post_install do |installer|
+    # 统一设置所有 pods 的 iOS 部署目标为 15.0
+    # 某些 pods 的默认部署目标可能过低（如 9.0），需要统一设置
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.0
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        end
+      end
+    end
+    
+    # 为 composeApp 的构建脚本添加输出文件，修复 Xcode 警告
+    installer.pods_project.targets.each do |target|
+      if target.name == 'composeApp'
+        target.build_phases.each do |phase|
+          if phase.respond_to?(:name) && phase.name == '[CP-User] Build composeApp'
+            # 添加输出文件路径（使用 outputPaths 属性）
+            phase.output_paths ||= []
+            unless phase.output_paths.include?("${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework")
+              phase.output_paths << "${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework"
+            end
+          end
+        end
+      end
+    end
+  end
+end

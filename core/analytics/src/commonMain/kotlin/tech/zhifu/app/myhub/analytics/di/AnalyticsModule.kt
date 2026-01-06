@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.analytics.di
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlin.coroutines.CoroutineContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.analytics.AnalyticsConfig
@@ -12,6 +11,7 @@ import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.DefaultAnalyticsConsent
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Analytics Koin 模块
