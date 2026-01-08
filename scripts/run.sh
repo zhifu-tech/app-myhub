@@ -56,6 +56,15 @@ print_error() {
     echo -e "${RED}✗${NC} $1"
 }
 
+# 打印醒目的启动信息
+print_startup_info() {
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}🚀 $1${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
 # ============================================
 # 显示函数
 # ============================================
@@ -86,7 +95,8 @@ show_help() {
     echo -e "${YELLOW}可用命令:${NC}"
     echo ""
     echo -e "  ${GREEN}desktop${NC}             运行 Desktop 应用"
-    echo -e "  ${GREEN}web${NC}                 运行 Web 应用（浏览器）"
+    echo -e "  ${GREEN}js${NC}                  运行 Web 应用（JavaScript）"
+    echo -e "  ${GREEN}wasmJs${NC}              运行 Web 应用（WebAssembly）"
     echo -e "  ${GREEN}android${NC}             构建并安装 Android 应用"
     echo -e "  ${GREEN}ios${NC}                 构建并打开 iOS 项目（自动检测设备）"
     echo -e "  ${GREEN}ios simulator${NC}       构建并打开 iOS 项目（使用模拟器）"
@@ -101,10 +111,12 @@ show_help() {
     echo ""
     echo -e "${YELLOW}可用选项:${NC}"
     echo ""
+    echo -e "  构建类型:"
+    echo -e "  ${GREEN}--debug${NC}              调试模式构建（默认）"
+    echo -e "  ${GREEN}--release${NC}            发布模式构建"
+    echo ""
     echo -e "  使用 ${GREEN}-P${NC} 格式参数（与 Gradle 对齐，统一参数格式）"
     echo ""
-    echo -e "  ${GREEN}-PbuildType=debug${NC}     调试模式构建（默认）"
-    echo -e "  ${GREEN}-PbuildType=release${NC}   发布模式构建"
     echo -e "  ${GREEN}-PappEnv=dev${NC}          开发环境（默认）"
     echo -e "  ${GREEN}-PappEnv=prod${NC}         生产环境"
     echo -e "  ${GREEN}-PappTier=free${NC}        免费版（默认）"
@@ -114,27 +126,50 @@ show_help() {
     echo -e "  其他选项:"
     echo -e "  ${GREEN}--help${NC} / ${GREEN}-h${NC}       显示此帮助信息"
     echo ""
-    echo -e "${YELLOW}示例:${NC}"
-    echo "  ./scripts/run.sh desktop                                    # 运行桌面应用（默认：debug, dev, free）"
-    echo "  ./scripts/run.sh desktop -PbuildType=release               # 运行桌面应用（release 模式）"
-    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium    # 运行桌面应用（生产环境，收费版）"
-    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 运行桌面应用（生产环境，收费版，Google Play 渠道）"
-    echo "  ./scripts/run.sh web                                         # 运行 Web 应用"
-    echo "  ./scripts/run.sh android                                    # 构建并安装 Android 应用（默认：debug, dev, free）"
-    echo "  ./scripts/run.sh android -PbuildType=release               # 构建并安装 Android 应用（release 模式）"
-    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium    # 构建并安装 Android 应用（生产环境，收费版）"
-    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 构建并安装 Android 应用（生产环境，收费版，Google Play 渠道）"
-    echo "  ./scripts/run.sh ios                                        # 构建并打开 iOS 项目"
-    echo "  ./scripts/run.sh ios simulator                              # 构建并打开 iOS 项目（使用模拟器）"
-    echo "  ./scripts/run.sh ios device                                # 构建并打开 iOS 项目（使用真机）"
-    echo "  ./scripts/run.sh ios list                                  # 列出所有可用设备"
-    echo "  ./scripts/run.sh server                                    # 运行服务器（SQLite）"
-    echo "  ./scripts/run.sh server dev                                # 运行服务器（开发模式）"
-    echo "  ./scripts/run.sh server postgres                           # 运行服务器（PostgreSQL）"
-    echo "  ./scripts/run.sh server docker                            # Docker 运行（PostgreSQL）"
-    echo "  ./scripts/run.sh build                                     # 构建所有模块（默认：dev, free）"
-    echo "  ./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 构建所有模块（生产环境，收费版，Google Play 渠道）"
-    echo "  ./scripts/run.sh clean                                     # 清理所有构建文件"
+    echo -e "${YELLOW}完整示例（可直接拷贝执行）:${NC}"
+    echo ""
+    echo -e "${CYAN}📱 Desktop 应用:${NC}"
+    echo "  ./scripts/run.sh desktop"
+    echo "  ./scripts/run.sh desktop --release"
+    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium"
+    echo "  ./scripts/run.sh desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}🌐 Web 应用 (JavaScript):${NC}"
+    echo "  ./scripts/run.sh js"
+    echo "  ./scripts/run.sh js --release"
+    echo "  ./scripts/run.sh js -PappEnv=prod -PappTier=premium"
+    echo "  ./scripts/run.sh js --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}🌐 Web 应用 (WebAssembly):${NC}"
+    echo "  ./scripts/run.sh wasmJs"
+    echo "  ./scripts/run.sh wasmJs --release"
+    echo "  ./scripts/run.sh wasmJs -PappEnv=prod -PappTier=premium"
+    echo "  ./scripts/run.sh wasmJs --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}🤖 Android 应用:${NC}"
+    echo "  ./scripts/run.sh android"
+    echo "  ./scripts/run.sh android --release"
+    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium"
+    echo "  ./scripts/run.sh android --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}🍎 iOS 应用:${NC}"
+    echo "  ./scripts/run.sh ios"
+    echo "  ./scripts/run.sh ios simulator"
+    echo "  ./scripts/run.sh ios device"
+    echo "  ./scripts/run.sh ios list"
+    echo "  ./scripts/run.sh ios -PappEnv=prod -PappTier=premium"
+    echo "  ./scripts/run.sh ios simulator -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}🖥️  服务器:${NC}"
+    echo "  ./scripts/run.sh server"
+    echo "  ./scripts/run.sh server dev"  # dev -PappEnv=dev -PappTier=free
+    echo "  ./scripts/run.sh server postgres"  # postgres -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+    echo "  ./scripts/run.sh server docker"  # docker -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+    echo ""
+    echo -e "${CYAN}🔨 构建和清理:${NC}"
+    echo "  ./scripts/run.sh build"
+    echo "  ./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ./scripts/run.sh clean"
     echo ""
 }
 
@@ -213,7 +248,8 @@ run_desktop() {
     local version="${3:-free}"
     local channel="${4:-}"
     
-    print_info "正在运行 Desktop 应用（${build_type} 模式，${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    print_startup_info "正在运行 Desktop 应用"
+    print_info "配置: ${build_type} 模式 | ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     
     # 构建 Gradle 参数
     local gradle_args="-PappEnv=${environment} -PappTier=${version}"
@@ -235,12 +271,20 @@ run_desktop() {
 
 # 运行 Web 应用
 run_web() {
-    local build_type="${1:-debug}"
-    local environment="${2:-dev}"
-    local version="${3:-free}"
-    local channel="${4:-}"
+    local web_target="${1:-js}"
+    local build_type="${2:-debug}"
+    local environment="${3:-dev}"
+    local version="${4:-free}"
+    local channel="${5:-}"
     
-    print_info "正在运行 Web 应用（${build_type} 模式，${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    # 验证 web_target 参数
+    if [ "$web_target" != "js" ] && [ "$web_target" != "wasmJs" ]; then
+        print_error "无效的 webTarget: $web_target，必须是 'js' 或 'wasmJs'"
+        exit 1
+    fi
+    
+    print_startup_info "正在运行 Web 应用 (${web_target})"
+    print_info "配置: ${build_type} 模式 | ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     print_info "应用将在浏览器中自动打开"
     
     # 构建 Gradle 参数
@@ -254,11 +298,23 @@ run_web() {
     export APP_ENVIRONMENT="$environment"
     export APP_VERSION="$version"
     
-    if [ "$build_type" = "release" ]; then
-        ./gradlew :composeApp:jsBrowserProductionRun $gradle_args
+    # 根据 web_target 和 build_type 选择正确的 Gradle 任务
+    local task_name=""
+    if [ "$web_target" = "wasmJs" ]; then
+        if [ "$build_type" = "release" ]; then
+            task_name="wasmJsBrowserProductionRun"
+        else
+            task_name="wasmJsBrowserDevelopmentRun"
+        fi
     else
-        ./gradlew :composeApp:jsBrowserDevelopmentRun $gradle_args
+        if [ "$build_type" = "release" ]; then
+            task_name="jsBrowserProductionRun"
+        else
+            task_name="jsBrowserDevelopmentRun"
+        fi
     fi
+    
+    ./gradlew :composeApp:${task_name} $gradle_args
 }
 
 # 构建并安装 Android 应用
@@ -274,15 +330,16 @@ run_android() {
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi
     
-    print_info "构建配置: ${environment} 环境 + ${version} 版${channel:+ + ${channel} 渠道}"
+    print_startup_info "正在构建 Android 应用"
+    print_info "配置: ${build_type} 模式 | ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     
     # 注意：Android App 现在使用动态源集注入，不再使用 productFlavors
     # 因此使用标准的 assembleDebug/assembleRelease 任务
     if [ "$build_type" = "release" ]; then
-        print_info "正在构建 Android 应用（Release 模式）..."
+        print_info "执行: ./gradlew :androidApp:assembleRelease"
         ./gradlew :androidApp:assembleRelease $gradle_args
     else
-        print_info "正在构建 Android 应用（Debug 模式）..."
+        print_info "执行: ./gradlew :androidApp:assembleDebug"
         ./gradlew :androidApp:assembleDebug $gradle_args
     fi
     
@@ -420,7 +477,8 @@ run_ios() {
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi
     
-    print_info "正在构建 iOS Framework（${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    print_startup_info "正在构建 iOS Framework"
+    print_info "配置: ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     print_info "注意: Framework 将在 Xcode 构建时自动生成"
     
     # 设置环境变量以匹配 Xcode 构建脚本的期望
@@ -569,7 +627,8 @@ build_all() {
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi
     
-    print_info "正在构建所有模块（${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    print_startup_info "正在构建所有模块"
+    print_info "配置: ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     ./gradlew build $gradle_args
     print_success "构建完成"
 }
@@ -602,11 +661,16 @@ parse_args() {
     # 处理选项和参数
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            # 支持 -P 格式的参数（与 Gradle 对齐）
-            -PbuildType=*)
-                build_type="${1#*=}"
+            # 构建类型选项
+            --debug)
+                build_type="debug"
                 shift
                 ;;
+            --release)
+                build_type="release"
+                shift
+                ;;
+            # 支持 -P 格式的参数（与 Gradle 对齐）
             -PappEnv=*)
                 environment="${1#*=}"
                 shift
@@ -687,8 +751,11 @@ main() {
         desktop)
             run_desktop "$build_type" "$environment" "$version" "$channel"
             ;;
-        web)
-            run_web "$build_type" "$environment" "$version" "$channel"
+        js)
+            run_web "js" "$build_type" "$environment" "$version" "$channel"
+            ;;
+        wasmJs)
+            run_web "wasmJs" "$build_type" "$environment" "$version" "$channel"
             ;;
         android)
             run_android "$build_type" "$environment" "$version" "$channel"

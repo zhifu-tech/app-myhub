@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.analytics.provider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.analytics.AnalyticsEvent
 import tech.zhifu.app.myhub.analytics.AnalyticsValue
@@ -43,10 +42,10 @@ class FileProvider(
         withContext(Dispatchers.IO) {
             // 创建输出目录
             ensureOutputDir()
-            
+
             // 创建文件写入器
             fileWriter = createFileWriter()
-            
+
             // 写入文件头（CSV 格式）
             if (format == FileFormat.CSV) {
                 fileWriter?.println("timestamp,event_name,parameters,value,currency")
@@ -57,7 +56,7 @@ class FileProvider(
 
     override fun doLogEvent(event: AnalyticsEvent) {
         val timestamp = Instant.now().toEpochMilli()
-        
+
         when (format) {
             FileFormat.JSON -> writeJsonEvent(timestamp, event)
             FileFormat.CSV -> writeCsvEvent(timestamp, event)
@@ -125,8 +124,8 @@ class FileProvider(
     }
 
     private fun writeCsvEvent(timestamp: Long, event: AnalyticsEvent) {
-        val paramsStr = event.parameters.entries.joinToString(";") { 
-            "${it.key}=${formatValue(it.value)}" 
+        val paramsStr = event.parameters.entries.joinToString(";") {
+            "${it.key}=${formatValue(it.value)}"
         }
         val line = listOf(
             timestamp.toString(),
@@ -146,6 +145,7 @@ class FileProvider(
                 fileWriter?.println(json)
                 fileWriter?.flush()
             }
+
             FileFormat.CSV -> {
                 // CSV 格式已在 writeCsvEvent 中处理
             }

@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.analytics
 
+import tech.zhifu.app.myhub.analytics.provider.ConsoleProvider
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
@@ -54,8 +55,10 @@ class AnalyticsProviderFactory(
      * 注册默认 Provider
      */
     private fun registerDefaultProviders() {
-        // ConsoleProvider 和 FileProvider 在对应平台模块中注册
-        // 参见各平台模块的注册实现
+        // 注册 ConsoleProvider（所有平台都支持）
+        register(ProviderType.CONSOLE) { config ->
+            ConsoleProvider()
+        }
     }
 }
 

@@ -13,6 +13,7 @@ kotlin {
             // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.logger)
+            implementation(projects.core.appBuildConfig)
 
             // Kotlinx Coroutines
             implementation(libs.kotlinx.coroutines.core)
@@ -32,22 +33,22 @@ kotlin {
         androidMain.dependencies {
             // Firebase Android SDK（仅在 googlePlay 渠道）
             if (project.isChannel("googlePlay")) {
-                implementation("dev.gitlive:firebase-analytics:2.4.0")
-                implementation(project.dependencies.platform("com.google.firebase:firebase-bom:34.7.0"))
+                implementation(libs.firebase.analytics)
+                implementation(project.dependencies.platform(libs.firebase.bom))
             }
         }
 
         iosMain.dependencies {
             // Firebase iOS SDK（仅在 googlePlay 渠道）
             if (project.isChannel("googlePlay")) {
-                implementation("dev.gitlive:firebase-analytics:2.4.0")
+                implementation(libs.firebase.analytics)
             }
         }
 
         jsMain.dependencies {
             // Firebase JS SDK（仅在 googlePlay 渠道）
             if (project.isChannel("googlePlay")) {
-                implementation("dev.gitlive:firebase-analytics:2.4.0")
+                implementation(libs.firebase.analytics)
             }
         }
 

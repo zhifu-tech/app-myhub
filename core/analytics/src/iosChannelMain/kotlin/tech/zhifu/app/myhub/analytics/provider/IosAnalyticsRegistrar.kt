@@ -7,9 +7,7 @@ import tech.zhifu.app.myhub.analytics.AnalyticsProviderRegistrar
  * iOS 平台 Provider 注册器
  */
 class IosAnalyticsRegistrar : AnalyticsProviderRegistrar {
-
     override fun register(factory: AnalyticsProviderFactory) {
-        // 先注册通用 Provider（ConsoleProvider）
-        CommonAnalyticsRegistrar().register(factory)
+
     }
 }

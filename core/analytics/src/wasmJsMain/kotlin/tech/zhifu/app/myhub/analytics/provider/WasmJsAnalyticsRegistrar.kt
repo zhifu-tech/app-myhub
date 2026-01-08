@@ -9,7 +9,6 @@ import tech.zhifu.app.myhub.analytics.AnalyticsProviderRegistrar
 class WasmJsAnalyticsRegistrar : AnalyticsProviderRegistrar {
 
     override fun register(factory: AnalyticsProviderFactory) {
-        // 先注册通用 Provider（ConsoleProvider）
-        CommonAnalyticsRegistrar().register(factory)
+
     }
 }

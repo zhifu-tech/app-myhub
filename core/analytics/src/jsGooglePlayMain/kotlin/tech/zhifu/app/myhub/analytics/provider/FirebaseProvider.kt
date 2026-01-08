@@ -4,6 +4,7 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.analytics.FirebaseAnalytics
 import dev.gitlive.firebase.analytics.analytics
 import dev.gitlive.firebase.analytics.logEvent
+import dev.gitlive.firebase.initialize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,34 +18,30 @@ import tech.zhifu.app.myhub.analytics.ProviderConfig
 import tech.zhifu.app.myhub.analytics.Region
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 
 /**
- * Firebase Analytics Provider Android 实现
+ * Firebase Analytics Provider JS 实现
  * 使用 GitLiveApp/firebase-kotlin-sdk
  */
 class FirebaseProvider(
-    private val logger: Logger = logger("Analytics.FirebaseProvider")
+    override val name: String,
+    override val supportedPlatforms: Set<Platform>,
+    override val supportedRegions: Set<Region>,
 ) : BaseAnalyticsProvider() {
-    override val name = "Firebase"
-    override val supportedPlatforms = setOf(Platform.ANDROID)
-    override val supportedRegions = setOf(Region.OVERSEAS)
-
     private var analytics: FirebaseAnalytics? = null
     private val analyticsScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val logger: Logger = logger("Analytics.FirebaseProvider")
 
     override suspend fun initialize(config: ProviderConfig) {
-        try {
-            // firebase-kotlin-sdk 使用 Firebase.analytics 获取实例
-            analytics = Firebase.analytics
-            logger.info { "Firebase Analytics initialized successfully" }
-            markAsReady()
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to initialize Firebase Analytics" }
-            throw e
+        config.toFirebaseOptions()?.also {
+            Firebase.initialize(
+                context = null,
+                options = it,
+            )
         }
+        analytics = Firebase.analytics
     }
 
     override fun doLogEvent(event: AnalyticsEvent) {

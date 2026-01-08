@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.analytics.di
 
-import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderRegistrar
 
 /**

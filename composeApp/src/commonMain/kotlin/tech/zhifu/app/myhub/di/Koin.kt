@@ -8,16 +8,10 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.AppViewModel
-import tech.zhifu.app.myhub.analytics.AnalyticsConfig
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
-import tech.zhifu.app.myhub.analytics.DefaultAnalyticsConsent
-import tech.zhifu.app.myhub.analytics.ProviderConfig
-import tech.zhifu.app.myhub.analytics.ProviderType
-import tech.zhifu.app.myhub.analytics.Region
 import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
-import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
@@ -36,10 +30,9 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             loggerModule {
                 LoggerConfig(
                     appName = "Myhub",
-                    useAndroidLogger = true
+                    useAndroidLogger = true,
                 )
-            },
-            platformModule(),
+            }, platformModule(),
             // Data module dependencies
             repositoryModule,
             settingsModule(),
@@ -48,25 +41,8 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             // Component modules
             cardModule,
             // Analytics module
-            analyticsModule(
-                config = {
-                    AnalyticsConfig(
-                        region = Region.DOMESTIC, // Fixme：可以根据实际需求动态检测
-                        enabled = true,
-                        debugMode = AppBuildConfig.enableDebugFeatures,
-                        providers = listOf(
-                            ProviderConfig(
-                                type = ProviderType.CONSOLE,
-                                enabled = true
-                            )
-                        )
-                    )
-                },
-                consent = DefaultAnalyticsConsent(
-                    analyticsAllowed = true, // 可以从用户设置获取
-                    personalizationAllowed = false
-                )
-            ),
+            analyticsModule(),
+            // App module
             module {
                 // 提供 AppCoroutineScope（用于 analytics 初始化）
                 single<AppCoroutineScope> { appScope }
@@ -75,17 +51,15 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
                 factory<CoroutineScope> {
                     CoroutineScope(Dispatchers.Default)
                 }
-
                 // App ViewModel（注入 AnalyticsService，如果可用）
-                factory {
+                factory<AppViewModel> {
                     AppViewModel(
                         settingsRepository = get(),
                         coroutineScope = get(),
-                        analyticsService = getOrNull()
+                        analyticsService = getOrNull(),
                     )
                 }
-            }
-        )
+            })
     }
 
     // 初始化统计服务（延迟初始化，避免阻塞应用启动）

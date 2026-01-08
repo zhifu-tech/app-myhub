@@ -67,6 +67,8 @@ logback = "1.5.22"
 # Google Services
 # ============================================================================
 googleServicesVersion = "4.4.2"
+firebase-analytics = "2.4.0"
+firebase-bom = "34.7.0"
 
 [libraries]
 # ============================================================================
@@ -160,6 +162,12 @@ ktor-serverCallLogging = { module = "io.ktor:ktor-server-call-logging-jvm", vers
 ktor-serverStatusPages = { module = "io.ktor:ktor-server-status-pages-jvm", version.ref = "ktor" }
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+# ============================================================================
+# Firebase
+# ============================================================================
+firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 
 [plugins]
 # ============================================================================

@@ -48,22 +48,20 @@ class AnalyticsManager(
             }
         }
 
-        config.providers
-            .filter { it.enabled }
-            .forEach { providerConfig ->
-                try {
-                    val provider = providerFactory.create(providerConfig)
-                    if (provider.supportedRegions.contains(config.region)) {
-                        provider.initialize(providerConfig)
-                        providers.add(provider)
-                        logger.info { "Analytics provider initialized: ${provider.name}" }
-                    } else {
-                        logger.warn { "Provider ${provider.name} does not support region ${config.region}" }
-                    }
-                } catch (e: Exception) {
-                    logger.error(e) { "Failed to initialize provider: ${providerConfig.type}" }
+        config.providers.filter { it.enabled }.forEach { providerConfig ->
+            try {
+                val provider = providerFactory.create(providerConfig)
+                if (provider.supportedRegions.contains(config.region)) {
+                    provider.initialize(providerConfig)
+                    providers.add(provider)
+                    logger.info { "Analytics provider initialized: ${provider.name}" }
+                } else {
+                    logger.warn { "Provider ${provider.name} does not support region ${config.region}" }
                 }
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to initialize provider: ${providerConfig.type}" }
             }
+        }
     }
 
     override fun logEvent(event: AnalyticsEvent) {

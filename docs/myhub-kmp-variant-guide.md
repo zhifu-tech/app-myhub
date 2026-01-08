@@ -88,11 +88,23 @@ MyHub KMP 项目支持多维度变体系统，允许你根据不同的环境和�
 # 构建并安装 Android 应用
 ./scripts/run.sh android -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
 
+# 运行 Web 应用（JavaScript，默认：debug）
+./scripts/run.sh js
+
+# 运行 Web 应用（JavaScript，release 模式）
+./scripts/run.sh js --release
+
+# 运行 Web 应用（WebAssembly，默认：debug）
+./scripts/run.sh wasmJs
+
+# 运行 Web 应用（WebAssembly，release 模式）
+./scripts/run.sh wasmJs --release
+
 # 构建所有模块
 ./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
 ```
 
-**注意：** 脚本使用 `-PbuildType=debug` 或 `-PbuildType=release` 来指定构建类型，使用 `-PappEnv`、`-PappTier`、`-PappChannel` 来指定变体参数，与 Gradle 命令的参数格式完全一致，便于统一管理。
+**注意：** 脚本使用 `--debug` 或 `--release` 来指定构建类型，使用 `-PappEnv`、`-PappTier`、`-PappChannel` 来指定变体参数。Web 应用使用 `js` 或 `wasmJs` 作为命令来区分构建目标。变体参数与 Gradle 命令的参数格式完全一致，便于统一管理。
 
 #### 方式 3：gradle.properties 文件（推荐用于默认配置）
 

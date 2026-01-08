@@ -102,13 +102,22 @@ app-myhub/
 ./scripts/run.sh desktop
 
 # 运行桌面应用（release 模式，生产环境，收费版，Google Play 渠道）
-./scripts/run.sh desktop -PbuildType=release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+./scripts/run.sh desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
 
 # 构建并安装 Android 应用
 ./scripts/run.sh android -PappEnv=prod -PappTier=premium
 
-# 运行 Web 应用
-./scripts/run.sh web
+# 运行 Web 应用（JavaScript，默认：debug）
+./scripts/run.sh js
+
+# 运行 Web 应用（JavaScript，release 模式）
+./scripts/run.sh js --release
+
+# 运行 Web 应用（WebAssembly，默认：debug）
+./scripts/run.sh wasmJs
+
+# 运行 Web 应用（WebAssembly，release 模式）
+./scripts/run.sh wasmJs --release
 
 # 构建并打开 iOS 项目
 ./scripts/run.sh ios
@@ -136,7 +145,13 @@ app-myhub/
 #### Web
 
 ```bash
+# JavaScript 版本（默认）
 ./gradlew :composeApp:jsBrowserDevelopmentRun -PappEnv=dev -PappTier=free
+./gradlew :composeApp:jsBrowserProductionRun -PappEnv=prod -PappTier=premium
+
+# WebAssembly 版本
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun -PappEnv=dev -PappTier=free
+./gradlew :composeApp:wasmJsBrowserProductionRun -PappEnv=prod -PappTier=premium
 ```
 
 #### iOS
@@ -238,7 +253,7 @@ app-myhub/
 - [数据模块迁移](docs/DATA_MODULE_MIGRATION.md) - 数据模块迁移指南
 - [多语言支持](docs/I18N_MULTILINGUAL_SUPPORT.md) - 多语言支持说明
 - [统计框架设计](docs/ANALYTICS_FRAMEWORK_DESIGN.md) - 统计框架设计方案
-- [Dashboard 迁移](DASHBOARD_MIGRATION.md) - Dashboard 模块迁移说明
+- [Dashboard 迁移](docs/DASHBOARD_MIGRATION.md) - Dashboard 模块迁移说明
 
 ## 📄 许可证
 
