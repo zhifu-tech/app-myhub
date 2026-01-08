@@ -32,7 +32,7 @@ kotlin {
 
         androidMain.dependencies {
             // Firebase Android SDK（仅在 googlePlay 渠道）
-            if (project.isChannel("googlePlay")) {
+            if (project.isChannelGooglePlay()) {
                 implementation(libs.firebase.analytics)
                 implementation(project.dependencies.platform(libs.firebase.bom))
             }
@@ -40,14 +40,14 @@ kotlin {
 
         iosMain.dependencies {
             // Firebase iOS SDK（仅在 googlePlay 渠道）
-            if (project.isChannel("googlePlay")) {
+            if (project.isChannelGooglePlay()) {
                 implementation(libs.firebase.analytics)
             }
         }
 
         jsMain.dependencies {
             // Firebase JS SDK（仅在 googlePlay 渠道）
-            if (project.isChannel("googlePlay")) {
+            if (project.isChannelGooglePlay()) {
                 implementation(libs.firebase.analytics)
             }
         }

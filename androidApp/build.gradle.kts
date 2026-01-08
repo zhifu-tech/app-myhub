@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
-if (project.isChannel("googlePlay")) {
+if (project.isChannelGooglePlay()) {
     // 使用 get().pluginId 获取 ID
     apply(plugin = libs.plugins.google.services.get().pluginId)
 }

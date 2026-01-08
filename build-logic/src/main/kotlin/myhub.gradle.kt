@@ -154,3 +154,17 @@ fun Project.isChannel(channel: String): Boolean {
     return currentChannel.equals(channel, ignoreCase = true)
 }
 
+/**
+ * 判断当前是否为 Google Play 渠道
+ *
+ * @return true 如果为 "googlePlay" 渠道
+ *
+ * @sample
+ * ```kotlin
+ * if (project.isChannelGooglePlay()) {
+ *     // Google Play 专属逻辑
+ * }
+ * ```
+ */
+fun Project.isChannelGooglePlay(): Boolean = isChannel("googlePlay")
+
