@@ -68,7 +68,33 @@ MyHub KMP 项目支持多维度变体系统，允许你根据不同的环境和�
 ./gradlew build -PappEnv=dev -PappTier=free -PappChannel=umeng
 ```
 
-#### 方式 2：gradle.properties 文件（推荐用于默认配置）
+#### 方式 2：使用统一管理脚本（推荐用于运行应用）
+
+项目提供了统一管理脚本 `scripts/run.sh`，支持使用 `-P` 格式参数（与 Gradle 对齐）：
+
+```bash
+# 运行桌面应用（使用默认值：debug, dev, free）
+./scripts/run.sh desktop
+
+# 运行桌面应用（release 模式）
+./scripts/run.sh desktop -PbuildType=release
+
+# 运行桌面应用（生产环境，收费版）
+./scripts/run.sh desktop -PappEnv=prod -PappTier=premium
+
+# 运行桌面应用（生产环境，收费版，Google Play 渠道）
+./scripts/run.sh desktop -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+
+# 构建并安装 Android 应用
+./scripts/run.sh android -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+
+# 构建所有模块
+./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+```
+
+**注意：** 脚本使用 `-PbuildType=debug` 或 `-PbuildType=release` 来指定构建类型，使用 `-PappEnv`、`-PappTier`、`-PappChannel` 来指定变体参数，与 Gradle 命令的参数格式完全一致，便于统一管理。
+
+#### 方式 3：gradle.properties 文件（推荐用于默认配置）
 
 在项目根目录的 `gradle.properties` 文件中配置：
 
@@ -84,10 +110,13 @@ appChannel=channel
 #### 配置优先级
 
 配置的优先级从高到低：
+
 1. **命令行参数** `-PappEnv=prod`（最高优先级）
 2. **gradle.properties** 文件（项目级配置）
 3. **~/.gradle/gradle.properties** 文件（用户级配置）
 4. **代码中的默认值**（`dev`, `free`, `channel`）
+
+**注意：** 无论是直接使用 `./gradlew` 命令还是通过 `scripts/run.sh` 脚本，都使用相同的 `-P` 格式参数，参数优先级规则一致。
 
 **注意：** `local.properties` 文件不用于构建变体配置，它仅用于 Android SDK 路径等本地配置。如果需要个人本地配置，可以使用用户级的 `~/.gradle/gradle.properties` 文件。
 
@@ -481,7 +510,7 @@ kotlin {
                 implementation("com.example:enterprise-analytics:1.0.0")
             }
         }
-        
+
         androidMain.dependencies {
             // 组合判断：生产环境 + Premium + Google Play
             if (project.isProd() && project.isPremium() && project.isGooglePlay()) {
@@ -614,12 +643,12 @@ kotlin {
             }
 
             // ========== 3. 渠道特定依赖 ==========
-            
+
             // Google Play 渠道
             if (project.isGooglePlay()) {
                 implementation("com.google.firebase:firebase-analytics-ktx:21.5.0")
             }
-            
+
             // Umeng 渠道
             if (project.isUmeng()) {
                 implementation("com.umeng:umeng-common:9.5.0")

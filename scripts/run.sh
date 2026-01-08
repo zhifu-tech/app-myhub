@@ -101,32 +101,40 @@ show_help() {
     echo ""
     echo -e "${YELLOW}可用选项:${NC}"
     echo ""
-    echo -e "  ${GREEN}--debug${NC}            调试模式构建（默认）"
-    echo -e "  ${GREEN}--release${NC}          发布模式构建"
-    echo -e "  ${GREEN}--dev${NC}              开发环境（默认）"
-    echo -e "  ${GREEN}--prod${NC}             生产环境"
-    echo -e "  ${GREEN}--free${NC}             免费版（默认）"
-    echo -e "  ${GREEN}--premium${NC}          收费版"
+    echo -e "  使用 ${GREEN}-P${NC} 格式参数（与 Gradle 对齐，统一参数格式）"
+    echo ""
+    echo -e "  ${GREEN}-PbuildType=debug${NC}     调试模式构建（默认）"
+    echo -e "  ${GREEN}-PbuildType=release${NC}   发布模式构建"
+    echo -e "  ${GREEN}-PappEnv=dev${NC}          开发环境（默认）"
+    echo -e "  ${GREEN}-PappEnv=prod${NC}         生产环境"
+    echo -e "  ${GREEN}-PappTier=free${NC}        免费版（默认）"
+    echo -e "  ${GREEN}-PappTier=premium${NC}      收费版"
+    echo -e "  ${GREEN}-PappChannel=CHANNEL${NC}  渠道（可选，如 googlePlay、umeng、vivo 等）"
+    echo ""
+    echo -e "  其他选项:"
     echo -e "  ${GREEN}--help${NC} / ${GREEN}-h${NC}       显示此帮助信息"
     echo ""
     echo -e "${YELLOW}示例:${NC}"
-    echo "  ./scripts/run.sh desktop                    # 运行桌面应用（默认：debug, dev, free）"
-    echo "  ./scripts/run.sh desktop --release          # 运行桌面应用（release 模式）"
-    echo "  ./scripts/run.sh desktop --prod --premium   # 运行桌面应用（生产环境，收费版）"
-    echo "  ./scripts/run.sh web                        # 运行 Web 应用"
-    echo "  ./scripts/run.sh android                    # 构建并安装 Android 应用（默认：debug, dev, free）"
-    echo "  ./scripts/run.sh android --release          # 构建并安装 Android 应用（release 模式）"
-    echo "  ./scripts/run.sh android --prod --premium   # 构建并安装 Android 应用（生产环境，收费版）"
-    echo "  ./scripts/run.sh ios                 # 构建并打开 iOS 项目"
-    echo "  ./scripts/run.sh ios simulator       # 构建并打开 iOS 项目（使用模拟器）"
-    echo "  ./scripts/run.sh ios device          # 构建并打开 iOS 项目（使用真机）"
-    echo "  ./scripts/run.sh ios list           # 列出所有可用设备"
-    echo "  ./scripts/run.sh server             # 运行服务器（SQLite）"
-    echo "  ./scripts/run.sh server dev         # 运行服务器（开发模式）"
-    echo "  ./scripts/run.sh server postgres    # 运行服务器（PostgreSQL）"
-    echo "  ./scripts/run.sh server docker      # Docker 运行（PostgreSQL）"
-    echo "  ./scripts/run.sh build               # 构建所有模块"
-    echo "  ./scripts/run.sh clean               # 清理所有构建文件"
+    echo "  ./scripts/run.sh desktop                                    # 运行桌面应用（默认：debug, dev, free）"
+    echo "  ./scripts/run.sh desktop -PbuildType=release               # 运行桌面应用（release 模式）"
+    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium    # 运行桌面应用（生产环境，收费版）"
+    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 运行桌面应用（生产环境，收费版，Google Play 渠道）"
+    echo "  ./scripts/run.sh web                                         # 运行 Web 应用"
+    echo "  ./scripts/run.sh android                                    # 构建并安装 Android 应用（默认：debug, dev, free）"
+    echo "  ./scripts/run.sh android -PbuildType=release               # 构建并安装 Android 应用（release 模式）"
+    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium    # 构建并安装 Android 应用（生产环境，收费版）"
+    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 构建并安装 Android 应用（生产环境，收费版，Google Play 渠道）"
+    echo "  ./scripts/run.sh ios                                        # 构建并打开 iOS 项目"
+    echo "  ./scripts/run.sh ios simulator                              # 构建并打开 iOS 项目（使用模拟器）"
+    echo "  ./scripts/run.sh ios device                                # 构建并打开 iOS 项目（使用真机）"
+    echo "  ./scripts/run.sh ios list                                  # 列出所有可用设备"
+    echo "  ./scripts/run.sh server                                    # 运行服务器（SQLite）"
+    echo "  ./scripts/run.sh server dev                                # 运行服务器（开发模式）"
+    echo "  ./scripts/run.sh server postgres                           # 运行服务器（PostgreSQL）"
+    echo "  ./scripts/run.sh server docker                            # Docker 运行（PostgreSQL）"
+    echo "  ./scripts/run.sh build                                     # 构建所有模块（默认：dev, free）"
+    echo "  ./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay  # 构建所有模块（生产环境，收费版，Google Play 渠道）"
+    echo "  ./scripts/run.sh clean                                     # 清理所有构建文件"
     echo ""
 }
 
@@ -203,8 +211,15 @@ run_desktop() {
     local build_type="${1:-debug}"
     local environment="${2:-dev}"
     local version="${3:-free}"
+    local channel="${4:-}"
     
-    print_info "正在运行 Desktop 应用（${build_type} 模式，${environment} 环境，${version} 版）..."
+    print_info "正在运行 Desktop 应用（${build_type} 模式，${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    
+    # 构建 Gradle 参数
+    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    if [ -n "$channel" ]; then
+        gradle_args="$gradle_args -PappChannel=${channel}"
+    fi
     
     # 设置环境变量传递给应用
     export APP_BUILD_TYPE="$build_type"
@@ -212,9 +227,9 @@ run_desktop() {
     export APP_VERSION="$version"
     
     if [ "$build_type" = "release" ]; then
-        ./gradlew :composeApp:runDistributable --args="--release"
+        ./gradlew :composeApp:runDistributable $gradle_args --args="--release"
     else
-        ./gradlew :composeApp:runDistributable
+        ./gradlew :composeApp:runDistributable $gradle_args
     fi
 }
 
@@ -223,9 +238,16 @@ run_web() {
     local build_type="${1:-debug}"
     local environment="${2:-dev}"
     local version="${3:-free}"
+    local channel="${4:-}"
     
-    print_info "正在运行 Web 应用（${build_type} 模式，${environment} 环境，${version} 版）..."
+    print_info "正在运行 Web 应用（${build_type} 模式，${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
     print_info "应用将在浏览器中自动打开"
+    
+    # 构建 Gradle 参数
+    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    if [ -n "$channel" ]; then
+        gradle_args="$gradle_args -PappChannel=${channel}"
+    fi
     
     # 设置环境变量传递给应用
     export APP_BUILD_TYPE="$build_type"
@@ -233,9 +255,9 @@ run_web() {
     export APP_VERSION="$version"
     
     if [ "$build_type" = "release" ]; then
-        ./gradlew :composeApp:jsBrowserProductionRun
+        ./gradlew :composeApp:jsBrowserProductionRun $gradle_args
     else
-        ./gradlew :composeApp:jsBrowserDevelopmentRun
+        ./gradlew :composeApp:jsBrowserDevelopmentRun $gradle_args
     fi
 }
 
@@ -244,50 +266,43 @@ run_android() {
     local build_type="${1:-debug}"
     local environment="${2:-dev}"
     local version="${3:-free}"
+    local channel="${4:-}"
     
-    # 根据环境 and 版本组合变体名称
-    # 注意：Gradle 生成的目录名格式是 {env小写}{Version首字母大写}，如 prodFree, devPremium
-    local version_title=$(echo "$version" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
-    local variant="${environment}${version_title}"
+    # 构建 Gradle 参数（使用独立的变体参数，不再组合）
+    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    if [ -n "$channel" ]; then
+        gradle_args="$gradle_args -PappChannel=${channel}"
+    fi
     
-    print_info "变体: ${variant} (${environment} 环境 + ${version} 版)"
+    print_info "构建配置: ${environment} 环境 + ${version} 版${channel:+ + ${channel} 渠道}"
     
+    # 注意：Android App 现在使用动态源集注入，不再使用 productFlavors
+    # 因此使用标准的 assembleDebug/assembleRelease 任务
     if [ "$build_type" = "release" ]; then
-        print_info "正在构建 Android 应用（Release 模式，变体: ${variant}）..."
-        ./gradlew :androidApp:assemble${variant}Release
+        print_info "正在构建 Android 应用（Release 模式）..."
+        ./gradlew :androidApp:assembleRelease $gradle_args
     else
-        print_info "正在构建 Android 应用（Debug 模式，变体: ${variant}）..."
-        ./gradlew :androidApp:assemble${variant}Debug
+        print_info "正在构建 Android 应用（Debug 模式）..."
+        ./gradlew :androidApp:assembleDebug $gradle_args
     fi
     
-    # 根据环境 and 版本调整包名
+    # 包名现在是固定的（不再有 applicationIdSuffix）
     local package_name="tech.zhifu.app.myhub"
-    if [ "$environment" = "dev" ]; then
-        if [ "$version" = "free" ]; then
-            package_name="tech.zhifu.app.myhub.dev.free"
-        else
-            package_name="tech.zhifu.app.myhub.dev.premium"
-        fi
-    else
-        if [ "$version" = "free" ]; then
-            package_name="tech.zhifu.app.myhub.free"
-        else
-            package_name="tech.zhifu.app.myhub.premium"
-        fi
-    fi
     
     print_info "正在安装到设备..."
     if [ "$build_type" = "release" ]; then
         # Release 版本没有 install 任务，需要手动使用 adb 安装
-        # APK 路径格式: androidApp/build/outputs/apk/{variant驼峰命名}/{buildType}/androidApp-{variant小写}-{buildType}[-unsigned].apk
-        # 注意：目录名使用驼峰命名（如 prodFree），文件名使用小写加连字符（如 prod-free）
+        # APK 路径格式: androidApp/build/outputs/apk/release/androidApp-release.apk
+        local apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
         
-        # 使用驼峰命名的目录查找 APK 文件（Gradle 生成的目录名是驼峰命名）
-        local apk_path=$(find androidApp/build/outputs/apk -path "*/${variant}/${build_type}/*.apk" -type f 2>/dev/null | head -1)
+        # 如果标准路径不存在，尝试查找其他可能的路径
+        if [ ! -f "$apk_path" ]; then
+            apk_path=$(find androidApp/build/outputs/apk/release -name "*.apk" -type f 2>/dev/null | head -1)
+        fi
         
         if [ -z "$apk_path" ] || [ ! -f "$apk_path" ]; then
             print_error "未找到 APK 文件，请检查构建是否成功"
-            print_info "预期路径: androidApp/build/outputs/apk/${variant}/${build_type}/"
+            print_info "预期路径: androidApp/build/outputs/apk/release/"
             print_info "请确保已成功构建 Release 版本"
             exit 1
         fi
@@ -313,7 +328,7 @@ run_android() {
         fi
     else
         # Debug 版本使用 Gradle install 任务
-        ./gradlew :androidApp:install${variant}Debug
+        ./gradlew :androidApp:installDebug $gradle_args
         if [ $? -ne 0 ]; then
             print_error "安装失败，请确保设备已连接或模拟器正在运行"
             exit 1
@@ -321,7 +336,7 @@ run_android() {
     fi
     
     local build_type_capitalized=$(echo "$build_type" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
-    print_success "Android 应用已成功安装（变体: ${variant}${build_type_capitalized}）"
+    print_success "Android 应用已成功安装（${build_type_capitalized} 模式，${environment} 环境，${version} 版${channel:+，${channel} 渠道}）"
     
     # 启动 MainActivity
     print_info "正在启动应用..."
@@ -369,6 +384,9 @@ run_ios() {
     check_xcode
     
     local device_type="${1:-auto}"
+    local environment="${2:-dev}"
+    local version="${3:-free}"
+    local channel="${4:-}"
     
     # 使用 .xcworkspace（CocoaPods 集成）或 .xcodeproj（非 CocoaPods）
     local xcode_workspace="iosApp/iosApp.xcworkspace"
@@ -396,7 +414,13 @@ run_ios() {
         return 0
     fi
     
-    print_info "正在构建 iOS Framework..."
+    # 构建 Gradle 参数
+    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    if [ -n "$channel" ]; then
+        gradle_args="$gradle_args -PappChannel=${channel}"
+    fi
+    
+    print_info "正在构建 iOS Framework（${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
     print_info "注意: Framework 将在 Xcode 构建时自动生成"
     
     # 设置环境变量以匹配 Xcode 构建脚本的期望
@@ -407,7 +431,8 @@ run_ios() {
     ./gradlew :composeApp:syncFramework \
         -Pkotlin.native.cocoapods.platform=iphonesimulator \
         -Pkotlin.native.cocoapods.archs="arm64" \
-        -Pkotlin.native.cocoapods.configuration=Debug 2>/dev/null || {
+        -Pkotlin.native.cocoapods.configuration=Debug \
+        $gradle_args 2>/dev/null || {
         print_warning "预构建 Framework 失败，将在 Xcode 中自动构建"
     }
     
@@ -534,8 +559,18 @@ run_server() {
 
 # 构建所有模块
 build_all() {
-    print_info "正在构建所有模块..."
-    ./gradlew build
+    local environment="${1:-dev}"
+    local version="${2:-free}"
+    local channel="${3:-}"
+    
+    # 构建 Gradle 参数
+    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    if [ -n "$channel" ]; then
+        gradle_args="$gradle_args -PappChannel=${channel}"
+    fi
+    
+    print_info "正在构建所有模块（${environment} 环境，${version} 版${channel:+，${channel} 渠道}）..."
+    ./gradlew build $gradle_args
     print_success "构建完成"
 }
 
@@ -557,6 +592,7 @@ parse_args() {
     local build_type="debug"
     local environment="dev"
     local version="free"
+    local channel=""
     
     # 如果没有参数，返回空
     if [ $# -eq 0 ]; then
@@ -566,30 +602,24 @@ parse_args() {
     # 处理选项和参数
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --debug)
-                build_type="debug"
+            # 支持 -P 格式的参数（与 Gradle 对齐）
+            -PbuildType=*)
+                build_type="${1#*=}"
                 shift
                 ;;
-            --release)
-                build_type="release"
+            -PappEnv=*)
+                environment="${1#*=}"
                 shift
                 ;;
-            --dev)
-                environment="dev"
+            -PappTier=*)
+                version="${1#*=}"
                 shift
                 ;;
-            --prod)
-                environment="prod"
+            -PappChannel=*)
+                channel="${1#*=}"
                 shift
                 ;;
-            --free)
-                version="free"
-                shift
-                ;;
-            --premium)
-                version="premium"
-                shift
-                ;;
+            # 保留 --help 和 -h 支持（脚本特定）
             --help|-h)
                 show_help
                 exit 0
@@ -610,7 +640,7 @@ parse_args() {
         return 0
     fi
     
-    echo "$command|$subcommand|$build_type|$environment|$version"
+    echo "$command|$subcommand|$build_type|$environment|$version|$channel"
 }
 
 # ============================================
@@ -641,7 +671,7 @@ main() {
         exit 0
     fi
     
-    IFS='|' read -r command subcommand build_type environment version <<< "$args_result"
+    IFS='|' read -r command subcommand build_type environment version channel <<< "$args_result"
     
     # 如果命令为空，显示帮助并退出
     if [ -z "$command" ]; then
@@ -655,27 +685,27 @@ main() {
     # 执行命令
     case "$command" in
         desktop)
-            run_desktop "$build_type" "$environment" "$version"
+            run_desktop "$build_type" "$environment" "$version" "$channel"
             ;;
         web)
-            run_web "$build_type" "$environment" "$version"
+            run_web "$build_type" "$environment" "$version" "$channel"
             ;;
         android)
-            run_android "$build_type" "$environment" "$version"
+            run_android "$build_type" "$environment" "$version" "$channel"
             ;;
         ios)
             if [ -z "$subcommand" ]; then
-                run_ios "auto"
+                run_ios "auto" "$environment" "$version" "$channel"
             else
                 case "$subcommand" in
                     simulator|sim)
-                        run_ios "simulator"
+                        run_ios "simulator" "$environment" "$version" "$channel"
                         ;;
                     device|physical|real)
-                        run_ios "device"
+                        run_ios "device" "$environment" "$version" "$channel"
                         ;;
                     mac)
-                        run_ios "mac"
+                        run_ios "mac" "$environment" "$version" "$channel"
                         ;;
                     list)
                         run_ios "list"
@@ -715,7 +745,7 @@ main() {
             fi
             ;;
         build)
-            build_all
+            build_all "$environment" "$version" "$channel"
             ;;
         clean)
             clean_all
