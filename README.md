@@ -2,7 +2,7 @@
 
 一个基于 Kotlin Multiplatform 和 Compose Multiplatform 的跨平台应用，支持 Android、iOS、Desktop、Web 等多个平台。
 
-[//]: # (https://stitch.withgoogle.com/projects/3621022472859340515)
+[//]: # "https://stitch.withgoogle.com/projects/3621022472859340515"
 
 ## 📱 支持的平台
 
@@ -28,6 +28,12 @@
 - **kotlinx.datetime** - 跨平台日期时间处理
 - **kotlin-logging** - 日志库
 - **Compose Resources** - 多语言资源支持
+
+## 开发工具
+
+1. **Jetbrain's Idea IntelliJ IDEA 2025.3.1 及以后的版本**
+   （因为用到了不兼容的 apg 要求 gradle 9.1.0 以上，kotlin multiplatform 有依赖，AS 尚无该版本的插件）
+
 
 ## 📦 项目结构
 
