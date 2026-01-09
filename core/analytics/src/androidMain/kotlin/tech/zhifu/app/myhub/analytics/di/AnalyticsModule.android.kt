@@ -6,6 +6,7 @@ import tech.zhifu.app.myhub.analytics.AnalyticsConfig
 import tech.zhifu.app.myhub.analytics.ProviderConfig
 import tech.zhifu.app.myhub.analytics.ProviderType
 import tech.zhifu.app.myhub.analytics.Region
+import tech.zhifu.app.myhub.analytics.provider.addChannelList
 import tech.zhifu.app.myhub.config.AppBuildConfig
 
 /**
@@ -21,16 +22,7 @@ internal actual fun analyticsPlatformModule(): Module = module {
             providers = buildList {
                 // Console Provider（所有平台都支持，用于调试）
                 add(ProviderConfig(type = ProviderType.CONSOLE))
-                if (AppBuildConfig.isGooglePlay()) {
-                    add(
-                        ProviderConfig(
-                            type = ProviderType.FIREBASE,
-                        )
-                    )
-                } else {
-                    // FIXME: todo
-                    add(ProviderConfig(type = ProviderType.UMENG))
-                }
+                addChannelList()
             },
         )
     }

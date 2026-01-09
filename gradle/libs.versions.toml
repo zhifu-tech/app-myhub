@@ -70,6 +70,12 @@ googleServicesVersion = "4.4.2"
 firebase-analytics = "2.4.0"
 firebase-bom = "34.7.0"
 
+# ============================================================================
+# Umeng (友盟)
+# ============================================================================
+umeng-common = "9.8.9"
+umeng-asms = "1.8.7.2"
+
 [libraries]
 # ============================================================================
 # Build System Plugins
@@ -168,6 +174,12 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 # ============================================================================
 firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+
+# ============================================================================
+# Umeng (友盟)
+# ============================================================================
+umeng-common = { module = "com.umeng.umsdk:common", version.ref = "umeng-common" }
+umeng-asms = { module = "com.umeng.umsdk:asms", version.ref = "umeng-asms" }
 
 [plugins]
 # ============================================================================

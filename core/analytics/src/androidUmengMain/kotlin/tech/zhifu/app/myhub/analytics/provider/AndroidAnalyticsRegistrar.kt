@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.analytics.provider
 
-import dev.gitlive.firebase.FirebaseOptions
+import android.content.Context
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderRegistrar
 import tech.zhifu.app.myhub.analytics.Platform
@@ -18,23 +18,23 @@ import tech.zhifu.app.myhub.analytics.Region
 class AndroidAnalyticsRegistrar : AnalyticsProviderRegistrar {
     override fun register(factory: AnalyticsProviderFactory) {
         // 注册 Android 平台特定的 FirebaseProvider
-        factory.register(ProviderType.FIREBASE) { config ->
-            FirebaseProvider(
-                name = "Firebase",
+        factory.register(ProviderType.UMENG) {
+            UmengProvider(
+                context = org.koin.core.context.GlobalContext.get().get<Context>(),
+                name = "Umeng",
                 supportedPlatforms = setOf(Platform.ANDROID),
-                supportedRegions = setOf(Region.OVERSEAS),
+                supportedRegions = setOf(Region.DOMESTIC),
             )
         }
     }
 }
 
-internal fun ProviderConfig.toFirebaseOptions(): FirebaseOptions? = null
-
 
 internal fun MutableList<ProviderConfig>.addChannelList() {
     add(
         ProviderConfig(
-            type = ProviderType.FIREBASE,
+            type = ProviderType.UMENG,
+            appKey = "695db2e99a7f376488244210"
         )
     )
 }

@@ -32,9 +32,16 @@ kotlin {
 
         androidMain.dependencies {
             // Firebase Android SDK（仅在 googlePlay 渠道）
-            if (project.isChannelGooglePlay()) {
-                implementation(libs.firebase.analytics)
-                implementation(project.dependencies.platform(libs.firebase.bom))
+            when {
+                project.isChannelGooglePlay() -> {
+                    implementation(libs.firebase.analytics)
+                    implementation(project.dependencies.platform(libs.firebase.bom))
+                }
+
+                project.isChannelUmeng() -> {
+                    implementation(libs.umeng.common)
+                    implementation(libs.umeng.asms)
+                }
             }
         }
 

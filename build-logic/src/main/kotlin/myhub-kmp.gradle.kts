@@ -40,7 +40,8 @@ configure<KotlinMultiplatformExtension> {
         }
     }
 
-    @Suppress("OPT_IN_USAGE") wasmJs {
+    @Suppress("OPT_IN_USAGE")
+    wasmJs {
         browser {
             testTask {
                 useKarma {
