@@ -32,3 +32,23 @@ internal fun ProviderConfig.toFirebaseOptions(): FirebaseOptions? = FirebaseOpti
     storageBucket = customParams["storageBucket"]!!,
     applicationId = customParams["appId"]!!,
 )
+
+
+internal fun MutableList<ProviderConfig>.addChannelList() {
+    add(
+        ProviderConfig(
+            type = ProviderType.FIREBASE,
+            // 注意：这些配置值应该从 Firebase Console 获取：
+            // Firebase Console > Project Settings > Your apps > Web app 获取
+            // 打开 Firebase Console: https://console.firebase.google.com/
+            customParams = mapOf(
+                "apiKey" to "AIzaSyDwhlwvWxk4VQAqa5WI9uAsgbkKwB53iyI",
+                "authDomain" to "myhub-2a6db.firebaseapp.com",
+                "projectId" to "myhub-2a6db",
+                "storageBucket" to "myhub-2a6db.firebasestorage.app",
+                "appId" to "1:557805960070:web:e3a7c4b4719b7c232dca07",
+                "measurementId" to "G-GBSVG75ZE6",
+            )
+        )
+    )
+}

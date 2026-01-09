@@ -17,7 +17,6 @@ class AndroidAnalyticsRegistrar : AnalyticsProviderRegistrar {
     }
 }
 
-
 internal fun MutableList<ProviderConfig>.addChannelList() {
     // Keep it empty
 }
