@@ -28,7 +28,7 @@ internal fun MutableList<ProviderConfig>.addChannelList() {
     add(
         ProviderConfig(
             type = ProviderType.UMENG,
-            appKey = "695db2e99a7f376488244210",
+            appKey = "6960a2528560e34872205a67",
         )
     )
 }
