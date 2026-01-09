@@ -4,7 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.isSystemInDarkTheme
+import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,12 +47,9 @@ fun QuoteCard(
     modifier: Modifier = Modifier
 ) {
 
-    val isDark = isSystemInDarkTheme()
-    val quoteBgColor = if (isDark) {
-        Color(0xFF1e2025)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    val isDark = LocalAppTheme.current
+    // 使用 CardStyles.QuoteCard.backgroundColor 根据主题判断背景色
+    val quoteBgColor = CardStyles.QuoteCard.backgroundColor(isDark)
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -73,17 +70,14 @@ fun QuoteCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = quoteBgColor
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = CardStyles.defaultBorder(),
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）
@@ -112,11 +106,12 @@ fun QuoteCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // 分类标签（对齐设计稿：bg-amber-100 text-amber-700）
                     Surface(
                         color = if (isDark) {
                             Color(0xFFFFB020).copy(alpha = 0.3f)
                         } else {
-                            Color(0xFFFFF4E6)
+                            Color(0xFFFEF3C7) // amber-100
                         },
                         shape = RoundedCornerShape(4.dp)
                     ) {
@@ -127,9 +122,9 @@ fun QuoteCard(
                             color = if (isDark) {
                                 Color(0xFFFFB020)
                             } else {
-                                Color(0xFF92400E)
+                                Color(0xFF92400E) // amber-700
                             },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp) // px-2 py-1
                         )
                     }
                     Text(
@@ -141,20 +136,20 @@ fun QuoteCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 引言内容（Serif 字体，斜体）
+                // 引言内容（对齐设计稿：font-serif text-xl leading-relaxed text-slate-800 italic）
                 Text(
                     text = card.content,
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic
+                        fontFamily = FontFamily.Serif, // font-serif
+                        fontStyle = FontStyle.Italic // italic
                     ),
-                    lineHeight = MaterialTheme.typography.titleLarge.lineHeight * 1.5,
+                    lineHeight = MaterialTheme.typography.titleLarge.lineHeight * 1.5, // leading-relaxed
                     color = if (isDark) {
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
                     } else {
-                        Color(0xFF1e293b)
+                        Color(0xFF1e293b) // text-slate-800
                     },
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp) // mb-4
                 )
 
                 // 分隔线和作者

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,18 +46,11 @@ fun IdeaCard(
     onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val isDark = isSystemInDarkTheme()
-    val ideaBgColor = if (isDark) {
-        Color(0xFF2A261C)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-
-    val ideaBorderColor = if (isDark) {
-        Color(0xFF92400E).copy(alpha = 0.5f)
-    } else {
-        Color(0xFFFCD34D).copy(alpha = 0.5f)
-    }
+    // 使用 LocalAppTheme 获取应用的主题设置
+    val isDark = LocalAppTheme.current
+    
+    val ideaBgColor = CardStyles.IdeaCard.backgroundColor(isDark)
+    val ideaBorder = CardStyles.IdeaCard.border(isDark)
 
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -70,17 +63,14 @@ fun IdeaCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = ideaBgColor
         ),
-        border = BorderStroke(1.dp, ideaBorderColor),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = ideaBorder,
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）
@@ -108,22 +98,27 @@ fun IdeaCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // 圆点（对齐设计稿：w-2 h-2 rounded-full bg-yellow-500）
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFFF59E0B))
+                                .size(8.dp) // w-2 h-2 = 8.dp
+                                .clip(RoundedCornerShape(4.dp)) // rounded-full
+                                .background(Color(0xFFF59E0B)) // yellow-500
                         )
                         Spacer(Modifier.width(8.dp))
+                        // 标签（对齐设计稿：text-xs text-yellow-700 font-medium）
                         Text(
                             text = "Idea",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall, // text-xs
                             fontWeight = FontWeight.Medium,
                             color = if (isDark) {
                                 Color(0xFFF59E0B)
                             } else {
-                                Color(0xFF92400E)
+                                Color(0xFF92400E) // yellow-700
                             }
                         )
                     }
@@ -150,21 +145,25 @@ fun IdeaCard(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // 内容文本（对齐设计稿：text-slate-800 font-medium leading-relaxed mb-4）
                 Text(
                     text = card.content,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.5 // leading-relaxed
+                    ),
                     fontWeight = FontWeight.Medium,
                     color = if (isDark) {
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
                     } else {
-                        Color(0xFF1e293b)
+                        Color(0xFF1e293b) // text-slate-800
                     },
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp) // mb-4
                 )
 
+                // 时间戳（对齐设计稿：text-xs text-yellow-700/60）
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) // gap-2 = 8.dp
                 ) {
                     Icon(
                         imageVector = Icons.Default.Schedule,
@@ -172,17 +171,17 @@ fun IdeaCard(
                         tint = if (isDark) {
                             Color(0xFFF59E0B).copy(alpha = 0.6f)
                         } else {
-                            Color(0xFF92400E).copy(alpha = 0.6f)
+                            Color(0xFF92400E).copy(alpha = 0.6f) // yellow-700/60
                         },
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp) // text-[16px]
                     )
                     Text(
                         text = relativeTime,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall, // text-xs
                         color = if (isDark) {
                             Color(0xFFF59E0B).copy(alpha = 0.6f)
                         } else {
-                            Color(0xFF92400E).copy(alpha = 0.6f)
+                            Color(0xFF92400E).copy(alpha = 0.6f) // yellow-700/60
                         }
                     )
                 }

@@ -63,17 +63,14 @@ fun ChecklistCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = CardStyles.defaultBorder(),
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）

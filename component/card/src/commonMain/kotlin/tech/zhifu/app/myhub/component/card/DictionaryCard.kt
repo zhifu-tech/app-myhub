@@ -69,17 +69,14 @@ fun DictionaryCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = CardStyles.defaultBorder(),
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）
@@ -119,9 +116,10 @@ fun DictionaryCard(
                         if (pronunciation != null) {
                             Text(
                                 text = pronunciation,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontStyle = FontStyle.Italic,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontStyle = FontStyle.Italic
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, // text-slate-500
                                 modifier = Modifier.padding(top = 4.dp)
                             )
                         }
@@ -166,22 +164,20 @@ fun DictionaryCard(
                     modifier = Modifier.padding(bottom = if (example != null) 16.dp else 0.dp)
                 )
 
-                // 例句（带左边框）
+                // 例句（对齐设计稿：p-3 bg-slate-50 rounded-lg border-l-2 border-primary）
                 if (example != null) {
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 0.dp)
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), // bg-slate-50
+                        shape = RoundedCornerShape(8.dp), // rounded-lg
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary), // border-l-2 border-primary
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = "\"$example\"",
                             style = MaterialTheme.typography.bodySmall,
                             fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(12.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, // text-slate-500
+                            modifier = Modifier.padding(12.dp) // p-3 = 12.dp
                         )
                     }
                 }

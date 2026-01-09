@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ fun CodeCard(
     onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val isDark = LocalAppTheme.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
@@ -66,17 +68,14 @@ fun CodeCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = CardStyles.defaultBorder(),
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）
@@ -142,18 +141,19 @@ fun CodeCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 代码块（深色背景）
+                    // 代码块（浅色背景，对齐设计稿：bg-slate-50 border border-slate-100）
                     Surface(
-                        color = Color(0xFF282c34),
-                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), // bg-slate-50
+                        shape = RoundedCornerShape(8.dp), // rounded-lg
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)), // border-slate-100
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = codeContent,
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = FontFamily.Monospace,
-                            color = Color(0xFF81A1C1),
-                            modifier = Modifier.padding(12.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(12.dp) // p-3 = 12.dp
                         )
                     }
 
@@ -181,12 +181,12 @@ fun CodeCard(
                     }
                 }
 
-                // 底部蓝色条
+                // 底部蓝色条（对齐设计稿：h-1 w-full bg-blue-500）
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Color(0xFF3b82f6))
+                        .height(4.dp) // h-1 = 4.dp (HTML中h-1对应4px)
+                        .background(Color(0xFF3b82f6)) // blue-500
                 )
             }
         }

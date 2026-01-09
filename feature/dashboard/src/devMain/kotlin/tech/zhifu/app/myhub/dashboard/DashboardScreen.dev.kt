@@ -71,7 +71,8 @@ private fun DashboardScreenLightGridPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 300_000, // 5分钟前
                     isLoading = false,
-                    onRefresh = {}
+                    onRefresh = {},
+                    sizeClass = sizeClass
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -84,13 +85,11 @@ private fun DashboardScreenLightGridPreview() {
                     onViewTypeChange = {}
                 )
 
-                if (sizeClass.isCompact) {
-                    StatsCardsRow(statistics = statistics)
-                }
-
                 DashboardGridView(
                     cards = sampleCards,
                     columns = columns,
+                    statistics = statistics,
+                    sizeClass = sizeClass,
                     onEdit = {},
                     onFavorite = {},
                     onCardClick = {},
@@ -124,7 +123,8 @@ private fun DashboardScreenDarkListPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 3600_000, // 1小时前
                     isLoading = false,
-                    onRefresh = {}
+                    onRefresh = {},
+                    sizeClass = sizeClass
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -139,6 +139,12 @@ private fun DashboardScreenDarkListPreview() {
 
                 DashboardListView(
                     cards = sampleCards,
+                    columns = when {
+                        sizeClass.isCompact -> 1
+                        sizeClass.isMedium -> 2
+                        else -> 3
+                    },
+                    statistics = null,
                     sizeClass = sizeClass,
                     onEdit = {},
                     onFavorite = {},
@@ -168,7 +174,8 @@ private fun DashboardScreenLoadingPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
                     isLoading = true,
-                    onRefresh = {}
+                    onRefresh = {},
+                    sizeClass = WindowSizeClass.Medium
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -196,7 +203,8 @@ private fun DashboardHeaderLightPreview() {
             recentEditsCount = 5,
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 300_000, // 5分钟前
             isLoading = false,
-            onRefresh = {}
+            onRefresh = {},
+            sizeClass = WindowSizeClass.Medium
         )
     }
 }
@@ -212,7 +220,8 @@ private fun DashboardHeaderDarkPreview() {
             recentEditsCount = 0,
             lastSyncTime = null,
             isLoading = false,
-            onRefresh = {}
+            onRefresh = {},
+            sizeClass = WindowSizeClass.Medium
         )
     }
 }
@@ -228,7 +237,8 @@ private fun DashboardHeaderLoadingPreview() {
             recentEditsCount = 3,
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
             isLoading = true,
-            onRefresh = {}
+            onRefresh = {},
+            sizeClass = WindowSizeClass.Medium
         )
     }
 }
@@ -297,10 +307,14 @@ private fun DashboardGridViewCompactPreview() {
 
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
+        val statistics = createSampleStatistics()
+        val sizeClass = WindowSizeClass.Compact
 
         DashboardGridView(
             cards = sampleCards,
             columns = 1,
+            statistics = statistics,
+            sizeClass = sizeClass,
             onEdit = {},
             onFavorite = {},
             onCardClick = {},
@@ -320,10 +334,14 @@ private fun DashboardGridViewMediumPreview() {
 
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
+        val statistics = createSampleStatistics()
+        val sizeClass = WindowSizeClass.Medium
 
         DashboardGridView(
             cards = sampleCards,
             columns = 2,
+            statistics = statistics,
+            sizeClass = sizeClass,
             onEdit = {},
             onFavorite = {},
             onCardClick = {},
@@ -343,10 +361,14 @@ private fun DashboardGridViewExpandedPreview() {
 
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
+        val statistics = createSampleStatistics()
+        val sizeClass = WindowSizeClass.Expanded
 
         DashboardGridView(
             cards = sampleCards,
             columns = 3,
+            statistics = null, // 3列时统计卡片在工具栏中显示
+            sizeClass = sizeClass,
             onEdit = {},
             onFavorite = {},
             onCardClick = {},
@@ -369,6 +391,8 @@ private fun DashboardListViewCompactPreview() {
 
         DashboardListView(
             cards = sampleCards,
+            columns = 1,
+            statistics = null,
             sizeClass = WindowSizeClass.Compact,
             onEdit = {},
             onFavorite = {},
@@ -392,6 +416,8 @@ private fun DashboardListViewExpandedPreview() {
 
         DashboardListView(
             cards = sampleCards,
+            columns = 3,
+            statistics = null,
             sizeClass = WindowSizeClass.Expanded,
             onEdit = {},
             onFavorite = {},

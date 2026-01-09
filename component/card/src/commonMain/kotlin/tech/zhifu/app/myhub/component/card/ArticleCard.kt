@@ -65,17 +65,14 @@ fun ArticleCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
                 onClick = { onCardClick(card) }
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CardStyles.Shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 1.dp
-        )
+        border = CardStyles.defaultBorder(),
+        elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {
             // 编辑按钮（hover 时显示）
@@ -103,11 +100,7 @@ fun ArticleCard(
                         .height(128.dp)
                         .background(
                             Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFF6366f1), // indigo
-                                    Color(0xFFa855f7), // purple
-                                    Color(0xFFec4899)  // pink
-                                )
+                                colors = CardStyles.ArticleCard.GradientColors
                             )
                         ),
                     contentAlignment = Alignment.BottomStart

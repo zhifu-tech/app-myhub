@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +44,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -139,7 +142,8 @@ fun DashboardScreen(
                         recentEditsCount = state.statistics.recentEdits,
                         lastSyncTime = state.lastSyncTime,
                         isLoading = state.isRefreshing, // 显示刷新动画
-                        onRefresh = { viewModel.refresh() }
+                        onRefresh = { viewModel.refresh() },
+                        sizeClass = sizeClass
                     )
 
                     // 搜索栏和工具栏
@@ -152,20 +156,19 @@ fun DashboardScreen(
                         onViewTypeChange = { viewModel.setViewType(it) }
                     )
 
-                    // 统计卡片（移动端显示）
-                    if (sizeClass.isCompact) {
-                        StatsCardsRow(statistics = state.statistics)
-                    }
-
                     // 根据视图类型显示不同的布局
                     when (state.viewType) {
                         ViewType.GRID -> {
+                            // 1列和2列：统计卡片在Grid内部，作为第一个item，随列表滚动
+                            // 3列：统计信息在工具栏中显示（已实现），Grid内部不显示
                             DashboardGridView(
                                 cards = state.recentCards,
                                 columns = columns,
+                                statistics = if (sizeClass.isExpanded) null else state.statistics, // 1列和2列时显示统计卡片
+                                sizeClass = sizeClass,
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
-                                onCardClick = { 
+                                onCardClick = {
                                     onNavigateToCardDetail?.invoke(it.id) ?: viewModel.viewCard(it.id)
                                 },
                                 modifier = Modifier
@@ -177,10 +180,12 @@ fun DashboardScreen(
                         ViewType.LIST -> {
                             DashboardListView(
                                 cards = state.recentCards,
+                                columns = columns,
+                                statistics = if (sizeClass.isExpanded) null else state.statistics, // 1列和2列时显示统计卡片
                                 sizeClass = sizeClass,
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
-                                onCardClick = { 
+                                onCardClick = {
                                     onNavigateToCardDetail?.invoke(it.id) ?: viewModel.viewCard(it.id)
                                 },
                                 modifier = Modifier
@@ -207,7 +212,8 @@ fun DashboardHeader(
     recentEditsCount: Int,
     lastSyncTime: Long?,
     isLoading: Boolean,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    sizeClass: WindowSizeClass
 ) {
     // 格式化最后同步时间
     val syncTimeText = when {
@@ -226,14 +232,15 @@ fun DashboardHeader(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+        color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f), // backdrop-blur effect
         tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp) // px-6 py-4
         ) {
+            // 统一布局：所有尺寸都使用水平布局，保持一致性
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -254,12 +261,12 @@ fun DashboardHeader(
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 4.dp) // mt-1
                     )
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp) // gap-3
                 ) {
                     Text(
                         text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
@@ -416,121 +423,132 @@ fun DashboardToolbar(
         tonalElevation = 0.dp
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // 搜索栏和工具栏行
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 搜索栏
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    modifier = Modifier
-                        .weight(1f, fill = true)
-                        .height(44.dp)
-                        .widthIn(min = if (sizeClass.isCompact) 150.dp else 200.dp),
-                    placeholder = {
-                        Text(
-                            text = stringResource(Res.string.feature_dashboard_search_placeholder),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodySmall
-                )
-
-                // 工具栏（统计信息和视图切换）
+                // 搜索栏和工具栏行
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 统计信息（桌面端显示）
-                    if (!sizeClass.isCompact) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surface,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                            modifier = Modifier.height(44.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                    // 搜索栏
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchQueryChange,
+                        modifier = Modifier
+                            .weight(1f, fill = true)
+                            .height(44.dp)
+                            .widthIn(min = if (sizeClass.isCompact) 150.dp else 200.dp),
+                        placeholder = {
+                            Text(
+                                text = stringResource(Res.string.feature_dashboard_search_placeholder),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodySmall
+                    )
+
+                    // 工具栏（统计信息和视图切换）
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // 统计信息（仅3列时显示，与搜索栏同一行）
+                        // 2列时统计信息在Grid上方显示，不在这里显示
+                        if (sizeClass.isExpanded) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                                modifier = Modifier.height(44.dp)
                             ) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
                                 ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color(0xFF10b981)) // emerald-500
+                                        )
+                                        Text(
+                                            text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                     Box(
                                         modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(Color(0xFF10b981)) // emerald-500
+                                            .width(1.dp)
+                                            .height(16.dp)
+                                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                                     )
-                                    Text(
-                                        text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .width(1.dp)
-                                        .height(16.dp)
-                                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-                                )
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(Color(0xFFf59e0b)) // amber-500
-                                    )
-                                    Text(
-                                        text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color(0xFFf59e0b)) // amber-500
+                                        )
+                                        Text(
+                                            text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // 视图切换
-                    ViewTypeToggle(
-                        currentViewType = viewType,
-                        onViewTypeChange = onViewTypeChange
-                    )
+                        // 视图切换
+                        ViewTypeToggle(
+                            currentViewType = viewType,
+                            onViewTypeChange = onViewTypeChange
+                        )
+                    }
                 }
+
+                // 分割线（统计区域和搜索区域之间）
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                    thickness = 1.dp
+                )
             }
         }
     }
@@ -538,15 +556,23 @@ fun DashboardToolbar(
 
 // ==================== Statistics Components ====================
 
+/**
+ * 统计卡片行（移动端：3列网格布局）
+ *
+ * HTML规则：grid grid-cols-3 gap-4 mb-8
+ * - 3列网格布局
+ * - gap-4 = 16.dp
+ * - mb-8 = 32.dp (底部间距)
+ */
 @Composable
 fun StatsCardsRow(
-    statistics: Statistics
+    statistics: Statistics,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp) // gap-4 = 16.dp
     ) {
         StatCard(
             label = stringResource(Res.string.feature_dashboard_total),
@@ -566,8 +592,46 @@ fun StatsCardsRow(
     }
 }
 
+/**
+ * 统计卡片可滑动行（中型和扩展布局：横向滑动）
+ */
 @Composable
-private fun StatCard(
+fun StatsCardsScrollableRow(
+    statistics: Statistics
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp)
+    ) {
+        item {
+            StatCard(
+                label = stringResource(Res.string.feature_dashboard_total),
+                value = "${statistics.totalCards}",
+                modifier = Modifier.width(140.dp)
+            )
+        }
+        item {
+            StatCard(
+                label = stringResource(Res.string.feature_dashboard_recent_edits),
+                value = "${statistics.recentEdits}",
+                modifier = Modifier.width(140.dp)
+            )
+        }
+        item {
+            StatCard(
+                label = stringResource(Res.string.feature_dashboard_favorites),
+                value = "${statistics.favoriteCards}",
+                modifier = Modifier.width(140.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -604,23 +668,48 @@ private fun StatCard(
 
 /**
  * Grid 视图组件（瀑布流布局）
+ *
+ * 根据设计稿规则：
+ * - 1列：统计卡片在 Grid 内部，作为第一个 item，随列表滚动
+ * - 2列和3列：统计信息在工具栏中（已实现），Grid 内部不显示
+ * - 使用 gap-6 (24.dp) 和 space-y-6 (24.dp)
  */
 @Composable
 fun DashboardGridView(
     cards: List<Card>,
     columns: Int,
+    statistics: Statistics?,
+    sizeClass: WindowSizeClass,
     onEdit: (Card) -> Unit,
     onFavorite: (Card) -> Unit,
     onCardClick: (Card) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // 直接使用 LazyVerticalStaggeredGrid，统计卡片作为第一个 item
+    // 注意：不能在 LazyColumn 中嵌套 LazyVerticalStaggeredGrid，会导致无限高度约束错误
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(columns),
-        contentPadding = PaddingValues(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalItemSpacing = 24.dp,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp), // gap-6 = 24.dp
+        verticalItemSpacing = 24.dp, // space-y-6 = 24.dp
         modifier = modifier
     ) {
+        // 统计卡片：1列和2列时在 Grid 内部，作为第一个 item，随列表滚动
+        // 3列时统计信息在工具栏中显示，Grid 内部不显示
+        if (statistics != null && !sizeClass.isExpanded) {
+            // 使用 item 让统计卡片占据整行（跨所有列）
+            // 对于 LazyVerticalStaggeredGrid，使用 span 参数让 item 跨越多列
+            item(span = StaggeredGridItemSpan.FullLine) {
+                StatsCardsRow(
+                    statistics = statistics,
+                    modifier = Modifier.padding(
+                        bottom = if (sizeClass.isCompact) 12.dp else 24.dp // 单列时缩小间距为1/2
+                    )
+                )
+            }
+        }
+
+        // 卡片列表
         items(cards) { card ->
             CardComponent(
                 card = card,
@@ -638,32 +727,48 @@ fun DashboardGridView(
 @Composable
 fun DashboardListView(
     cards: List<Card>,
+    columns: Int,
+    statistics: Statistics?,
     sizeClass: WindowSizeClass,
     onEdit: (Card) -> Unit,
     onFavorite: (Card) -> Unit,
     onCardClick: (Card) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // 列表头部（仅在桌面端显示）
-        if (!sizeClass.isCompact) {
-            ListViewHeader(sizeClass = sizeClass)
-        }
-
-        // 列表内容
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(cards) { card ->
-                ListViewItem(
-                    card = card,
-                    sizeClass = sizeClass,
-                    onEdit = { onEdit(card) },
-                    onFavorite = { onFavorite(card) },
-                    onCardClick = { onCardClick(card) }
+    // 列表内容
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+    ) {
+        // 统计卡片：1列和2列时在 List 内部，作为第一个 item，随列表滚动
+        // 3列时统计信息在工具栏中显示，List 内部不显示
+        if (statistics != null && !sizeClass.isExpanded) {
+            item {
+                StatsCardsRow(
+                    statistics = statistics,
+                    modifier = Modifier.padding(
+                        bottom = if (sizeClass.isCompact) 12.dp else 24.dp // 单列时缩小间距为1/2
+                    )
                 )
             }
+        }
+
+        // 列表头部（仅在桌面端显示，在统计信息之后）
+        if (!sizeClass.isCompact) {
+            item {
+                ListViewHeader(sizeClass = sizeClass)
+            }
+        }
+
+        items(cards) { card ->
+            ListViewItem(
+                card = card,
+                sizeClass = sizeClass,
+                onEdit = { onEdit(card) },
+                onFavorite = { onFavorite(card) },
+                onCardClick = { onCardClick(card) }
+            )
         }
     }
 }
@@ -674,7 +779,7 @@ fun DashboardListView(
  * 列表头部（表头）
  */
 @Composable
-private fun ListViewHeader(
+fun ListViewHeader(
     sizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
@@ -752,7 +857,7 @@ private fun ListViewHeader(
  * 列表项组件
  */
 @Composable
-private fun ListViewItem(
+fun ListViewItem(
     card: Card,
     sizeClass: WindowSizeClass,
     onEdit: (Card) -> Unit,

@@ -1,23 +1,27 @@
 package tech.zhifu.app.myhub
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import org.koin.compose.koinInject
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
 import tech.zhifu.app.myhub.carddetail.CardDetailScreen
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
+import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
@@ -79,23 +83,23 @@ fun App(
     onRetry: () -> Unit
 ) {
     // 根据加载状态显示不同内容
-    when (val state = appState) {
+    when (appState) {
         is AppUiState.Loading -> {
             AppLoadingScreen()
         }
 
         is AppUiState.Ready -> {
             AppContent(
-                currentScreen = state.currentScreen,
+                currentScreen = appState.currentScreen,
                 onNavigate = onNavigate,
-                isDarkTheme = state.isDarkTheme, // 使用 state 中的主题设置，而不是全局变量
-                windowSizeClass = state.windowSizeClass
+                isDarkTheme = appState.isDarkTheme, // 使用 state 中的主题设置，而不是全局变量
+                windowSizeClass = appState.windowSizeClass
             )
         }
 
         is AppUiState.Error -> {
             AppErrorScreen(
-                error = state.error,
+                error = appState.error,
                 onRetry = onRetry
             )
         }
@@ -114,16 +118,19 @@ private fun AppContent(
 ) {
     // 提供应用环境上下文
     LocalAppEnvironment {
-        // 应用主题
-        AppTheme(darkTheme = isDarkTheme) {
-            // 提供窗口大小类
-            ProvideWindowSizeClass(windowSizeClass) {
-                // 响应式布局
-                ResponsiveAppLayout(
-                    windowSizeClass = windowSizeClass,
-                    currentScreen = currentScreen,
-                    onNavigate = onNavigate
-                )
+        // 提供应用主题状态（供卡片组件等使用）
+        CompositionLocalProvider(LocalAppTheme provides isDarkTheme) {
+            // 应用主题
+            AppTheme(darkTheme = isDarkTheme) {
+                // 提供窗口大小类
+                ProvideWindowSizeClass(windowSizeClass) {
+                    // 响应式布局
+                    ResponsiveAppLayout(
+                        windowSizeClass = windowSizeClass,
+                        currentScreen = currentScreen,
+                        onNavigate = onNavigate
+                    )
+                }
             }
         }
     }
@@ -177,9 +184,14 @@ private fun CompactLayout(
                 currentScreen = currentScreen,
                 onNavigate = onNavigate
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             AppNavigation(
                 currentScreen = currentScreen,
                 onNavigateBack = {
@@ -206,7 +218,11 @@ private fun MediumLayout(
             onNavigate = onNavigate,
             isExpanded = false
         )
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             AppNavigation(
                 currentScreen = currentScreen,
                 onNavigateBack = {
@@ -233,7 +249,11 @@ private fun ExpandedLayout(
             onNavigate = onNavigate,
             isExpanded = true
         )
-        Box(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             AppNavigation(
                 currentScreen = currentScreen,
                 onNavigateBack = {
@@ -265,17 +285,17 @@ fun AppNavigation(
                 // 从 Dashboard 导航到 CardDetail：卡片展开动画
                 initialState is Screen.Dashboard && targetState is Screen.CardDetail -> {
                     ScreenTransition.cardDetailEnterTransition() togetherWith
-                            ScreenTransition.dashboardExitTransition()
+                        ScreenTransition.dashboardExitTransition()
                 }
                 // 从 CardDetail 返回 Dashboard：卡片收起动画
                 initialState is Screen.CardDetail && targetState is Screen.Dashboard -> {
                     ScreenTransition.dashboardEnterTransition() togetherWith
-                            ScreenTransition.cardDetailExitTransition()
+                        ScreenTransition.cardDetailExitTransition()
                 }
                 // 其他导航：默认转场
                 else -> {
                     ScreenTransition.defaultEnterTransition() togetherWith
-                            ScreenTransition.defaultExitTransition()
+                        ScreenTransition.defaultExitTransition()
                 }
             }.using(
                 // 使用 SizeTransform 保持内容大小平滑过渡
@@ -291,10 +311,12 @@ fun AppNavigation(
                     onNavigate?.invoke(Screen.CardDetail(cardId))
                 }
             )
+
             is Screen.Settings -> SettingsScreen()
             is Screen.Profile -> ProfileScreen(
                 onNavigateToSettings = { /* TODO: Navigate to Settings */ }
             )
+
             is Screen.CardDetail -> CardDetailScreen(
                 cardId = screen.cardId,
                 onNavigateBack = onNavigateBack
