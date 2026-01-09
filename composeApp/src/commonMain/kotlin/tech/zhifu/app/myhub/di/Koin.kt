@@ -12,6 +12,7 @@ import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
+import tech.zhifu.app.myhub.carddetail.di.cardDetailModule
 import tech.zhifu.app.myhub.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
@@ -38,6 +39,7 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             settingsModule(),
             dashboardModule(),
             profileModule(),
+            cardDetailModule(),
             // Component modules
             cardModule,
             // Analytics module

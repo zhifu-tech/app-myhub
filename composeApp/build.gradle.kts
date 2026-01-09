@@ -167,6 +167,7 @@ kotlin {
             implementation(projects.feature.settings)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.profile)
+            implementation(projects.feature.cardDetail)
             // Component 模块
             implementation(projects.component.card)
             implementation(projects.component.mixed)

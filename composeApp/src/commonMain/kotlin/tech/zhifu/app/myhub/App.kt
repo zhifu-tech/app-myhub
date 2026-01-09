@@ -12,11 +12,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import org.koin.compose.koinInject
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.togetherWith
+import tech.zhifu.app.myhub.carddetail.CardDetailScreen
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
 import tech.zhifu.app.myhub.navigation.Screen
+import tech.zhifu.app.myhub.navigation.ScreenTransition
 import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
 import tech.zhifu.app.myhub.profile.ProfileScreen
 import tech.zhifu.app.myhub.settings.SettingsScreen
@@ -175,7 +180,14 @@ private fun CompactLayout(
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
-            AppNavigation(currentScreen = currentScreen)
+            AppNavigation(
+                currentScreen = currentScreen,
+                onNavigateBack = {
+                    // 返回 Dashboard
+                    onNavigate(Screen.Dashboard)
+                },
+                onNavigate = onNavigate
+            )
         }
     }
 }
@@ -195,7 +207,14 @@ private fun MediumLayout(
             isExpanded = false
         )
         Box(modifier = Modifier.weight(1f)) {
-            AppNavigation(currentScreen = currentScreen)
+            AppNavigation(
+                currentScreen = currentScreen,
+                onNavigateBack = {
+                    // 返回 Dashboard
+                    onNavigate(Screen.Dashboard)
+                },
+                onNavigate = onNavigate
+            )
         }
     }
 }
@@ -215,24 +234,74 @@ private fun ExpandedLayout(
             isExpanded = true
         )
         Box(modifier = Modifier.weight(1f)) {
-            AppNavigation(currentScreen = currentScreen)
+            AppNavigation(
+                currentScreen = currentScreen,
+                onNavigateBack = {
+                    // 返回 Dashboard
+                    onNavigate(Screen.Dashboard)
+                },
+                onNavigate = onNavigate
+            )
         }
     }
 }
 
 /**
  * 应用导航容器
+ *
+ * 使用 AnimatedContent 实现流畅的转场动画
+ * 参考 Apple Music 的卡片展开动效
  */
 @Composable
-fun AppNavigation(currentScreen: Screen) {
-    when (currentScreen) {
-        is Screen.Dashboard -> DashboardScreen()
-        is Screen.Settings -> SettingsScreen()
-        is Screen.Profile -> ProfileScreen(
-            onNavigateToSettings = { /* TODO: Navigate to Settings */ }
-        )
+fun AppNavigation(
+    currentScreen: Screen,
+    onNavigateBack: () -> Unit = {},
+    onNavigate: ((Screen) -> Unit)? = null
+) {
+    AnimatedContent(
+        targetState = currentScreen,
+        transitionSpec = {
+            when {
+                // 从 Dashboard 导航到 CardDetail：卡片展开动画
+                initialState is Screen.Dashboard && targetState is Screen.CardDetail -> {
+                    ScreenTransition.cardDetailEnterTransition() togetherWith
+                            ScreenTransition.dashboardExitTransition()
+                }
+                // 从 CardDetail 返回 Dashboard：卡片收起动画
+                initialState is Screen.CardDetail && targetState is Screen.Dashboard -> {
+                    ScreenTransition.dashboardEnterTransition() togetherWith
+                            ScreenTransition.cardDetailExitTransition()
+                }
+                // 其他导航：默认转场
+                else -> {
+                    ScreenTransition.defaultEnterTransition() togetherWith
+                            ScreenTransition.defaultExitTransition()
+                }
+            }.using(
+                // 使用 SizeTransform 保持内容大小平滑过渡
+                SizeTransform(clip = false)
+            )
+        },
+        label = "screen_transition"
+    ) { screen ->
+        when (screen) {
+            is Screen.Dashboard -> DashboardScreen(
+                onNavigateToCardDetail = { cardId ->
+                    // 导航到卡片详情页
+                    onNavigate?.invoke(Screen.CardDetail(cardId))
+                }
+            )
+            is Screen.Settings -> SettingsScreen()
+            is Screen.Profile -> ProfileScreen(
+                onNavigateToSettings = { /* TODO: Navigate to Settings */ }
+            )
+            is Screen.CardDetail -> CardDetailScreen(
+                cardId = screen.cardId,
+                onNavigateBack = onNavigateBack
+            )
 
-        else -> PlaceholderScreen(currentScreen)
+            else -> PlaceholderScreen(screen)
+        }
     }
 }
 

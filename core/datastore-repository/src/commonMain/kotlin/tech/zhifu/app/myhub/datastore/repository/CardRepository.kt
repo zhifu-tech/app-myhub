@@ -56,6 +56,12 @@ interface ReactiveCardRepository : CardRepository {
     fun observeAllCards(): Flow<List<Card>>
 
     /**
+     * 观察单个卡片（响应式）
+     * 用于详情页等需要实时更新的场景
+     */
+    fun observeCard(id: String): Flow<Card?>
+
+    /**
      * 观察搜索结果（响应式）
      */
     fun observeSearchCards(filter: SearchFilter): Flow<List<Card>>

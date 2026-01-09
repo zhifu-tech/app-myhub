@@ -26,6 +26,19 @@ sealed class Screen(val route: String, val title: String) {
     object Favorites : Screen("favorites", "Favorites")
     object Settings : Screen("settings", "Settings")
     object Profile : Screen("profile", "Profile")
+    
+    /**
+     * 卡片详情页
+     *
+     * @param cardId 卡片 ID
+     */
+    data class CardDetail(
+        val cardId: String
+    ) : Screen("card_detail/$cardId", "Card Detail") {
+        companion object {
+            fun createRoute(cardId: String) = "card_detail/$cardId"
+        }
+    }
 }
 
 sealed class NavItem(val screen: Screen, val icon: ImageVector, val labelKey: StringResource) {

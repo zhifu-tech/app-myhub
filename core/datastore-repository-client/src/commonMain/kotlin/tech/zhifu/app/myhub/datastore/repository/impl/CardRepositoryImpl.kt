@@ -75,6 +75,19 @@ class CardRepositoryImpl(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeCard(id: String): Flow<Card?> {
+        return userDataSource.observeUser().flatMapLatest { user ->
+            if (user == null) {
+                flowOf(null)
+            } else {
+                localDataSource.observeCards(user.id).map { cards ->
+                    cards.find { it.id == id }
+                }
+            }
+        }
+    }
+
     override suspend fun getCardById(id: String): Card? {
         val userId = requireUserId()
         // 先从本地获取

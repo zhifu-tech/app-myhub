@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="card_detail_back_to_library">Back to Library</string>
+    <string name="card_detail_card_details">Card Details</string>
+    <string name="card_detail_loading">Loading card...</string>
+    <string name="card_detail_error">Error loading card</string>
+    <string name="card_detail_retry">Retry</string>
+</resources>

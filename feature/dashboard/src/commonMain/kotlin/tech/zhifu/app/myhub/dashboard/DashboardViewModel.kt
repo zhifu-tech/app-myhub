@@ -390,10 +390,11 @@ class DashboardViewModel(
 
     /**
      * 查看卡片详情
+     * 注意：此方法保留用于兼容性，实际导航应通过 onNavigateToCardDetail 回调处理
      */
     fun viewCard(cardId: String) {
-        logger.info { "View card: $cardId" }
-        // TODO: 导航到详情页面
+        logger.info { "View card: $cardId (navigation should be handled by callback)" }
+        // 导航逻辑由 Screen 层通过回调处理
     }
 
     /**
