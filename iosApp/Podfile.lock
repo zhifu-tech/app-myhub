@@ -1,8 +1,18 @@
 PODS:
   - composeApp (1.0.0)
+  - UMCommon (7.5.6):
+    - UMDevice
+  - UMDevice (3.4.0)
 
 DEPENDENCIES:
   - composeApp (from `../composeApp`)
+  - UMCommon
+  - UMDevice
+
+SPEC REPOS:
+  trunk:
+    - UMCommon
+    - UMDevice
 
 EXTERNAL SOURCES:
   composeApp:
@@ -10,7 +20,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   composeApp: 5977df5b92cc6868eb4656b1b41eeb16634d9ad3
+  UMCommon: 298dd359c0314e5a6d81bb9ffe5e4299a063a683
+  UMDevice: dcdf7ec167387837559d149fbc7d793d984faf82
 
-PODFILE CHECKSUM: 1acdc4ebfe44403d03d98ac9fbf85ef32a48188d
+PODFILE CHECKSUM: 841df525df3fae66dfb6c4b2c268a9d456d20c24
 
 COCOAPODS: 1.16.2

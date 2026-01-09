@@ -27,3 +27,11 @@ class IosAnalyticsRegistrar : AnalyticsProviderRegistrar {
 }
 
 internal fun ProviderConfig.toFirebaseOptions(): FirebaseOptions? = null
+
+internal fun MutableList<ProviderConfig>.addChannelList() {
+    add(
+        ProviderConfig(
+            type = ProviderType.FIREBASE,
+        )
+    )
+}

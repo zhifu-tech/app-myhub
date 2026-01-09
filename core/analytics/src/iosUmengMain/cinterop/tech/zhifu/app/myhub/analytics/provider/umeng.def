@@ -1,0 +1,3 @@
+language = Objective-C
+headers = UMConfigure.h MobClick.h
+linkerOpts = -framework UMCommon

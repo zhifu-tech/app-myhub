@@ -156,7 +156,21 @@ app-myhub/
 
 #### iOS
 
-在 Xcode 中打开 `iosApp/iosApp.xcodeproj` 并运行。
+```bash
+# 使用项目脚本（推荐）
+./scripts/run.sh ios
+
+# 安装 CocoaPods 依赖
+./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev
+
+# 指定渠道和环境
+./scripts/run.sh ios -PappChannel=googlePlay -PappEnv=prod
+```
+
+⚠️ **重要**：
+- 必须使用 `iosApp/iosApp.xcworkspace` 打开项目（不是 `.xcodeproj`）
+- 首次运行前需要执行 `pod install` 安装依赖
+- 详细说明请参考 [iosApp/README.md](iosApp/README.md)
 
 ### 运行服务器
 

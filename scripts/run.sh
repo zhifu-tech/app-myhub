@@ -102,6 +102,7 @@ show_help() {
     echo -e "  ${GREEN}ios simulator${NC}       构建并打开 iOS 项目（使用模拟器）"
     echo -e "  ${GREEN}ios device${NC}          构建并打开 iOS 项目（使用真机）"
     echo -e "  ${GREEN}ios list${NC}            列出所有可用设备"
+    echo -e "  ${GREEN}pod install${NC}         安装 CocoaPods 依赖（iOS）"
     echo -e "  ${GREEN}server${NC}              运行服务器（SQLite）"
     echo -e "  ${GREEN}server dev${NC}          运行服务器（开发模式，支持热重载）"
     echo -e "  ${GREEN}server postgres${NC}     运行服务器（PostgreSQL）"
@@ -159,6 +160,10 @@ show_help() {
     echo "  ./scripts/run.sh ios list"
     echo "  ./scripts/run.sh ios -PappEnv=prod -PappTier=premium"
     echo "  ./scripts/run.sh ios simulator -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo ""
+    echo -e "${CYAN}📦 CocoaPods 依赖安装:${NC}"
+    echo "  ./scripts/run.sh pod install"
+    echo "  ./scripts/run.sh pod install -PappChannel=googlePlay -PappEnv=dev"
     echo ""
     echo -e "${CYAN}🖥️  服务器:${NC}"
     echo "  ./scripts/run.sh server"
@@ -526,6 +531,132 @@ run_ios() {
     echo "  - Mac: 选择 Mac 设备（需要 Mac Catalyst 支持）"
 }
 
+# 安装 CocoaPods 依赖
+run_pod_install() {
+    local environment="${1:-dev}"
+    local channel="${2:-}"
+    
+    check_xcode
+    
+    print_startup_info "正在安装 CocoaPods 依赖"
+    
+    # 检查 CocoaPods 是否安装
+    if ! command -v pod &> /dev/null; then
+        print_error "未找到 CocoaPods，请先安装 CocoaPods"
+        echo ""
+        print_info "安装方法:"
+        echo "  sudo gem install cocoapods"
+        echo "  或"
+        echo "  brew install cocoapods"
+        exit 1
+    fi
+    
+    # 显示当前配置
+    local current_channel="${APP_CHANNEL:-}"
+    local current_env="${APP_ENV:-}"
+    
+    # 如果通过参数传递，设置环境变量
+    if [ -n "$channel" ]; then
+        export APP_CHANNEL="$channel"
+        current_channel="$channel"
+    fi
+    
+    if [ -n "$environment" ]; then
+        export APP_ENV="$environment"
+        current_env="$environment"
+    fi
+    
+    # 如果环境变量未设置，尝试从 gradle.properties 读取
+    if [ -z "$current_channel" ] || [ -z "$current_env" ]; then
+        local gradle_props="$PROJECT_ROOT/gradle.properties"
+        if [ -f "$gradle_props" ]; then
+            if [ -z "$current_channel" ]; then
+                current_channel=$(grep -E "^appChannel\s*=" "$gradle_props" | head -1 | sed 's/^[^=]*=\s*\([^#]*\).*/\1/' | xargs)
+            fi
+            if [ -z "$current_env" ]; then
+                current_env=$(grep -E "^appEnv\s*=" "$gradle_props" | head -1 | sed 's/^[^=]*=\s*\([^#]*\).*/\1/' | xargs)
+            fi
+        fi
+    fi
+    
+    # 显示配置信息
+    echo ""
+    print_warning "⚠️  重要提示：环境变量配置"
+    echo ""
+    print_info "Podfile 会根据以下配置安装依赖："
+    echo ""
+    if [ -n "$current_channel" ]; then
+        echo -e "  ${GREEN}渠道 (APP_CHANNEL):${NC} $current_channel"
+        case "$current_channel" in
+            googlePlay)
+                echo -e "    ${CYAN}→ 将安装: FirebaseCore, FirebaseAnalytics${NC}"
+                ;;
+            umeng)
+                echo -e "    ${CYAN}→ 将安装: UMCommon, UMDevice${NC}"
+                ;;
+            *)
+                echo -e "    ${CYAN}→ 将安装: 基础依赖（composeApp）${NC}"
+                ;;
+        esac
+    else
+        echo -e "  ${YELLOW}渠道 (APP_CHANNEL):${NC} 未设置（将使用 gradle.properties 中的默认值）"
+    fi
+    
+    if [ -n "$current_env" ]; then
+        echo -e "  ${GREEN}环境 (APP_ENV):${NC} $current_env"
+    else
+        echo -e "  ${YELLOW}环境 (APP_ENV):${NC} 未设置（将使用 gradle.properties 中的默认值）"
+    fi
+    
+    echo ""
+    print_info "配置优先级（从高到低）："
+    echo "  1. 环境变量 (APP_CHANNEL, APP_ENV)"
+    echo "  2. gradle.properties 文件"
+    echo ""
+    print_info "如果需要修改配置，可以使用以下方式："
+    echo ""
+    echo -e "  ${CYAN}方式1: 通过脚本参数（推荐）${NC}"
+    echo "    ./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev"
+    echo ""
+    echo -e "  ${CYAN}方式2: 修改 gradle.properties 文件${NC}"
+    echo "    编辑 gradle.properties，设置 appChannel 和 appEnv"
+    echo ""
+    
+    # 询问用户是否继续
+    echo -e -n "${YELLOW}是否继续安装？(y/N): ${NC}"
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        print_info "已取消安装"
+        exit 0
+    fi
+    
+    echo ""
+    print_info "正在执行 pod install..."
+    echo ""
+    
+    # 切换到 iosApp 目录
+    cd "$PROJECT_ROOT/iosApp" || exit 1
+    
+    # 执行 pod install
+    if pod install; then
+        echo ""
+        print_success "CocoaPods 依赖安装成功"
+        echo ""
+        print_info "下一步："
+        echo "  1. 打开 Xcode 项目: open iosApp/iosApp.xcworkspace"
+        echo "  2. 或使用脚本: ./scripts/run.sh ios"
+    else
+        echo ""
+        print_error "CocoaPods 依赖安装失败"
+        echo ""
+        print_info "常见问题排查："
+        echo "  1. 检查 CocoaPods 是否正确安装: pod --version"
+        echo "  2. 清理并重试: rm -rf Pods Podfile.lock && pod install"
+        echo "  3. 更新 CocoaPods: sudo gem install cocoapods"
+        exit 1
+    fi
+}
+
 # 运行服务器
 run_server() {
     local mode="${1:-normal}"
@@ -691,7 +822,7 @@ parse_args() {
             *)
                 if [ -z "$command" ]; then
                     command="$1"
-                elif [ -z "$subcommand" ] && [[ "$command" == "ios" || "$command" == "server" ]]; then
+                elif [ -z "$subcommand" ] && [[ "$command" == "ios" || "$command" == "server" || "$command" == "pod" ]]; then
                     subcommand="$1"
                 fi
                 shift
@@ -785,6 +916,17 @@ main() {
                         exit 1
                         ;;
                 esac
+            fi
+            ;;
+        pod)
+            if [ "$subcommand" = "install" ]; then
+                run_pod_install "$environment" "$channel"
+            else
+                print_error "未知的 pod 子命令: ${subcommand:-无}"
+                echo ""
+                print_info "可用的 pod 子命令: install"
+                show_help
+                exit 1
             fi
             ;;
         server)

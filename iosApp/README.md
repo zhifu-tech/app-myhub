@@ -83,6 +83,19 @@ which pod
 
 ### 初始化 CocoaPods 依赖
 
+推荐使用项目脚本（会自动处理环境变量配置）：
+
+```bash
+# 使用默认配置（从 gradle.properties 读取）
+./scripts/run.sh pod install
+
+# 通过参数指定配置
+./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev
+./scripts/run.sh pod install -PappChannel=googlePlay -PappEnv=prod
+```
+
+或者使用 Gradle 任务：
+
 ```bash
 # 在项目根目录执行
 ./gradlew :composeApp:podInstall
@@ -94,6 +107,15 @@ which pod
 cd iosApp
 pod install
 ```
+
+⚠️ **注意**：Podfile 会根据配置自动安装不同的依赖：
+- `googlePlay` 渠道：安装 FirebaseCore, FirebaseAnalytics
+- `umeng` 渠道：安装 UMCommon, UMDevice
+- 其他渠道：仅安装基础依赖（composeApp）
+
+配置优先级（从高到低）：
+1. 脚本参数（`-PappChannel=xxx`）
+2. gradle.properties 文件
 
 ### 打开项目
 
@@ -122,57 +144,99 @@ open iosApp/iosApp.xcworkspace
 
 ### Podfile 配置
 
+Podfile 已重构为专业的 iOS 开发风格，使用清晰的代码结构和配置管理：
+
 ```ruby
+# CocoaPods Podfile for MyHub iOS App
+# 
+# Configuration:
+# - Environment variables (highest priority): APP_CHANNEL, APP_ENV
+# - Fallback: gradle.properties file
+
+source 'https://cdn.cocoapods.org/'
+
+# Constants
+IOS_DEPLOYMENT_TARGET = '15.0'
+CHANNEL_GOOGLE_PLAY = 'googlePlay'
+CHANNEL_UMENG = 'umeng'
+ENV_DEV = 'dev'
+
+# Configuration Helpers
+def read_gradle_property(file_path, property_name)
+  return nil unless File.exist?(file_path)
+  content = File.read(file_path)
+  pattern = /^#{Regexp.escape(property_name)}\s*=\s*(\S+?)(?:\s*#|$)/
+  match = content.match(pattern)
+  match ? match[1].strip : nil
+end
+
+def get_build_config
+  gradle_props_path = File.join(__dir__, '..', 'gradle.properties')
+  channel = ENV['APP_CHANNEL'] || read_gradle_property(gradle_props_path, 'appChannel')
+  env = ENV['APP_ENV'] || read_gradle_property(gradle_props_path, 'appEnv')
+  
+  {
+    channel: channel,
+    env: env,
+    is_google_play: channel == CHANNEL_GOOGLE_PLAY,
+    is_umeng: channel == CHANNEL_UMENG,
+    is_dev: env == ENV_DEV
+  }
+end
+
 target 'iosApp' do
   use_frameworks!
-  # iOS 部署目标：统一为 15.0
-  platform :ios, '15.0'
+  platform :ios, IOS_DEPLOYMENT_TARGET
+  
+  # Kotlin Multiplatform Framework
   pod 'composeApp', :path => '../composeApp'
   
-  # Firebase pods（仅在 googlePlay 渠道需要）
-  # 注意：dev.gitlive:firebase-analytics 会自动处理依赖，但在 Xcode 构建时需要明确声明
-  # 检查 gradle.properties 中的 appChannel 设置
-  gradle_properties_path = File.join(__dir__, '..', 'gradle.properties')
-  is_google_play = false
-  if File.exist?(gradle_properties_path)
-    gradle_props = File.read(gradle_properties_path)
-    is_google_play = gradle_props.match(/^appChannel\s*=\s*googlePlay\s*$/) || gradle_props.match(/^appChannel\s*=\s*googlePlay\s*#/)
-  end
-  # 也可以通过环境变量覆盖
-  is_google_play = true if ENV['APP_CHANNEL'] == 'googlePlay'
+  # Build configuration
+  config = get_build_config
   
-  if is_google_play
+  # Firebase Analytics (Google Play channel only)
+  if config[:is_google_play]
     pod 'FirebaseCore'
     pod 'FirebaseAnalytics'
   end
   
+  # Umeng Analytics (Umeng channel only)
+  if config[:is_umeng]
+    pod 'UMCommon'   # Statistics SDK base library
+    pod 'UMDevice'   # Device information collection
+  end
+  
   post_install do |installer|
-    # 统一设置所有 pods 的 iOS 部署目标为 15.0
-    # 某些 pods 的默认部署目标可能过低（如 9.0），需要统一设置
+    # Unify iOS deployment target to 15.0 for all pods
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.0
-          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        current_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if current_target.to_f < IOS_DEPLOYMENT_TARGET.to_f
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = IOS_DEPLOYMENT_TARGET
         end
       end
     end
     
-    # 为 composeApp 的构建脚本添加输出文件，修复 Xcode 警告
+    # Fix Xcode warning: Add output paths for composeApp build script
     installer.pods_project.targets.each do |target|
-      if target.name == 'composeApp'
-        target.build_phases.each do |phase|
-          if phase.respond_to?(:name) && phase.name == '[CP-User] Build composeApp'
-            phase.output_paths ||= []
-            unless phase.output_paths.include?("${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework")
-              phase.output_paths << "${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework"
-            end
-          end
-        end
+      next unless target.name == 'composeApp'
+      target.build_phases.each do |phase|
+        next unless phase.respond_to?(:name) && phase.name == '[CP-User] Build composeApp'
+        framework_path = "${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework"
+        phase.output_paths ||= []
+        phase.output_paths << framework_path unless phase.output_paths.include?(framework_path)
       end
     end
   end
 end
 ```
+
+**主要特性**：
+- ✅ 使用常量定义配置值，易于维护
+- ✅ 提取配置读取逻辑到独立方法
+- ✅ 清晰的代码结构，符合 iOS 开发规范
+- ✅ 支持环境变量和 gradle.properties 两种配置方式
+- ✅ 自动根据渠道安装不同的依赖
 
 ### Gradle 配置
 
@@ -210,9 +274,17 @@ cocoapods {
 当修改了 `composeApp/build.gradle.kts` 中的 CocoaPods 配置后：
 
 ```bash
-# 重新生成 podspec 并安装依赖
+# 方式1: 使用项目脚本（推荐）
+./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev
+
+# 方式2: 使用 Gradle 任务
 ./gradlew :composeApp:podInstall
+
+# 方式3: 手动执行
+cd iosApp && pod install
 ```
+
+⚠️ **重要**：如果切换了渠道（如从 `umeng` 切换到 `googlePlay`），需要重新执行 `pod install` 以安装正确的依赖。
 
 ## 🏗️ 构建和运行
 
@@ -248,31 +320,72 @@ cocoapods {
 # 指定设备类型
 ./scripts/run.sh ios simulator  # 使用模拟器
 ./scripts/run.sh ios device     # 使用真机
+
+# 指定渠道和环境
+./scripts/run.sh ios -PappChannel=umeng -PappEnv=dev
+./scripts/run.sh ios simulator -PappChannel=googlePlay -PappEnv=prod
 ```
 
-## 🔥 Firebase 集成
+## 🔥 渠道配置和依赖管理
 
-### 渠道配置
+### 支持的渠道
 
-Firebase 仅在 `googlePlay` 渠道启用。要使用 Firebase，需要：
+项目支持多个渠道，每个渠道会安装不同的依赖：
 
-1. 设置构建参数：
+| 渠道 | 依赖 | 说明 |
+|------|------|------|
+| `googlePlay` | FirebaseCore, FirebaseAnalytics | Google Play 应用商店 |
+| `umeng` | UMCommon, UMDevice | 友盟统计（国内） |
+| 其他 | composeApp（基础） | 默认渠道 |
 
+### 配置方式
+
+#### 方式1: 使用项目脚本（推荐）
+
+```bash
+# 使用 googlePlay 渠道
+./scripts/run.sh pod install -PappChannel=googlePlay -PappEnv=dev
+
+# 使用 umeng 渠道
+./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev
+```
+
+脚本会自动：
+- 显示当前配置和将安装的依赖
+- 提示配置优先级
+- 询问确认后执行安装
+
+#### 方式2: 修改 gradle.properties
+
+在 `gradle.properties` 中设置：
+
+```properties
+appChannel=googlePlay  # 或 umeng
+appEnv=dev            # 或 prod
+```
+
+然后执行：
+
+```bash
+./scripts/run.sh pod install
+# 或
+./gradlew :composeApp:podInstall
+```
+
+### Firebase 集成
+
+Firebase 仅在 `googlePlay` 渠道启用。要使用 Firebase：
+
+1. 使用脚本安装（推荐）：
    ```bash
-   ./gradlew :composeApp:podInstall -PappChannel=googlePlay
+   ./scripts/run.sh pod install -PappChannel=googlePlay
    ```
 
-2. 或者在 `gradle.properties` 中设置：
-
+2. 或在 `gradle.properties` 中设置：
    ```properties
    appChannel=googlePlay
    ```
-
-3. 重新安装 Pods：
-   ```bash
-   cd iosApp
-   pod install
-   ```
+   然后执行 `./scripts/run.sh pod install`
 
 ### Firebase 配置
 
@@ -283,6 +396,26 @@ Firebase 配置通过 `GoogleService-Info.plist` 文件管理。该文件需要�
 3. 添加到 Xcode 项目中
 
 ⚠️ **注意**：`GoogleService-Info.plist` 文件包含敏感信息，不应提交到版本控制系统。
+
+### Umeng 集成
+
+Umeng（友盟）仅在 `umeng` 渠道启用。要使用 Umeng：
+
+1. 使用脚本安装（推荐）：
+   ```bash
+   ./scripts/run.sh pod install -PappChannel=umeng
+   ```
+
+2. 或在 `gradle.properties` 中设置：
+   ```properties
+   appChannel=umeng
+   ```
+   然后执行 `./scripts/run.sh pod install`
+
+**注意**：
+- `UMCCommonLog` 已禁用，因为它在 iOS 模拟器上存在架构兼容性问题
+- 如需调试日志，可以使用 `UMCommon` 自带的日志功能（通过 `UMConfigure.setLogEnabled`）
+- 或在真机上测试
 
 ## 📱 应用配置
 
@@ -316,8 +449,13 @@ Firebase 配置通过 `GoogleService-Info.plist` 文件管理。该文件需要�
 **解决方案**：
 
 ```bash
+# 推荐：使用项目脚本
+./scripts/run.sh pod install
+
+# 或使用 Gradle 任务
 ./gradlew :composeApp:podInstall
-# 或
+
+# 或手动执行
 cd iosApp && pod install
 ```
 
