@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.ui
+package tech.zhifu.app.myhub.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,4 +72,3 @@ fun AppErrorScreen(
         }
     }
 }
-

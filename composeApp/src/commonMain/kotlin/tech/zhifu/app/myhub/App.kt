@@ -6,10 +6,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -17,8 +19,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.carddetail.CardDetailScreen
+import tech.zhifu.app.myhub.component.AppErrorScreen
+import tech.zhifu.app.myhub.component.AppLoadingScreen
 import tech.zhifu.app.myhub.dashboard.DashboardScreen
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
 import tech.zhifu.app.myhub.local.LocalAppTheme
@@ -30,9 +35,6 @@ import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
 import tech.zhifu.app.myhub.profile.ProfileScreen
 import tech.zhifu.app.myhub.settings.SettingsScreen
 import tech.zhifu.app.myhub.theme.AppTheme
-import tech.zhifu.app.myhub.ui.AppErrorScreen
-import tech.zhifu.app.myhub.ui.AppLoadingScreen
-import tech.zhifu.app.myhub.ui.AppTopBar
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
 import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
@@ -178,7 +180,6 @@ private fun CompactLayout(
     onNavigate: (Screen) -> Unit
 ) {
     Scaffold(
-        topBar = { AppTopBar() },
         bottomBar = {
             AppNavigationBar(
                 currentScreen = currentScreen,
@@ -213,11 +214,18 @@ private fun MediumLayout(
     onNavigate: (Screen) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
-        AppNavigationRail(
-            currentScreen = currentScreen,
-            onNavigate = onNavigate,
-            isExpanded = false
-        )
+        Surface(
+            modifier = Modifier.fillMaxHeight(),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp, // 轻微阴影
+            shadowElevation = 0.dp
+        ) {
+            AppNavigationRail(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate,
+                isExpanded = false
+            )
+        }
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -244,11 +252,18 @@ private fun ExpandedLayout(
     onNavigate: (Screen) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
-        AppNavigationRail(
-            currentScreen = currentScreen,
-            onNavigate = onNavigate,
-            isExpanded = true
-        )
+        Surface(
+            modifier = Modifier.fillMaxHeight(),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp, // 轻微阴影
+            shadowElevation = 0.dp
+        ) {
+            AppNavigationRail(
+                currentScreen = currentScreen,
+                onNavigate = onNavigate,
+                isExpanded = true
+            )
+        }
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -325,18 +340,4 @@ fun AppNavigation(
             else -> PlaceholderScreen(screen)
         }
     }
-}
-
-@Composable
-fun AppPreview() {
-    // 使用 KoinContext 包装预览，防止 koinInject() 在预览环境中抛出异常
-    App(
-        appState = AppUiState.Ready(
-            currentScreen = Screen.Dashboard,
-            isDarkTheme = false,
-            windowSizeClass = WindowSizeClass.Expanded
-        ),
-        onNavigate = {},
-        onRetry = {}
-    )
 }

@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.ui
+package tech.zhifu.app.myhub.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,4 +28,3 @@ fun AppLoadingScreen() {
         }
     }
 }
-

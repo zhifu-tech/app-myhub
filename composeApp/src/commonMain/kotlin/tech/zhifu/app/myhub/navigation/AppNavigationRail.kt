@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
@@ -162,7 +163,11 @@ fun AppNavigationRail(
                 }
             }
             Spacer(Modifier.weight(1f))
-            Box(modifier = Modifier.padding(bottom = 16.dp)) {
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                thickness = 1.dp,
+            )
+            Box(modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)) {
                 UserProfileSection(isExpanded = isExpanded)
             }
         }

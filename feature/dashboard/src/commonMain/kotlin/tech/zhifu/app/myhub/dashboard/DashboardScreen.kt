@@ -543,13 +543,12 @@ fun DashboardToolbar(
                         )
                     }
                 }
-
-                // 分割线（统计区域和搜索区域之间）
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
             }
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                thickness = 1.dp
+            )
         }
     }
 }
