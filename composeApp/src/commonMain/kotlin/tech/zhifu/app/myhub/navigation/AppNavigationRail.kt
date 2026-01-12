@@ -44,30 +44,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.mixed.Avatar
+import tech.zhifu.app.myhub.core.navigation.AppNavKey
 import tech.zhifu.app.myhub.resources.Res
 import tech.zhifu.app.myhub.resources.app_name
 import tech.zhifu.app.myhub.resources.new_card
 import tech.zhifu.app.myhub.resources.premium
 import tech.zhifu.app.myhub.resources.scholar_name
 
-/**
- * NavigationRail intended for use on Desktop/Tablet.
- */
 @Composable
 fun AppNavigationRail(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit,
+    currentAppKey: NavKey,
+    onNavigate: (NavKey) -> Unit,
     isExpanded: Boolean,
     modifier: Modifier = Modifier.Companion
 ) {
     val items = listOf(
         NavItem.Dashboard,
         NavItem.Favorites,
-        NavItem.Profile,
-        NavItem.Settings
+        NavItem.Profile
     )
+    val currentItem = when (currentAppKey) {
+        is AppNavKey.Dashboard -> NavItem.Dashboard
+        is AppNavKey.Profile -> NavItem.Profile
+        else -> null
+    }
+
     val railWidth by animateDpAsState(targetValue = if (isExpanded) 280.dp else 80.dp)
 
     NavigationRail(
@@ -92,11 +96,17 @@ fun AppNavigationRail(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
+                            elevation = FloatingActionButtonDefaults.elevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp
+                            )
                         ) {
-                            Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.width(12.dp))
-                            Text(stringResource(Res.string.new_card))
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = stringResource(Res.string.new_card))
                         }
                     } else {
                         SmallFloatingActionButton(
@@ -107,8 +117,8 @@ fun AppNavigationRail(
                             modifier = Modifier.padding(vertical = 8.dp)
                         ) {
                             Icon(
-                                Icons.Default.Add,
-                                contentDescription = stringResource(Res.string.new_card)
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(Res.string.new_card),
                             )
                         }
                     }
@@ -132,8 +142,14 @@ fun AppNavigationRail(
                         if (expanded) {
                             NavigationDrawerItem(
                                 label = { Text(stringResource(item.labelKey)) },
-                                selected = currentScreen == item.screen,
-                                onClick = { onNavigate(item.screen) },
+                                selected = currentItem == item,
+                                onClick = {
+                                    when (item) {
+                                        NavItem.Dashboard -> onNavigate(AppNavKey.Dashboard)
+                                        NavItem.Profile -> onNavigate(AppNavKey.Profile)
+                                        else -> {}
+                                    }
+                                },
                                 icon = { Icon(item.icon, contentDescription = null) },
                                 modifier = Modifier.padding(horizontal = 12.dp),
                                 colors = NavigationDrawerItemDefaults.colors(
@@ -142,18 +158,24 @@ fun AppNavigationRail(
                             )
                         } else {
                             NavigationRailItem(
-                                selected = currentScreen == item.screen,
-                                onClick = { onNavigate(item.screen) },
+                                selected = currentItem == item,
+                                onClick = {
+                                    when (item) {
+                                        NavItem.Dashboard -> onNavigate(AppNavKey.Dashboard)
+                                        NavItem.Profile -> onNavigate(AppNavKey.Profile)
+                                        else -> {}
+                                    }
+                                },
                                 icon = {
                                     Icon(
-                                        item.icon,
-                                        contentDescription = stringResource(item.labelKey)
+                                        imageVector = item.icon,
+                                        contentDescription = stringResource(item.labelKey),
                                     )
                                 },
                                 label = {
                                     Text(
                                         stringResource(item.labelKey),
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelSmall,
                                     )
                                 },
                                 alwaysShowLabel = true

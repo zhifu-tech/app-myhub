@@ -37,12 +37,16 @@ kotlin {
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
             implementation(projects.core.logger)
+            implementation(projects.core.navigation)
 
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)
 
             // Component 模块
             implementation(projects.component.card)
+
+            // Feature 模块
+            implementation(projects.feature.cardDetail) // card-detail 模块
 
             // Preview 支持（仅在 dev 环境）
             if (project.isDev()) {

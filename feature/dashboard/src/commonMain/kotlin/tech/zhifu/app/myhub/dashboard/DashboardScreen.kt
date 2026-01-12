@@ -99,7 +99,7 @@ import kotlin.time.Clock
 fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = koinInject<DashboardViewModel>(),
-    onNavigateToCardDetail: ((String) -> Unit)? = null
+    onNavigateToCardDetail: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -169,7 +169,7 @@ fun DashboardScreen(
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
                                 onCardClick = {
-                                    onNavigateToCardDetail?.invoke(it.id) ?: viewModel.viewCard(it.id)
+                                    onNavigateToCardDetail.invoke(it.id) ?: viewModel.viewCard(it.id)
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -186,7 +186,7 @@ fun DashboardScreen(
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
                                 onCardClick = {
-                                    onNavigateToCardDetail?.invoke(it.id) ?: viewModel.viewCard(it.id)
+                                    onNavigateToCardDetail.invoke(it.id) ?: viewModel.viewCard(it.id)
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()

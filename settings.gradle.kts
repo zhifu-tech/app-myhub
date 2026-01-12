@@ -51,6 +51,7 @@ include(":core:logger")
 include(":core:app-build-config")
 include(":core:platform")
 include(":core:platform-compose")
+include(":core:navigation")
 
 // ============================================================================
 // 网络模块

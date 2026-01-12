@@ -3,6 +3,10 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     // Logger 模块
     implementation(projects.core.logger)

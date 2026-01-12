@@ -37,6 +37,7 @@ kotlin {
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
             implementation(projects.core.logger)
+            implementation(projects.core.navigation)
 
             implementation(projects.core.datastoreModel)
             implementation(projects.core.datastoreRepositoryClient)

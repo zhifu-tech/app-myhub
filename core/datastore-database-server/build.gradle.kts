@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.kotlinJvm)
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation(projects.core.datastoreDatabase)
     implementation(projects.core.datastoreDatabaseManage)

@@ -1,8 +1,5 @@
 package tech.zhifu.app.myhub
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,30 +7,37 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.carddetail.CardDetailScreen
 import tech.zhifu.app.myhub.component.AppErrorScreen
 import tech.zhifu.app.myhub.component.AppLoadingScreen
-import tech.zhifu.app.myhub.dashboard.DashboardScreen
+import tech.zhifu.app.myhub.core.navigation.AppNavKey
+import tech.zhifu.app.myhub.core.navigation.AppNavigationState
+import tech.zhifu.app.myhub.core.navigation.AppNavigator
+import tech.zhifu.app.myhub.core.navigation.rememberAppNavigationState
+import tech.zhifu.app.myhub.core.navigation.toEntries
+import tech.zhifu.app.myhub.dashboard.navigation.dashboardEntry
 import tech.zhifu.app.myhub.local.LocalAppEnvironment
 import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.navigation.AppNavigationBar
 import tech.zhifu.app.myhub.navigation.AppNavigationRail
-import tech.zhifu.app.myhub.navigation.Screen
-import tech.zhifu.app.myhub.navigation.ScreenTransition
-import tech.zhifu.app.myhub.placeholder.PlaceholderScreen
-import tech.zhifu.app.myhub.profile.ProfileScreen
-import tech.zhifu.app.myhub.settings.SettingsScreen
+import tech.zhifu.app.myhub.navigation.ListDetailSceneStrategy
+import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
+import tech.zhifu.app.myhub.profile.navigation.profileEntry
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
 import tech.zhifu.app.myhub.ui.WindowSizeClass
@@ -44,7 +48,7 @@ import tech.zhifu.app.myhub.ui.isExpanded
 import tech.zhifu.app.myhub.ui.isMedium
 
 /**
- * 应用主入口 (Stateful)
+ * 应用主入口 (Stateful) - 使用 Navigation 3
  */
 @Composable
 fun App(
@@ -70,21 +74,18 @@ fun App(
 
     App(
         appState = appState,
-        onNavigate = appViewModel::navigateTo,
-        onRetry = appViewModel::retry
+        windowSizeClass = sizeClass
     )
 }
 
 /**
- * 应用主入口 (Stateless) - 方便测试和预览
+ * 应用主入口 (Stateless)
  */
 @Composable
 fun App(
     appState: AppUiState,
-    onNavigate: (Screen) -> Unit,
-    onRetry: () -> Unit
+    windowSizeClass: WindowSizeClass
 ) {
-    // 根据加载状态显示不同内容
     when (appState) {
         is AppUiState.Loading -> {
             AppLoadingScreen()
@@ -92,17 +93,15 @@ fun App(
 
         is AppUiState.Ready -> {
             AppContent(
-                currentScreen = appState.currentScreen,
-                onNavigate = onNavigate,
-                isDarkTheme = appState.isDarkTheme, // 使用 state 中的主题设置，而不是全局变量
-                windowSizeClass = appState.windowSizeClass
+                isDarkTheme = appState.isDarkTheme,
+                windowSizeClass = windowSizeClass
             )
         }
 
         is AppUiState.Error -> {
             AppErrorScreen(
                 error = appState.error,
-                onRetry = onRetry
+                onRetry = { /* TODO: Handle retry */ }
             )
         }
     }
@@ -113,8 +112,6 @@ fun App(
  */
 @Composable
 private fun AppContent(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit,
     isDarkTheme: Boolean,
     windowSizeClass: WindowSizeClass
 ) {
@@ -126,11 +123,32 @@ private fun AppContent(
             AppTheme(darkTheme = isDarkTheme) {
                 // 提供窗口大小类
                 ProvideWindowSizeClass(windowSizeClass) {
+                    // 初始化 Navigation 3 状态
+                    val navigationState = rememberAppNavigationState(
+                        startKey = AppNavKey.Dashboard,
+                        appKeys = setOf(
+                            AppNavKey.Dashboard,
+                            AppNavKey.Profile
+                        )
+                    )
+
+                    val navigator = remember { AppNavigator(navigationState) }
+
+                    val entryProvider = entryProvider {
+                        dashboardEntry(navigator)
+                        profileEntry(navigator)
+                    }
+
+                    val entries = navigationState.toEntries(entryProvider)
+                    val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+
                     // 响应式布局
                     ResponsiveAppLayout(
                         windowSizeClass = windowSizeClass,
-                        currentScreen = currentScreen,
-                        onNavigate = onNavigate
+                        navigationState = navigationState,
+                        navigator = navigator,
+                        entries = entries,
+                        sceneStrategy = sceneStrategy
                     )
                 }
             }
@@ -144,46 +162,56 @@ private fun AppContent(
 @Composable
 private fun ResponsiveAppLayout(
     windowSizeClass: WindowSizeClass,
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit
+    navigationState: AppNavigationState,
+    navigator: AppNavigator,
+    entries: SnapshotStateList<NavEntry<NavKey>>,
+    sceneStrategy: ListDetailSceneStrategy<NavKey>
 ) {
     when {
         windowSizeClass.isCompact -> {
             CompactLayout(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate
+                navigationState = navigationState,
+                navigator = navigator,
+                entries = entries,
+                sceneStrategy = sceneStrategy
             )
         }
 
         windowSizeClass.isMedium -> {
             MediumLayout(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate
+                navigationState = navigationState,
+                navigator = navigator,
+                entries = entries,
+                sceneStrategy = sceneStrategy
             )
         }
 
         windowSizeClass.isExpanded -> {
             ExpandedLayout(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate
+                navigationState = navigationState,
+                navigator = navigator,
+                entries = entries,
+                sceneStrategy = sceneStrategy
             )
         }
     }
 }
 
 /**
- * 紧凑布局（移动端）
+ * 紧凑布局
  */
 @Composable
 private fun CompactLayout(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit
+    navigationState: AppNavigationState,
+    navigator: AppNavigator,
+    entries: SnapshotStateList<NavEntry<NavKey>>,
+    sceneStrategy: ListDetailSceneStrategy<NavKey>
 ) {
-    Scaffold(
+    androidx.compose.material3.Scaffold(
         bottomBar = {
             AppNavigationBar(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate
+                currentAppKey = navigationState.currentAppKey,
+                onNavigate = { key -> navigator.navigate(key) }
             )
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -193,13 +221,10 @@ private fun CompactLayout(
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AppNavigation(
-                currentScreen = currentScreen,
-                onNavigateBack = {
-                    // 返回 Dashboard
-                    onNavigate(Screen.Dashboard)
-                },
-                onNavigate = onNavigate
+            NavDisplay(
+                entries = entries,
+                sceneStrategy = sceneStrategy,
+                onBack = { navigator.goBack() },
             )
         }
     }
@@ -210,19 +235,21 @@ private fun CompactLayout(
  */
 @Composable
 private fun MediumLayout(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit
+    navigationState: AppNavigationState,
+    navigator: AppNavigator,
+    entries: SnapshotStateList<NavEntry<NavKey>>,
+    sceneStrategy: ListDetailSceneStrategy<NavKey>
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Surface(
             modifier = Modifier.fillMaxHeight(),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp, // 轻微阴影
+            tonalElevation = 2.dp,
             shadowElevation = 0.dp
         ) {
             AppNavigationRail(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate,
+                currentAppKey = navigationState.currentAppKey,
+                onNavigate = { key -> navigator.navigate(key) },
                 isExpanded = false
             )
         }
@@ -231,36 +258,35 @@ private fun MediumLayout(
                 .weight(1f)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AppNavigation(
-                currentScreen = currentScreen,
-                onNavigateBack = {
-                    // 返回 Dashboard
-                    onNavigate(Screen.Dashboard)
-                },
-                onNavigate = onNavigate
+            NavDisplay(
+                entries = entries,
+                sceneStrategy = sceneStrategy,
+                onBack = { navigator.goBack() },
             )
         }
     }
 }
 
 /**
- * 扩展布局（桌面）
+ * 扩展布局
  */
 @Composable
 private fun ExpandedLayout(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit
+    navigationState: AppNavigationState,
+    navigator: AppNavigator,
+    entries: SnapshotStateList<NavEntry<NavKey>>,
+    sceneStrategy: ListDetailSceneStrategy<NavKey>
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Surface(
             modifier = Modifier.fillMaxHeight(),
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp, // 轻微阴影
+            tonalElevation = 2.dp,
             shadowElevation = 0.dp
         ) {
             AppNavigationRail(
-                currentScreen = currentScreen,
-                onNavigate = onNavigate,
+                currentAppKey = navigationState.currentAppKey,
+                onNavigate = { key -> navigator.navigate(key) },
                 isExpanded = true
             )
         }
@@ -269,75 +295,11 @@ private fun ExpandedLayout(
                 .weight(1f)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AppNavigation(
-                currentScreen = currentScreen,
-                onNavigateBack = {
-                    // 返回 Dashboard
-                    onNavigate(Screen.Dashboard)
-                },
-                onNavigate = onNavigate
+            NavDisplay(
+                entries = entries,
+                sceneStrategy = sceneStrategy,
+                onBack = { navigator.goBack() },
             )
-        }
-    }
-}
-
-/**
- * 应用导航容器
- *
- * 使用 AnimatedContent 实现流畅的转场动画
- * 参考 Apple Music 的卡片展开动效
- */
-@Composable
-fun AppNavigation(
-    currentScreen: Screen,
-    onNavigateBack: () -> Unit = {},
-    onNavigate: ((Screen) -> Unit)? = null
-) {
-    AnimatedContent(
-        targetState = currentScreen,
-        transitionSpec = {
-            when {
-                // 从 Dashboard 导航到 CardDetail：卡片展开动画
-                initialState is Screen.Dashboard && targetState is Screen.CardDetail -> {
-                    ScreenTransition.cardDetailEnterTransition() togetherWith
-                        ScreenTransition.dashboardExitTransition()
-                }
-                // 从 CardDetail 返回 Dashboard：卡片收起动画
-                initialState is Screen.CardDetail && targetState is Screen.Dashboard -> {
-                    ScreenTransition.dashboardEnterTransition() togetherWith
-                        ScreenTransition.cardDetailExitTransition()
-                }
-                // 其他导航：默认转场
-                else -> {
-                    ScreenTransition.defaultEnterTransition() togetherWith
-                        ScreenTransition.defaultExitTransition()
-                }
-            }.using(
-                // 使用 SizeTransform 保持内容大小平滑过渡
-                SizeTransform(clip = false)
-            )
-        },
-        label = "screen_transition"
-    ) { screen ->
-        when (screen) {
-            is Screen.Dashboard -> DashboardScreen(
-                onNavigateToCardDetail = { cardId ->
-                    // 导航到卡片详情页
-                    onNavigate?.invoke(Screen.CardDetail(cardId))
-                }
-            )
-
-            is Screen.Settings -> SettingsScreen()
-            is Screen.Profile -> ProfileScreen(
-                onNavigateToSettings = { /* TODO: Navigate to Settings */ }
-            )
-
-            is Screen.CardDetail -> CardDetailScreen(
-                cardId = screen.cardId,
-                onNavigateBack = onNavigateBack
-            )
-
-            else -> PlaceholderScreen(screen)
         }
     }
 }

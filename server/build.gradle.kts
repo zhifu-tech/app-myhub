@@ -14,6 +14,10 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     // 项目模块
     implementation(projects.core.logger)

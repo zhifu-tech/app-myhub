@@ -111,6 +111,8 @@ kotlin {
             implementation(compose.foundation)
             // Material3 组件库（必需：Material Design 3 组件）
             implementation(compose.material3)
+            // Material3 Adaptive Navigation Suite（必需：Adaptive Navigation 组件）
+            implementation(compose.material3AdaptiveNavigationSuite)
             // Compose UI 核心（必需：UI 组件和工具）
             implementation(compose.ui)
             // Compose 资源组件（必需：使用 composeResources）
@@ -125,10 +127,10 @@ kotlin {
             // ========== AndroidX Lifecycle 依赖 ==========
             // ViewModel Compose 集成（可选：DashboardViewModel 存在但未使用 ViewModel 功能）
             // 如果未来需要使用 ViewModel，需要保留此依赖
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)
             // Lifecycle Runtime Compose（可选：LaunchedEffect 来自 compose.runtime，不是此依赖）
             // 如果不需要 lifecycle 相关的状态管理，可以考虑移除
-            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
 
             // ========== 本地存储依赖 ==========
             // Multiplatform Settings（必需：SettingsManager 使用 Settings）
@@ -158,6 +160,8 @@ kotlin {
             implementation(projects.core.platformCompose)
             // 日志
             implementation(projects.core.logger)
+            // 导航模块
+            implementation(projects.core.navigation)
             // 统计框架
             implementation(projects.core.analytics)
             // 数据层（必需：数据存储和网络）

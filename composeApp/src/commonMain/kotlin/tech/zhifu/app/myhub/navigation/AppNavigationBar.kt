@@ -8,23 +8,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.mixed.Avatar
+import tech.zhifu.app.myhub.core.navigation.AppNavKey
 
-/**
- * Bottom Navigation Bar for Mobile
- */
 @Composable
 fun AppNavigationBar(
-    currentScreen: Screen,
-    onNavigate: (Screen) -> Unit,
-    modifier: Modifier = Modifier.Companion
+    currentAppKey: NavKey,
+    onNavigate: (NavKey) -> Unit,
+    modifier: Modifier = Modifier.Companion,
 ) {
     val items = listOf(
         NavItem.Dashboard,
         NavItem.New,
         NavItem.Profile,
     )
+    val currentItem = when (currentAppKey) {
+        is AppNavKey.Dashboard -> NavItem.Dashboard
+        is AppNavKey.Profile -> NavItem.Profile
+        else -> null
+    }
+
     NavigationBar(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -32,16 +37,35 @@ fun AppNavigationBar(
     ) {
         items.forEach { item ->
             NavigationBarItem(
-                selected = currentScreen == item.screen,
-                onClick = { onNavigate(item.screen) },
-                icon = {
-                    if (item.screen == Screen.Profile) {
-                        Avatar(size = 24.dp)
-                    } else {
-                        Icon(item.icon, contentDescription = stringResource(item.labelKey))
+                selected = currentItem == item,
+                onClick = {
+                    when (item) {
+                        NavItem.Dashboard -> onNavigate(AppNavKey.Dashboard)
+                        NavItem.Profile -> onNavigate(AppNavKey.Profile)
+                        else -> {}
                     }
                 },
-                label = { Text(stringResource(item.labelKey)) },
+                icon = {
+                    when (item.screen) {
+                        Screen.Profile -> {
+                            Avatar(
+                                size = 24.dp
+                            )
+                        }
+
+                        else -> {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = stringResource(item.labelKey),
+                            )
+                        }
+                    }
+                },
+                label = {
+                    Text(
+                        text = stringResource(item.labelKey),
+                    )
+                },
                 alwaysShowLabel = true
             )
         }
