@@ -1,12 +1,16 @@
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.android)
+    alias(libs.plugins.myhub.kmp.ios)
+    alias(libs.plugins.myhub.kmp.jvm)
+    alias(libs.plugins.myhub.kmp.js)
+    alias(libs.plugins.myhub.kmp.wasmJs)
 }
 
 kotlin {
     android {
         namespace = "tech.zhifu.app.myhub.logger"
     }
-
     sourceSets {
         commonMain {
             dependencies {
@@ -14,11 +18,9 @@ kotlin {
                 implementation(libs.koin.core)
             }
         }
-
-        androidMain {
+        commonTest {
             dependencies {
-                // Android 平台使用 kotlin-logging-android
-                implementation(libs.kotlin.logging.android)
+                implementation(libs.kotlin.test)
             }
         }
 
@@ -29,11 +31,6 @@ kotlin {
             }
         }
 
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
-        }
 
         jvmTest {
             dependencies {

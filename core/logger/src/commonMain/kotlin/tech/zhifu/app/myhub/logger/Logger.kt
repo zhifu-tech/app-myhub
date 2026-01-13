@@ -79,11 +79,17 @@ fun Logger.trace(message: () -> Any?) =
 fun Logger.trace(throwable: Throwable?, message: () -> Any?) =
     trace(null, throwable, message)
 
+fun Logger.trace(marker: String, message: () -> Any?) =
+    trace(marker, null, message)
+
 fun Logger.debug(message: () -> Any?) =
     debug(null, null, message)
 
 fun Logger.debug(throwable: Throwable?, message: () -> Any?) =
     debug(null, throwable, message)
+
+fun Logger.debug(marker: String, message: () -> Any?) =
+    debug(marker, null, message)
 
 fun Logger.info(message: () -> Any?) =
     info(null, null, message)
@@ -91,15 +97,24 @@ fun Logger.info(message: () -> Any?) =
 fun Logger.info(throwable: Throwable?, message: () -> Any?) =
     info(null, throwable, message)
 
+fun Logger.info(marker: String, message: () -> Any?) =
+    info(marker, null, message)
+
 fun Logger.warn(message: () -> Any?) =
     warn(null, null, message)
 
 fun Logger.warn(throwable: Throwable?, message: () -> Any?) =
     warn(null, throwable, message)
 
+fun Logger.warn(marker: String?, message: () -> Any?) =
+    warn(marker, null, message)
+
 fun Logger.error(message: () -> Any?) =
     error(null, null, message)
 
 fun Logger.error(throwable: Throwable?, message: () -> Any?) =
     error(null, throwable, message)
+
+fun Logger.error(marker: String, message: () -> Any?) =
+    error(marker, null, message)
 
