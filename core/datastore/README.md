@@ -8,6 +8,7 @@
 
 ## 📚 文档
 
+- **[数据存储套件总体架构设计](./docs/myhub-datastore-infra-v1.0.md)** - 符合 MyHub 架构设计规范的总体架构设计文档（分层架构：Repository → Datasource → Database）
 - **[架构设计文档](./docs/datastore_architecture.md)** - 详细的数据模型架构设计文档
 - **[待办事项](./docs/datastore_todos.md)** - 数据层待办事项和功能完善计划
 
