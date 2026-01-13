@@ -1,8 +1,6 @@
-# MyHub Database Module
+# Core Datastore Database Module
 
-## 📋 概述
-
-`core/datastore-database` 模块负责 MyHub 应用的数据库 Schema 定义和版本管理。使用 SQLDelight 进行数据库 Schema 管理和迁移。
+本模块用于**规范**和**实现** MyHub 应用的数据库基础设施（Datastore Database Infra），为各功能模块**提供统一、跨平台的数据库 Schema 定义和版本管理能力**。它基于 **SQLDelight 和 SQLite**，实现了**类型安全的 Schema 定义**、**版本管理**、**自动迁移**、**用户关联**、**索引优化**等特性，并提供了面向 KMP 场景的**统一数据库接口**，方便在 **Android、iOS、JVM、JS、WASM** 等多端项目中集成和使用。
 
 ## 🗄️ 数据库结构
 

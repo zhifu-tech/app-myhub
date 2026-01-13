@@ -1,6 +1,6 @@
-# core:datastore-model
+# Core Datastore Model Module
 
-数据模型模块，定义应用的核心领域模型和 DTO（数据传输对象）。
+本模块用于**规范**和**实现** MyHub 应用的数据模型基础设施（Datastore Model Infra），为各功能模块**提供统一、跨平台的数据模型定义和 DTO 转换能力**。它基于 **kotlinx.serialization 和 kotlinx.datetime**，实现了**领域模型定义**、**DTO 支持**、**类型安全**、**JSON 序列化**、**时间类型处理**等特性，并提供了面向 KMP 场景的**统一数据模型接口**，方便在 **Android、iOS、JVM、JS、WASM** 等多端项目中集成和使用。
 
 ## 📋 功能特性
 
