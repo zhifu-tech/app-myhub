@@ -1,6 +1,6 @@
-# core:network-test
+# Core Network Test Module
 
-网络测试工具模块，提供测试中使用的 Mock HttpClient 工具。
+本模块用于**规范**和**实现** MyHub 应用的网络测试基础设施（Network Test Infra），为各功能模块**提供统一的 Mock HttpClient 测试工具**。它基于 **Ktor Client Mock** 引擎，实现了**Mock HTTP 请求**、**JSON 序列化**、**跨平台支持**等特性，并提供了面向 KMP 场景的**统一测试接口**，方便在 **Android、iOS、JVM、JS、WASM** 等多端项目的单元测试中集成和使用。
 
 ## 📋 功能特性
 
