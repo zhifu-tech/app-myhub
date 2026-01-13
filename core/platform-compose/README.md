@@ -1,160 +1,133 @@
-# core:platform-compose
+# Core Platform Compose Module
 
-Compose UI 平台抽象模块，提供跨平台的主题、语言环境和窗口大小检测功能。
+本模块用于**规范**和**实现** MyHub 应用的 Compose UI 平台抽象基础设施（Platform Compose Infra），为各功能模块**提供统一的跨平台 Compose UI 抽象能力**。它基于 **Compose Multiplatform** 和 **Kotlin Multiplatform expect/actual 机制**，实现了**主题管理**、**语言环境**、**窗口尺寸检测**、**手势交互**等特性，并提供了面向 KMP 场景的**统一 Compose UI 平台抽象接口**，方便在 **Android、iOS、JVM、JS、WASM** 等多端项目中集成和使用。
 
-## 📋 功能特性
+**重要说明**：`core/platform-compose` 是一个**混合（Mixed）模块**，与其他单一功能的 core 模块不同，它包含多个 Compose UI 平台相关的功能集合，这些功能都与 Compose UI 平台相关，属于同一领域，便于统一管理和维护。
 
-- ✅ **主题管理**：跨平台的深色/浅色主题支持
-- ✅ **语言环境**：多语言支持（英语、简体中文、繁体中文、日语）
-- ✅ **窗口大小检测**：响应式布局的窗口尺寸检测
-- ✅ **窗口尺寸类别**：自动计算 Compact/Medium/Expanded 布局类别
-- ✅ **WASM 支持**：完整支持 Kotlin/WASM 平台
-- ✅ **代码复用**：Web 平台（JS/WASM）公共代码提取到 `webMain`
-- ✅ **单元测试**：完整的测试覆盖
+## 核心组件
 
-## 🎯 支持的平台
+### 1. LocalAppTheme
 
-- **Android** - Android 平台
-- **iOS** - iOS 平台（所有架构）
-- **JVM** - 桌面应用（Windows、macOS、Linux）
-- **JS** - Web 应用（Kotlin/JS）
-- **WASM** - Web 应用（Kotlin/WASM）
+统一的主题管理 CompositionLocal，提供深色/浅色主题支持：
 
-## 📁 模块结构
+- **`current`**：获取当前是否为深色主题
+- **`provides(value)`**：设置主题值
+- **平台支持**：所有平台统一接口，隐藏平台实现细节
 
-### 源集说明
+### 2. LocalAppLocale
 
-- **commonMain**：公共接口、期望函数和资源文件
-  - `LocalAppLocale.kt` - 语言环境期望接口
-  - `LocalAppTheme.kt` - 主题期望接口
-  - `WindowSizeDetector.kt` - 窗口大小检测期望接口
-  - `WindowSize.kt` - 窗口尺寸类别计算
-  - `Language.kt` - 语言枚举和转换
-  - `composeResources/` - 多语言资源文件
+统一的语言环境管理 CompositionLocal，提供多语言支持：
 
-- **webMain**：Web 平台（JS/WASM）公共代码
-  - `LocalAppLocale.web.kt` - Web 平台语言环境实现
-  - `LocalAppTheme.web.kt` - Web 平台主题实现
+- **`current`**：获取当前语言代码（如 "en"、"zh-CN"）
+- **`provides(value)`**：设置语言环境值
+- **支持语言**：英语、简体中文、繁体中文、日语
 
-- **jsMain**：JS 平台特定代码
-  - `WindowSizeDetector.js.kt` - JS 平台窗口大小检测（使用 `kotlinx.browser.window`）
+### 3. WindowSizeDetector
 
-- **wasmJsMain**：WASM 平台特定代码
-  - `WindowSizeDetector.wasmJs.kt` - WASM 平台窗口大小检测（使用 `external val window`）
+跨平台的窗口尺寸检测函数：
 
-- **androidMain**：Android 平台特定代码
-- **iosMain**：iOS 平台特定代码
-- **jvmMain**：JVM 平台特定代码
+- **`getWindowSize()`**：获取当前窗口尺寸（DpSize）
+- **`calculateWindowSizeClass()`**：计算窗口尺寸类别（Compact/Medium/Expanded）
+- **响应式布局**：支持手机、平板、桌面三种布局模式
 
-## 🔧 主要 API
+### 4. SwipeBackGesture
 
-### 主题管理
+统一的滑动返回手势 Modifier：
+
+- **`swipeBackGesture(onSwipeBack, enabled)`**：添加滑动返回手势
+- **统一交互**：从屏幕左边缘向右滑动返回上一页
+- **平台适配**：支持启用/禁用控制，桌面端可禁用
+
+### 5. Language 枚举
+
+语言代码和枚举之间的转换工具：
+
+- **`Language`**：支持的语言枚举（English、SimplifiedChinese、TraditionalChinese、Japanese）
+- **`String.toLanguage()`**：字符串转语言枚举
+- **`Language.toCode()`**：语言枚举转代码
+- **`Language.getLocalizedLabel()`**：获取本地化显示名称
+
+## 使用示例
 
 ```kotlin
+// 1. 配置主题和语言环境
+import tech.zhifu.app.myhub.local.LocalAppEnvironment
+import tech.zhifu.app.myhub.theme.AppTheme
+
+@Composable
+fun MyApp() {
+    LocalAppEnvironment {
+        AppTheme {
+            // 应用内容
+        }
+    }
+}
+
+// 2. 使用主题
+import tech.zhifu.app.myhub.local.LocalAppTheme
+
 @Composable
 fun MyScreen() {
     val isDark = LocalAppTheme.current
-    // 使用主题状态
+    
+    Surface(
+        color = if (isDark) Color.Black else Color.White
+    ) {
+        // 屏幕内容
+    }
 }
-```
 
-### 语言环境
+// 3. 使用语言环境
+import tech.zhifu.app.myhub.local.LocalAppLocale
+import tech.zhifu.app.myhub.language.Language
 
-```kotlin
 @Composable
 fun MyScreen() {
     val locale = LocalAppLocale.current // 例如: "en", "zh-CN"
-    // 使用语言环境
+    val language = locale.toLanguage() // Language.English
+    
+    Text("当前语言: ${language.getLocalizedLabel()}")
 }
-```
 
-### 窗口大小检测
+// 4. 响应式布局
+import tech.zhifu.app.myhub.ui.*
 
-```kotlin
 @Composable
 fun MyScreen() {
     val windowSize = getWindowSize()
     val sizeClass = calculateWindowSizeClass(windowSize)
     
     when {
-        sizeClass.isCompact -> { /* 手机布局 */ }
-        sizeClass.isMedium -> { /* 平板布局 */ }
-        sizeClass.isExpanded -> { /* 桌面布局 */ }
+        sizeClass.isCompact -> {
+            // 手机布局
+            Column { /* ... */ }
+        }
+        sizeClass.isMedium -> {
+            // 平板布局
+            Row { /* ... */ }
+        }
+        sizeClass.isExpanded -> {
+            // 桌面布局
+            Row { /* ... */ }
+        }
+    }
+}
+
+// 5. 滑动返回手势
+import tech.zhifu.app.myhub.ui.swipeBackGesture
+
+@Composable
+fun MyScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .swipeBackGesture(onSwipeBack = onBack)
+    ) {
+        // 屏幕内容
     }
 }
 ```
 
-### 语言转换
+## 文档
 
-```kotlin
-// 字符串转语言枚举
-val language = "zh-CN".toLanguage() // Language.SimplifiedChinese
-
-// 语言枚举转代码
-val code = Language.English.toCode() // "en"
-
-// 获取本地化显示名称
-@Composable
-fun LanguageLabel(language: Language) {
-    Text(language.getLocalizedLabel())
-}
-```
-
-## 🧪 测试
-
-模块包含完整的单元测试：
-
-- **LanguageTest** - 语言转换和枚举测试
-- **WindowSizeTest** - 窗口尺寸类别计算测试
-
-### 运行测试
-
-```bash
-# 运行所有平台的测试
-./gradlew :core:platform-compose:allTests
-
-# 运行特定平台的测试
-./gradlew :core:platform-compose:jvmTest
-./gradlew :core:platform-compose:jsTest
-./gradlew :core:platform-compose:wasmJsTest
-```
-
-## 📝 设计说明
-
-### Web 平台代码复用
-
-- JS 和 WASM 的公共代码（`LocalAppLocale`、`LocalAppTheme`）提取到 `webMain`
-- 平台特定的实现（`WindowSizeDetector`）分别放在 `jsMain` 和 `wasmJsMain`
-  - JS 使用 `kotlinx.browser.window`（JS 特定 API）
-  - WASM 使用 `external val window: Window`（WASM 兼容方式）
-- 符合 KMP 默认结构：`webMain` 是 `jsMain` 和 `wasmJsMain` 的父级源集
-
-### 窗口大小检测
-
-- **Android**：使用 `LocalConfiguration` 获取屏幕尺寸
-- **iOS**：使用 `LocalWindowInfo` 获取窗口尺寸
-- **JVM**：返回默认桌面尺寸（实际大小通过参数传入）
-- **JS/WASM**：实时监听浏览器窗口 `resize` 事件
-
-### 窗口尺寸类别
-
-- **Compact**：< 600dp（手机）
-- **Medium**：600dp - 840dp（平板）
-- **Expanded**：> 840dp（桌面）
-
-`calculateWindowSizeClass` 是一个纯函数，不需要 `@Composable` 注解，可以在任何地方调用。
-
-## 🌐 支持的语言
-
-- **English** (`en`) - 英语
-- **Simplified Chinese** (`zh-CN`) - 简体中文
-- **Traditional Chinese** (`zh-TW`) - 繁体中文
-- **Japanese** (`ja`) - 日语
-
-语言资源文件位于 `commonMain/composeResources/` 目录。
-
-## 🔗 相关模块
-
-- `core:platform` - 基础平台抽象
-- `composeApp` - Compose 应用主模块
-
+- [MyHub Compose UI 平台抽象模块方案设计](./docs/myhub-platform-compose-infra-v1.0.md)
