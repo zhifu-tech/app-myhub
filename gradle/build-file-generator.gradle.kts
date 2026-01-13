@@ -162,6 +162,63 @@ class BuildFileParser(private val buildFileContent: String) {
     }
 
     /**
+     * 解析 dependencies 配置块（顶级配置块）
+     * 只匹配顶级的 dependencies，不包括 kotlin 块内的 dependencies（如 commonMain.dependencies）
+     */
+    fun parseDependenciesBlock(): String? {
+        // 先找到 kotlin 块的范围（如果存在）
+        val kotlinBlockRange = kotlinBlockRange()
+        
+        // 查找所有 dependencies（确保是独立的单词，不是其他字符串的一部分）
+        val dependenciesPattern = Regex("""\bdependencies\s*\{""")
+        val allMatches = dependenciesPattern.findAll(buildFileContent)
+        
+        // 找到第一个不在 kotlin 块内的 dependencies
+        for (match in allMatches) {
+            val dependenciesIndex = match.range.first
+            
+            // 如果 kotlin 块存在，检查 dependencies 是否在 kotlin 块内
+            if (kotlinBlockRange != null) {
+                if (dependenciesIndex < kotlinBlockRange.first || dependenciesIndex >= kotlinBlockRange.last) {
+                    // 这个 dependencies 不在 kotlin 块内，是顶级的
+                    val braceIndex = match.range.last
+                    return extractBlock(buildFileContent, braceIndex)?.let { (content, endIndex) ->
+                        // 返回完整的 dependencies { ... } 块
+                        val startIndex = dependenciesIndex
+                        buildFileContent.substring(startIndex, endIndex)
+                    }
+                }
+            } else {
+                // 没有 kotlin 块，直接使用第一个匹配的 dependencies
+                val braceIndex = match.range.last
+                return extractBlock(buildFileContent, braceIndex)?.let { (content, endIndex) ->
+                    // 返回完整的 dependencies { ... } 块
+                    val startIndex = dependenciesIndex
+                    buildFileContent.substring(startIndex, endIndex)
+                }
+            }
+        }
+        
+        return null
+    }
+    
+    /**
+     * 获取 kotlin 块的范围（起始位置和结束位置）
+     */
+    private fun kotlinBlockRange(): IntRange? {
+        val kotlinPattern = Regex("""\bkotlin\s*\{""")
+        val match = kotlinPattern.find(buildFileContent) ?: return null
+        val kotlinIndex = match.range.first
+        val braceIndex = match.range.last
+        
+        // 提取 kotlin 块，获取结束位置
+        val blockResult = extractBlock(buildFileContent, braceIndex) ?: return null
+        val endIndex = blockResult.second
+        
+        return IntRange(kotlinIndex, endIndex)
+    }
+
+    /**
      * 提取特定平台的 sourceSet
      */
     fun extractPlatformSourceSet(sourceSetsContent: String, platform: String): List<String> {
@@ -233,6 +290,7 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
         val sourceSets = parser.parseSourceSets()
         val composeResourcesBlock = parser.parseComposeResourcesBlock()
         val sqldelightBlock = parser.parseSqlDelightBlock()
+        val dependenciesBlock = parser.parseDependenciesBlock()
 
         val sourceSetList = mutableListOf<String>()
         sourceSets?.let {
@@ -248,7 +306,8 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             androidBlock = androidBlock,
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
-            sqldelightBlock = sqldelightBlock
+            sqldelightBlock = sqldelightBlock,
+            dependenciesBlock = dependenciesBlock
         )
     }
 
@@ -279,7 +338,8 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             androidBlock = null,
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
-            sqldelightBlock = sqldelightBlock
+            sqldelightBlock = sqldelightBlock,
+            dependenciesBlock = null
         )
     }
 
@@ -312,7 +372,8 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
             iosTargetsBlock = iosTargetsBlock,
-            sqldelightBlock = sqldelightBlock
+            sqldelightBlock = sqldelightBlock,
+            dependenciesBlock = null
         )
     }
 
@@ -343,7 +404,8 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             androidBlock = null,
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
-            sqldelightBlock = sqldelightBlock
+            sqldelightBlock = sqldelightBlock,
+            dependenciesBlock = null
         )
     }
 
@@ -374,7 +436,8 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             androidBlock = null,
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
-            sqldelightBlock = sqldelightBlock
+            sqldelightBlock = sqldelightBlock,
+            dependenciesBlock = null
         )
     }
 }
@@ -389,7 +452,8 @@ data class PlatformBuildConfig(
     val sourceSets: List<String>,
     val composeResourcesBlock: String? = null,
     val iosTargetsBlock: String? = null,
-    val sqldelightBlock: String? = null
+    val sqldelightBlock: String? = null,
+    val dependenciesBlock: String? = null
 )
 
 /**
@@ -517,7 +581,17 @@ class BuildFileGenerator {
             appendLine("}")
         }
 
-        return pluginsBlock + composeResourcesBlock + sqldelightBlock + kotlinBlock
+        // dependencies 配置块（如果有）
+        val dependenciesBlock = if (config.dependenciesBlock != null) {
+            buildString {
+                appendLine()
+                appendLine(config.dependenciesBlock)
+            }
+        } else {
+            ""
+        }
+
+        return pluginsBlock + composeResourcesBlock + sqldelightBlock + kotlinBlock + dependenciesBlock
     }
 }
 

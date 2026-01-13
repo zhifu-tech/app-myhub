@@ -1,9 +1,9 @@
 # CocoaPods Podfile for MyHub iOS App
-# 
+#
 # Configuration:
 # - Environment variables (highest priority): APP_CHANNEL, APP_ENV
 # - Fallback: gradle.properties file
-# 
+#
 # Usage:
 #   APP_CHANNEL=umeng APP_ENV=dev pod install
 #   or set in gradle.properties: appChannel=umeng, appEnv=dev
@@ -25,7 +25,7 @@ ENV_DEV = 'dev'
 
 def read_gradle_property(file_path, property_name)
   return nil unless File.exist?(file_path)
-  
+
   content = File.read(file_path)
   pattern = /^#{property_name}\s*=\s*(\S+?)(?:\s*#|$)/
   match = content.match(pattern)
@@ -34,11 +34,11 @@ end
 
 def get_build_config
   gradle_props_path = File.join(__dir__, '..', 'gradle.properties')
-  
+
   # Priority 1: Environment variables
   channel = ENV['APP_CHANNEL'] || read_gradle_property(gradle_props_path, 'appChannel')
   env = ENV['APP_ENV'] || read_gradle_property(gradle_props_path, 'appEnv')
-  
+
   {
     channel: channel,
     env: env,
@@ -55,13 +55,13 @@ end
 target 'iosApp' do
   use_frameworks!
   platform :ios, IOS_DEPLOYMENT_TARGET
-  
+
   # Kotlin Multiplatform Framework
   pod 'composeApp', :path => '../composeApp'
-  
+
   # Build configuration
   config = get_build_config
-  
+
   # Firebase Analytics (Google Play channel only)
   # Note: dev.gitlive:firebase-analytics handles dependencies automatically,
   # but explicit pod declarations are required for Xcode linking
@@ -69,12 +69,12 @@ target 'iosApp' do
     pod 'FirebaseCore'
     pod 'FirebaseAnalytics'
   end
-  
+
   # Umeng Analytics (Umeng channel only)
   if config[:is_umeng]
     pod 'UMCommon'   # Statistics SDK base library
     pod 'UMDevice'   # Device information collection
-    
+
     # UMCCommonLog is disabled due to iOS simulator architecture incompatibility
     # Issue: arm64 architecture built for device, incompatible with simulator's arm64-simulator
     # Error: ld: building for 'iOS-simulator', but linking in object file built for 'iOS'
@@ -84,11 +84,11 @@ target 'iosApp' do
     #   pod 'UMCCommonLog'
     # end
   end
-  
+
   # ============================================================================
   # Post Install Hooks
   # ============================================================================
-  
+
   post_install do |installer|
     # Unify iOS deployment target to 15.0 for all pods
     # Some pods may have lower default deployment targets (e.g., 9.0)
@@ -100,14 +100,14 @@ target 'iosApp' do
         end
       end
     end
-    
+
     # Fix Xcode warning: Add output paths for composeApp build script
     installer.pods_project.targets.each do |target|
       next unless target.name == 'composeApp'
-      
+
       target.build_phases.each do |phase|
         next unless phase.respond_to?(:name) && phase.name == '[CP-User] Build composeApp'
-        
+
         framework_path = "${PODS_TARGET_SRCROOT}/../build/cocoapods/framework/ComposeApp.framework"
         phase.output_paths ||= []
         phase.output_paths << framework_path unless phase.output_paths.include?(framework_path)

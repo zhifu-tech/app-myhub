@@ -24,10 +24,19 @@ kotlin {
             }
         }
 
-        jvmMain {
+        androidMain {
             dependencies {
-                implementation(libs.slf4j.api)
-                implementation(libs.slf4j.simple)
+                // Android 平台使用 kotlin-logging-android
+                implementation(libs.kotlin.logging.android)
+            }
+        }
+
+        if (isDesktopEnabled()) {
+            jvmMain {
+                dependencies {
+                    implementation(libs.slf4j.api)
+                    implementation(libs.slf4j.simple)
+                }
             }
         }
 

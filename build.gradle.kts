@@ -24,6 +24,11 @@ plugins {
 
     // myhub
     alias(libs.plugins.myhub.kmp) apply false
+    alias(libs.plugins.myhub.kmp.android) apply false
+    alias(libs.plugins.myhub.kmp.ios) apply false
+    alias(libs.plugins.myhub.kmp.jvm) apply false
+    alias(libs.plugins.myhub.kmp.js) apply false
+    alias(libs.plugins.myhub.kmp.wasmJs) apply false
     alias(libs.plugins.myhub.kmp.web) apply false
     alias(libs.plugins.myhub.android) apply false
 }

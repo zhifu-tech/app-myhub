@@ -2,6 +2,11 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.android)
+    alias(libs.plugins.myhub.kmp.ios)
+    alias(libs.plugins.myhub.kmp.jvm)
+    alias(libs.plugins.myhub.kmp.js)
+    alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.myhub.kmp.web)
     // Compose Multiplatform 插件（必需：使用 Compose Multiplatform UI）
     alias(libs.plugins.composeMultiplatform)

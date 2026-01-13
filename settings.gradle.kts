@@ -82,7 +82,7 @@ println(
 // 1. server 启用的前提是，必须要有 jvm
 // 2. 可以接受的组合为：
 //    - 单个平台：android, ios, jvm, js, wasmJs
-//    - 三个平台：单个平台 + jvm + server（如 android,jvm,server）
+//    - 两个平台： jvm + server
 
 // 首先检查：如果启用了 server，必须同时启用 jvm
 if (isServerEnabled && !isJvmEnabled) {
@@ -203,21 +203,25 @@ if (isServerEnabled) {
 // ============================================================================
 include(":component:card")
 include(":component:mixed")
-//
-//// ============================================================================
-//// 功能模块
-//// ============================================================================
-//include(":feature:settings")
-//include(":feature:dashboard")
-//include(":feature:profile")
-//include(":feature:card-detail")
 
-//// ============================================================================
-//// 应用模块
-//// ============================================================================
-//include(":server")
-//include(":composeApp")
-//include(":androidApp")
+// ============================================================================
+// 功能模块
+// ============================================================================
+include(":feature:settings")
+include(":feature:dashboard")
+include(":feature:profile")
+include(":feature:card-detail")
+
+// ============================================================================
+// 应用模块
+// ============================================================================
+include(":composeApp")
+if (isAndroidEnabled) {
+    include(":androidApp")
+}
+if (isServerEnabled) {
+    include(":server")
+}
 
 // ============================================================================
 // 构建文件动态生成系统

@@ -42,7 +42,7 @@
 
 **结构模板**：
 
-```
+```text
 本模块用于**规范**和**实现** MyHub 应用的[模块类型]基础设施（[Module Name] Infra），为各功能模块**[提供的能力]**。它基于 **[技术选型]**，实现了**[特性1]**、**[特性2]**、**[特性3]**等特性，并提供了面向 KMP 场景的**[架构特点]**，方便在 **[目标平台/场景]**中集成和使用。
 ```
 
@@ -133,9 +133,6 @@
 // 4. [常见用法2]
 [代码]
 ```
-````
-
-````
 
 **示例**：
 ```markdown
@@ -159,7 +156,7 @@ val logger = logger("MyModule")
 
 // 3. 记录日志
 logger.info { "Application started" }
-````
+```
 
 ````
 
@@ -168,11 +165,13 @@ logger.info { "Application started" }
 **格式**：`## 文档`
 
 **要求**：
+
 - 链接到架构设计文档
 - 使用相对路径（`./docs/[文档名称]`）
 - 链接文本应清晰描述文档内容
 
 **结构模板**：
+
 ```markdown
 ## 文档
 
@@ -187,6 +186,178 @@ logger.info { "Application started" }
 - [MyHub 日志模块方案设计](./docs/myhub-logger-infra-v1.0.md)
 ```
 
+### 1.6 可选章节
+
+以下章节可根据模块实际情况选择添加：
+
+#### 1.6.1 功能特性（可选）
+
+**格式**：`## 📋 功能特性`
+
+**要求**：
+
+- 使用列表列出模块的主要功能特性
+- 每个特性使用 ✅ 标记
+- 保持简洁，3-8 个特性为宜
+
+**示例**：
+
+```markdown
+## 📋 功能特性
+
+- ✅ **Mock HttpClient**: 提供创建 Mock HttpClient 的工具函数
+- ✅ **测试支持**: 用于单元测试中模拟 HTTP 请求和响应
+- ✅ **JSON 序列化**: 自动配置 JSON 序列化/反序列化
+- ✅ **跨平台**: 支持所有 Kotlin Multiplatform 平台
+```
+
+#### 1.6.2 模块结构（可选）
+
+**格式**：`## 📁 模块结构`
+
+**要求**：
+
+- 使用代码块展示模块的目录结构
+- 包含主要源文件和目录
+- 使用注释说明关键文件的作用
+
+**示例**：
+
+```markdown
+## 📁 模块结构
+
+```text
+core/network-test/
+├── src/
+│   ├── commonMain/
+│   │   └── kotlin/tech/zhifu/app/myhub/network/test/
+│   │       └── KtorMockClientFactory.kt  # createMockHttpClient 函数
+│   └── commonTest/
+│       └── kotlin/tech/zhifu/app/myhub/network/test/
+│           └── KtorMockClientFactoryTest.kt  # 单元测试
+└── build.gradle.kts
+```
+
+#### 1.6.3 依赖关系（可选）
+
+**格式**：`## 🔧 依赖关系`
+
+**要求**：
+
+- 列出模块的依赖关系
+- 分为：依赖的模块、外部依赖、测试依赖（如适用）
+- 使用子标题组织
+
+**示例**：
+
+```markdown
+## 🔧 依赖关系
+
+### 依赖的模块
+
+- `core:network` - 网络模块（提供 HttpClient 类型）
+
+### 外部依赖
+
+- `ktor-client-mock` - Ktor Mock 引擎
+- `ktor-client-core` - Ktor 客户端核心
+
+### 测试依赖
+
+- `kotlin-test` - Kotlin 测试框架
+- `kotlinx-coroutines-test` - 协程测试支持
+```
+
+#### 1.6.4 测试（可选）
+
+**格式**：`## 🧪 测试`
+
+**要求**：
+
+- 说明模块包含的测试
+- 列出主要测试类和测试场景
+- 提供运行测试的命令
+
+**示例**：
+
+```markdown
+## 🧪 测试
+
+模块包含完整的单元测试：
+
+- **KtorMockClientFactoryTest**: 测试 `createMockHttpClient` 函数
+    - 验证 HttpClient 创建和配置
+    - 测试不同 HTTP 状态码处理
+    - 测试 JSON 序列化配置
+
+运行测试：
+
+```bash
+./gradlew :core:network-test:test
+```
+
+#### 1.6.5 注意事项（可选）
+
+**格式**：`## ⚠️ 注意事项`
+
+**要求**：
+
+- 列出使用模块时需要注意的重要事项
+- 使用编号列表
+- 使用加粗强调关键信息
+
+**示例**：
+
+```markdown
+## ⚠️ 注意事项
+
+1. **仅用于测试**: 此模块仅用于测试，不应在生产代码中使用
+2. **Mock HttpClient**: Mock HttpClient 已配置好 JSON 序列化和默认请求头
+3. **函数导入**: 使用 `createMockHttpClient` 函数时需要导入：
+   ```kotlin
+   import tech.zhifu.app.myhub.network.test.createMockHttpClient
+   ```
+
+#### 1.6.6 相关模块（可选）
+
+**格式**：`## 🔗 相关模块`
+
+**要求**：
+
+- 列出与本模块相关的其他模块
+- 使用列表格式
+- 简要说明关系
+
+**示例**：
+
+```markdown
+## 🔗 相关模块
+
+- `core:network` - 网络模块，提供实际的 HttpClient 实现
+- `core:datastore-datasource-remote` - 远程数据源实现，使用本模块进行测试
+```
+
+#### 1.6.7 更多示例（可选）
+
+**格式**：`## 📚 更多示例`
+
+**要求**：
+
+- 指向其他模块或文档中的更多示例
+- 列出具体的示例文件或文档
+
+**示例**：
+
+```markdown
+## 📚 更多示例
+
+查看 `core:datastore-datasource-remote` 模块的测试文件，了解更详细的使用示例：
+
+- `RemoteCardDataSourceTest.kt`
+- `RemoteTagDataSourceTest.kt`
+- `RemoteTemplateDataSourceTest.kt`
+```
+
 ## 2. 内容要求
 
 ### 2.1 内容精简原则
@@ -196,11 +367,12 @@ README.md 应遵循以下原则：
 - ✅ **快速上手**：专注于让开发人员快速了解和使用模块
 - ✅ **核心信息**：只包含最核心的组件和使用方法
 - ✅ **简洁明了**：避免冗长的说明和过多的细节
+- ✅ **可选章节**：可根据模块特点添加可选章节（功能特性、模块结构、依赖关系、测试、注意事项、相关模块、更多示例）
 - ❌ **不包含**：
   - 详细的使用指南（应在架构设计文档中）
   - 平台特定配置细节（应在架构设计文档中）
   - 依赖版本信息（应在架构设计文档中）
-  - 测试说明（应在架构设计文档中）
+  - 过于详细的测试说明（简要说明即可）
   - 最佳实践（应在架构设计文档中）
 
 ### 2.2 代码示例要求
@@ -263,13 +435,11 @@ README.md 应遵循以下原则：
 // 4. [常见用法2]
 [代码]
 ```
-````
 
 ## 文档
 
 - [MyHub [模块名称]方案设计](./docs/myhub-[模块名称]-infra-v[版本号].md)
-
-````
+```
 
 ### 3.2 模板使用说明
 
@@ -297,6 +467,7 @@ README.md 应遵循以下原则：
 - [ ] 包含核心组件章节（3-5 个组件）
 - [ ] 包含使用示例章节（完整代码示例）
 - [ ] 包含文档链接章节
+- [ ] 可选章节（如适用）：功能特性、模块结构、依赖关系、测试、注意事项、相关模块、更多示例
 
 ### 4.2 内容质量
 
@@ -335,6 +506,22 @@ README.md 应遵循以下原则：
 - 3 个核心组件（AppNavKey/FeatureNavKey、AppNavigationState、AppNavigator）
 - 完整的使用示例（5 个步骤）
 - 链接到架构设计文档
+
+### 5.3 Network Test 模块示例
+
+参考文件：`core/network-test/README.md`
+
+**特点**：
+- 清晰的模块概述
+- 功能特性章节
+- 核心组件说明（包含函数签名和配置内容）
+- 多个使用示例（基本使用、处理不同状态码、验证请求参数、使用序列化对象）
+- 模块结构说明
+- 依赖关系说明
+- 测试说明
+- 注意事项
+- 相关模块链接
+- 更多示例链接
 
 ## 6. 与架构设计文档的关系
 
