@@ -1,5 +1,10 @@
 plugins {
     alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.android)
+    alias(libs.plugins.myhub.kmp.ios)
+    alias(libs.plugins.myhub.kmp.jvm)
+    alias(libs.plugins.myhub.kmp.js)
+    alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)

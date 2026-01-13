@@ -2,7 +2,7 @@
 # ============================================================================
 # Build System & Kotlin
 # ============================================================================
-agp = "9.1.0-alpha03"
+agp = "9.1.0-alpha04"
 kotlin = "2.3.0"
 composeMultiplatform = "1.9.3"
 composeHotReload = "1.0.0"
@@ -380,5 +380,10 @@ ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 # MyHub Custom Plugins
 # ============================================================================
 myhub-kmp = { id = "myhub-kmp" }
+myhub-kmp-android = { id = "myhub-kmp-android" }
+myhub-kmp-ios = { id = "myhub-kmp-ios" }
+myhub-kmp-jvm = { id = "myhub-kmp-jvm" }
+myhub-kmp-js = { id = "myhub-kmp-js" }
+myhub-kmp-wasmJs = { id = "myhub-kmp-wasmJs" }
 myhub-kmp-web = { id = "myhub-kmp-web" }
 myhub-android = { id = "myhub-android" }
