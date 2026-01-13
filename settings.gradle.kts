@@ -99,6 +99,7 @@ if (isServerEnabled && !isJvmEnabled) {
 // 然后检查组合是否合法
 val validSinglePlatforms = setOf("android", "ios", "jvm", "js", "wasmJs")
 when (enabledPlatforms.size) {
+    6 -> println("all platforms enabled")
     1 -> {
         // 只启用一个平台，必须是有效的单个平台
         if (enabledPlatforms.first() !in validSinglePlatforms) {

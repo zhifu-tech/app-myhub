@@ -31,16 +31,12 @@ kotlin {
             }
         }
 
-        if (isDesktopEnabled()) {
-            jvmMain {
-                dependencies {
-                    implementation(libs.slf4j.api)
-                    implementation(libs.slf4j.simple)
-                }
+        jvmMain {
+            dependencies {
+                implementation(libs.slf4j.api)
+                implementation(libs.slf4j.simple)
             }
         }
-
-
         jvmTest {
             dependencies {
                 implementation(libs.kotlin.testJunit)
