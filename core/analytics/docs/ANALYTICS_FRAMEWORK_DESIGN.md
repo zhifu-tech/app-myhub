@@ -1620,10 +1620,10 @@ fun DashboardScreen(
 
 ## 🔗 相关文档
 
-- [项目架构文档](./myhub_architecture.md)
-- [网络模块文档](../core/network/README.md)
-- [日志模块文档](../core/logger/README.md)
-- [平台模块文档](../core/platform/README.md)
+- [项目架构文档](../../../docs/myhub_architecture.md)
+- [网络模块文档](../../network/README.md)
+- [日志模块文档](../../logger/README.md)
+- [平台模块文档](../../platform/README.md)
 
 ## 📚 参考资料
 
