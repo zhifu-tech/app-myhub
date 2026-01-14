@@ -29,6 +29,10 @@ savedstateCompose = "1.4.0-alpha01"
 uiToolingPreview = "1.10.0"
 uiTooling = "1.10.0"
 # Navigation 3 版本
+androidx-compose-navigation3-adaptive = "1.3.0-alpha05"
+jb-androidx-compose-navigation3-adaptive = "1.3.0-alpha03"
+androidx-compose-material3-windowsize = "1.5.0-alpha11"
+jb-compose-material3-windowsize = "1.11.0-alpha01"
 androidx-navigation3 = "1.1.0-alpha01"
 jb-androidx-navigation3 = "1.1.0-alpha01"
 lifecycle-viewmodel-navigation3 = "2.1.0-alpha07"
@@ -144,8 +148,6 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 #jb-androidx-core-bundle = { module = "org.jetbrains.androidx.core:core-bundle", version.ref = "jb-androidx-core-bundle" }
 
 
-
-
 ## AndroidX AppCompat：提供向后兼容的 Activity 和 Fragment 支持
 #androidx-appcompat-appcomapt = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 #
@@ -207,8 +209,35 @@ jb-androidx-lifecycle-lifecycleViewModelCompose = { module = "org.jetbrains.andr
 #androidx-lifecycle-lifecycleProcess = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
 
 
+
+# -----------------------------------------------------------------------------
+# AndroidX Compose Material3 material3-window-size-class
+# https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes
+# -----------------------------------------------------------------------------
+#androidx-compose-material3-material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "androidx-compose-material3-windowsize" }
+jb-compose-material3-material3WindowSizeClass = { group = "org.jetbrains.compose.material3", name = "material3-window-size-class", version.ref = "jb-compose-material3-windowsize" }
+
+# -----------------------------------------------------------------------------
+# AndroidX Compose Material3 Adaptive
+# https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive?hl=zh-cn
+# -----------------------------------------------------------------------------
 # 自适应布局插件：支持 List-Detail (列表-详情) 等大屏适配的导航策略 SceneStrategy
-androidx-navigation3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "androidx-navigation3" }
+#androidx-compose-material3-adaptive-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "androidx-compose-navigation3-adaptive" }
+jb-compose-material3-adaptive-adaptive = { group = "org.jetbrains.compose.material3.adaptive", name = "adaptive", version.ref = "jb-androidx-compose-navigation3-adaptive" }
+
+# 自适应布局：支持大屏自适应、窗口大小类推断等
+#androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "androidx-compose-navigation3-adaptive" }
+jb-compose-material3-adaptive-adaptiveLayout = { group = "org.jetbrains.compose.material3.adaptive", name = "adaptive-layout", version.ref = "jb-androidx-compose-navigation3-adaptive" }
+
+# 自适应导航：支持 SceneStrategy、TwoPane 等响应式导航模式
+androidx-compose-material3-adaptive-adaptiveNavigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "androidx-compose-navigation3-adaptive" }
+jb-compose-material3-adaptive-adaptiveNavigation = { group = "org.jetbrains.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "jb-androidx-compose-navigation3-adaptive" }
+
+
+# AndroidX Window 核心库：用于提供窗口和显示相关的 API（如折叠屏、屏幕分区支持）
+#androidx-window-windowCore = { module = "androidx.window:window-core", version = "1.6.0-alpha01" }
+jb-androidx-window-windowCore = { module = "org.jetbrains.androidx.window:window-core", version = "1.5.1" }
+
 
 
 # Compose UI 工具：提供 Compose 的开发和调试工具，如布局检查器、实时预览等
@@ -218,14 +247,14 @@ androidx-compose-ui-uiTooling = { group = "androidx.compose.ui", name = "ui-tool
 androidx-compose-ui-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 # SavedState Compose 支持：为 Compose 提供状态保存和恢复功能，支持配置变更时保持状态
-androidx-savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstateCompose" }
+jb-androidx-savedstate-compose = { module = "org.jetbrains.androidx.savedstate:savedstate-compose", version.ref = "savedstateCompose" }
 
 # -----------------------------------------------------------------------------
 # AndroidX Navigation @ https://developer.android.com/jetpack/androidx/releases/navigation3
 # -----------------------------------------------------------------------------
 
 ## 导航库：核心运行时：包含 NavKey, NavEntry 等基础导航逻辑，不含 UI，只有所有平台
-#androidx-navigation3-navigation3Runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "androidx-navigation3" }
+androidx-navigation3-navigation3Runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "androidx-navigation3" }
 #
 ## 导航库 UI 容器：包含 NavDisplay, Scene 等核心组件，负责界面渲染与动画转换
 #androidx-navigation3-navigation3Ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "androidx-navigation3" }

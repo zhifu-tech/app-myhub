@@ -212,6 +212,9 @@ include(":feature:settings")
 include(":feature:dashboard")
 include(":feature:profile")
 include(":feature:card-detail")
+// 业务模块：引用
+include(":feature:quote-api")
+include(":feature:quote")
 
 // ============================================================================
 // 应用模块

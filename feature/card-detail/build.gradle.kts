@@ -35,6 +35,8 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
 
+            implementation(libs.jb.androidx.window.windowCore)
+
             // 依赖注入
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)

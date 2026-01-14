@@ -44,7 +44,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation3.runtime.NavKey
+import androidx.window.core.layout.WindowSizeClass
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.mixed.Avatar
 import tech.zhifu.app.myhub.core.navigation.AppNavKey
@@ -53,12 +55,18 @@ import tech.zhifu.app.myhub.resources.app_name
 import tech.zhifu.app.myhub.resources.new_card
 import tech.zhifu.app.myhub.resources.premium
 import tech.zhifu.app.myhub.resources.scholar_name
+import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
+import tech.zhifu.app.myhub.ui.isWidthCompact
+import tech.zhifu.app.myhub.ui.isWidthExpanded
+import tech.zhifu.app.myhub.ui.isWidthExtraLarge
+import tech.zhifu.app.myhub.ui.isWidthLarge
+import tech.zhifu.app.myhub.ui.isWidthMedium
 
 @Composable
 fun AppNavigationRail(
+    windowSizeClass: WindowSizeClass,
     currentAppKey: NavKey,
     onNavigate: (NavKey) -> Unit,
-    isExpanded: Boolean,
     modifier: Modifier = Modifier.Companion
 ) {
     val items = listOf(
@@ -72,10 +80,24 @@ fun AppNavigationRail(
         else -> null
     }
 
-    val railWidth by animateDpAsState(targetValue = if (isExpanded) 280.dp else 80.dp)
+    val railWidth by animateDpAsState(
+        targetValue = when {
+            windowSizeClass.isWidthCompact() -> 80.dp
+            windowSizeClass.isWidthMedium() -> 80.dp
+            windowSizeClass.isWidthExpanded() -> 240.dp
+            windowSizeClass.isWidthLarge() -> 320.dp
+            windowSizeClass.isWidthExtraLarge() -> 320.dp
+            else -> 320.dp
+        }
+    )
+
+    val isExpanded = windowSizeClass.isWidthAtLeastExpanded()
 
     NavigationRail(
-        modifier = modifier.fillMaxHeight().width(railWidth),
+        modifier = modifier
+            .fillMaxHeight()
+            .width(railWidth)
+            .zIndex(10f), // 确保 NavigationRail 在动画之上
         containerColor = MaterialTheme.colorScheme.surface,
         header = {
             Column(

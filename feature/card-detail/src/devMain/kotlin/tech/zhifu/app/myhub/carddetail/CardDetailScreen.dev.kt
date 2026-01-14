@@ -19,7 +19,9 @@ import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
-import tech.zhifu.app.myhub.ui.WindowSizeClass
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassCompact
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassExpanded
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassMedium
 import kotlin.time.Clock
 
 /**
@@ -54,19 +56,19 @@ private class MockReactiveCardRepository : ReactiveCardRepository {
 
     // CardRepository 接口方法
     override suspend fun getAllCards(): List<Card> = listOf(sampleCard)
-    
+
     override suspend fun getCardById(id: String): Card? = if (id == "preview-card-1") sampleCard else null
-    
+
     override suspend fun searchCards(filter: tech.zhifu.app.myhub.datastore.model.SearchFilter): List<Card> {
         return listOf(sampleCard)
     }
-    
+
     override suspend fun createCard(card: Card): Card = card
-    
+
     override suspend fun updateCard(card: Card): Card = card
-    
+
     override suspend fun deleteCard(id: String): Boolean = true
-    
+
     override suspend fun toggleFavorite(cardId: String): Card = sampleCard.copy(isFavorite = !sampleCard.isFavorite)
 }
 
@@ -130,7 +132,7 @@ private fun CardDetailScreenLightCompactPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = false) {
-        ProvideWindowSizeClass(WindowSizeClass.Compact) {
+        ProvideWindowSizeClass(mockWindowSizeClassCompact()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},
@@ -150,7 +152,7 @@ private fun CardDetailScreenDarkCompactPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = true) {
-        ProvideWindowSizeClass(WindowSizeClass.Compact) {
+        ProvideWindowSizeClass(mockWindowSizeClassCompact()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},
@@ -170,7 +172,7 @@ private fun CardDetailScreenLightMediumPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = false) {
-        ProvideWindowSizeClass(WindowSizeClass.Medium) {
+        ProvideWindowSizeClass(mockWindowSizeClassMedium()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},
@@ -190,7 +192,7 @@ private fun CardDetailScreenDarkMediumPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = true) {
-        ProvideWindowSizeClass(WindowSizeClass.Medium) {
+        ProvideWindowSizeClass(mockWindowSizeClassMedium()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},
@@ -210,7 +212,7 @@ private fun CardDetailScreenLightExpandedPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = false) {
-        ProvideWindowSizeClass(WindowSizeClass.Expanded) {
+        ProvideWindowSizeClass(mockWindowSizeClassExpanded()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},
@@ -230,7 +232,7 @@ private fun CardDetailScreenDarkExpandedPreview() {
     remember { initPreviewKoin() }
 
     AppTheme(darkTheme = true) {
-        ProvideWindowSizeClass(WindowSizeClass.Expanded) {
+        ProvideWindowSizeClass(mockWindowSizeClassExpanded()) {
             CardDetailScreen(
                 cardId = "preview-card-1",
                 onNavigateBack = {},

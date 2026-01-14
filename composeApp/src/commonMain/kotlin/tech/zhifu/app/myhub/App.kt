@@ -1,13 +1,12 @@
 package tech.zhifu.app.myhub
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -16,16 +15,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clipToBounds
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import androidx.window.core.layout.WindowSizeClass
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.AppErrorScreen
 import tech.zhifu.app.myhub.component.AppLoadingScreen
 import tech.zhifu.app.myhub.core.navigation.AppNavKey
+import tech.zhifu.app.myhub.core.navigation.AppNavKey.Dashboard
 import tech.zhifu.app.myhub.core.navigation.AppNavigationState
 import tech.zhifu.app.myhub.core.navigation.AppNavigator
 import tech.zhifu.app.myhub.core.navigation.rememberAppNavigationState
@@ -40,41 +40,31 @@ import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.profile.navigation.profileEntry
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
-import tech.zhifu.app.myhub.ui.WindowSizeClass
-import tech.zhifu.app.myhub.ui.calculateWindowSizeClass
-import tech.zhifu.app.myhub.ui.getWindowSize
-import tech.zhifu.app.myhub.ui.isCompact
-import tech.zhifu.app.myhub.ui.isExpanded
-import tech.zhifu.app.myhub.ui.isMedium
+import tech.zhifu.app.myhub.ui.isWidthCompact
+import tech.zhifu.app.myhub.ui.rememberWindowSizeClass
 
-/**
- * 应用主入口 (Stateful) - 使用 Navigation 3
- */
 @Composable
 fun App(
-    windowSize: DpSize? = null,
     appViewModel: AppViewModel = koinInject()
 ) {
-    // 观察应用状态
     val appState by appViewModel.uiState.collectAsState()
-
-    // 计算窗口大小类
-    val actualWindowSize = windowSize ?: getWindowSize()
-    val sizeClass = calculateWindowSizeClass(actualWindowSize)
+    val windowSizeClass = rememberWindowSizeClass()
 
     // 初始化应用
     LaunchedEffect(Unit) {
-        appViewModel.initialize(initialWindowSizeClass = sizeClass)
+        appViewModel.initialize()
     }
 
-    // 当窗口大小变化时更新 ViewModel
-    LaunchedEffect(sizeClass) {
-        appViewModel.updateWindowSizeClass(sizeClass)
+    // 监听窗口大小变化
+    LaunchedEffect(windowSizeClass) {
+        // 当窗口大小变化时，可以在这里执行相关操作
+        // 例如：记录分析事件、更新状态等
+        appViewModel.onWindowSizeClassChanged(windowSizeClass)
     }
 
     App(
         appState = appState,
-        windowSizeClass = sizeClass
+        windowSizeClass = windowSizeClass
     )
 }
 
@@ -107,27 +97,20 @@ fun App(
     }
 }
 
-/**
- * 应用主要内容
- */
 @Composable
 private fun AppContent(
     isDarkTheme: Boolean,
     windowSizeClass: WindowSizeClass
 ) {
-    // 提供应用环境上下文
     LocalAppEnvironment {
-        // 提供应用主题状态（供卡片组件等使用）
         CompositionLocalProvider(LocalAppTheme provides isDarkTheme) {
-            // 应用主题
             AppTheme(darkTheme = isDarkTheme) {
-                // 提供窗口大小类
                 ProvideWindowSizeClass(windowSizeClass) {
-                    // 初始化 Navigation 3 状态
+
                     val navigationState = rememberAppNavigationState(
-                        startKey = AppNavKey.Dashboard,
+                        startKey = Dashboard,
                         appKeys = setOf(
-                            AppNavKey.Dashboard,
+                            Dashboard,
                             AppNavKey.Profile
                         )
                     )
@@ -140,166 +123,79 @@ private fun AppContent(
                     }
 
                     val entries = navigationState.toEntries(entryProvider)
+
+                    // ⭐ SceneStrategy 不再依赖 WindowSizeClass
                     val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-                    // 响应式布局
-                    ResponsiveAppLayout(
+                    AppScaffold(
                         windowSizeClass = windowSizeClass,
                         navigationState = navigationState,
-                        navigator = navigator,
-                        entries = entries,
-                        sceneStrategy = sceneStrategy
-                    )
+                        navigator = navigator
+                    ) {
+                        AppSceneContainer(
+                            entries = entries,
+                            navigator = navigator,
+                            sceneStrategy = sceneStrategy
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * 响应式应用布局
- */
+
 @Composable
-private fun ResponsiveAppLayout(
+private fun AppScaffold(
     windowSizeClass: WindowSizeClass,
     navigationState: AppNavigationState,
     navigator: AppNavigator,
-    entries: SnapshotStateList<NavEntry<NavKey>>,
-    sceneStrategy: ListDetailSceneStrategy<NavKey>
+    content: @Composable (PaddingValues) -> Unit
 ) {
-    when {
-        windowSizeClass.isCompact -> {
-            CompactLayout(
-                navigationState = navigationState,
-                navigator = navigator,
-                entries = entries,
-                sceneStrategy = sceneStrategy
-            )
-        }
+    val showNavigatorBar = windowSizeClass.isWidthCompact()
+    val showNavigationRail = showNavigatorBar.not()
 
-        windowSizeClass.isMedium -> {
-            MediumLayout(
-                navigationState = navigationState,
-                navigator = navigator,
-                entries = entries,
-                sceneStrategy = sceneStrategy
-            )
-        }
-
-        windowSizeClass.isExpanded -> {
-            ExpandedLayout(
-                navigationState = navigationState,
-                navigator = navigator,
-                entries = entries,
-                sceneStrategy = sceneStrategy
-            )
-        }
-    }
-}
-
-/**
- * 紧凑布局
- */
-@Composable
-private fun CompactLayout(
-    navigationState: AppNavigationState,
-    navigator: AppNavigator,
-    entries: SnapshotStateList<NavEntry<NavKey>>,
-    sceneStrategy: ListDetailSceneStrategy<NavKey>
-) {
-    androidx.compose.material3.Scaffold(
+    Scaffold(
         bottomBar = {
-            AppNavigationBar(
-                currentAppKey = navigationState.currentAppKey,
-                onNavigate = { key -> navigator.navigate(key) }
-            )
+            if (showNavigatorBar) {
+                AppNavigationBar(
+                    currentAppKey = navigationState.currentAppKey,
+                    onNavigate = navigator::navigate
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            NavDisplay(
-                entries = entries,
-                sceneStrategy = sceneStrategy,
-                onBack = { navigator.goBack() },
-            )
+        Row(Modifier.fillMaxSize()) {
+            if (showNavigationRail) {
+                AppNavigationRail(
+                    windowSizeClass = windowSizeClass,
+                    currentAppKey = navigationState.currentAppKey,
+                    onNavigate = navigator::navigate,
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (showNavigatorBar) Modifier.padding(padding) else Modifier)
+                    // 限制动画范围，防止溢出到 NavigationRail
+                    .clipToBounds()
+            ) {
+                content(padding)
+            }
         }
     }
 }
 
-/**
- * 中等布局（平板）
- */
 @Composable
-private fun MediumLayout(
-    navigationState: AppNavigationState,
-    navigator: AppNavigator,
+private fun AppSceneContainer(
     entries: SnapshotStateList<NavEntry<NavKey>>,
+    navigator: AppNavigator,
     sceneStrategy: ListDetailSceneStrategy<NavKey>
 ) {
-    Row(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            modifier = Modifier.fillMaxHeight(),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp,
-            shadowElevation = 0.dp
-        ) {
-            AppNavigationRail(
-                currentAppKey = navigationState.currentAppKey,
-                onNavigate = { key -> navigator.navigate(key) },
-                isExpanded = false
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            NavDisplay(
-                entries = entries,
-                sceneStrategy = sceneStrategy,
-                onBack = { navigator.goBack() },
-            )
-        }
-    }
-}
-
-/**
- * 扩展布局
- */
-@Composable
-private fun ExpandedLayout(
-    navigationState: AppNavigationState,
-    navigator: AppNavigator,
-    entries: SnapshotStateList<NavEntry<NavKey>>,
-    sceneStrategy: ListDetailSceneStrategy<NavKey>
-) {
-    Row(modifier = Modifier.fillMaxSize()) {
-        Surface(
-            modifier = Modifier.fillMaxHeight(),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 2.dp,
-            shadowElevation = 0.dp
-        ) {
-            AppNavigationRail(
-                currentAppKey = navigationState.currentAppKey,
-                onNavigate = { key -> navigator.navigate(key) },
-                isExpanded = true
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            NavDisplay(
-                entries = entries,
-                sceneStrategy = sceneStrategy,
-                onBack = { navigator.goBack() },
-            )
-        }
-    }
+    NavDisplay(
+        entries = entries,
+        sceneStrategy = sceneStrategy,
+        onBack = navigator::goBack
+    )
 }

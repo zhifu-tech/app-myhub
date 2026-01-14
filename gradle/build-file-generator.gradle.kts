@@ -19,6 +19,64 @@ class BuildFileParser(private val buildFileContent: String) {
     }
 
     /**
+     * 解析完整的 plugins 块内容（包括所有插件声明）
+     */
+    fun parsePluginsBlock(): String? {
+        val pluginsRegex = Regex("""plugins\s*\{([^}]+)\}""", RegexOption.DOT_MATCHES_ALL)
+        val match = pluginsRegex.find(buildFileContent) ?: return null
+        return match.groupValues[1]
+    }
+
+    /**
+     * 从 plugins 块中提取特定格式的插件声明（如 kotlin("native.cocoapods")）
+     * 包括前面的注释行（如果有）
+     */
+    fun extractDirectPluginDeclarations(pluginsBlock: String, pattern: Regex): List<String> {
+        val result = mutableListOf<String>()
+        pattern.findAll(pluginsBlock).forEach { match ->
+            val matchStart = match.range.first
+            val matchEnd = match.range.last
+
+            // 向前查找行开始，并尝试包含前面的注释行
+            var lineStart = matchStart
+            var i = matchStart - 1
+            while (i >= 0) {
+                val char = pluginsBlock[i]
+                if (char == '\n') {
+                    // 检查这一行是否是注释或空行
+                    val prevLineStart = i + 1
+                    val prevLineEnd = lineStart
+                    val prevLine = pluginsBlock.substring(prevLineStart, prevLineEnd).trim()
+                    if (prevLine.isEmpty() || prevLine.startsWith("//")) {
+                        lineStart = prevLineStart
+                        i--
+                    } else {
+                        break
+                    }
+                } else {
+                    i--
+                }
+            }
+
+            // 向后查找行结束
+            var lineEnd = matchEnd
+            i = matchEnd
+            while (i < pluginsBlock.length && pluginsBlock[i] != '\n') {
+                i++
+            }
+            if (i < pluginsBlock.length) {
+                lineEnd = i
+            }
+
+            val declaration = pluginsBlock.substring(lineStart, lineEnd)
+            if (declaration.trim().isNotBlank()) {
+                result.add(declaration)
+            }
+        }
+        return result
+    }
+
+    /**
      * 提取大括号块内容（处理嵌套）
      */
     private fun extractBlock(content: String, startIndex: Int): Pair<String, Int>? {
@@ -162,21 +220,63 @@ class BuildFileParser(private val buildFileContent: String) {
     }
 
     /**
+     * 解析 cocoapods 配置块（只在 kotlin 块内查找）
+     */
+    fun parseCocoapodsBlock(): String? {
+        val kotlinBlock = parseKotlinBlock() ?: return null
+
+        // 在 kotlin 块内查找 cocoapods
+        val cocoapodsPattern = Regex("""\bcocoapods\s*\{""")
+        val match = cocoapodsPattern.find(kotlinBlock) ?: return null
+        var cocoapodsIndex = match.range.first
+        val braceIndex = match.range.last
+
+        // 尝试包含前面的注释行（如果有的话）
+        // 向前查找，直到遇到非注释、非空行的内容
+        var commentStartIndex = cocoapodsIndex
+        var i = cocoapodsIndex - 1
+        while (i >= 0) {
+            val char = kotlinBlock[i]
+            if (char == '\n') {
+                // 检查这一行是否是注释或空行
+                val lineStart = i + 1
+                val lineEnd = cocoapodsIndex
+                val line = kotlinBlock.substring(lineStart, lineEnd).trim()
+                if (line.isEmpty() || line.startsWith("//")) {
+                    commentStartIndex = lineStart
+                    i--
+                } else {
+                    break
+                }
+            } else {
+                i--
+            }
+        }
+
+        return extractBlock(kotlinBlock, braceIndex)?.let { (content, endIndex) ->
+            // 返回完整的 cocoapods { ... } 块（包括前面的注释）
+            val startIndex = commentStartIndex
+            val end = braceIndex + content.length + 2 // +2 for { and }
+            kotlinBlock.substring(startIndex, end)
+        }
+    }
+
+    /**
      * 解析 dependencies 配置块（顶级配置块）
      * 只匹配顶级的 dependencies，不包括 kotlin 块内的 dependencies（如 commonMain.dependencies）
      */
     fun parseDependenciesBlock(): String? {
         // 先找到 kotlin 块的范围（如果存在）
         val kotlinBlockRange = kotlinBlockRange()
-        
+
         // 查找所有 dependencies（确保是独立的单词，不是其他字符串的一部分）
         val dependenciesPattern = Regex("""\bdependencies\s*\{""")
         val allMatches = dependenciesPattern.findAll(buildFileContent)
-        
+
         // 找到第一个不在 kotlin 块内的 dependencies
         for (match in allMatches) {
             val dependenciesIndex = match.range.first
-            
+
             // 如果 kotlin 块存在，检查 dependencies 是否在 kotlin 块内
             if (kotlinBlockRange != null) {
                 if (dependenciesIndex < kotlinBlockRange.first || dependenciesIndex >= kotlinBlockRange.last) {
@@ -198,10 +298,10 @@ class BuildFileParser(private val buildFileContent: String) {
                 }
             }
         }
-        
+
         return null
     }
-    
+
     /**
      * 获取 kotlin 块的范围（起始位置和结束位置）
      */
@@ -210,11 +310,11 @@ class BuildFileParser(private val buildFileContent: String) {
         val match = kotlinPattern.find(buildFileContent) ?: return null
         val kotlinIndex = match.range.first
         val braceIndex = match.range.last
-        
+
         // 提取 kotlin 块，获取结束位置
         val blockResult = extractBlock(buildFileContent, braceIndex) ?: return null
         val endIndex = blockResult.second
-        
+
         return IntRange(kotlinIndex, endIndex)
     }
 
@@ -353,9 +453,20 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
                 !it.startsWith("myhub.kmp.") // 保留非平台插件
         }
 
+        // 提取额外的插件声明（如 kotlin("native.cocoapods")）
+        val pluginsBlock = parser.parsePluginsBlock()
+        val extraPluginDeclarations = mutableListOf<String>()
+        pluginsBlock?.let {
+            // 提取 kotlin("native.cocoapods") 插件
+            val cocoapodsPluginPattern = Regex("""kotlin\s*\(\s*"native\.cocoapods"\s*\)""")
+            val cocoapodsPlugins = parser.extractDirectPluginDeclarations(it, cocoapodsPluginPattern)
+            extraPluginDeclarations.addAll(cocoapodsPlugins)
+        }
+
         val sourceSets = parser.parseSourceSets()
         val composeResourcesBlock = parser.parseComposeResourcesBlock()
         val iosTargetsBlock = parser.parseIosTargetsBlock()
+        val cocoapodsBlock = parser.parseCocoapodsBlock()
         val sqldelightBlock = parser.parseSqlDelightBlock()
         val sourceSetList = mutableListOf<String>()
         sourceSets?.let {
@@ -372,8 +483,10 @@ class PlatformConfigExtractor(private val parser: BuildFileParser) {
             sourceSets = sourceSetList,
             composeResourcesBlock = composeResourcesBlock,
             iosTargetsBlock = iosTargetsBlock,
+            cocoapodsBlock = cocoapodsBlock,
             sqldelightBlock = sqldelightBlock,
-            dependenciesBlock = null
+            dependenciesBlock = null,
+            extraPluginDeclarations = extraPluginDeclarations
         )
     }
 
@@ -452,8 +565,10 @@ data class PlatformBuildConfig(
     val sourceSets: List<String>,
     val composeResourcesBlock: String? = null,
     val iosTargetsBlock: String? = null,
+    val cocoapodsBlock: String? = null,
     val sqldelightBlock: String? = null,
-    val dependenciesBlock: String? = null
+    val dependenciesBlock: String? = null,
+    val extraPluginDeclarations: List<String> = emptyList() // 额外的插件声明，如 kotlin("native.cocoapods")
 )
 
 /**
@@ -466,6 +581,31 @@ class BuildFileGenerator {
             appendLine("plugins {")
             config.plugins.forEach { plugin ->
                 appendLine("    alias(libs.plugins.$plugin)")
+            }
+            // 添加额外的插件声明（如 kotlin("native.cocoapods")）
+            config.extraPluginDeclarations.forEach { pluginDeclaration ->
+                // 保持原始格式，但需要调整缩进以适应 plugins 块
+                val lines = pluginDeclaration.lines()
+                val firstNonBlankLine = lines.firstOrNull { it.trim().isNotBlank() }
+                val baseIndent = if (firstNonBlankLine != null) {
+                    firstNonBlankLine.length - firstNonBlankLine.trimStart().length
+                } else {
+                    0
+                }
+
+                lines.forEach { line ->
+                    if (line.isNotBlank()) {
+                        val trimmed = line.trimStart()
+                        val originalIndent = line.length - trimmed.length
+                        // 计算相对缩进（相对于第一行的缩进）
+                        val relativeIndent = originalIndent - baseIndent
+                        // 在 plugins 块内，第一行应该有4个空格缩进
+                        val finalIndent = 4 + maxOf(0, relativeIndent)
+                        appendLine(" ".repeat(finalIndent) + trimmed)
+                    } else {
+                        appendLine()
+                    }
+                }
             }
             appendLine("}")
             appendLine()
@@ -511,6 +651,28 @@ class BuildFileGenerator {
                 // iosTargetsBlock 已经包含了完整的块，在原始文件中已经有相对于 kotlin { 的缩进
                 // 但需要确保第一行有正确的缩进（4个空格）
                 val lines = config.iosTargetsBlock.lines()
+                lines.forEachIndexed { index, line ->
+                    if (line.isNotBlank()) {
+                        val originalIndent = line.length - line.trimStart().length
+                        // 如果第一行没有缩进，添加4个空格；否则保持原始缩进
+                        val finalIndent = if (index == 0 && originalIndent == 0) {
+                            4
+                        } else {
+                            originalIndent
+                        }
+                        appendLine(" ".repeat(finalIndent) + line.trimStart())
+                    } else {
+                        appendLine()
+                    }
+                }
+                appendLine()
+            }
+
+            // iOS 平台 CocoaPods 配置（cocoapods { ... }）
+            if (config.platform == "ios" && config.cocoapodsBlock != null) {
+                // cocoapodsBlock 已经包含了完整的块，在原始文件中已经有相对于 kotlin { 的缩进
+                // 但需要确保第一行有正确的缩进（4个空格）
+                val lines = config.cocoapodsBlock.lines()
                 lines.forEachIndexed { index, line ->
                     if (line.isNotBlank()) {
                         val originalIndent = line.length - line.trimStart().length

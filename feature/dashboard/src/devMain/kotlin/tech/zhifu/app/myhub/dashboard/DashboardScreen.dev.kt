@@ -20,9 +20,11 @@ import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.ChecklistItem
 import tech.zhifu.app.myhub.datastore.model.Statistics
 import tech.zhifu.app.myhub.theme.AppTheme
-import tech.zhifu.app.myhub.ui.WindowSizeClass
-import tech.zhifu.app.myhub.ui.isCompact
-import tech.zhifu.app.myhub.ui.isMedium
+import tech.zhifu.app.myhub.ui.isWidthCompact
+import tech.zhifu.app.myhub.ui.isWidthMedium
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassCompact
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassExpanded
+import tech.zhifu.app.myhub.ui.mockWindowSizeClassMedium
 import kotlin.time.Clock
 
 /**
@@ -55,10 +57,10 @@ private fun DashboardScreenLightGridPreview() {
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
         val statistics = createSampleStatistics()
-        val sizeClass = WindowSizeClass.Medium
+        val sizeClass = mockWindowSizeClassMedium()
         val columns = when {
-            sizeClass.isCompact -> 1
-            sizeClass.isMedium -> 2
+            sizeClass.isWidthCompact() -> 1
+            sizeClass.isWidthMedium() -> 2
             else -> 3
         }
 
@@ -112,7 +114,7 @@ private fun DashboardScreenDarkListPreview() {
     AppTheme(darkTheme = true) {
         val sampleCards = createSampleCards()
         val statistics = createSampleStatistics()
-        val sizeClass = WindowSizeClass.Expanded
+        val sizeClass = mockWindowSizeClassExpanded()
 
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -140,8 +142,8 @@ private fun DashboardScreenDarkListPreview() {
                 DashboardListView(
                     cards = sampleCards,
                     columns = when {
-                        sizeClass.isCompact -> 1
-                        sizeClass.isMedium -> 2
+                        sizeClass.isWidthCompact() -> 1
+                        sizeClass.isWidthMedium() -> 2
                         else -> 3
                     },
                     statistics = null,
@@ -175,7 +177,7 @@ private fun DashboardScreenLoadingPreview() {
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
                     isLoading = true,
                     onRefresh = {},
-                    sizeClass = WindowSizeClass.Medium
+                    sizeClass = mockWindowSizeClassMedium()
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -183,7 +185,7 @@ private fun DashboardScreenLoadingPreview() {
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
                     statistics = statistics,
-                    sizeClass = WindowSizeClass.Medium,
+                    sizeClass = mockWindowSizeClassMedium(),
                     viewType = ViewType.GRID,
                     onViewTypeChange = {}
                 )
@@ -204,7 +206,7 @@ private fun DashboardHeaderLightPreview() {
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 300_000, // 5分钟前
             isLoading = false,
             onRefresh = {},
-            sizeClass = WindowSizeClass.Medium
+            sizeClass = mockWindowSizeClassMedium()
         )
     }
 }
@@ -221,7 +223,7 @@ private fun DashboardHeaderDarkPreview() {
             lastSyncTime = null,
             isLoading = false,
             onRefresh = {},
-            sizeClass = WindowSizeClass.Medium
+            sizeClass = mockWindowSizeClassMedium()
         )
     }
 }
@@ -238,7 +240,7 @@ private fun DashboardHeaderLoadingPreview() {
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
             isLoading = true,
             onRefresh = {},
-            sizeClass = WindowSizeClass.Medium
+            sizeClass = mockWindowSizeClassMedium()
         )
     }
 }
@@ -257,7 +259,7 @@ private fun DashboardToolbarLightPreview() {
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
             statistics = statistics,
-            sizeClass = WindowSizeClass.Medium,
+            sizeClass = mockWindowSizeClassMedium(),
             viewType = ViewType.GRID,
             onViewTypeChange = {}
         )
@@ -278,7 +280,7 @@ private fun DashboardToolbarDarkPreview() {
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
             statistics = statistics,
-            sizeClass = WindowSizeClass.Expanded,
+            sizeClass = mockWindowSizeClassExpanded(),
             viewType = ViewType.LIST,
             onViewTypeChange = {}
         )
@@ -308,7 +310,7 @@ private fun DashboardGridViewCompactPreview() {
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
         val statistics = createSampleStatistics()
-        val sizeClass = WindowSizeClass.Compact
+        val sizeClass = mockWindowSizeClassCompact()
 
         DashboardGridView(
             cards = sampleCards,
@@ -335,7 +337,7 @@ private fun DashboardGridViewMediumPreview() {
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
         val statistics = createSampleStatistics()
-        val sizeClass = WindowSizeClass.Medium
+        val sizeClass = mockWindowSizeClassMedium()
 
         DashboardGridView(
             cards = sampleCards,
@@ -362,7 +364,7 @@ private fun DashboardGridViewExpandedPreview() {
     AppTheme(darkTheme = false) {
         val sampleCards = createSampleCards()
         val statistics = createSampleStatistics()
-        val sizeClass = WindowSizeClass.Expanded
+        val sizeClass = mockWindowSizeClassExpanded()
 
         DashboardGridView(
             cards = sampleCards,
@@ -393,7 +395,7 @@ private fun DashboardListViewCompactPreview() {
             cards = sampleCards,
             columns = 1,
             statistics = null,
-            sizeClass = WindowSizeClass.Compact,
+            sizeClass = mockWindowSizeClassCompact(),
             onEdit = {},
             onFavorite = {},
             onCardClick = {},
@@ -418,7 +420,7 @@ private fun DashboardListViewExpandedPreview() {
             cards = sampleCards,
             columns = 3,
             statistics = null,
-            sizeClass = WindowSizeClass.Expanded,
+            sizeClass = mockWindowSizeClassExpanded(),
             onEdit = {},
             onFavorite = {},
             onCardClick = {},

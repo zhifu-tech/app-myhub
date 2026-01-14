@@ -20,7 +20,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,9 +38,8 @@ import tech.zhifu.app.myhub.carddetail.components.CardDetailMetadata
 import tech.zhifu.app.myhub.carddetail.components.CardDetailNotes
 import tech.zhifu.app.myhub.carddetail.components.CardDetailTags
 import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
-import tech.zhifu.app.myhub.ui.isCompact
-import tech.zhifu.app.myhub.ui.isExpanded
-import tech.zhifu.app.myhub.ui.swipeBackGesture
+import tech.zhifu.app.myhub.ui.isWidthCompact
+import tech.zhifu.app.myhub.ui.isWidthMedium
 import tech.zhifu.app.myhub.ui.windowSizeClass
 
 /**
@@ -83,13 +81,13 @@ fun CardDetailScreen(
         is CardDetailUiState.Content -> {
             // 内容状态
             when {
-                windowSize.isCompact -> {
+                windowSize.isWidthCompact() -> {
                     // 移动端：垂直布局
                     Column(
                         modifier = modifier
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background)
-                            .swipeBackGesture(onSwipeBack = onNavigateBack, enabled = true)
+//                            .swipeBackGesture(onSwipeBack = onNavigateBack, enabled = true)
                             .verticalScroll(rememberScrollState())
                     ) {
                         CardDetailHeader(
@@ -143,13 +141,63 @@ fun CardDetailScreen(
                     }
                 }
 
-                windowSize.isExpanded -> {
+                windowSize.isWidthMedium() -> {
+                    // Medium 布局（平板）
+                    Column(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                    ) {
+                        CardDetailHeader(onNavigateBack = onNavigateBack)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CardDetailContent(card = state.card)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 操作面板（平板：垂直排列）
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            CardDetailActions(
+                                card = state.card,
+                                isSharing = state.isSharing,
+                                showDeleteConfirm = showDeleteConfirm,
+                                onShare = { viewModel.shareCard() },
+                                onEdit = { viewModel.editCard() },
+                                onDelete = { viewModel.showDeleteConfirm() },
+                                onConfirmDelete = { viewModel.confirmDelete() },
+                                onCancelDelete = { viewModel.cancelDelete() },
+                                onCopy = { viewModel.copyContent() }
+                            )
+
+                            CardDetailTags(
+                                tags = state.card.tags,
+                                onAddTag = { /* TODO: 实现添加标签对话框 */ },
+                                onRemoveTag = { tag ->
+                                    val newTags = state.card.tags.filter { it != tag }
+                                    viewModel.updateTags(newTags)
+                                }
+                            )
+
+                            CardDetailMetadata(card = state.card)
+
+                            CardDetailNotes(
+                                notes = "", // TODO: 从 Card 模型获取 notes 字段
+                                onNotesChange = { viewModel.updateNotes(it) },
+                                isSaving = state.isSaving
+                            )
+                        }
+                    }
+                }
+
+                else -> {
                     // 桌面端：左右分栏布局
                     androidx.compose.foundation.layout.Row(
                         modifier = modifier
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background)
-                            .swipeBackGesture(onSwipeBack = onNavigateBack, enabled = false) // 桌面端禁用滑动返回
                             .padding(24.dp)
                     ) {
                         // 左侧：卡片内容展示区（8/12 列）
@@ -223,57 +271,6 @@ fun CardDetailScreen(
                     }
                 }
 
-                else -> {
-                    // Medium 布局（平板）
-                    Column(
-                        modifier = modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background)
-                            .swipeBackGesture(onSwipeBack = onNavigateBack, enabled = true) // 平板也支持滑动返回
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp)
-                    ) {
-                        CardDetailHeader(onNavigateBack = onNavigateBack)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        CardDetailContent(card = state.card)
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // 操作面板（平板：垂直排列）
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            CardDetailActions(
-                                card = state.card,
-                                isSharing = state.isSharing,
-                                showDeleteConfirm = showDeleteConfirm,
-                                onShare = { viewModel.shareCard() },
-                                onEdit = { viewModel.editCard() },
-                                onDelete = { viewModel.showDeleteConfirm() },
-                                onConfirmDelete = { viewModel.confirmDelete() },
-                                onCancelDelete = { viewModel.cancelDelete() },
-                                onCopy = { viewModel.copyContent() }
-                            )
-
-                            CardDetailTags(
-                                tags = state.card.tags,
-                                onAddTag = { /* TODO: 实现添加标签对话框 */ },
-                                onRemoveTag = { tag ->
-                                    val newTags = state.card.tags.filter { it != tag }
-                                    viewModel.updateTags(newTags)
-                                }
-                            )
-
-                            CardDetailMetadata(card = state.card)
-
-                            CardDetailNotes(
-                                notes = "", // TODO: 从 Card 模型获取 notes 字段
-                                onNotesChange = { viewModel.updateNotes(it) },
-                                isSaving = state.isSaving
-                            )
-                        }
-                    }
-                }
             }
         }
 
@@ -302,29 +299,29 @@ fun CardDetailScreen(
     // 删除确认对话框（在 when 表达式外部）
     if (showDeleteConfirm) {
         AlertDialog(
-                onDismissRequest = { viewModel.cancelDelete() },
-                title = {
-                    Text(text = "Delete Card")
-                },
-                text = {
-                    Text(text = "Are you sure you want to delete this card? This action cannot be undone.")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { viewModel.confirmDelete() },
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(text = "Delete")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.cancelDelete() }) {
-                        Text(text = "Cancel")
-                    }
+            onDismissRequest = { viewModel.cancelDelete() },
+            title = {
+                Text(text = "Delete Card")
+            },
+            text = {
+                Text(text = "Are you sure you want to delete this card? This action cannot be undone.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.confirmDelete() },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(text = "Delete")
                 }
-            )
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.cancelDelete() }) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
     }
 }
 

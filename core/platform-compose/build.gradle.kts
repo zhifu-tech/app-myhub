@@ -30,6 +30,8 @@ kotlin {
                 implementation(compose.material3)
                 // Foundation 依赖（isSystemInDarkTheme 需要）
                 implementation(compose.foundation)
+                implementation(libs.jb.compose.material3.adaptive.adaptive)
+                implementation(libs.jb.compose.material3.material3WindowSizeClass)
             }
         }
 

@@ -1,12 +1,13 @@
 package tech.zhifu.app.myhub
 
 import tech.zhifu.app.myhub.navigation.Screen
-import tech.zhifu.app.myhub.ui.WindowSizeClass
 
 /**
  * 应用 UI 状态
  *
  * 表示应用的整体状态，包括加载、就绪和错误状态
+ *
+ * 注意：WindowSizeClass 不再存储在 AppUiState 中，而是从 Composable 上下文获取
  */
 sealed class AppUiState {
     /**
@@ -21,8 +22,7 @@ sealed class AppUiState {
      */
     data class Ready(
         val currentScreen: Screen,
-        val isDarkTheme: Boolean,
-        val windowSizeClass: WindowSizeClass
+        val isDarkTheme: Boolean
     ) : AppUiState()
 
     /**

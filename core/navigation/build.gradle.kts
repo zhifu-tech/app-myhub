@@ -21,7 +21,7 @@ kotlin {
                 api(libs.jb.androidx.navigation3.navigation3Ui)
 
                 // 状态管理支持（KMP 全平台支持）
-                implementation(libs.androidx.savedstate.compose)
+                implementation(libs.jb.androidx.savedstate.compose)
 
                 // Kotlin 序列化（NavKey 需要 @Serializable）
                 implementation(libs.kotlinx.serialization.json)

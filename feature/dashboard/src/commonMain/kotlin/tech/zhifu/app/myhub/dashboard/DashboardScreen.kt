@@ -41,10 +41,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.card.CardComponent
@@ -88,10 +89,10 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_car
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recent_edits
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total
-import tech.zhifu.app.myhub.ui.WindowSizeClass
-import tech.zhifu.app.myhub.ui.isCompact
-import tech.zhifu.app.myhub.ui.isExpanded
-import tech.zhifu.app.myhub.ui.isMedium
+import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
+import tech.zhifu.app.myhub.ui.isWidthCompact
+import tech.zhifu.app.myhub.ui.isWidthExpanded
+import tech.zhifu.app.myhub.ui.isWidthMedium
 import tech.zhifu.app.myhub.ui.windowSizeClass
 import kotlin.time.Clock
 
@@ -105,9 +106,9 @@ fun DashboardScreen(
     var searchQuery by remember { mutableStateOf("") }
     val sizeClass = windowSizeClass()
     val columns = when {
-        sizeClass.isCompact -> 1
-        sizeClass.isMedium -> 2
-        sizeClass.isExpanded -> 3
+        sizeClass.isWidthCompact() -> 1
+        sizeClass.isWidthMedium() -> 2
+        sizeClass.isWidthExpanded() -> 3
         else -> 3 // 默认值，实际上不会到达这里
     }
 
@@ -164,12 +165,12 @@ fun DashboardScreen(
                             DashboardGridView(
                                 cards = state.recentCards,
                                 columns = columns,
-                                statistics = if (sizeClass.isExpanded) null else state.statistics, // 1列和2列时显示统计卡片
+                                statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics, // 1列和2列时显示统计卡片
                                 sizeClass = sizeClass,
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
                                 onCardClick = {
-                                    onNavigateToCardDetail.invoke(it.id) ?: viewModel.viewCard(it.id)
+                                    onNavigateToCardDetail(it.id)
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -181,12 +182,12 @@ fun DashboardScreen(
                             DashboardListView(
                                 cards = state.recentCards,
                                 columns = columns,
-                                statistics = if (sizeClass.isExpanded) null else state.statistics, // 1列和2列时显示统计卡片
+                                statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics, // 1列和2列时显示统计卡片
                                 sizeClass = sizeClass,
                                 onEdit = { viewModel.editCard(it.id) },
                                 onFavorite = { viewModel.toggleFavorite(it.id) },
                                 onCardClick = {
-                                    onNavigateToCardDetail.invoke(it.id) ?: viewModel.viewCard(it.id)
+                                    onNavigateToCardDetail(it.id)
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -444,7 +445,7 @@ fun DashboardToolbar(
                         modifier = Modifier
                             .weight(1f, fill = true)
                             .height(44.dp)
-                            .widthIn(min = if (sizeClass.isCompact) 150.dp else 200.dp),
+                            .widthIn(min = if (sizeClass.isWidthCompact()) 150.dp else 200.dp),
                         placeholder = {
                             Text(
                                 text = stringResource(Res.string.feature_dashboard_search_placeholder),
@@ -480,7 +481,7 @@ fun DashboardToolbar(
                     ) {
                         // 统计信息（仅3列时显示，与搜索栏同一行）
                         // 2列时统计信息在Grid上方显示，不在这里显示
-                        if (sizeClass.isExpanded) {
+                        if (sizeClass.isWidthAtLeastExpanded()) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surface,
@@ -695,14 +696,14 @@ fun DashboardGridView(
     ) {
         // 统计卡片：1列和2列时在 Grid 内部，作为第一个 item，随列表滚动
         // 3列时统计信息在工具栏中显示，Grid 内部不显示
-        if (statistics != null && !sizeClass.isExpanded) {
+        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
             // 使用 item 让统计卡片占据整行（跨所有列）
             // 对于 LazyVerticalStaggeredGrid，使用 span 参数让 item 跨越多列
             item(span = StaggeredGridItemSpan.FullLine) {
                 StatsCardsRow(
                     statistics = statistics,
                     modifier = Modifier.padding(
-                        bottom = if (sizeClass.isCompact) 12.dp else 24.dp // 单列时缩小间距为1/2
+                        bottom = if (sizeClass.isWidthAtLeastExpanded()) 12.dp else 24.dp // 单列时缩小间距为1/2
                     )
                 )
             }
@@ -742,19 +743,19 @@ fun DashboardListView(
     ) {
         // 统计卡片：1列和2列时在 List 内部，作为第一个 item，随列表滚动
         // 3列时统计信息在工具栏中显示，List 内部不显示
-        if (statistics != null && !sizeClass.isExpanded) {
+        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
             item {
                 StatsCardsRow(
                     statistics = statistics,
                     modifier = Modifier.padding(
-                        bottom = if (sizeClass.isCompact) 12.dp else 24.dp // 单列时缩小间距为1/2
+                        bottom = if (sizeClass.isWidthCompact()) 12.dp else 24.dp // 单列时缩小间距为1/2
                     )
                 )
             }
         }
 
         // 列表头部（仅在桌面端显示，在统计信息之后）
-        if (!sizeClass.isCompact) {
+        if (!sizeClass.isWidthCompact()) {
             item {
                 ListViewHeader(sizeClass = sizeClass)
             }
@@ -800,11 +801,11 @@ fun ListViewHeader(
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(if (sizeClass.isCompact) 1f else 0.4f)
+                modifier = Modifier.weight(if (sizeClass.isWidthCompact()) 1f else 0.4f)
             )
 
             // Tags 列（桌面端显示）
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 Text(
                     text = "Tags",
                     style = MaterialTheme.typography.labelSmall,
@@ -815,7 +816,7 @@ fun ListViewHeader(
             }
 
             // Last Modified 列（桌面端显示）
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 Text(
                     text = "Last Modified",
                     style = MaterialTheme.typography.labelSmall,
@@ -826,7 +827,7 @@ fun ListViewHeader(
             }
 
             // Actions 列（桌面端显示）
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 Box(
                     modifier = Modifier.weight(0.1f),
                     contentAlignment = Alignment.CenterEnd
@@ -903,7 +904,7 @@ fun ListViewItem(
         ) {
             // 图标和标题/内容
             Row(
-                modifier = Modifier.weight(if (sizeClass.isCompact) 1f else 0.4f),
+                modifier = Modifier.weight(if (sizeClass.isWidthCompact()) 1f else 0.4f),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -957,7 +958,7 @@ fun ListViewItem(
             }
 
             // Tags（桌面端显示）
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 Row(
                     modifier = Modifier.weight(0.3f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -983,7 +984,7 @@ fun ListViewItem(
             }
 
             // 最后修改时间
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 Text(
                     text = formattedDate,
                     style = MaterialTheme.typography.bodySmall,
@@ -993,7 +994,7 @@ fun ListViewItem(
             }
 
             // 操作按钮（桌面端显示）
-            if (!sizeClass.isCompact) {
+            if (!sizeClass.isWidthCompact()) {
                 val buttonAlpha = if (isHovered) 1f else 0.6f
                 Row(
                     modifier = Modifier.weight(0.1f),

@@ -22,7 +22,7 @@ import tech.zhifu.app.myhub.navigation.Screen
 import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.settings.settings.languageSetting
 import tech.zhifu.app.myhub.settings.settings.themeSetting
-import tech.zhifu.app.myhub.ui.WindowSizeClass
+import androidx.window.core.layout.WindowSizeClass
 
 /**
  * 应用级 ViewModel
@@ -31,6 +31,8 @@ import tech.zhifu.app.myhub.ui.WindowSizeClass
  * - 管理应用级状态（导航、主题、语言等）
  * - 处理应用初始化
  * - 协调各模块的状态
+ *
+ * 注意：WindowSizeClass 不再存储在 ViewModel 中，而是从 Composable 上下文获取
  */
 class AppViewModel(
     private val settingsRepository: SettingsRepository,
@@ -44,7 +46,6 @@ class AppViewModel(
 
     private var currentScreen: Screen = Screen.Dashboard
     private var isDarkTheme: Boolean = true
-    private var windowSizeClass: WindowSizeClass = WindowSizeClass.Compact
 
     init {
         // 监听主题设置变化
@@ -53,10 +54,8 @@ class AppViewModel(
 
     /**
      * 初始化应用
-     *
-     * @param initialWindowSizeClass 初始窗口大小类（从 Composable 上下文传入）
      */
-    fun initialize(initialWindowSizeClass: WindowSizeClass = WindowSizeClass.Compact) {
+    fun initialize() {
         coroutineScope.launch {
             try {
                 // 记录应用启动事件
@@ -78,14 +77,10 @@ class AppViewModel(
                 // 加载设置（初始值）
                 loadSettings()
 
-                // 设置初始窗口大小类
-                windowSizeClass = initialWindowSizeClass
-
                 // 切换到就绪状态
                 _uiState.value = AppUiState.Ready(
                     currentScreen = currentScreen,
-                    isDarkTheme = isDarkTheme,
-                    windowSizeClass = windowSizeClass
+                    isDarkTheme = isDarkTheme
                 )
             } catch (e: Exception) {
                 logger.error(e) { "Failed to initialize app: ${e.message}" }
@@ -155,23 +150,43 @@ class AppViewModel(
     }
 
     /**
-     * 更新窗口大小类
-     *
-     * @param newSizeClass 新的窗口大小类（从 Composable 上下文传入）
-     */
-    fun updateWindowSizeClass(newSizeClass: WindowSizeClass) {
-        if (windowSizeClass != newSizeClass) {
-            windowSizeClass = newSizeClass
-            updateReadyState()
-        }
-    }
-
-    /**
      * 重试初始化
      */
     fun retry() {
         _uiState.value = AppUiState.Loading
         initialize()
+    }
+
+    /**
+     * 处理窗口大小类别变化
+     *
+     * 当窗口大小改变时调用，可以用于：
+     * - 记录分析事件
+     * - 更新相关状态
+     * - 日志记录
+     */
+    fun onWindowSizeClassChanged(windowSizeClass: WindowSizeClass) {
+        coroutineScope.launch {
+            try {
+                // 记录窗口大小变化事件（可选）
+                if (AppBuildConfig.enableLogging) {
+                    logger.info {
+                        "Window size class changed: " +
+                        "width=${windowSizeClass.minWidthDp}, " +
+                        "height=${windowSizeClass.minHeightDp}, " +
+                        "minWidthDp=${windowSizeClass.minWidthDp}, " +
+                        "minHeightDp=${windowSizeClass.minHeightDp}"
+                    }
+                }
+
+                // 可以在这里添加其他处理逻辑，例如：
+                // - 记录分析事件
+                // - 更新某些状态
+                // - 触发布局调整等
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to handle window size class change: ${e.message}" }
+            }
+        }
     }
 
     private fun logBuildConfig() {
@@ -218,8 +233,7 @@ class AppViewModel(
         if (currentState is AppUiState.Ready) {
             _uiState.value = AppUiState.Ready(
                 currentScreen = currentScreen,
-                isDarkTheme = isDarkTheme,
-                windowSizeClass = windowSizeClass
+                isDarkTheme = isDarkTheme
             )
         }
     }

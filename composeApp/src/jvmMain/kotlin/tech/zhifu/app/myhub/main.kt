@@ -20,6 +20,6 @@ fun main() = application {
         state = windowState
     ) {
         // 传递当前窗口大小，以便 App 内部能正确计算 WindowSizeClass
-        App(windowSize = windowState.size)
+        App()
     }
 }

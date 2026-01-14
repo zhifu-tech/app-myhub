@@ -38,6 +38,8 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
 
+            implementation(libs.jb.androidx.window.windowCore)
+
             // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
