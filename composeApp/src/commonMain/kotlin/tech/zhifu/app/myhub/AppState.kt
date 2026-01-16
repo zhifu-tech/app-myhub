@@ -19,7 +19,6 @@ import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.settings.settings.languageSetting
 import tech.zhifu.app.myhub.settings.settings.themeSetting
 
-private val defaultAppKeys = setOf(Dashboard, AppNavKey.Profile)
 
 @Composable
 fun rememberAppState(
@@ -28,7 +27,7 @@ fun rememberAppState(
 ): AppState {
     val navigationState = rememberAppNavigationState(
         startKey = Dashboard,
-        appKeys = defaultAppKeys
+        appKeys = setOf(Dashboard, AppNavKey.Profile)
     )
 
     val stableScope = remember {

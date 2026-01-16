@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -53,7 +54,7 @@ import tech.zhifu.app.myhub.ui.rememberWindowSizeClass
 fun App(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
 ) {
-    logger.debug { "App函数调用 [${System.currentTimeMillis()}], 防止调用裂化" }
+    logger.debug { "App函数调用, 防止调用裂化" }
     val windowSizeClass = rememberWindowSizeClass(windowAdaptiveInfo)
     CompositionLocalProvider(
         LocalWindowSizeClass provides windowSizeClass
@@ -68,7 +69,7 @@ private fun AppEnvironment(
     analyticsService: AnalyticsService = koinInject(),
     settingsRepository: SettingsRepository = koinInject(),
 ) {
-    logger.debug { "AppEnvironment函数调用 [${System.currentTimeMillis()}], 防止调用裂化" }
+    logger.debug { "AppEnvironment函数调用, 防止调用裂化" }
     val appState = rememberAppState(settingsRepository)
     val isDarkTheme by appState.isDarkTheme.collectAsState()
     val locale by appState.locale.collectAsState()
@@ -92,7 +93,7 @@ private fun AppContent(
     isDarkTheme: Boolean,
     windowSizeClass: WindowSizeClass,
 ) {
-    logger.debug { "AppContent函数调用 [${System.currentTimeMillis()}]" }
+    logger.debug { "AppContent函数调用" }
     TrackAppStartedEvent()
 
     AppTheme(darkTheme = isDarkTheme) {
