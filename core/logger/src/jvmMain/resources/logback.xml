@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback 配置文件（已启用）
+
+    当前使用 Logback 作为日志实现，此配置文件会生效。
+    如果需要切换回 slf4j-simple，请：
+    1. 修改 core/logger/build.gradle.kts，将 logback 替换为 slf4j.simple
+    2. 此配置文件会被忽略，使用 simplelogger.properties 配置
+-->
+<configuration>
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出（可选，开发时可以注释掉） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/myhub.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/myhub.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 日志级别配置 -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <!-- 开发时可以注释掉文件输出 -->
+        <!-- <appender-ref ref="FILE" /> -->
+    </root>
+
+    <!-- 特定包的日志级别 -->
+    <logger name="tech.zhifu.app.myhub" level="DEBUG" />
+</configuration>

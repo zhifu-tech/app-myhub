@@ -26,7 +26,7 @@ sealed class Screen(val route: String, val title: String) {
     object Favorites : Screen("favorites", "Favorites")
     object Settings : Screen("settings", "Settings")
     object Profile : Screen("profile", "Profile")
-    
+
     /**
      * 卡片详情页
      *
@@ -42,7 +42,7 @@ sealed class Screen(val route: String, val title: String) {
 }
 
 sealed class NavItem(val screen: Screen, val icon: ImageVector, val labelKey: StringResource) {
-    object Placeholder : NavItem(Screen.AllCards, Icons.Default.Style, Res.string.all_cards)
+    object Explore : NavItem(Screen.AllCards, Icons.Default.Style, Res.string.all_cards)
     object Dashboard : NavItem(Screen.Dashboard, Icons.Default.Dashboard, Res.string.dashboard)
     object Favorites : NavItem(Screen.Favorites, Icons.Default.Favorite, Res.string.favorites)
     object New : NavItem(Screen.New, Icons.Default.Add, Res.string.new_card)

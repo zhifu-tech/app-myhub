@@ -34,7 +34,12 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(libs.slf4j.api)
-                implementation(libs.slf4j.simple)
+                // 使用 Logback（功能强大，支持文件输出和日志轮转）
+                implementation(libs.logback)
+                
+                // 备用：slf4j-simple（简单快速，适合开发）
+                // 如果需要切换回 slf4j-simple，取消注释下面这行，并注释掉上面的 logback
+                // implementation(libs.slf4j.simple)
             }
         }
         jvmTest {

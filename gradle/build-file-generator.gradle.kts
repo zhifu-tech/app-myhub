@@ -36,7 +36,7 @@ class BuildFileParser(private val buildFileContent: String) {
         pattern.findAll(pluginsBlock).forEach { match ->
             val matchStart = match.range.first
             val matchEnd = match.range.last
-
+            
             // 向前查找行开始，并尝试包含前面的注释行
             var lineStart = matchStart
             var i = matchStart - 1
@@ -57,7 +57,7 @@ class BuildFileParser(private val buildFileContent: String) {
                     i--
                 }
             }
-
+            
             // 向后查找行结束
             var lineEnd = matchEnd
             i = matchEnd
@@ -67,7 +67,7 @@ class BuildFileParser(private val buildFileContent: String) {
             if (i < pluginsBlock.length) {
                 lineEnd = i
             }
-
+            
             val declaration = pluginsBlock.substring(lineStart, lineEnd)
             if (declaration.trim().isNotBlank()) {
                 result.add(declaration)
@@ -268,15 +268,15 @@ class BuildFileParser(private val buildFileContent: String) {
     fun parseDependenciesBlock(): String? {
         // 先找到 kotlin 块的范围（如果存在）
         val kotlinBlockRange = kotlinBlockRange()
-
+        
         // 查找所有 dependencies（确保是独立的单词，不是其他字符串的一部分）
         val dependenciesPattern = Regex("""\bdependencies\s*\{""")
         val allMatches = dependenciesPattern.findAll(buildFileContent)
-
+        
         // 找到第一个不在 kotlin 块内的 dependencies
         for (match in allMatches) {
             val dependenciesIndex = match.range.first
-
+            
             // 如果 kotlin 块存在，检查 dependencies 是否在 kotlin 块内
             if (kotlinBlockRange != null) {
                 if (dependenciesIndex < kotlinBlockRange.first || dependenciesIndex >= kotlinBlockRange.last) {
@@ -298,10 +298,10 @@ class BuildFileParser(private val buildFileContent: String) {
                 }
             }
         }
-
+        
         return null
     }
-
+    
     /**
      * 获取 kotlin 块的范围（起始位置和结束位置）
      */
@@ -310,11 +310,11 @@ class BuildFileParser(private val buildFileContent: String) {
         val match = kotlinPattern.find(buildFileContent) ?: return null
         val kotlinIndex = match.range.first
         val braceIndex = match.range.last
-
+        
         // 提取 kotlin 块，获取结束位置
         val blockResult = extractBlock(buildFileContent, braceIndex) ?: return null
         val endIndex = blockResult.second
-
+        
         return IntRange(kotlinIndex, endIndex)
     }
 
@@ -592,7 +592,7 @@ class BuildFileGenerator {
                 } else {
                     0
                 }
-
+                
                 lines.forEach { line ->
                     if (line.isNotBlank()) {
                         val trimmed = line.trimStart()
@@ -771,12 +771,22 @@ fun generateAndSetBuildFile(
         return
     }
 
-    // 首先检查目标文件是否已存在，如果存在则直接使用，避免不必要的解析操作
+    // 优先级检查：项目根目录中的 build.xx.gradle.kts > build 目录中的 build.xx.gradle.kts > 执行生成
+    // 1. 首先检查项目根目录中是否有 build.$platform.gradle.kts
+    val projectRootBuildFile = File(project.projectDir, "build.$platform.gradle.kts")
+    if (projectRootBuildFile.exists()) {
+        // 项目根目录中的文件存在，优先使用
+        project.buildFileName = "build.$platform.gradle.kts"
+        println("ℹ️  使用项目根目录中的平台特定构建文件: build.$platform.gradle.kts (${project.name})")
+        return
+    }
+
+    // 2. 检查 build 目录中的 build.$platform.gradle.kts
     val platformBuildFile = File(project.projectDir, "build/build-gradle-files-kts/build.$platform.gradle.kts")
     if (platformBuildFile.exists()) {
-        // 文件已存在，直接使用
+        // build 目录中的文件已存在，直接使用
         project.buildFileName = "build/build-gradle-files-kts/build.$platform.gradle.kts"
-        println("ℹ️  使用已存在的平台特定构建文件: build.$platform.gradle.kts (${project.name})")
+        println("ℹ️  使用 build 目录中的平台特定构建文件: build.$platform.gradle.kts (${project.name})")
         println("   提示: 如果遇到编译问题，可以执行 'gradlew clean' 清理后重新生成")
         return
     }

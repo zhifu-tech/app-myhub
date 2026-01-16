@@ -7,12 +7,11 @@ import kotlinx.coroutines.launch
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import tech.zhifu.app.myhub.AppViewModel
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
-import tech.zhifu.app.myhub.component.card.di.cardModule
 import tech.zhifu.app.myhub.carddetail.di.cardDetailModule
+import tech.zhifu.app.myhub.component.card.di.cardModule
 import tech.zhifu.app.myhub.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
@@ -52,14 +51,6 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
                 // 使用 Dispatchers.Default 作为默认调度器
                 factory<CoroutineScope> {
                     CoroutineScope(Dispatchers.Default)
-                }
-                // App ViewModel（注入 AnalyticsService，如果可用）
-                factory<AppViewModel> {
-                    AppViewModel(
-                        settingsRepository = get(),
-                        coroutineScope = get(),
-                        analyticsService = getOrNull(),
-                    )
                 }
             })
     }

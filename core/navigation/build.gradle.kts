@@ -25,6 +25,13 @@ kotlin {
 
                 // Kotlin 序列化（NavKey 需要 @Serializable）
                 implementation(libs.kotlinx.serialization.json)
+
+                // Material3 组件库（必需：Material Design 3 组件）
+                implementation(compose.material3)
+                implementation(libs.jb.compose.material3.adaptive.adaptive)
+
+                // Material3 Adaptive Navigation Suite（必需：Adaptive Navigation 组件）
+                implementation(compose.material3AdaptiveNavigationSuite)
             }
         }
         commonTest {

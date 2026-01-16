@@ -10,8 +10,6 @@ import androidx.navigation3.runtime.NavKey
  * - 返回操作
  * - 应用级导航项切换
  * - 子栈管理
- *
- * @param state 应用导航状态
  */
 class AppNavigator(val state: AppNavigationState) {
     /**
@@ -29,7 +27,7 @@ class AppNavigator(val state: AppNavigationState) {
         when (key) {
             state.currentAppKey -> {
                 //  清空当前 SubStack（返回到应用键的根屏幕）
-                state.currentSubStack.run {
+                state.currentFeatureStack.run {
                     if (size > 1) subList(1, size).clear()
                 }
             }
@@ -48,7 +46,7 @@ class AppNavigator(val state: AppNavigationState) {
 
             else -> {
                 // 导航到功能键（在当前 SubStack 中）
-                state.currentSubStack.apply {
+                state.currentFeatureStack.apply {
                     remove(key)
                     add(key)
                 }
@@ -87,7 +85,7 @@ class AppNavigator(val state: AppNavigationState) {
 
             else -> {
                 // 在子栈中，正常返回
-                state.currentSubStack.removeLastOrNull()
+                state.currentFeatureStack.removeLastOrNull()
             }
         }
     }

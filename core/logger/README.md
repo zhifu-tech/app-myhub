@@ -1,77 +1,115 @@
 # Core Logger Module
-
 本模块用于**规范**和**实现** MyHub 应用的日志基础设施（Logger Infra），为各功能模块**提供统一、跨平台的日志记录能力**。它基于 [kotlin-logging](https://github.com/oshai/kotlin-logging) 库，实现了**延迟求值**、**多级别日志**、**标记支持**等特性，并提供了面向 KMP 场景的**统一日志接口**，方便在 **Android、iOS、JVM、Web** 等多端项目中集成和使用。
 
-## 核心组件
+## 功能特性
 
-### 1. Logger 接口
+- ✅ 跨平台支持（Android、iOS、JVM、Web）
+- ✅ 统一的日志接口（SLF4J API）
+- ✅ 平台特定实现
+- ✅ 可配置的日志级别
 
-统一的日志接口，定义所有日志级别的方法：
+## 平台实现
 
-- **TRACE**：最详细的日志信息，用于深度调试
-- **DEBUG**：调试信息，开发阶段的主要工具
-- **INFO**：信息性消息，记录重要事件和状态变化
-- **WARN**：警告信息，记录潜在问题
-- **ERROR**：错误信息，记录严重问题
+### Android
+- 使用 `kotlin-logging-android`
+- 自动集成 Android Logcat
 
-### 2. LoggerFactory
+### iOS
+- 使用 `NSLog` 输出
+- 集成 iOS 日志系统
 
-工厂函数，提供创建 `Logger` 实例的能力：
+### JVM
+- 使用 SLF4J + 实现
+- 默认：`slf4j-simple`（简单快速）
+- 可选：`logback`（功能强大）
 
-- `logger()`：使用默认应用名称创建 Logger
-- `logger(vararg tags: String)`：使用标签创建 Logger（名称格式：`appName:tag1:tag2`）
+### Web
+- 使用浏览器 `console` API
+- 支持不同日志级别
 
-### 3. LoggerConfig
+## JVM 平台配置
 
-日志配置类，用于统一管理日志配置：
+### 使用 slf4j-simple（默认）
 
-- `appName`：应用名称
-- `useAndroidLogger`：是否使用 Android Logcat（Android 平台专用）
+配置文件：`src/jvmMain/resources/simplelogger.properties`
 
-### 4. LoggerModule
+```properties
+# 默认日志级别
+org.slf4j.simpleLogger.defaultLogLevel=debug
 
-Koin 依赖注入模块，用于注册 `LoggerConfig`。
+# 特定包的日志级别
+org.slf4j.simpleLogger.log.tech.zhifu.app.myhub=debug
+```
 
-## 使用示例
+### 切换到 Logback（可选）
 
+1. **修改依赖**（`build.gradle.kts`）：
 ```kotlin
-// 1. 配置 Koin
-startKoin {
-    modules(
-        loggerModule {
-            LoggerConfig(
-                appName = "MyHub",
-                useAndroidLogger = true // Android 平台专用
-            )
-        }
-    )
-}
-
-// 2. 创建 Logger 实例
-val logger = logger("MyModule")
-
-// 3. 记录日志
-logger.info { "Application started" }
-logger.debug { "Loading data..." }
-
-// 4. 记录异常
-try {
-    // 可能抛出异常的操作
-} catch (e: Exception) {
-    logger.error(e) { "Operation failed" }
-}
-
-// 5. 使用标记分类日志
-logger.info("DATABASE") { "Database operation completed" }
-
-// 6. 检查日志级别（避免不必要的计算）
-if (logger.isDebugEnabled()) {
-    val expensiveData = computeExpensiveData()
-    logger.debug { "Data: $expensiveData" }
+jvmMain.dependencies {
+    // 注释掉 slf4j-simple
+    // implementation(libs.slf4j.simple)
+    
+    // 使用 Logback
+    implementation(libs.logback)
 }
 ```
 
-## 文档
+2. **配置文件**：`src/jvmMain/resources/logback.xml`（已提供模板）
 
-- [MyHub 日志模块方案设计](./docs/myhub-logger-infra-v1.0.md) - 架构设计文档
-- [Logger 模块使用指南](./docs/USAGE_GUIDE.md) - 详细使用指南
+3. **删除**：`simplelogger.properties`（如果存在）
+
+## 使用方式
+
+```kotlin
+import tech.zhifu.app.myhub.logger.logger
+
+// 使用全局 logger
+logger.debug { "调试信息" }
+logger.info { "信息" }
+logger.warn { "警告" }
+logger.error { "错误" }
+
+// 使用带标签的 logger
+val componentLogger = logger("MyComponent")
+componentLogger.debug { "组件日志" }
+```
+
+## 配置说明
+
+### 日志级别（从低到高）
+
+- **TRACE** - 最详细的日志
+- **DEBUG** - 调试信息（开发环境）
+- **INFO** - 信息性消息（生产环境）
+- **WARN** - 警告信息
+- **ERROR** - 错误信息
+
+### 配置文件位置
+
+所有日志配置文件都在 `core/logger` 模块中：
+
+- `src/jvmMain/resources/simplelogger.properties` - slf4j-simple 配置
+- `src/jvmMain/resources/logback.xml` - Logback 配置（如果使用）
+
+**注意**：不要在应用模块（如 `composeApp`）中创建日志配置文件，统一在 `core/logger` 模块中管理。
+
+## 迁移指南
+
+### 从 slf4j-simple 迁移到 Logback
+
+1. 修改 `core/logger/build.gradle.kts`：
+```kotlin
+jvmMain.dependencies {
+    // implementation(libs.slf4j.simple)  // 注释掉
+    implementation(libs.logback)          // 使用 Logback
+}
+```
+
+2. 配置文件会自动使用 `logback.xml`（如果存在）
+
+3. 代码不需要修改，因为都使用 SLF4J API
+
+## 参考文档
+
+- [JVM 日志查看指南](../../composeApp/docs/JVM_LOGGING_GUIDE.md)
+- [Logback 介绍](../../composeApp/docs/LOGBACK_INTRO.md)

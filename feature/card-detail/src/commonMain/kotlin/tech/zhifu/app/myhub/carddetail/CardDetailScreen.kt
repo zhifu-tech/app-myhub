@@ -38,9 +38,9 @@ import tech.zhifu.app.myhub.carddetail.components.CardDetailMetadata
 import tech.zhifu.app.myhub.carddetail.components.CardDetailNotes
 import tech.zhifu.app.myhub.carddetail.components.CardDetailTags
 import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
+import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthMedium
-import tech.zhifu.app.myhub.ui.windowSizeClass
 
 /**
  * 卡片详情页主界面
@@ -57,7 +57,7 @@ fun CardDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteConfirm by viewModel.showDeleteConfirm.collectAsState()
-    val windowSize = windowSizeClass()
+    val windowSizeClass = LocalWindowSizeClass.current
 
     when (val state = uiState) {
         is CardDetailUiState.Loading -> {
@@ -67,7 +67,7 @@ fun CardDetailScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                verticalArrangement = Arrangement.Center
             ) {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -81,7 +81,7 @@ fun CardDetailScreen(
         is CardDetailUiState.Content -> {
             // 内容状态
             when {
-                windowSize.isWidthCompact() -> {
+                windowSizeClass.isWidthCompact() -> {
                     // 移动端：垂直布局
                     Column(
                         modifier = modifier
@@ -141,7 +141,7 @@ fun CardDetailScreen(
                     }
                 }
 
-                windowSize.isWidthMedium() -> {
+                windowSizeClass.isWidthMedium() -> {
                     // Medium 布局（平板）
                     Column(
                         modifier = modifier
@@ -281,7 +281,7 @@ fun CardDetailScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = state.message,

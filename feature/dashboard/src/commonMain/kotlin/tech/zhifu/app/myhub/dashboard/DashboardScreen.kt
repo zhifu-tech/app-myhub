@@ -89,11 +89,11 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_car
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recent_edits
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total
+import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthExpanded
 import tech.zhifu.app.myhub.ui.isWidthMedium
-import tech.zhifu.app.myhub.ui.windowSizeClass
 import kotlin.time.Clock
 
 @Composable
@@ -104,7 +104,7 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    val sizeClass = windowSizeClass()
+    val sizeClass = LocalWindowSizeClass.current
     val columns = when {
         sizeClass.isWidthCompact() -> 1
         sizeClass.isWidthMedium() -> 2

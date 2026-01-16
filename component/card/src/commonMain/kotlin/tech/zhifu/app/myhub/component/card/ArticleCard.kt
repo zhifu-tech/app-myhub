@@ -159,6 +159,7 @@ fun ArticleCard(
                             // 作者头像组（使用标签前两个字符）
                             card.tags.take(2).forEach { tag ->
                                 Surface(
+
                                     shape = RoundedCornerShape(12.dp),
                                     color = MaterialTheme.colorScheme.surfaceVariant,
                                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)

@@ -118,6 +118,7 @@ kotlin {
             implementation(compose.material3)
             // Material3 Adaptive Navigation Suite（必需：Adaptive Navigation 组件）
             implementation(compose.material3AdaptiveNavigationSuite)
+            implementation(libs.jb.compose.material3.adaptive.adaptive)
 //            // TODO
 //            implementation(libs.jb.compose.material3.material3WindowSizeClass)
             implementation(libs.jb.androidx.window.windowCore)

@@ -2,8 +2,10 @@ package tech.zhifu.app.myhub.carddetail
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.window.core.layout.WindowSizeClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -18,11 +20,22 @@ import tech.zhifu.app.myhub.datastore.model.CardMetadata
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
 import tech.zhifu.app.myhub.theme.AppTheme
-import tech.zhifu.app.myhub.ui.ProvideWindowSizeClass
+import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.mockWindowSizeClassCompact
 import tech.zhifu.app.myhub.ui.mockWindowSizeClassExpanded
 import tech.zhifu.app.myhub.ui.mockWindowSizeClassMedium
 import kotlin.time.Clock
+
+
+@Composable
+fun ProvideWindowSizeClass(
+    windowSizeClass: WindowSizeClass,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+        content()
+    }
+}
 
 /**
  * Mock ReactiveCardRepository 用于 Preview

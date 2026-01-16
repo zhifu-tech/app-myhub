@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.myhub.kmp.js)
     alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.kotlinSerialization)
+    // Compose 编译器插件 @Composable
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {
@@ -59,6 +62,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            // Compose 运行时（必需：所有 Compose 组件的基础）
+            implementation(compose.runtime)
+
             // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.logger)
