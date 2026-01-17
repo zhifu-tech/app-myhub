@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatformTools
 import tech.zhifu.app.myhub.component.card.di.cardModule
@@ -73,8 +73,7 @@ private fun DashboardScreenLightGridPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 300_000, // 5分钟前
                     isLoading = false,
-                    onRefresh = {},
-                    sizeClass = sizeClass
+                    onRefresh = {}
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -125,8 +124,7 @@ private fun DashboardScreenDarkListPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 3600_000, // 1小时前
                     isLoading = false,
-                    onRefresh = {},
-                    sizeClass = sizeClass
+                    onRefresh = {}
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -176,8 +174,7 @@ private fun DashboardScreenLoadingPreview() {
                     recentEditsCount = statistics.recentEdits,
                     lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
                     isLoading = true,
-                    onRefresh = {},
-                    sizeClass = mockWindowSizeClassMedium()
+                    onRefresh = {}
                 )
 
                 var searchQuery by remember { mutableStateOf("") }
@@ -205,8 +202,7 @@ private fun DashboardHeaderLightPreview() {
             recentEditsCount = 5,
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 300_000, // 5分钟前
             isLoading = false,
-            onRefresh = {},
-            sizeClass = mockWindowSizeClassMedium()
+            onRefresh = {}
         )
     }
 }
@@ -222,8 +218,7 @@ private fun DashboardHeaderDarkPreview() {
             recentEditsCount = 0,
             lastSyncTime = null,
             isLoading = false,
-            onRefresh = {},
-            sizeClass = mockWindowSizeClassMedium()
+            onRefresh = {}
         )
     }
 }
@@ -239,8 +234,7 @@ private fun DashboardHeaderLoadingPreview() {
             recentEditsCount = 3,
             lastSyncTime = Clock.System.now().toEpochMilliseconds() - 60_000, // 1分钟前
             isLoading = true,
-            onRefresh = {},
-            sizeClass = mockWindowSizeClassMedium()
+            onRefresh = {}
         )
     }
 }

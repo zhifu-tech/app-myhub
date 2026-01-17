@@ -3,13 +3,12 @@ plugins {
     // in each subproject's classloader
 
     // Kotlin & KMP 核心插件
-    alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinSerialization) apply false
 
     // Compose 相关
-    alias(libs.plugins.composeMultiplatform) apply false
-    alias(libs.plugins.composeCompiler) apply false // Kotlin 2.0+ 推荐显式声明
+    alias(libs.plugins.jb.composeMultiplatform) apply false
+    alias(libs.plugins.jb.composeCompiler) apply false // Kotlin 2.0+ 推荐显式声明
     alias(libs.plugins.composeHotReload) apply false
 
     // Android 插件

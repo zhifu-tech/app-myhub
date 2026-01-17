@@ -15,7 +15,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // 无外部依赖
             }
         }
 

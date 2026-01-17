@@ -14,10 +14,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // 模型类型
             implementation(projects.datastore.model)
 
-            // Kotlinx Coroutines（Flow 需要）
             implementation(libs.kotlinx.coroutines.core)
         }
     }

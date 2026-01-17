@@ -24,24 +24,18 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.logger)
 
-            // Repository 接口
             api(projects.datastore.repository)
 
-            // 数据源（LocalDataSource + RemoteDataSource）
             implementation(projects.datastore.databaseClient)
             implementation(projects.datastore.datasourceLocal)
             implementation(projects.datastore.datasourceRemote)
 
-            // Model（包含 DTO）
             implementation(projects.datastore.model)
 
-            // Kotlinx Serialization（用于序列化支持，特别是枚举类）
             implementation(libs.kotlinx.serialization.json)
 
-            // Kotlinx Coroutines（用于 Flow）
             implementation(libs.kotlinx.coroutines.core)
 
-            // Koin（用于 RepositoryModule）
             implementation(libs.koin.core)
         }
 
@@ -49,10 +43,8 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
 
-            // 数据库（用于测试）
             implementation(projects.datastore.database)
 
-            // 数据库测试工具（runDatabaseTest）
             implementation(projects.datastore.databaseTest)
         }
     }

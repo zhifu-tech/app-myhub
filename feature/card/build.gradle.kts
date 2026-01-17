@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.myhub.kmp.jvm)
     alias(libs.plugins.myhub.kmp.js)
     alias(libs.plugins.myhub.kmp.wasmJs)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.jb.composeMultiplatform)
+    alias(libs.plugins.jb.composeCompiler)
 }
 
 compose.resources {
@@ -24,46 +24,38 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.feature.cardApi)
 
+            implementation(projects.component.card)
+
+            implementation(projects.core.logger)
             implementation(projects.core.navigation)
-
-            // Compose UI 依赖
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            // Material Icons 扩展（必需：Icons.Default.* 图标）
-            implementation(compose.materialIconsExtended)
-
-            // Kotlinx 库依赖
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.datetime)
-
-            implementation(libs.jb.androidx.window.windowCore)
-
-            // 依赖注入
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose.viewmodel)
-
-            // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
-            implementation(projects.core.logger)
 
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClient)
 
-            // Component 模块
-            implementation(projects.component.card)
+            implementation(libs.jb.compose.components.componentsResources)
+            implementation(libs.jb.compose.foundation.foundation)
+            implementation(libs.jb.compose.material.materialIconsExtend)
+            implementation(libs.jb.compose.material3.material3)
+            implementation(libs.jb.compose.runtime.runtime)
+            implementation(libs.jb.compose.ui.ui)
 
-            // Preview 支持（仅在 dev 环境）
+            implementation(libs.jb.androidx.window.windowCore)
+
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
+
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.core)
+
             if (project.isDev()) {
-                implementation(compose.components.uiToolingPreview)
+                implementation(libs.jb.compose.ui.uiToolingPreview)
             }
         }
     }
 }
 
 dependencies {
-    "androidRuntimeClasspath"(compose.uiTooling)
+    "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }

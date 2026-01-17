@@ -23,10 +23,8 @@ kotlin {
             api(libs.ktor.serialization.kotlinx.json)
             api(libs.ktor.client.logging)
 
-            // Kotlinx Coroutines
             implementation(libs.kotlinx.coroutines.core)
 
-            // Koin（用于 NetworkModule）
             implementation(libs.koin.core)
         }
 
@@ -34,7 +32,6 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
 
-            // Ktor Client Mock for testing
             implementation(libs.ktor.client.mock)
         }
 

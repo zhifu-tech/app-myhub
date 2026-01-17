@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.myhub.kmp.jvm)
     alias(libs.plugins.myhub.kmp.js)
     alias(libs.plugins.myhub.kmp.wasmJs)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.jb.composeMultiplatform)
+    alias(libs.plugins.jb.composeCompiler)
 }
 
 compose.resources {
@@ -23,33 +23,30 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.platformCompose)
-            // 数据模型依赖
+
             implementation(projects.datastore.model)
-            // kotlinx-datetime 用于日期格式化
+
+            implementation(libs.jb.compose.components.componentsResources)
+            implementation(libs.jb.compose.foundation.foundation)
+            implementation(libs.jb.compose.material.materialIconsExtend)
+            implementation(libs.jb.compose.material3.material3)
+            implementation(libs.jb.compose.runtime.runtime)
+            implementation(libs.jb.compose.ui.ui)
+
             implementation(libs.kotlinx.datetime)
-            // Compose UI 依赖
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            // Material Icons 扩展（必需：Icons.Default.* 图标）
-            implementation(compose.materialIconsExtended)
-            // 依赖注入
-            implementation(libs.koin.core)
+
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.core)
 
             if (project.isDev()) {
-                implementation(compose.components.uiToolingPreview)
+                implementation(libs.jb.compose.ui.uiToolingPreview)
             }
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            // Compose UI 依赖（测试需要）
-            implementation(compose.ui)
-            implementation(compose.runtime)
-            // 数据模型依赖（测试需要）
+            implementation(libs.jb.compose.ui.ui)
+            implementation(libs.jb.compose.runtime.runtime)
             implementation(projects.datastore.model)
         }
 
@@ -60,6 +57,6 @@ kotlin {
 }
 
 dependencies {
-    "androidRuntimeClasspath"(compose.uiTooling)
+    "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }
 

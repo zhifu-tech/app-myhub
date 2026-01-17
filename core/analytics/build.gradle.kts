@@ -7,8 +7,8 @@ plugins {
     alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.kotlinSerialization)
     // Compose 编译器插件 @Composable
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.jb.composeCompiler)
+    alias(libs.plugins.jb.composeMultiplatform)
 }
 
 kotlin {
@@ -62,21 +62,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Compose 运行时（必需：所有 Compose 组件的基础）
-            implementation(compose.runtime)
+            implementation(libs.jb.compose.runtime.runtime)
 
-            // 项目模块依赖
             implementation(projects.core.platform)
             implementation(projects.core.logger)
             implementation(projects.core.appBuildConfig)
 
-            // Kotlinx Coroutines
             implementation(libs.kotlinx.coroutines.core)
 
-            // Kotlinx Serialization（用于 FileProvider JSON 输出）
             implementation(libs.kotlinx.serialization.json)
 
-            // Koin（用于 DI 模块）
             implementation(libs.koin.core)
         }
 
@@ -86,7 +81,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            // Firebase Android SDK（仅在 googlePlay 渠道）
             when {
                 project.isChannelGooglePlay() -> {
                     implementation(libs.firebase.analytics)
@@ -101,14 +95,12 @@ kotlin {
         }
 
         iosMain.dependencies {
-            // Firebase iOS SDK（仅在 googlePlay 渠道）
             if (project.isChannelGooglePlay()) {
                 implementation(libs.firebase.analytics)
             }
         }
 
         jsMain.dependencies {
-            // Firebase JS SDK（仅在 googlePlay 渠道）
             if (project.isChannelGooglePlay()) {
                 implementation(libs.firebase.analytics)
             }

@@ -15,14 +15,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Kotlin 标准库
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            // 序列化测试需要
             implementation(libs.kotlinx.serialization.json)
         }
 

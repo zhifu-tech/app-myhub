@@ -16,7 +16,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.network)
-            // Ktor Client Mock for testing
             api(libs.ktor.client.mock)
         }
 

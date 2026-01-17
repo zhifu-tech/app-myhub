@@ -21,9 +21,7 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.core.network)
 
-            // Kotlinx Coroutines
             implementation(libs.kotlinx.coroutines.core)
-            // Koin（用于 RemoteDataSourceModule）
             implementation(libs.koin.core)
         }
 
@@ -31,10 +29,8 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
 
-            // Model for test data
             implementation(projects.datastore.model)
 
-            // Network test utilities
             implementation(projects.core.networkTest)
         }
     }

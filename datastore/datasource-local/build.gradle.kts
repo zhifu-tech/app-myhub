@@ -36,7 +36,6 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
 
-            // 数据库测试工具（runDatabaseTest）
             implementation(projects.datastore.databaseTest)
         }
     }

@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.myhub.kmp.jvm)
     alias(libs.plugins.myhub.kmp.js)
     alias(libs.plugins.myhub.kmp.wasmJs)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.jb.composeCompiler)
+    alias(libs.plugins.jb.composeMultiplatform)
     alias(libs.plugins.kotlinSerialization)
 }
 
@@ -25,10 +25,10 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.navigation)
 
-            implementation(compose.materialIconsExtended)
-            implementation(compose.components.resources)
+            implementation(libs.jb.compose.material.materialIconsExtend)
+            implementation(libs.jb.compose.components.componentsResources)
 
-            implementation(libs.androidx.navigation3.navigation3Runtime)
+            implementation(libs.jb.androidx.navigation3.navigation3Ui)
         }
     }
 }

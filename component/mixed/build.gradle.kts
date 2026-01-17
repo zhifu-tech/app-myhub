@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.myhub.kmp.jvm)
     alias(libs.plugins.myhub.kmp.js)
     alias(libs.plugins.myhub.kmp.wasmJs)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.jb.composeMultiplatform)
+    alias(libs.plugins.jb.composeCompiler)
 }
 
 kotlin {
@@ -16,25 +16,22 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // 平台 Compose 依赖（包含 AppTheme）
             implementation(projects.core.platformCompose)
 
-            // Compose UI 依赖
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
+            implementation(libs.jb.compose.foundation.foundation)
+            implementation(libs.jb.compose.material3.material3)
+            implementation(libs.jb.compose.runtime.runtime)
+            implementation(libs.jb.compose.ui.ui)
 
-            // Preview 支持
             if (project.isDev()) {
-                implementation(compose.components.uiToolingPreview)
+                implementation(libs.jb.compose.ui.uiToolingPreview)
             }
         }
     }
 }
 
 dependencies {
-    "androidRuntimeClasspath"(compose.uiTooling)
+    "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }
 
 

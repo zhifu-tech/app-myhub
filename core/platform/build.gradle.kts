@@ -15,11 +15,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // Logger 模块
                 implementation(projects.core.logger)
-                // App Build Config 模块
                 implementation(projects.core.appBuildConfig)
-                // Koin 依赖注入
                 implementation(libs.koin.core)
             }
         }
