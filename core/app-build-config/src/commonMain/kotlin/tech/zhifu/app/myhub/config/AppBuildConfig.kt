@@ -1,10 +1,9 @@
 package tech.zhifu.app.myhub.config
 
-object AppBuildConfig : AppBuildEnvConfig by AppBuildEnvConfigImpl(), AppBuildTierConfig by AppBuildTierConfigImpl(),
-    AppBuildChannelConfig by AppBuildChannelConfigImpl() {
-
-    const val APP_NAME: String = "MyHub"
-}
+object AppBuildConfig :
+    AppBuildEnvConfig by AppBuildEnvConfigImpl(),
+    AppBuildTierConfig by AppBuildTierConfigImpl(),
+    AppBuildChannelConfig by AppBuildChannelConfigImpl()
 
 interface AppBuildEnvConfig {
     val appEnv: String
