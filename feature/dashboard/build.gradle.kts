@@ -22,7 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.feature.cardDtailApi)
+            implementation(projects.feature.cardDetailApi)
             implementation(projects.feature.dashboardApi)
             // Compose UI 依赖
             implementation(compose.runtime)
