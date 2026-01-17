@@ -527,7 +527,7 @@ Preview 文件使用示例数据，无需额外的依赖初始化。
 ### 相关文档
 
 - [项目整体架构](../../docs/myhub_architecture.md)
-- [数据层架构](../../core/datastore/docs/datastore_architecture.md)
+- [数据层架构](../../datastore/docs/datastore_architecture.md)
 - [Settings 模块](../settings/README.md)
 - [Dashboard 模块](../dashboard/README.md)
 
@@ -540,8 +540,8 @@ Preview 文件使用示例数据，无需额外的依赖初始化。
 
 ## 🔗 相关模块
 
-- **core/datastore-repository-client**: 提供用户和统计数据的 Repository
-- **core/datastore-model**: 提供数据模型（User、Statistics）
+- **datastore/repository-client**: 提供用户和统计数据的 Repository
+- **datastore/model**: 提供数据模型（User、Statistics）
 - **component/mixed**: 提供 Avatar 组件
 - **core/platform**: 提供平台抽象（窗口大小、主题等）
 - **feature/settings**: 应用设置模块（通过导航跳转）

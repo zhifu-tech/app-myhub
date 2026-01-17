@@ -57,7 +57,7 @@ export DB_PASSWORD=your_password
 
 ## 📦 数据库 Schema
 
-Server 使用 SQLDelight 管理数据库 schema，schema 定义在 `core/datastore` 模块中：
+Server 使用 SQLDelight 管理数据库 schema，schema 定义在 `datastore` 模块中：
 
 - **Card** - 卡片表
 - **Tag** - 标签表

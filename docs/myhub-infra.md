@@ -29,24 +29,24 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 
 ## [统计框架模块方案设计](../core/analytics/docs/myhub-analytics-infra-v1.0.md)
 
-## [数据存储套件总体架构设计](../core/datastore/docs/myhub-datastore-infra-v1.0.md)
+## [数据存储套件总体架构设计](../datastore/docs/myhub-datastore-infra-v1.0.md)
 
-## [数据模型模块方案设计](../core/datastore-model/docs/myhub-datastore-model-infra-v1.0.md)
+## [数据模型模块方案设计](../datastore/model/docs/myhub-datastore-model-infra-v1.0.md)
 
-## [数据库模块方案设计](../core/datastore-database/docs/myhub-datastore-database-infra-v1.0.md)
+## [数据库模块方案设计](../datastore/database/docs/myhub-datastore-database-infra-v1.0.md)
 
-## [数据库测试模块方案设计](../core/datastore-database-test/docs/myhub-datastore-database-test-infra-v1.0.md)
+## [数据库测试模块方案设计](../datastore/database-test/docs/myhub-datastore-database-test-infra-v1.0.md)
 
-## [数据库管理模块方案设计](../core/datastore-database-manage/docs/myhub-datastore-database-manage-infra-v1.0.md)
+## [数据库管理模块方案设计](../datastore/database-manage/docs/myhub-datastore-database-manage-infra-v1.0.md)
 
-## [数据库客户端模块方案设计](../core/datastore-database-client/docs/myhub-datastore-database-client-infra-v1.0.md)
+## [数据库客户端模块方案设计](../datastore/database-client/docs/myhub-datastore-database-client-infra-v1.0.md)
 
-## [本地数据源模块方案设计](../core/datastore-datasource-local/docs/myhub-datastore-datasource-local-infra-v1.0.md)
+## [本地数据源模块方案设计](../datastore/datasource-local/docs/myhub-datastore-datasource-local-infra-v1.0.md)
 
-## [远程数据源模块方案设计](../core/datastore-datasource-remote/docs/myhub-datastore-datasource-remote-infra-v1.0.md)
+## [远程数据源模块方案设计](../datastore/datasource-remote/docs/myhub-datastore-datasource-remote-infra-v1.0.md)
 
-## [数据库服务端模块方案设计](../core/datastore-database-server/docs/myhub-datastore-database-server-infra-v1.0.md)
+## [数据库服务端模块方案设计](../datastore/database-server/docs/myhub-datastore-database-server-infra-v1.0.md)
 
-## [数据仓库客户端模块方案设计](../core/datastore-repository-client/docs/myhub-datastore-repository-client-infra-v1.0.md)
+## [数据仓库客户端模块方案设计](../datastore/repository-client/docs/myhub-datastore-repository-client-infra-v1.0.md)
 
-## [数据仓库服务端模块方案设计](../core/datastore-repository-server/docs/myhub-datastore-repository-server-infra-v1.0.md)
+## [数据仓库服务端模块方案设计](../datastore/repository-server/docs/myhub-datastore-repository-server-infra-v1.0.md)

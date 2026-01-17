@@ -11,7 +11,7 @@
 
 - `core:logger` - 日志模块
 - `core:navigation` - 导航模块
-- `core:datastore` - 数据存储模块
+- `datastore` - 数据存储模块
 - 其他基础设施模块
 
 ## 1. 文档结构要求
@@ -334,7 +334,7 @@ core/network-test/
 ## 🔗 相关模块
 
 - `core:network` - 网络模块，提供实际的 HttpClient 实现
-- `core:datastore-datasource-remote` - 远程数据源实现，使用本模块进行测试
+- `datastore:datasource-remote` - 远程数据源实现，使用本模块进行测试
 ```
 
 #### 1.6.7 更多示例（可选）
@@ -351,7 +351,7 @@ core/network-test/
 ```markdown
 ## 📚 更多示例
 
-查看 `core:datastore-datasource-remote` 模块的测试文件，了解更详细的使用示例：
+查看 `datastore:datasource-remote` 模块的测试文件，了解更详细的使用示例：
 
 - `RemoteCardDataSourceTest.kt`
 - `RemoteTagDataSourceTest.kt`

@@ -274,7 +274,7 @@
 ## 📝 注意事项
 
 1. **API 兼容性** - 确保 API 设计与客户端 `RemoteDataSource` 接口一致
-2. **数据模型** - 与 `core:datastore` 模块的数据模型保持一致
+2. **数据模型** - 与 `datastore` 模块的数据模型保持一致
 3. **错误处理** - 统一的错误响应格式
 4. **性能** - 考虑高并发场景的性能优化
 5. **安全** - 生产环境必须实现身份验证和授权
@@ -284,5 +284,5 @@
 - [Server README](../README.md) - Server 模块概述
 - [架构设计文档](architecture.md) - 详细的架构设计
 - [MyHub 整体架构](../../../docs/myhub_architecture.md) - 项目整体架构
-- [Datastore 模块文档](../../core/datastore/docs/) - 客户端数据层文档
+- [Datastore 模块文档](../../datastore/docs/) - 客户端数据层文档
 

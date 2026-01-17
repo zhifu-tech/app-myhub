@@ -10,14 +10,14 @@ import org.koin.dsl.module
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
-import tech.zhifu.app.myhub.carddetail.di.cardDetailModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
-import tech.zhifu.app.myhub.dashboard.di.dashboardModule
+import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
+import tech.zhifu.app.myhub.feature.card.di.cardDetailModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
 import tech.zhifu.app.myhub.logger.di.loggerModule
-import tech.zhifu.app.myhub.profile.di.profileModule
-import tech.zhifu.app.myhub.settings.di.settingsModule
+import tech.zhifu.app.myhub.feature.profile.di.profileModule
+import tech.zhifu.app.myhub.feature.settings.di.settingsModule
 
 fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
     val appScope = AppCoroutineScope()

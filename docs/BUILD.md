@@ -215,14 +215,14 @@ enabledPlatforms=android
 - `core:network` - 网络
 - `core:analytics` - 统计
 - `core:app-build-config` - 构建配置
-- `core:datastore-*` - 数据存储模块套件
+- `datastore:*` - 数据存储模块套件
 
 ### 功能模块
 
 - `feature:dashboard` - 仪表板
 - `feature:profile` - 个人资料
 - `feature:settings` - 设置
-- `feature:card-detail` - 卡片详情
+- `feature:card` - 卡片详情
 
 ### 组件模块
 

@@ -46,8 +46,8 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
 
-            implementation(projects.core.datastoreModel)
-            implementation(projects.core.datastoreRepositoryClient)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClient)
 
             // 共享组件
             implementation(projects.component.mixed) // Avatar 组件

@@ -1,16 +1,14 @@
 package tech.zhifu.app.myhub.api
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import tech.zhifu.app.myhub.datastore.model.User
-import tech.zhifu.app.myhub.datastore.model.UserPreferences
 import tech.zhifu.app.myhub.datastore.model.CardType
+import tech.zhifu.app.myhub.datastore.model.UserPreferences
 import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.UserService
 

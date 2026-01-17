@@ -196,11 +196,11 @@ core/network-test/
 ## 🔗 相关模块
 
 - `core:network` - 网络模块，提供实际的 HttpClient 实现
-- `core:datastore-datasource-remote` - 远程数据源实现，使用本模块进行测试
+- `datastore:datasource-remote` - 远程数据源实现，使用本模块进行测试
 
 ## 📚 更多示例
 
-查看 `core:datastore-datasource-remote` 模块的测试文件，了解更详细的使用示例：
+查看 `datastore:datasource-remote` 模块的测试文件，了解更详细的使用示例：
 
 - `RemoteCardDataSourceTest.kt`
 - `RemoteTagDataSourceTest.kt`

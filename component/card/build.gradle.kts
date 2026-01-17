@@ -24,7 +24,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.platformCompose)
             // 数据模型依赖
-            implementation(projects.core.datastoreModel)
+            implementation(projects.datastore.model)
             // kotlinx-datetime 用于日期格式化
             implementation(libs.kotlinx.datetime)
             // Compose UI 依赖
@@ -50,7 +50,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.runtime)
             // 数据模型依赖（测试需要）
-            implementation(projects.core.datastoreModel)
+            implementation(projects.datastore.model)
         }
 
         jvmTest.dependencies {

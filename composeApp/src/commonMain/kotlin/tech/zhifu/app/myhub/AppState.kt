@@ -11,15 +11,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import tech.zhifu.app.myhub.core.navigation.AppNavigationState
-import tech.zhifu.app.myhub.core.navigation.rememberAppNavigationState
+import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
+import tech.zhifu.app.myhub.feature.settings.settings.languageSetting
+import tech.zhifu.app.myhub.feature.settings.settings.themeSetting
+import tech.zhifu.app.myhub.navigation.AppNavigationState
 import tech.zhifu.app.myhub.navigation.navAppKeySet
 import tech.zhifu.app.myhub.navigation.navAppStartKey
 import tech.zhifu.app.myhub.navigation.navKeySerializerModule
-import tech.zhifu.app.myhub.settings.domain.SettingsRepository
-import tech.zhifu.app.myhub.settings.settings.languageSetting
-import tech.zhifu.app.myhub.settings.settings.themeSetting
-
+import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
 
 @Composable
 fun rememberAppState(

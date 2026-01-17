@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.api
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -57,7 +56,8 @@ fun Route.cardsApi(cardService: CardService) {
         // GET /api/cards/{id} - 获取指定卡片
         get("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
                 val card = cardService.getCardById(id)
                     ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Card", id)
                 call.respond(HttpStatusCode.OK, card)
@@ -84,7 +84,8 @@ fun Route.cardsApi(cardService: CardService) {
         // PUT /api/cards/{id} - 更新卡片
         put("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
                 val request = call.receive<UpdateCardRequest>()
                 val card = cardService.updateCard(id, request)
                 call.respond(HttpStatusCode.OK, card)
@@ -100,7 +101,8 @@ fun Route.cardsApi(cardService: CardService) {
         // DELETE /api/cards/{id} - 删除卡片
         delete("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
                 val deleted = cardService.deleteCard(id)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)
@@ -119,7 +121,8 @@ fun Route.cardsApi(cardService: CardService) {
         // POST /api/cards/{id}/favorite - 切换收藏状态
         post("{id}/favorite") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Card ID is required")
                 val card = cardService.toggleFavorite(id)
                 call.respond(HttpStatusCode.OK, card)
             } catch (e: tech.zhifu.app.myhub.exception.NotFoundException) {

@@ -787,7 +787,7 @@ private fun ListViewItem(card: Card) {
 ### 相关文档
 
 - [项目整体架构](../../docs/myhub_architecture.md)
-- [数据层架构](../../core/datastore/docs/datastore_architecture.md)
+- [数据层架构](../../datastore/docs/datastore_architecture.md)
 - [Settings 模块](../settings/README.md)
 - [Card 组件](../../component/card/README.md)
 
@@ -800,8 +800,8 @@ private fun ListViewItem(card: Card) {
 
 ## 🔗 相关模块
 
-- **core/datastore-repository-client**: 提供卡片和统计数据的 Repository
-- **core/datastore-model**: 提供数据模型（Card、Statistics）
+- **datastore/repository-client**: 提供卡片和统计数据的 Repository
+- **datastore/model**: 提供数据模型（Card、Statistics）
 - **component/card**: 提供卡片 UI 组件
 - **core/platform**: 提供平台抽象（窗口大小、主题等）
 

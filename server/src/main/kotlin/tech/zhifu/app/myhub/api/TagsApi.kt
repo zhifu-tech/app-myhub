@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.api
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,7 +9,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import tech.zhifu.app.myhub.datastore.model.Tag
 import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.TagService
 
@@ -32,7 +30,8 @@ fun Route.tagsApi(tagService: TagService) {
         // GET /api/tags/{id} - 获取指定标签
         get("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
                 val tag = tagService.getTagById(id)
                     ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Tag", id)
                 call.respond(HttpStatusCode.OK, tag)
@@ -65,7 +64,8 @@ fun Route.tagsApi(tagService: TagService) {
         // PUT /api/tags/{id} - 更新标签
         put("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
                 val request = call.receive<UpdateTagRequest>()
                 val existing = tagService.getTagById(id)
                     ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Tag", id)
@@ -90,7 +90,8 @@ fun Route.tagsApi(tagService: TagService) {
         // DELETE /api/tags/{id} - 删除标签
         delete("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Tag ID is required")
                 val deleted = tagService.deleteTag(id)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)

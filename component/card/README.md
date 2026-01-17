@@ -1155,7 +1155,7 @@ dependencies {
     implementation(compose.components.uiToolingPreview)  // Preview 支持
 
     // 数据模型依赖
-    implementation(projects.core.datastoreModel)
+    implementation(projects.datastoreModel)
     implementation(projects.core.platformCompose)
     
     // kotlinx-datetime 用于日期格式化

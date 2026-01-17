@@ -17,7 +17,7 @@
 
 ### 模块组织方案
 
-**推荐方案：创建独立的 `feature/card-detail` 模块**
+**推荐方案：创建独立的 `feature:card` 模块**
 
 #### 为什么选择独立模块？
 
@@ -48,7 +48,7 @@
 - 会破坏现有的架构分层（组件层 vs 功能层）
 - 难以维护和测试
 
-✅ 推荐：独立的 feature/card-detail 模块
+✅ 推荐：独立的 feature:card 模块
 - 符合 MVVM 架构（ViewModel + Screen）
 - 与现有 feature 模块保持一致
 - 职责清晰，易于扩展
@@ -57,10 +57,10 @@
 ### 模块结构
 
 ```
-feature/card-detail/
+feature/card/
 ├── src/
 │   ├── commonMain/
-│   │   ├── kotlin/tech/zhifu/app/myhub/carddetail/
+│   │   ├── kotlin/tech/zhifu/app/myhub/feature/card/
 │   │   │   ├── CardDetailScreen.kt          # 主界面
 │   │   │   ├── CardDetailViewModel.kt      # ViewModel
 │   │   │   ├── CardDetailUiState.kt         # UI 状态
@@ -80,7 +80,7 @@ feature/card-detail/
 │   │           ├── values-zh-rTW/strings.xml
 │   │           └── values-ja/strings.xml
 │   └── devMain/                              # Preview 支持
-│       └── kotlin/.../carddetail/
+│       └── kotlin/.../feature/card/
 │           └── CardDetailScreen.dev.kt
 ├── build.gradle.kts
 └── README.md
@@ -489,7 +489,7 @@ enum class CardRenderMode {
 
 **注意**：`Preview` 模式目前不需要实现，但提前预留可以避免未来扩展时的重构。
 
-**SectionCard 组件定义**（需要在 feature/card-detail 中实现）：
+**SectionCard 组件定义**（需要在 feature/card 中实现）：
 
 ```kotlin
 /**
@@ -878,7 +878,7 @@ sealed class Screen(val route: String, val title: String) {
 ### 3. Koin 依赖注入配置
 
 ```kotlin
-// feature/card-detail/di/CardDetailModule.kt
+// feature/card/di/CardDetailModule.kt
 val cardDetailModule = module {
     viewModel { (cardId: String) ->
         CardDetailViewModel(
@@ -1062,7 +1062,7 @@ fun CardDetailContent(
 
 **目标**：实现基础的详情页框架，能够查看卡片内容
 
-- [ ] 创建 `feature/card-detail` 模块
+- [ ] 创建 `feature/card` 模块
 - [ ] 实现基础 Screen、ViewModel、UiState
 - [ ] 集成导航（扩展 Screen sealed class）
 - [ ] 实现基础布局（移动端垂直布局）
@@ -1142,10 +1142,10 @@ fun CardDetailContent(
 ## 📦 依赖关系
 
 ```
-feature/card-detail
+feature/card
 ├── component/card              # 使用 CardComponent 渲染卡片
-├── core/datastore-repository-client  # 数据访问（ReactiveCardRepository）
-├── core/datastore-model        # 数据模型（Card）
+├── datastore/repository-client  # 数据访问（ReactiveCardRepository）
+├── datastore/model        # 数据模型（Card）
 └── core/platform-compose       # 平台抽象（WindowSizeClass 等）
 ```
 
@@ -1166,8 +1166,8 @@ dependencies {
         implementation(projects.component.card)
 
         // 数据层依赖
-        implementation(projects.core.datastoreRepositoryClient)
-        implementation(projects.core.datastoreModel)
+        implementation(projects.datastoreRepositoryClient)
+        implementation(projects.datastoreModel)
 
         // 平台抽象
         implementation(projects.core.platformCompose)

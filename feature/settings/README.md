@@ -924,5 +924,5 @@ class ThemeSettingTest {
 ## 🔗 相关文档
 
 - [项目整体架构](../../docs/myhub_architecture.md)
-- [数据层架构](../../core/datastore/docs/datastore_architecture.md)
-- [用户偏好设计](../../core/datastore-database/docs/user_association_design.md)
+- [数据层架构](../../datastore/docs/datastore_architecture.md)
+- [用户偏好设计](../../datastore/database/docs/user_association_design.md)

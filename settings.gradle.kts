@@ -176,27 +176,26 @@ include(":core:analytics")
 // ============================================================================
 // 数据存储模块
 // ============================================================================
-// 数据模型
-include(":core:datastore-model")
+include(":datastore:model")
 
 // 数据库模块
-include(":core:datastore-database")
-include(":core:datastore-database-test")
-include(":core:datastore-database-manage")
-include(":core:datastore-database-client")
+include(":datastore:database")
+include(":datastore:database-test")
+include(":datastore:database-manage")
+include(":datastore:database-client")
 if (isServerEnabled) {
-    include(":core:datastore-database-server")
+    include(":datastore:database-server")
 }
 
 // 数据源模块
-include(":core:datastore-datasource-local")
-include(":core:datastore-datasource-remote")
+include(":datastore:datasource-local")
+include(":datastore:datasource-remote")
 
 // 数据仓库模块
-include(":core:datastore-repository")
-include(":core:datastore-repository-client")
+include(":datastore:repository")
+include(":datastore:repository-client")
 if (isServerEnabled) {
-    include(":core:datastore-repository-server")
+    include(":datastore:repository-server")
 }
 
 // ============================================================================
@@ -216,8 +215,8 @@ include(":feature:profile-api")
 include(":feature:profile")
 include(":feature:favorite-api")
 include(":feature:favorite")
-include(":feature:card-detail-api")
-include(":feature:card-detail")
+include(":feature:card-api")
+include(":feature:card")
 
 // ============================================================================
 // 应用模块

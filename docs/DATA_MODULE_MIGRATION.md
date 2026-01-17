@@ -2,9 +2,9 @@
 
 ## 📋 概述
 
-已将 `composeApp` 中的 `data` 目录抽取为独立的 `core:datastore` 模块，以提高代码的组织性、可维护性和模块化程度。
+已将 `composeApp` 中的 `data` 目录抽取为独立的 `datastore` 模块，以提高代码的组织性、可维护性和模块化程度。
 
-> **注意**：模块已从 `core:data` 重命名为 `core:datastore`，包名从 `tech.zhifu.app.myhub.data` 重命名为 `tech.zhifu.app.myhub.datastore`。
+> **注意**：模块已从 `core:data` 重命名为 `datastore`，包名从 `tech.zhifu.app.myhub.data` 重命名为 `tech.zhifu.app.myhub.datastore`。
 
 ## 🎯 迁移目标
 
@@ -17,7 +17,7 @@
 ### 新模块位置
 
 ```
-core/datastore/
+datastore/
 ├── build.gradle.kts
 ├── README.md
 └── src/
@@ -52,7 +52,7 @@ core/datastore/
 添加了新模块：
 
 ```kotlin
-include(":core:datastore")
+include(":datastore")
 ```
 
 ### 2. composeApp/build.gradle.kts
@@ -64,10 +64,10 @@ include(":core:datastore")
 
 **添加的依赖**：
 ```kotlin
-implementation(projects.core.datastore)
+implementation(projects.datastore)
 ```
 
-### 3. core/datastore/build.gradle.kts
+### 3. datastore/build.gradle.kts
 
 新创建的配置文件，包含：
 - Kotlin Multiplatform 配置
@@ -76,10 +76,10 @@ implementation(projects.core.datastore)
 
 ## 📦 依赖关系
 
-### core:datastore 模块的依赖
+### datastore 模块的依赖
 
 ```
-core:datastore
+datastore
 ├── core:platform (SERVER_PORT 等常量)
 ├── kotlinx.serialization
 ├── kotlinx.coroutines
@@ -88,11 +88,11 @@ core:datastore
 └── Koin
 ```
 
-### composeApp 对 core:datastore 的依赖
+### composeApp 对 datastore 的依赖
 
 ```
 composeApp
-└── core:datastore (Repository、Model、DI Modules)
+└── datastore (Repository、Model、DI Modules)
 ```
 
 ## 🔄 导入路径
@@ -119,7 +119,7 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 - [x] 删除 `composeApp` 中的旧 data 目录
 - [x] 删除 `composeApp` 中的旧 sqldelight 目录
 - [x] 验证导入路径正确
-- [x] 重命名模块：`core:data` → `core:datastore`
+- [x] 重命名模块：`core:data` → `datastore`
 - [x] 重命名包名：`tech.zhifu.app.myhub.data` → `tech.zhifu.app.myhub.datastore`
 - [x] 更新数据库包名：`tech.zhifu.app.myhub.database` → `tech.zhifu.app.myhub.datastore.database`
 
@@ -132,20 +132,20 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 
 2. **验证构建**：
    ```bash
-   ./gradlew :core:datastore:build
+   ./gradlew :datastore:build
    ./gradlew :composeApp:build
    ```
 
 3. **运行测试**：
    ```bash
-   ./gradlew :core:datastore:allTests
+   ./gradlew :datastore:allTests
    ```
 
 ## 📚 相关文档
 
-- [Datastore Module README](../core/datastore/README.md)
-- [架构设计文档](../core/datastore/docs/datastore_architecture.md)
-- [待办事项](../core/datastore/docs/datastore_todos.md)
+- [Datastore Module README](../datastore/README.md)
+- [架构设计文档](../datastore/docs/datastore_architecture.md)
+- [待办事项](../datastore/docs/datastore_todos.md)
 
 ---
 

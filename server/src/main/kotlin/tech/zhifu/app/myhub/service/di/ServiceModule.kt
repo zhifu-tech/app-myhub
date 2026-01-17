@@ -14,7 +14,7 @@ import tech.zhifu.app.myhub.service.UserService
 
 /**
  * 服务层依赖注入模块
- * 
+ *
  * 提供所有 Service 的实现
  */
 val serviceModule = module {
@@ -24,25 +24,25 @@ val serviceModule = module {
             cardRepository = get<CardRepository>()
         )
     }
-    
+
     single<TagService> {
         TagService(
             tagRepository = get<TagRepository>()
         )
     }
-    
+
     single<TemplateService> {
         TemplateService(
             templateRepository = get<TemplateRepository>()
         )
     }
-    
+
     single<UserService> {
         UserService(
             userRepository = get<UserRepository>()
         )
     }
-    
+
     single<StatisticsService> {
         StatisticsService(
             statisticsRepository = get<StatisticsRepository>()

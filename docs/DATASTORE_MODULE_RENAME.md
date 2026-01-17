@@ -2,7 +2,7 @@
 
 ## 📋 概述
 
-已将 `core:data` 模块重命名为 `core:datastore`，并将所有相关包名从 `tech.zhifu.app.myhub.data` 重命名为 `tech.zhifu.app.myhub.datastore`。
+已将 `core:data` 模块重命名为 `datastore`，并将所有相关包名从 `tech.zhifu.app.myhub.data` 重命名为 `tech.zhifu.app.myhub.datastore`。
 
 ## 🎯 重命名原因
 
@@ -15,8 +15,8 @@
 ### 1. 模块名称
 
 - **旧名称**：`core:data`
-- **新名称**：`core:datastore`
-- **目录**：`core/data/` → `core/datastore/`
+- **新名称**：`datastore`
+- **目录**：`core/data/` → `datastore/`
 
 ### 2. 包名变更
 
@@ -39,12 +39,12 @@
 include(":core:data")
 
 // 新配置
-include(":core:datastore")
+include(":datastore")
 ```
 
 #### build.gradle.kts
 
-**core/datastore/build.gradle.kts**:
+**datastore/build.gradle.kts**:
 ```kotlin
 androidLibrary {
     namespace = "tech.zhifu.app.myhub.datastore"  // 更新命名空间
@@ -64,7 +64,7 @@ sqldelight {
 **composeApp/build.gradle.kts**:
 ```kotlin
 dependencies {
-    implementation(projects.core.datastore)  // 更新依赖
+    implementation(projects.datastore)  // 更新依赖
 }
 ```
 
@@ -90,7 +90,7 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 
 ## ✅ 已完成的工作
 
-- [x] 重命名模块目录：`core/data` → `core/datastore`
+- [x] 重命名模块目录：`core/data` → `datastore/`（已从 core 目录移动到根目录）
 - [x] 更新 `settings.gradle.kts` 中的模块引用
 - [x] 更新 `build.gradle.kts` 中的命名空间和 SQLDelight 包名
 - [x] 重命名所有源代码文件的包名声明
@@ -106,7 +106,7 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 
 ```bash
 # 编译 datastore 模块
-./gradlew :core:datastore:build
+./gradlew :datastore:build
 
 # 编译 composeApp 模块
 ./gradlew :composeApp:build
@@ -122,13 +122,13 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 find . -type f -name "*.kt" -exec grep -l "tech.zhifu.app.myhub.data\." {} \;
 
 # 检查新的包名
-find core/datastore/src -type f -name "*.kt" -exec grep -l "package tech.zhifu.app.myhub.datastore" {} \;
+find datastore/src -type f -name "*.kt" -exec grep -l "package tech.zhifu.app.myhub.datastore" {} \;
 ```
 
 ## 📚 相关文档
 
-- [Datastore Module README](../core/datastore/README.md)
-- [数据模型架构设计文档](../core/datastore/src/commonMain/kotlin/tech/zhifu/app/myhub/datastore/README.md)
+- [Datastore Module README](../datastore/README.md)
+- [数据模型架构设计文档](../datastore/src/commonMain/kotlin/tech/zhifu/app/myhub/datastore/README.md)
 - [模块迁移说明](./DATA_MODULE_MIGRATION.md)
 
 ---

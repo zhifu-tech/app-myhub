@@ -46,7 +46,7 @@ MyHub 是一个基于 Kotlin Multiplatform 和 Compose Multiplatform 的跨平�
 
 ```
 composeApp
-├── core:datastore (数据层)
+├── datastore (数据层)
 │   └── core:platform (平台抽象)
 ├── core:local (本地存储)
 └── core:platform (平台抽象)
@@ -54,7 +54,7 @@ composeApp
 server
 └── (独立运行，提供 API 服务)
 
-core:datastore
+datastore
 └── core:platform
 
 core:local
@@ -91,7 +91,7 @@ core:local
 
 ---
 
-### 2. core:datastore - 数据层模块
+### 2. datastore - 数据层模块
 
 **职责**：
 
@@ -111,10 +111,10 @@ core:local
 
 **文档**：
 
-- [模块 README](../core/datastore/README.md)
-- [架构设计文档](../core/datastore/docs/datastore_architecture.md)
-- [测试指南](../core/datastore/docs/datastore_test_guide.md)
-- [待办事项](../core/datastore/docs/datastore_todos.md)
+- [模块 README](../datastore/README.md)
+- [架构设计文档](../datastore/docs/datastore_architecture.md)
+- [测试指南](../datastore/docs/datastore_test_guide.md)
+- [待办事项](../datastore/docs/datastore_todos.md)
 
 ---
 
@@ -185,7 +185,7 @@ UI Layer (Compose)
     ↓
 ViewModel
     ↓
-Repository (core:datastore)
+Repository (datastore)
     ↓
 LocalDataSource (SQLDelight) ← 优先读取，快速响应
     ↓
@@ -207,7 +207,7 @@ UI Layer (用户操作)
     ↓
 ViewModel
     ↓
-Repository (core:datastore)
+Repository (datastore)
     ↓
 1. 乐观更新 LocalDataSource (立即响应)
     ↓
@@ -319,15 +319,15 @@ app-myhub/
 
 ## 🔗 模块间通信
 
-### composeApp ↔ core:datastore
+### composeApp ↔ datastore
 
-- **composeApp** 通过 Repository 接口使用 **core:datastore** 的功能
+- **composeApp** 通过 Repository 接口使用 **datastore** 的功能
 - 使用 Koin 进行依赖注入
 - 通过 Kotlin Flow 进行数据流通信
 
-### core:datastore ↔ core:platform
+### datastore ↔ core:platform
 
-- **core:datastore** 使用 **core:platform** 提供的平台常量
+- **datastore** 使用 **core:platform** 提供的平台常量
 - 平台抽象接口
 
 ### composeApp ↔ core:local
@@ -337,7 +337,7 @@ app-myhub/
 
 ### composeApp ↔ server
 
-- 通过 **core:datastore** 的 RemoteDataSource 间接通信
+- 通过 **datastore** 的 RemoteDataSource 间接通信
 - REST API 调用
 
 ## 📚 相关文档
@@ -349,9 +349,9 @@ app-myhub/
 
 ### 模块文档
 
-- [core:datastore 架构设计](../core/datastore/docs/datastore_architecture.md)
-- [core:datastore 测试指南](../core/datastore/docs/datastore_test_guide.md)
-- [core:datastore 待办事项](../core/datastore/docs/datastore_todos.md)
+- [datastore 架构设计](../datastore/docs/datastore_architecture.md)
+- [datastore 测试指南](../datastore/docs/datastore_test_guide.md)
+- [datastore 待办事项](../datastore/docs/datastore_todos.md)
 
 ### 迁移文档
 

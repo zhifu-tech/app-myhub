@@ -116,8 +116,8 @@ kotlin {
             implementation(projects.feature.profileApi)
             implementation(projects.feature.favoriteApi)
             implementation(projects.feature.favorite)
-            implementation(projects.feature.cardDetailApi)
-            implementation(projects.feature.cardDetail)
+            implementation(projects.feature.cardApi)
+            implementation(projects.feature.card)
 
             // ========== Compose UI 依赖 ==========
             // Compose 运行时（必需：所有 Compose 组件的基础）
@@ -184,8 +184,8 @@ kotlin {
             // 统计框架
             implementation(projects.core.analytics)
             // 数据层（必需：数据存储和网络）
-            implementation(projects.core.datastoreModel)
-            implementation(projects.core.datastoreRepositoryClient)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClient)
             // Feature 模块
             implementation(projects.feature.settings)
             // Component 模块

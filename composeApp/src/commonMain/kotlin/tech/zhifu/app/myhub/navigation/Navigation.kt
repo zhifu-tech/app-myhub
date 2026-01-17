@@ -7,26 +7,24 @@ import androidx.navigation3.runtime.entryProvider
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import tech.zhifu.app.myhub.carddetail.navigation.cardEntry
-import tech.zhifu.app.myhub.core.navigation.AppNavigator
-import tech.zhifu.app.myhub.core.navigation.NavItem
-import tech.zhifu.app.myhub.dashboard.navigation.dashboardEntry
-import tech.zhifu.app.myhub.feature.carddetail.api.CardNavKey
-import tech.zhifu.app.myhub.feature.dashboard.api.DashboardNavItem
-import tech.zhifu.app.myhub.feature.dashboard.api.DashboardNavKey
-import tech.zhifu.app.myhub.feature.dashboard.api.navigation.ProfileNavItem
-import tech.zhifu.app.myhub.feature.dashboard.api.navigation.ProfileNavKey
-import tech.zhifu.app.myhub.profile.navigation.profileEntry
+import tech.zhifu.app.myhub.feature.card.api.CardNavKey
+import tech.zhifu.app.myhub.feature.card.navigation.cardEntry
+import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavItem
+import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavKey
+import tech.zhifu.app.myhub.feature.dashboard.navigation.dashboardEntry
+import tech.zhifu.app.myhub.feature.profile.api.navigation.ProfileNavItem
+import tech.zhifu.app.myhub.feature.profile.api.navigation.ProfileNavKey
+import tech.zhifu.app.myhub.feature.profile.navigation.profileEntry
 
 fun navAppStartKey(): NavKey = DashboardNavKey
 
-fun navAppKeySet() = setOf<NavKey>(
+fun navAppKeySet(): Set<NavKey> = setOf(
     DashboardNavKey,
     ProfileNavKey,
 )
 
 @Composable
-fun navAppKeyItemMap() = mapOf<NavKey, NavItem>(
+fun navAppKeyItemMap(): Map<NavKey, NavItem> = mapOf(
     DashboardNavKey to DashboardNavItem(),
     ProfileNavKey to ProfileNavItem(),
 )

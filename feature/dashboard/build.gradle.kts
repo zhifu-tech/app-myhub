@@ -22,7 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.feature.cardDetailApi)
+            implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboardApi)
             // Compose UI 依赖
             implementation(compose.runtime)
@@ -48,14 +48,14 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
 
-            implementation(projects.core.datastoreModel)
-            implementation(projects.core.datastoreRepositoryClient)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClient)
 
             // Component 模块
             implementation(projects.component.card)
 
             // Feature 模块
-            implementation(projects.feature.cardDetail) // card-detail 模块
+            implementation(projects.feature.card) // card 模块
 
             // Preview 支持（仅在 dev 环境）
             if (project.isDev()) {

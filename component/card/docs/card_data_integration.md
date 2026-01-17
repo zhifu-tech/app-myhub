@@ -152,7 +152,7 @@ fun kotlin.time.Instant.formatCardDate(): String {
 ```kotlin
 dependencies {
     // 数据模型依赖
-    implementation(projects.core.datastoreModel)
+    implementation(projects.datastoreModel)
     // kotlinx-datetime 用于日期格式化
     implementation(libs.kotlinx.datetime)
 }
@@ -362,7 +362,7 @@ fun QuoteCard(
 
 1. ✅ 检查依赖关系
 
-   - 确认 `component/card` 已依赖 `core:datastore-model`
+   - 确认 `component/card` 已依赖 `datastore:model`
    - 确认已依赖 `kotlinx-datetime`
    - 已在 `build.gradle.kts` 中添加
 
@@ -409,7 +409,7 @@ fun QuoteCard(
 ```kotlin
 dependencies {
     // 数据模型依赖
-    implementation(projects.core.datastoreModel)
+    implementation(projects.datastoreModel)
     // kotlinx-datetime 用于日期格式化
     implementation(libs.kotlinx.datetime)
 }

@@ -133,7 +133,7 @@
 
 ---
 
-### core:datastore ✅
+### datastore ✅
 
 | 功能             | 状态        | 说明                         |
 | ---------------- | ----------- | ---------------------------- |
@@ -143,7 +143,7 @@
 | Repository       | 🟡 部分完成 | 核心功能完成，部分方法待完善 |
 | 测试             | ✅ 完成     | 完整的单元测试覆盖           |
 
-**详细待办**：参见 [core:datastore 待办事项](../core/datastore/docs/datastore_todos.md)
+**详细待办**：参见 [datastore 待办事项](../datastore/docs/datastore_todos.md)
 
 ---
 
@@ -199,9 +199,9 @@
 
 ### 模块文档
 
-- [core:datastore 架构设计](../core/datastore/docs/datastore_architecture.md)
-- [core:datastore 待办事项](../core/datastore/docs/datastore_todos.md)
-- [core:datastore 测试指南](../core/datastore/docs/datastore_test_guide.md)
+- [datastore 架构设计](../datastore/docs/datastore_architecture.md)
+- [datastore 待办事项](../datastore/docs/datastore_todos.md)
+- [datastore 测试指南](../datastore/docs/datastore_test_guide.md)
 
 ### 其他文档
 

@@ -49,8 +49,8 @@ kotlin {
             implementation(projects.core.platformCompose)
             implementation(projects.core.logger)
 
-            implementation(projects.core.datastoreModel)
-            implementation(projects.core.datastoreRepositoryClient)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClient)
             // Preview 支持
             if (project.isDev()) {
                 implementation(compose.components.uiToolingPreview)

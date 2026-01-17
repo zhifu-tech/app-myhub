@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.service
 
 import tech.zhifu.app.myhub.datastore.model.User
-import tech.zhifu.app.myhub.exception.ValidationException
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.exception.ValidationException
 
 /**
  * 用户服务

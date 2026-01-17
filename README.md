@@ -205,15 +205,15 @@ app-myhub/
 
 **数据层模块**
 
-- **core:datastore-model**: 数据模型定义（Card、Tag、Template、User 等）
-- **core:datastore-database**: SQLDelight 数据库 Schema 定义
-- **core:datastore-database-client**: 客户端数据库配置和驱动工厂
-- **core:datastore-database-server**: 服务端数据库配置和驱动工厂
-- **core:datastore-datasource-local**: 本地数据源实现（SQLDelight）
-- **core:datastore-datasource-remote**: 远程数据源实现（Ktor Client）
-- **core:datastore-repository**: Repository 接口定义
-- **core:datastore-repository-client**: 客户端 Repository 实现（协调本地和远程数据源）
-- **core:datastore-repository-server**: 服务端 Repository 实现（仅使用本地数据源）
+- **datastore:model**: 数据模型定义（Card、Tag、Template、User 等）
+- **datastore:database**: SQLDelight 数据库 Schema 定义
+- **datastore:database-client**: 客户端数据库配置和驱动工厂
+- **datastore:database-server**: 服务端数据库配置和驱动工厂
+- **datastore:datasource-local**: 本地数据源实现（SQLDelight）
+- **datastore:datasource-remote**: 远程数据源实现（Ktor Client）
+- **datastore:repository**: Repository 接口定义
+- **datastore:repository-client**: 客户端 Repository 实现（协调本地和远程数据源）
+- **datastore:repository-server**: 服务端 Repository 实现（仅使用本地数据源）
 
 #### 组件模块
 
@@ -230,7 +230,7 @@ app-myhub/
 
 - **server**: Ktor 服务器应用，提供 RESTful API 服务
 
-更多关于数据层模块的详细信息，请参考 [core/datastore/README.md](core/datastore/README.md)。
+更多关于数据层模块的详细信息，请参考 [datastore/README.md](datastore/README.md)。
 
 ### 📚 文档
 
@@ -245,8 +245,8 @@ app-myhub/
 - [core:platform 模块](core/platform/README.md) - 平台抽象模块说明
 - [core:logger 模块](core/logger/README.md) - 日志模块说明
 - [core:analytics 模块](core/analytics/README.md) - 统计框架模块说明
-- [core:datastore 模块套件](core/datastore/README.md) - 数据层模块套件概述
-- [core:datastore 架构设计](core/datastore/docs/datastore_architecture.md) - 详细的数据模型架构设计
+- [datastore 模块套件](datastore/README.md) - 数据层模块套件概述
+- [datastore 架构设计](datastore/docs/datastore_architecture.md) - 详细的数据模型架构设计
 
 **组件模块**
 

@@ -23,19 +23,19 @@ dependencies {
     implementation(projects.core.logger)
 
     // Model 模块（用于 API，包含 DTO）
-    implementation(projects.core.datastoreModel)
+    implementation(projects.datastore.model)
 
     // Repository 服务端实现
-    implementation(projects.core.datastoreRepositoryServer)
+    implementation(projects.datastore.repositoryServer)
 
     // 数据库模块（通过 datastore-repository-server 传递，但需要显式声明以访问 MyHubDatabase）
-    implementation(projects.core.datastoreDatabaseServer)
+    implementation(projects.datastore.databaseServer)
 
     // 数据库管理模块（用于初始化数据）
-    implementation(projects.core.datastoreDatabaseManage)
+    implementation(projects.datastore.databaseManage)
 
     // LocalDataSource（CardRepositoryImpl 需要使用）
-    implementation(projects.core.datastoreDatasourceLocal)
+    implementation(projects.datastore.datasourceLocal)
 
     // Ktor Server
     implementation(libs.ktor.serverCore)

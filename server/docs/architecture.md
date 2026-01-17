@@ -407,7 +407,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ### API 客户端
 
-客户端通过 `core:datastore` 模块的 `RemoteCardDataSource` 等接口与服务器通信。
+客户端通过 `datastore` 模块的 `RemoteCardDataSource` 等接口与服务器通信。
 
 ### 数据同步
 

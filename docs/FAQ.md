@@ -362,7 +362,7 @@ Android 模拟器使用特殊的 IP 地址 `10.0.2.2` 来访问主机的 `localh
 **相关配置文件：**
 
 - `androidApp/src/main/res/xml/network_security_config.xml` - 网络安全配置
-- `core/datastore-datasource-remote/src/commonMain/kotlin/.../ApiConfig.kt` - API 配置
+- `datastore/datasource-remote/src/commonMain/kotlin/.../ApiConfig.kt` - API 配置
 - `composeApp/src/commonMain/kotlin/.../AppBuildConfig.kt` - 构建配置
 
 ---
@@ -577,7 +577,7 @@ fun `test database schema creation`() = runDatabaseTest { database ->
 **示例：**
 
 ```kotlin
-// core/datastore-model/src/commonMain/kotlin/.../model/Card.kt
+// datastore/model/src/commonMain/kotlin/.../model/Card.kt
 data class Card(
     val id: String,
     val type: CardType,              // ✅ 枚举类型，类型安全
@@ -600,7 +600,7 @@ data class Card(
 **示例：**
 
 ```kotlin
-// core/datastore-model/src/commonMain/kotlin/.../model/CardDto.kt
+// datastore/model/src/commonMain/kotlin/.../model/CardDto.kt
 @Serializable
 data class CardDto(
     val id: String,

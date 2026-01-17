@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.api
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,9 +9,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import tech.zhifu.app.myhub.datastore.model.toDomain
 import tech.zhifu.app.myhub.datastore.model.CardType
 import tech.zhifu.app.myhub.datastore.model.Template
+import tech.zhifu.app.myhub.datastore.model.toDomain
 import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.TemplateService
 import kotlin.time.Clock
@@ -35,7 +34,8 @@ fun Route.templatesApi(templateService: TemplateService) {
         // GET /api/templates/{id} - 获取指定模板
         get("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
                 val template = templateService.getTemplateById(id)
                     ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Template", id)
                 call.respond(HttpStatusCode.OK, template)
@@ -76,7 +76,8 @@ fun Route.templatesApi(templateService: TemplateService) {
         // PUT /api/templates/{id} - 更新模板
         put("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
                 val request = call.receive<UpdateTemplateRequest>()
                 val existing = templateService.getTemplateById(id)
                     ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Template", id)
@@ -106,7 +107,8 @@ fun Route.templatesApi(templateService: TemplateService) {
         // DELETE /api/templates/{id} - 删除模板
         delete("{id}") {
             try {
-                val id = call.parameters["id"] ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
+                val id = call.parameters["id"]
+                    ?: throw tech.zhifu.app.myhub.exception.ValidationException("Template ID is required")
                 val deleted = templateService.deleteTemplate(id)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)
