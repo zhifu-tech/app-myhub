@@ -2,8 +2,8 @@ package tech.zhifu.app.myhub.profile.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import tech.zhifu.app.myhub.core.navigation.AppNavKey
 import tech.zhifu.app.myhub.core.navigation.AppNavigator
+import tech.zhifu.app.myhub.feature.dashboard.api.navigation.ProfileNavKey
 import tech.zhifu.app.myhub.profile.ProfileScreen
 
 /**
@@ -14,7 +14,7 @@ import tech.zhifu.app.myhub.profile.ProfileScreen
 fun EntryProviderScope<NavKey>.profileEntry(
     navigator: AppNavigator
 ) {
-    entry<AppNavKey.Profile> {
+    entry<ProfileNavKey>() {
         ProfileScreen()
     }
 }

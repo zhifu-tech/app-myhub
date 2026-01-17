@@ -109,6 +109,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            // ========== 项目模块依赖 ==========
+            implementation(projects.feature.dashboard)
+            implementation(projects.feature.dashboardApi)
+            implementation(projects.feature.profile)
+            implementation(projects.feature.profileApi)
+            implementation(projects.feature.favoriteApi)
+            implementation(projects.feature.favorite)
+            implementation(projects.feature.cardDetailApi)
+            implementation(projects.feature.cardDetail)
+
             // ========== Compose UI 依赖 ==========
             // Compose 运行时（必需：所有 Compose 组件的基础）
             implementation(compose.runtime)
@@ -178,9 +188,6 @@ kotlin {
             implementation(projects.core.datastoreRepositoryClient)
             // Feature 模块
             implementation(projects.feature.settings)
-            implementation(projects.feature.dashboard)
-            implementation(projects.feature.profile)
-            implementation(projects.feature.cardDetail)
             // Component 模块
             implementation(projects.component.card)
             implementation(projects.component.mixed)

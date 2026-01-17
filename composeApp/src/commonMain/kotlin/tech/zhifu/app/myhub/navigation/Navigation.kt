@@ -1,51 +1,47 @@
 package tech.zhifu.app.myhub.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Style
-import androidx.compose.ui.graphics.vector.ImageVector
-import org.jetbrains.compose.resources.StringResource
-import tech.zhifu.app.myhub.platform.resources.settings
-import tech.zhifu.app.myhub.resources.Res
-import tech.zhifu.app.myhub.resources.all_cards
-import tech.zhifu.app.myhub.resources.dashboard
-import tech.zhifu.app.myhub.resources.favorites
-import tech.zhifu.app.myhub.resources.new_card
-import tech.zhifu.app.myhub.resources.profile
-import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import tech.zhifu.app.myhub.carddetail.navigation.cardEntry
+import tech.zhifu.app.myhub.core.navigation.AppNavigator
+import tech.zhifu.app.myhub.core.navigation.NavItem
+import tech.zhifu.app.myhub.dashboard.navigation.dashboardEntry
+import tech.zhifu.app.myhub.feature.carddetail.api.CardNavKey
+import tech.zhifu.app.myhub.feature.dashboard.api.DashboardNavItem
+import tech.zhifu.app.myhub.feature.dashboard.api.DashboardNavKey
+import tech.zhifu.app.myhub.feature.dashboard.api.navigation.ProfileNavItem
+import tech.zhifu.app.myhub.feature.dashboard.api.navigation.ProfileNavKey
+import tech.zhifu.app.myhub.profile.navigation.profileEntry
 
-sealed class Screen(val route: String, val title: String) {
-    object Dashboard : Screen("dashboard", "Dashboard")
-    object AllCards : Screen("all_cards", "All Cards")
-    object New : Screen("new", "New")
-    object Templates : Screen("templates", "Templates")
-    object Favorites : Screen("favorites", "Favorites")
-    object Settings : Screen("settings", "Settings")
-    object Profile : Screen("profile", "Profile")
+fun navAppStartKey(): NavKey = DashboardNavKey
 
-    /**
-     * 卡片详情页
-     *
-     * @param cardId 卡片 ID
-     */
-    data class CardDetail(
-        val cardId: String
-    ) : Screen("card_detail/$cardId", "Card Detail") {
-        companion object {
-            fun createRoute(cardId: String) = "card_detail/$cardId"
-        }
+fun navAppKeySet() = setOf<NavKey>(
+    DashboardNavKey,
+    ProfileNavKey,
+)
+
+@Composable
+fun navAppKeyItemMap() = mapOf<NavKey, NavItem>(
+    DashboardNavKey to DashboardNavItem(),
+    ProfileNavKey to ProfileNavItem(),
+)
+
+fun navKeySerializerModule() = SerializersModule {
+    polymorphic(NavKey::class) {
+        subclass(DashboardNavKey::class)
+        subclass(ProfileNavKey::class)
+        subclass(CardNavKey::class)
     }
 }
 
-sealed class NavItem(val screen: Screen, val icon: ImageVector, val labelKey: StringResource) {
-    object Explore : NavItem(Screen.AllCards, Icons.Default.Style, Res.string.all_cards)
-    object Dashboard : NavItem(Screen.Dashboard, Icons.Default.Dashboard, Res.string.dashboard)
-    object Favorites : NavItem(Screen.Favorites, Icons.Default.Favorite, Res.string.favorites)
-    object New : NavItem(Screen.New, Icons.Default.Add, Res.string.new_card)
-    object Settings : NavItem(Screen.Settings, Icons.Default.Settings, PlatformRes.string.settings)
-    object Profile : NavItem(Screen.Profile, Icons.Default.Person, Res.string.profile)
+@Composable
+fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvider {
+    dashboardEntry(this@navEntryProvider)
+    profileEntry(this@navEntryProvider)
+    cardEntry(this@navEntryProvider)
 }

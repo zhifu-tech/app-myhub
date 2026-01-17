@@ -21,28 +21,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.LocalAnalyticsService
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
-import tech.zhifu.app.myhub.core.navigation.AppNavKey
 import tech.zhifu.app.myhub.core.navigation.AppNavigator
-import tech.zhifu.app.myhub.core.navigation.FeatureNavKey
+import tech.zhifu.app.myhub.core.navigation.NavItem
+import tech.zhifu.app.myhub.core.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.core.navigation.toEntries
-import tech.zhifu.app.myhub.dashboard.navigation.dashboardEntry
 import tech.zhifu.app.myhub.local.LocalAppLocale
 import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.navigation.NavItem
-import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
-import tech.zhifu.app.myhub.profile.navigation.profileEntry
+import tech.zhifu.app.myhub.navigation.navAppKeyItemMap
+import tech.zhifu.app.myhub.navigation.navEntryProvider
 import tech.zhifu.app.myhub.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
@@ -98,10 +93,7 @@ private fun AppContent(
 
     AppTheme(darkTheme = isDarkTheme) {
         val navigator = AppNavigator(appState.navigationState)
-        val entries = appState.navigationState.toEntries(entryProvider {
-            dashboardEntry(navigator)
-            profileEntry(navigator)
-        })
+        val entries = appState.navigationState.toEntries(navigator.navEntryProvider())
         val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
         val navSuitState = rememberNavigationSuiteScaffoldState()
         val navSuitType = when {
@@ -115,7 +107,8 @@ private fun AppContent(
             navigationSuiteType = navSuitType,
             navigationItems = {
                 NavigationItems(
-                    items = navigationItems,
+                    appState = appState,
+                    items = navAppKeyItemMap(),
                     currentKey = appState.navigationState.currentAppKey,
                     navSuitType = navSuitType,
                     onNavigate = navigator::navigate
@@ -134,35 +127,30 @@ private fun AppContent(
     }
 }
 
-private val navigationItems = mapOf(
-    AppNavKey.Dashboard to NavItem.Dashboard,
-    AppNavKey.Profile to NavItem.Profile,
-    FeatureNavKey.AllCards to NavItem.Explore,
-    FeatureNavKey.CardDetail to NavItem.Favorites
-)
-
 @Composable
 private fun NavigationItems(
-    items: Map<Any, NavItem>,
+    appState: AppState,
+    items: Map<NavKey, NavItem>,
     currentKey: NavKey?,
     navSuitType: NavigationSuiteType,
     onNavigate: (NavKey) -> Unit
 ) {
     items.forEach { (navKey, navItem) ->
+        val selected = navKey == appState.navigationState.currentAppKey
         NavigationSuiteItem(
             navigationSuiteType = navSuitType,
             selected = currentKey == navKey,
-            onClick = { onNavigate(navKey as NavKey) },
+            onClick = { onNavigate(navKey) },
             icon = {
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = navItem.icon,
-                    contentDescription = stringResource(navItem.labelKey)
+                    imageVector = if (selected) navItem.selectedIcon else navItem.unselectedIcon,
+                    contentDescription = navItem.iconText
                 )
             },
             label = {
                 Text(
-                    text = stringResource(navItem.labelKey),
+                    text = navItem.iconText,
                     style = MaterialTheme.typography.labelMedium
                 )
             }

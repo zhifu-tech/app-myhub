@@ -22,6 +22,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.feature.cardDetailApi)
+
+            implementation(projects.core.navigation)
+
             // Compose UI 依赖
             implementation(compose.runtime)
             implementation(compose.foundation)

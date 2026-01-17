@@ -22,6 +22,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.feature.cardDtailApi)
+            implementation(projects.feature.dashboardApi)
             // Compose UI 依赖
             implementation(compose.runtime)
             implementation(compose.foundation)

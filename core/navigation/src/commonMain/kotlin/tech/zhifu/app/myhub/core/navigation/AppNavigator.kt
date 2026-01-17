@@ -27,7 +27,7 @@ class AppNavigator(val state: AppNavigationState) {
         when (key) {
             state.currentAppKey -> {
                 //  清空当前 SubStack（返回到应用键的根屏幕）
-                state.currentFeatureStack.run {
+                state.currentSubStack.run {
                     if (size > 1) subList(1, size).clear()
                 }
             }
@@ -46,7 +46,7 @@ class AppNavigator(val state: AppNavigationState) {
 
             else -> {
                 // 导航到功能键（在当前 SubStack 中）
-                state.currentFeatureStack.apply {
+                state.currentSubStack.apply {
                     remove(key)
                     add(key)
                 }
@@ -85,7 +85,7 @@ class AppNavigator(val state: AppNavigationState) {
 
             else -> {
                 // 在子栈中，正常返回
-                state.currentFeatureStack.removeLastOrNull()
+                state.currentSubStack.removeLastOrNull()
             }
         }
     }

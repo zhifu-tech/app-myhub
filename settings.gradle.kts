@@ -208,13 +208,16 @@ include(":component:mixed")
 // ============================================================================
 // 功能模块
 // ============================================================================
+include(":feature:settings-api")
 include(":feature:settings")
+include(":feature:dashboard-api")
 include(":feature:dashboard")
+include(":feature:profile-api")
 include(":feature:profile")
+include(":feature:favorite-api")
+include(":feature:favorite")
+include(":feature:card-detail-api")
 include(":feature:card-detail")
-// 业务模块：引用
-include(":feature:quote-api")
-include(":feature:quote")
 
 // ============================================================================
 // 应用模块

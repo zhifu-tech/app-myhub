@@ -14,31 +14,18 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 
 @Composable
 fun rememberAppNavigationState(
     startKey: NavKey,
     appKeys: Set<NavKey>,
+    navKeysSerializerModule: SerializersModule,
 ): AppNavigationState {
-    val savedStateConfiguration = remember {
-        SavedStateConfiguration {
-            serializersModule = SerializersModule {
-                polymorphic(NavKey::class) {
-                    // TODO 考虑重构，满足开闭原则，新增或者移除不需要在这里手动注册
-                    // 注册 AppNavKey 的所有具体子类型
-                    subclass(AppNavKey.Dashboard::class)
-                    subclass(AppNavKey.Profile::class)
-                    // 注册 FeatureNavKey 的所有具体子类型
-                    subclass(FeatureNavKey.CardDetail::class)
-                    subclass(FeatureNavKey.AllCards::class)
-                }
-            }
-        }
+    val savedStateConfiguration = SavedStateConfiguration {
+        serializersModule = navKeysSerializerModule
     }
     val appStack = rememberNavBackStack(savedStateConfiguration, startKey)
-    val featureStacks = appKeys.associateWith { key ->
+    val subStacks = appKeys.associateWith { key ->
         rememberNavBackStack(savedStateConfiguration, key)
     }
 
@@ -46,7 +33,7 @@ fun rememberAppNavigationState(
         AppNavigationState(
             startKey = startKey,
             appStack = appStack,
-            featureStacks = featureStacks,
+            subStacks = subStacks,
         )
     }
 }
@@ -54,21 +41,21 @@ fun rememberAppNavigationState(
 class AppNavigationState(
     val startKey: NavKey,
     val appStack: NavBackStack<NavKey>,
-    val featureStacks: Map<NavKey, NavBackStack<NavKey>>,
+    val subStacks: Map<NavKey, NavBackStack<NavKey>>,
 ) {
     val currentAppKey: NavKey by derivedStateOf {
         appStack.last()
     }
 
     val appKeys: Set<NavKey>
-        get() = featureStacks.keys
+        get() = subStacks.keys
 
-    val currentFeatureStack: NavBackStack<NavKey>
-        get() = featureStacks[currentAppKey]
+    val currentSubStack: NavBackStack<NavKey>
+        get() = subStacks[currentAppKey]
             ?: error("Feature stack for $currentAppKey does not exist")
 
     val currentKey: NavKey by derivedStateOf {
-        currentFeatureStack.last()
+        currentSubStack.last()
     }
 }
 
@@ -77,7 +64,7 @@ fun AppNavigationState.toEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): SnapshotStateList<NavEntry<NavKey>> {
 
-    val decoratedEntries = featureStacks.mapValues { (_, stack) ->
+    val decoratedEntries = subStacks.mapValues { (_, stack) ->
         val decorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
         )
