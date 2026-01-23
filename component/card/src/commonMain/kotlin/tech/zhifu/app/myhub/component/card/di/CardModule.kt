@@ -3,12 +3,18 @@ package tech.zhifu.app.myhub.component.card.di
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.component.card.ArticleCardComponent
 import tech.zhifu.app.myhub.component.card.CardComponent
-import tech.zhifu.app.myhub.component.card.ChecklistCardComponent
 import tech.zhifu.app.myhub.component.card.CodeCardComponent
-import tech.zhifu.app.myhub.component.card.DictionaryCardComponent
 import tech.zhifu.app.myhub.component.card.IdeaCardComponent
 import tech.zhifu.app.myhub.component.card.QuoteCardComponent
-import tech.zhifu.app.myhub.datastore.model.CardType
+import tech.zhifu.app.myhub.component.card.TodoCardComponent
+import tech.zhifu.app.myhub.component.card.WordCardComponent
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_ARTICLE
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_CODE
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_IDEA
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_QUOTE
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_TODO
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_WORD
+import tech.zhifu.app.myhub.datastore.model.domain.CardType
 
 /**
  * 卡片组件 Koin 模块
@@ -23,13 +29,12 @@ val cardModule = module {
     // 注册卡片组件映射
     single<Map<CardType, CardComponent>> {
         mapOf(
-            CardType.QUOTE to QuoteCardComponent(),
-            CardType.CODE to CodeCardComponent(),
-            CardType.IDEA to IdeaCardComponent(),
-            CardType.ARTICLE to ArticleCardComponent(),
-            CardType.DICTIONARY to DictionaryCardComponent(),
-            CardType.CHECKLIST to ChecklistCardComponent()
+            CARD_TYPE_ARTICLE to ArticleCardComponent(),
+            CARD_TYPE_QUOTE to QuoteCardComponent(),
+            CARD_TYPE_CODE to CodeCardComponent(),
+            CARD_TYPE_IDEA to IdeaCardComponent(),
+            CARD_TYPE_WORD to WordCardComponent(),
+            CARD_TYPE_TODO to TodoCardComponent()
         )
     }
 }
-

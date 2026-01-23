@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,7 +35,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.articleMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 
 @Composable
 fun ArticleCard(
@@ -53,11 +56,11 @@ fun ArticleCard(
     }
 
     val summary = remember(card) {
-        card.metadata?.articleSummary ?: card.content
+        card.articleMetadata?.summary ?: card.content
     }
 
     val articleUrl = remember(card) {
-        card.metadata?.articleUrl ?: card.source
+        card.articleMetadata?.url.orEmpty()
     }
 
     Card(
@@ -83,7 +86,7 @@ fun ArticleCard(
                         .align(Alignment.TopEnd)
                         .padding(16.dp)
                 ) {
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit",
                         tint = MaterialTheme.colorScheme.primary,
@@ -165,7 +168,7 @@ fun ArticleCard(
                                     border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)
                                 ) {
                                     Text(
-                                        text = tag.take(2).uppercase(),
+                                        text = tag.name.take(2).uppercase(),
                                         style = MaterialTheme.typography.labelSmall,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
@@ -176,7 +179,7 @@ fun ArticleCard(
                                 onClick = { onFavorite(card) },
                                 modifier = Modifier.size(32.dp)
                             ) {
-                                androidx.compose.material3.Icon(
+                                Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = "Favorite",
                                     tint = if (card.isFavorite) {

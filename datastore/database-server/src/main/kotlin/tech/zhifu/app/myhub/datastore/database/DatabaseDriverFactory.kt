@@ -3,9 +3,9 @@ package tech.zhifu.app.myhub.datastore.database
 import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.GlobalContext
-import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
+//import kotlinx.coroutines.runBlocking
+//import org.koin.core.context.GlobalContext
+//import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
 import java.io.File
 
 /**
@@ -39,14 +39,14 @@ class DatabaseDriverFactory(private val config: DatabaseConfig) {
             // 数据库文件不存在，创建新数据库和表
             MyHubDatabase.Schema.synchronous().create(driver)
 
-            // 加载初始数据
-            val databaseManager = GlobalContext.get().get<DatabaseManager>()
-            runBlocking {
-                databaseManager.loadAllData(
-                    resourcePath = "database/init",
-                    clearBeforeLoad = false
-                )
-            }
+//            // 加载初始数据
+//            val databaseManager = GlobalContext.get().get<DatabaseManager>()
+//            runBlocking {
+//                databaseManager.loadAllData(
+//                    resourcePath = "database/init",
+//                    clearBeforeLoad = false
+//                )
+//            }
         }
 
         // 启用外键约束

@@ -21,8 +21,8 @@ import tech.zhifu.app.myhub.component.card.resources.component_card_month_may
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_nov
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_oct
 import tech.zhifu.app.myhub.component.card.resources.component_card_month_sep
-import tech.zhifu.app.myhub.datastore.model.Card
-import tech.zhifu.app.myhub.datastore.model.CardType
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.CardType
 
 private lateinit var factories: Map<CardType, CardComponent>
 

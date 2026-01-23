@@ -1,0 +1,41 @@
+-- 同步游标状态表
+CREATE TABLE sync_state (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    last_sync_at TEXT,
+    last_sync_token TEXT
+);
+
+-- 索引
+
+CREATE UNIQUE INDEX idx_sync_state_user_entity ON sync_state(user_id, entity_type);
+
+-- CRUD 操作
+
+selectSyncStateByUserIdAndEntity:
+SELECT * FROM sync_state
+WHERE user_id = ?
+  AND entity_type = ?;
+
+selectSyncStatesByUserId:
+SELECT * FROM sync_state
+WHERE user_id = ?;
+
+insertSyncState:
+INSERT OR REPLACE INTO sync_state (
+    id,
+    user_id,
+    entity_type,
+    last_sync_at,
+    last_sync_token
+)
+VALUES (?, ?, ?, ?, ?);
+
+deleteSyncStateById:
+DELETE FROM sync_state
+WHERE id = ?;
+
+deleteSyncStatesByUserId:
+DELETE FROM sync_state
+WHERE user_id = ?;

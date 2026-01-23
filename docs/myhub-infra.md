@@ -19,6 +19,8 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 
 ## [日志模块方案设计](../core/logger/docs/myhub-logger-infra-v1.0.md)
 
+## [缓存模块方案设计](../core/cache/docs/myhub-cache-infra-v1.0.md)
+
 ## [应用构建配置模块方案设计](../core/app-build-config/docs/myhub-app-build-config-infra-v1.0.md)
 
 ## [平台抽象模块方案设计](../core/platform/docs/myhub-platform-infra-v1.0.md)
@@ -37,8 +39,6 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 
 ## [数据库测试模块方案设计](../datastore/database-test/docs/myhub-datastore-database-test-infra-v1.0.md)
 
-## [数据库管理模块方案设计](../datastore/database-manage/docs/myhub-datastore-database-manage-infra-v1.0.md)
-
 ## [数据库客户端模块方案设计](../datastore/database-client/docs/myhub-datastore-database-client-infra-v1.0.md)
 
 ## [本地数据源模块方案设计](../datastore/datasource-local/docs/myhub-datastore-datasource-local-infra-v1.0.md)
@@ -50,3 +50,9 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 ## [数据仓库客户端模块方案设计](../datastore/repository-client/docs/myhub-datastore-repository-client-infra-v1.0.md)
 
 ## [数据仓库服务端模块方案设计](../datastore/repository-server/docs/myhub-datastore-repository-server-infra-v1.0.md)
+
+## [同步机制方案设计](./myhub-sync-infra-v1.0.md)
+
+## [匿名身份与免登录标识方案设计](./myhub-anonymous-identity-infra-v1.0.md)
+
+## [首次安装数据初始化方案设计](./myhub-bootstrap-infra-v1.0.md)

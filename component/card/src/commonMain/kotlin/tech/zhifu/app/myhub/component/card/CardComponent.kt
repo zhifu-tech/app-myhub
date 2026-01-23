@@ -3,7 +3,7 @@ package tech.zhifu.app.myhub.component.card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 internal interface CardComponent {
     @Suppress("NotConstructor")

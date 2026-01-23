@@ -1,0 +1,17 @@
+-- 单词 / 语言学习卡片元数据
+CREATE TABLE card_metadata_word (
+    card_id TEXT PRIMARY KEY NOT NULL,
+
+    pronunciation TEXT,
+    definition TEXT NOT NULL,
+    example TEXT,
+
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_card_metadata_word_card_id ON card_metadata_word(card_id);
+
+insertCardMetadataWord:
+INSERT OR REPLACE INTO card_metadata_word (card_id, pronunciation, definition, example)
+VALUES (?, ?, ?, ?);

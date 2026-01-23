@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 /**
  * 操作面板组件

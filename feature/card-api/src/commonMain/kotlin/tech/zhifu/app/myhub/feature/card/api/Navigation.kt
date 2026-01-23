@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Serializable
-data class CardNavKey(val id: String) : NavKey
+data class CardNavKey(val cardId: String) : NavKey
 
-fun AppNavigator.navigateToCardDetail(id: String) {
-    navigate(CardNavKey(id))
+fun AppNavigator.navigateToCardDetail(cardId: String) {
+    navigate(CardNavKey(cardId))
 }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
+import tech.zhifu.app.myhub.datastore.repository.CardRepository
 
 /**
  * 卡片详情页 ViewModel
@@ -26,7 +26,7 @@ import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class CardDetailViewModel(
     private val cardId: String,
-    private val cardRepository: ReactiveCardRepository,
+    private val cardRepository: CardRepository,
     private val coroutineScope: CoroutineScope
 ) {
     private val _uiState = MutableStateFlow<CardDetailUiState>(
@@ -81,8 +81,10 @@ class CardDetailViewModel(
                     _uiState.value = when (val current = _uiState.value) {
                         is CardDetailUiState.Loading ->
                             CardDetailUiState.Content(card = card)
+
                         is CardDetailUiState.Content ->
                             current.copy(card = card)
+
                         is CardDetailUiState.Error ->
                             CardDetailUiState.Content(card = card)
                     }
@@ -157,7 +159,7 @@ class CardDetailViewModel(
     fun toggleFavorite() {
         coroutineScope.launch {
             try {
-                cardRepository.toggleFavorite(cardId)
+//                cardRepository.toggleFavorite(cardId)
                 // 状态会自动更新（通过 observeCard）
             } catch (e: Exception) {
                 updateError("Failed to toggle favorite: ${e.message}")
@@ -173,8 +175,8 @@ class CardDetailViewModel(
         if (currentState is CardDetailUiState.Content) {
             coroutineScope.launch {
                 try {
-                    val updatedCard = currentState.card.copy(tags = tags)
-                    cardRepository.updateCard(updatedCard)
+//                    val updatedCard = currentState.card.copy(tags = tags)
+//                    cardRepository.updateCard(updatedCard)
                     // 状态会自动更新（通过 observeCard）
                 } catch (e: Exception) {
                     updateError("Failed to update tags: ${e.message}")
@@ -223,7 +225,7 @@ class CardDetailViewModel(
                     // 如果 Card 有 notes 字段，在这里更新
                     // 或者使用 metadata 存储
                 )
-                cardRepository.updateCard(updatedCard)
+//                cardRepository.updateCard(updatedCard)
                 _uiState.value = currentState.copy(isSaving = false)
             } catch (e: Exception) {
                 _uiState.value = currentState.copy(

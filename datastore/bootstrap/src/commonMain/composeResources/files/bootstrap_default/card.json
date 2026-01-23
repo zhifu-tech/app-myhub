@@ -1,0 +1,74 @@
+[
+  {
+    "id": "card-001",
+    "type": "quote",
+    "title": "编程名言",
+    "content": "\"The more that you read, the more things you will know. The more that you learn, the more places you'll go.\"",
+    "userId": "user-001",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "card-002",
+    "type": "code",
+    "title": "Quick Sort Algorithm",
+    "content": "function quickSort(arr) {\n  if (arr.length <= 1) return arr;\n  let pivot = arr[0];\n  let left = [];\n  let right = [];\n  for (let i = 1; i < arr.length; i++) {\n    if (arr[i] < pivot) left.push(arr[i]);\n    else right.push(arr[i]);\n  }\n  return [...quickSort(left), pivot, ...quickSort(right)];\n}",
+    "userId": "user-001",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z"
+  },
+  {
+    "id": "card-003",
+    "type": "idea",
+    "title": "Project Idea",
+    "content": "Project idea: Build a browser extension that automatically converts highlighted text into a Study Room card.",
+    "userId": "user-001",
+    "createdAt": "2024-01-03T00:00:00Z",
+    "updatedAt": "2024-01-03T00:00:00Z"
+  },
+  {
+    "id": "card-004",
+    "type": "article",
+    "title": "The Future of AI",
+    "content": "Artificial intelligence is rapidly evolving, moving from narrow tasks to broader capabilities. The integration of LLMs into daily workflows suggests a paradigm shift in how we process information and interact with technology.",
+    "userId": "user-001",
+    "createdAt": "2024-01-04T00:00:00Z",
+    "updatedAt": "2024-01-04T00:00:00Z"
+  },
+  {
+    "id": "card-005",
+    "type": "word",
+    "title": "Serendipity",
+    "content": "The occurrence and development of events by chance in a happy or beneficial way.",
+    "userId": "user-001",
+    "createdAt": "2024-01-05T00:00:00Z",
+    "updatedAt": "2024-01-05T00:00:00Z"
+  },
+  {
+    "id": "card-006",
+    "type": "todo",
+    "title": "Weekly Review",
+    "content": "Weekly review checklist",
+    "userId": "user-001",
+    "createdAt": "2024-01-06T00:00:00Z",
+    "updatedAt": "2024-01-06T00:00:00Z"
+  },
+  {
+    "id": "card-007",
+    "type": "quote",
+    "title": "编程名言",
+    "content": "代码是写给人看的，只是偶尔在机器上运行。",
+    "userId": "user-001",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "card-008",
+    "type": "code",
+    "title": "Hello World",
+    "content": "fun main() {\n    println(\"Hello, World!\")\n}",
+    "userId": "user-001",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z"
+  }
+]

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.component.card.CardComponent
 import tech.zhifu.app.myhub.component.card.displayTitle
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 /**
  * 卡片内容展示区

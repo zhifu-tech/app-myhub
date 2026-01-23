@@ -29,26 +29,36 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,6 +71,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,8 +84,8 @@ import tech.zhifu.app.myhub.component.card.formatUpdatedTime
 import tech.zhifu.app.myhub.component.card.getContentPreview
 import tech.zhifu.app.myhub.component.card.typeIconColor
 import tech.zhifu.app.myhub.component.card.typeIconText
-import tech.zhifu.app.myhub.datastore.model.Card
-import tech.zhifu.app.myhub.datastore.model.Statistics
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_cards_to_review
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_days_ago
@@ -96,6 +107,10 @@ import tech.zhifu.app.myhub.ui.isWidthExpanded
 import tech.zhifu.app.myhub.ui.isWidthMedium
 import kotlin.time.Clock
 
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
@@ -112,98 +127,170 @@ fun DashboardScreen(
         else -> 3 // 默认值，实际上不会到达这里
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        when (val state = uiState) {
-            is DashboardUiState.InitialLoading -> {
-                // 显示初始加载状态（无数据）
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    // 可以在这里添加加载指示器
-                    Text(
-                        text = "Loading...",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    // 从 state 中获取数据（用于 AppBar 显示）
+    val contentState = uiState as? DashboardUiState.Content
+    val recentEditsCount = /*contentState?.statistics?.recentEdits ?:*/ 0
+    val lastSyncTime = contentState?.lastSyncTime
+    val isRefreshing = contentState?.isRefreshing ?: false
+
+    // 格式化最后同步时间
+    val syncTimeText = when {
+        lastSyncTime == null -> stringResource(Res.string.feature_dashboard_never_synced)
+        else -> {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val diff = now - lastSyncTime
+            when {
+                diff < 60_000 -> stringResource(Res.string.feature_dashboard_just_now)
+                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, (diff / 60_000))
+                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, (diff / 3_600_000))
+                else -> stringResource(Res.string.feature_dashboard_days_ago, (diff / 86_400_000))
             }
+        }
+    }
 
-            is DashboardUiState.Content -> {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // 顶部头部（sticky）
-                    DashboardHeader(
-                        recentEditsCount = state.statistics.recentEdits,
-                        lastSyncTime = state.lastSyncTime,
-                        isLoading = state.isRefreshing, // 显示刷新动画
-                        onRefresh = { viewModel.refresh() },
-                        sizeClass = sizeClass
+    Scaffold(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            LargeFlexibleTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(Res.string.feature_dashboard_good_evening),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-
-                    // 搜索栏和工具栏
-                    DashboardToolbar(
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        statistics = state.statistics,
-                        sizeClass = sizeClass,
-                        viewType = state.viewType,
-                        onViewTypeChange = { viewModel.setViewType(it) }
+                },
+                subtitle = {
+                    Text(
+                        text = if (recentEditsCount > 0) {
+                            stringResource(Res.string.feature_dashboard_cards_to_review, recentEditsCount)
+                        } else {
+                            stringResource(Res.string.feature_dashboard_no_cards_to_review)
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-
-                    // 根据视图类型显示不同的布局
-                    when (state.viewType) {
-                        ViewType.GRID -> {
-                            // 1列和2列：统计卡片在Grid内部，作为第一个item，随列表滚动
-                            // 3列：统计信息在工具栏中显示（已实现），Grid内部不显示
-                            DashboardGridView(
-                                cards = state.recentCards,
-                                columns = columns,
-                                statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics, // 1列和2列时显示统计卡片
-                                sizeClass = sizeClass,
-                                onEdit = { viewModel.editCard(it.id) },
-                                onFavorite = { viewModel.toggleFavorite(it.id) },
-                                onCardClick = {
-                                    onNavigateToCardDetail(it.id)
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(1f)
-                            )
-                        }
-
-                        ViewType.LIST -> {
-                            DashboardListView(
-                                cards = state.recentCards,
-                                columns = columns,
-                                statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics, // 1列和2列时显示统计卡片
-                                sizeClass = sizeClass,
-                                onEdit = { viewModel.editCard(it.id) },
-                                onFavorite = { viewModel.toggleFavorite(it.id) },
-                                onCardClick = {
-                                    onNavigateToCardDetail(it.id)
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(1f)
-                            )
+                },
+                titleHorizontalAlignment = Alignment.Start,
+                navigationIcon = {
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                            TooltipAnchorPosition.Above
+                        ),
+                        tooltip = { PlainTooltip { Text("Menu") } },
+                        state = rememberTooltipState(),
+                    ) {
+                        IconButton(onClick = { /* doSomething() */ }) {
+                            Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
                         }
                     }
+                },
+                actions = {
+                    // 同步时间提示
+                    Text(
+                        text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                    // 刷新按钮
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                            TooltipAnchorPosition.Above
+                        ),
+                        tooltip = { PlainTooltip { Text("Refresh") } },
+                        state = rememberTooltipState(),
+                    ) {
+                        RefreshButton(
+                            isLoading = isRefreshing,
+                            onRefresh = { viewModel.refresh() }
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        },
+        content = { innerPadding ->
+            when (val state = uiState) {
+                is DashboardUiState.InitialLoading -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // 可以在这里添加加载指示器
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-                    // 错误提示（如果有错误且不在刷新中）
-                    if (state.error != null && !state.isRefreshing) {
-                        // TODO: 可以在这里添加错误提示 UI
+                is DashboardUiState.Content -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        // 搜索栏和工具栏
+                        DashboardToolbar(
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = { searchQuery = it },
+//                            statistics = state.statistics,
+                            sizeClass = sizeClass,
+                            viewType = state.viewType,
+                            onViewTypeChange = { viewModel.setViewType(it) }
+                        )
+
+                        // 根据视图类型显示不同的布局
+                        when (state.viewType) {
+                            ViewType.GRID -> {
+                                // 1列和2列：统计卡片在Grid内部，作为第一个item，随列表滚动
+                                // 3列：统计信息在工具栏中显示（已实现），Grid内部不显示
+                                DashboardGridView(
+                                    cards = state.recentCards,
+                                    columns = columns,
+//                                    statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics,
+                                    sizeClass = sizeClass,
+                                    onEdit = { viewModel.editCard(it.id) },
+                                    onFavorite = { viewModel.toggleFavorite(it.id) },
+                                    onCardClick = { onNavigateToCardDetail(it.id) },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .weight(1f)
+                                )
+                            }
+
+                            ViewType.LIST -> {
+                                DashboardListView(
+                                    cards = state.recentCards,
+                                    columns = columns,
+//                                    statistics = if (sizeClass.isWidthAtLeastExpanded()) null else state.statistics,
+                                    sizeClass = sizeClass,
+                                    onEdit = { viewModel.editCard(it.id) },
+                                    onFavorite = { viewModel.toggleFavorite(it.id) },
+                                    onCardClick = { onNavigateToCardDetail(it.id) },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .weight(1f)
+                                )
+                            }
+                        }
+
+                        // 错误提示（如果有错误且不在刷新中）
+                        if (state.error != null && !state.isRefreshing) {
+                            // TODO: 可以在这里添加错误提示 UI
+                        }
                     }
                 }
             }
         }
-    }
+    )
 }
 
 // ==================== Header Components ====================
@@ -213,8 +300,7 @@ fun DashboardHeader(
     recentEditsCount: Int,
     lastSyncTime: Long?,
     isLoading: Boolean,
-    onRefresh: () -> Unit,
-    sizeClass: WindowSizeClass
+    onRefresh: () -> Unit
 ) {
     // 格式化最后同步时间
     val syncTimeText = when {
@@ -413,7 +499,7 @@ private fun ViewTypeToggleButton(
 fun DashboardToolbar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    statistics: Statistics,
+//    statistics: Statistics,
     sizeClass: WindowSizeClass,
     viewType: ViewType,
     onViewTypeChange: (ViewType) -> Unit
@@ -485,7 +571,10 @@ fun DashboardToolbar(
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surface,
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                                ),
                                 modifier = Modifier.height(44.dp)
                             ) {
                                 Row(
@@ -504,7 +593,7 @@ fun DashboardToolbar(
                                                 .background(Color(0xFF10b981)) // emerald-500
                                         )
                                         Text(
-                                            text = "${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
+                                            text = "0", //${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Medium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -527,7 +616,7 @@ fun DashboardToolbar(
                                                 .background(Color(0xFFf59e0b)) // amber-500
                                         )
                                         Text(
-                                            text = "${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
+                                            text = "0",//"${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Medium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -566,7 +655,7 @@ fun DashboardToolbar(
  */
 @Composable
 fun StatsCardsRow(
-    statistics: Statistics,
+//    statistics: Statistics,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -576,17 +665,17 @@ fun StatsCardsRow(
     ) {
         StatCard(
             label = stringResource(Res.string.feature_dashboard_total),
-            value = "${statistics.totalCards}",
+            value = "0", //"${statistics.totalCards}",
             modifier = Modifier.weight(1f)
         )
         StatCard(
             label = stringResource(Res.string.feature_dashboard_recent_edits),
-            value = "${statistics.recentEdits}",
+            value = "0",//"${statistics.recentEdits}",
             modifier = Modifier.weight(1f)
         )
         StatCard(
             label = stringResource(Res.string.feature_dashboard_favorites),
-            value = "${statistics.favoriteCards}",
+            value = "0",// "${statistics.favoriteCards}",
             modifier = Modifier.weight(1f)
         )
     }
@@ -597,7 +686,7 @@ fun StatsCardsRow(
  */
 @Composable
 fun StatsCardsScrollableRow(
-    statistics: Statistics
+//    statistics: Statistics
 ) {
     LazyRow(
         modifier = Modifier
@@ -609,21 +698,21 @@ fun StatsCardsScrollableRow(
         item {
             StatCard(
                 label = stringResource(Res.string.feature_dashboard_total),
-                value = "${statistics.totalCards}",
+                value = "0",//"${statistics.totalCards}",
                 modifier = Modifier.width(140.dp)
             )
         }
         item {
             StatCard(
                 label = stringResource(Res.string.feature_dashboard_recent_edits),
-                value = "${statistics.recentEdits}",
+                value = "0", //"${statistics.recentEdits}",
                 modifier = Modifier.width(140.dp)
             )
         }
         item {
             StatCard(
                 label = stringResource(Res.string.feature_dashboard_favorites),
-                value = "${statistics.favoriteCards}",
+                value = "0",// "${statistics.favoriteCards}",
                 modifier = Modifier.width(140.dp)
             )
         }
@@ -678,7 +767,7 @@ fun StatCard(
 fun DashboardGridView(
     cards: List<Card>,
     columns: Int,
-    statistics: Statistics?,
+//    statistics: Statistics?,
     sizeClass: WindowSizeClass,
     onEdit: (Card) -> Unit,
     onFavorite: (Card) -> Unit,
@@ -694,20 +783,20 @@ fun DashboardGridView(
         verticalItemSpacing = 24.dp, // space-y-6 = 24.dp
         modifier = modifier
     ) {
-        // 统计卡片：1列和2列时在 Grid 内部，作为第一个 item，随列表滚动
-        // 3列时统计信息在工具栏中显示，Grid 内部不显示
-        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
-            // 使用 item 让统计卡片占据整行（跨所有列）
-            // 对于 LazyVerticalStaggeredGrid，使用 span 参数让 item 跨越多列
-            item(span = StaggeredGridItemSpan.FullLine) {
-                StatsCardsRow(
-                    statistics = statistics,
-                    modifier = Modifier.padding(
-                        bottom = if (sizeClass.isWidthAtLeastExpanded()) 12.dp else 24.dp // 单列时缩小间距为1/2
-                    )
-                )
-            }
-        }
+//        // 统计卡片：1列和2列时在 Grid 内部，作为第一个 item，随列表滚动
+//        // 3列时统计信息在工具栏中显示，Grid 内部不显示
+//        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
+//            // 使用 item 让统计卡片占据整行（跨所有列）
+//            // 对于 LazyVerticalStaggeredGrid，使用 span 参数让 item 跨越多列
+//            item(span = StaggeredGridItemSpan.FullLine) {
+//                StatsCardsRow(
+//                    statistics = statistics,
+//                    modifier = Modifier.padding(
+//                        bottom = if (sizeClass.isWidthAtLeastExpanded()) 12.dp else 24.dp // 单列时缩小间距为1/2
+//                    )
+//                )
+//            }
+//        }
 
         // 卡片列表
         items(cards) { card ->
@@ -728,7 +817,7 @@ fun DashboardGridView(
 fun DashboardListView(
     cards: List<Card>,
     columns: Int,
-    statistics: Statistics?,
+//    statistics: Statistics?,
     sizeClass: WindowSizeClass,
     onEdit: (Card) -> Unit,
     onFavorite: (Card) -> Unit,
@@ -741,18 +830,18 @@ fun DashboardListView(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
     ) {
-        // 统计卡片：1列和2列时在 List 内部，作为第一个 item，随列表滚动
-        // 3列时统计信息在工具栏中显示，List 内部不显示
-        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
-            item {
-                StatsCardsRow(
-                    statistics = statistics,
-                    modifier = Modifier.padding(
-                        bottom = if (sizeClass.isWidthCompact()) 12.dp else 24.dp // 单列时缩小间距为1/2
-                    )
-                )
-            }
-        }
+//        // 统计卡片：1列和2列时在 List 内部，作为第一个 item，随列表滚动
+//        // 3列时统计信息在工具栏中显示，List 内部不显示
+//        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
+//            item {
+//                StatsCardsRow(
+//                    statistics = statistics,
+//                    modifier = Modifier.padding(
+//                        bottom = if (sizeClass.isWidthCompact()) 12.dp else 24.dp // 单列时缩小间距为1/2
+//                    )
+//                )
+//            }
+//        }
 
         // 列表头部（仅在桌面端显示，在统计信息之后）
         if (!sizeClass.isWidthCompact()) {
@@ -973,7 +1062,7 @@ fun ListViewItem(
                             )
                         ) {
                             Text(
-                                text = tag,
+                                text = tag.name,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

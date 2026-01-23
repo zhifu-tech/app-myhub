@@ -3,9 +3,9 @@
 **方案名称**：Datastore Database Infra v1  
 **文档版本**：v1.0  
 **文档类型**：技术方案设计文档  
-**创建日期**：2026-01-13  
-**锁定日期**：2026-01-13  
-**最后更新**：2026-01-13  
+**创建日期**：2026-01-20  
+**锁定日期**：2026-01-20  
+**最后更新**：2026-01-20  
 **作者**：MyHub Development Team  
 **评审状态**：🟢 通过  
 **方案状态**：🔒 已锁定
@@ -33,8 +33,8 @@
 
 - **评审状态**：🟢 通过（文档已通过评审，可以进入实施阶段）
 - **方案状态**：🔒 已锁定 - 此版本已冻结，作为 Datastore Database Infra v1 的基线设计
-- **锁定日期**：2026-01-13
-- **当前进度**：所有阶段已完成，方案设计已确定并锁定
+- **锁定日期**：2026-01-20
+- **当前进度**：Schema 与查询已实现，作为 v1.0 基线设计
 
 **状态说明**：
 
@@ -52,11 +52,9 @@
 
 ## 修改历史
 
-| 版本   | 日期         | 修改内容            | 修改原因      |
-|------|------------|-----------------|-----------|
-| v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
-| v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
-| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
+| 版本   | 日期         | 修改内容   | 修改原因 |
+|------|------------|--------|------|
+| v1.0 | 2026-01-20 | 全新方案设计 | 新建   |
 
 ---
 
@@ -64,30 +62,27 @@
 
 ### 1.1 用户场景
 
-在 MyHub 应用的开发和运行过程中，需要处理数据库 Schema 的定义、版本管理和迁移。典型的场景包括：
+MyHub 进入新阶段后，数据库需要完全按照当前的领域模型与建模原则重建，确保：
 
-1. **数据库 Schema 定义**：应用需要定义数据库表结构（如 Card、Tag、Template、User 等），这些表结构需要在客户端和服务端保持一致
-2. **版本管理**：数据库 Schema 需要版本化管理，支持从旧版本升级到新版本
-3. **数据迁移**：当 Schema 变更时，需要将现有数据迁移到新结构
-4. **跨平台兼容**：在 KMP 项目中，数据库 Schema 需要在所有平台（Android、iOS、JVM、JS、WASM）上保持一致
-5. **类型安全查询**：需要提供类型安全的 SQL 查询接口，避免运行时错误
+1. **事实与主观分离**：Card 作为事实，不承载用户主观状态
+2. **关系驱动**：User × Card、User × Collection 等关系作为独立表表达
+3. **类型扩展**：Card 类型差异通过 Metadata 表扩展
+4. **跨平台一致**：KMP 多平台使用统一 Schema
+5. **类型安全**：使用 SQLDelight 生成类型安全查询
 
 ### 1.2 问题根因
 
-在引入统一的数据库 Schema 模块之前，MyHub 应用面临以下问题：
+旧 Schema 将事实、主观、派生混合在主表中，导致：
 
-1. **Schema 定义分散**：客户端和服务端可能使用不同的 Schema 定义，导致不一致
-2. **版本管理缺失**：缺乏统一的版本管理机制，难以追踪 Schema 变更历史
-3. **迁移机制不完善**：数据迁移逻辑分散，容易出错
-4. **类型安全问题**：直接使用字符串 SQL 查询，缺乏类型安全
-5. **跨平台兼容性**：不同平台使用不同的数据库实现，Schema 定义难以统一
+1. 数据语义混乱，难以演进
+2. 用户状态与事实耦合，难以扩展多用户与协作
+3. 类型字段堆叠，导致主表复杂且难维护
 
 ### 1.3 影响范围
 
-- **数据一致性**：Schema 不一致导致数据同步问题
-- **版本升级**：缺乏版本管理导致升级困难
-- **开发效率**：缺乏类型安全的查询接口降低开发效率
-- **维护成本**：Schema 变更需要手动同步客户端和服务端
+- **产品一致性**：模型与产品概念不一致
+- **演进成本**：Schema 变更频繁且风险高
+- **多端一致性**：Schema 难以跨平台统一
 
 ---
 
@@ -95,23 +90,22 @@
 
 ### 2.1 功能目标
 
-- ✅ **统一的 Schema 定义**：使用 SQLDelight 定义数据库 Schema，客户端和服务端共享
-- ✅ **版本管理**：支持数据库版本管理和自动迁移
-- ✅ **类型安全查询**：提供类型安全的 SQL 查询接口
-- ✅ **跨平台支持**：支持所有平台（Android、iOS、JVM、JS、WASM）
-- ✅ **用户关联**：支持多用户数据隔离（版本 2）
-- ✅ **性能优化**：提供索引优化查询性能
+- ✅ **事实模型稳定**：Card 表只保留最小事实字段
+- ✅ **主观关系独立**：User × Card / User × Collection 关系独立建表
+- ✅ **类型语义扩展**：每种 Card 类型独立 Metadata 表
+- ✅ **结构与权限分离**：Collection 的 owner 为事实，权限在 user_collection
+- ✅ **索引齐全**：每个表提供最基础索引
+- ✅ **CRUD 完整**：每个表至少提供基础 CRUD 操作
 
 ### 2.2 非功能目标
 
-- ✅ **代码复用**：Schema 定义在客户端和服务端复用
-- ✅ **易于维护**：Schema 变更易于追踪和维护
-- ✅ **向后兼容**：支持从旧版本平滑升级
-- ✅ **性能优化**：索引优化查询性能
+- ✅ **跨平台一致**：所有平台共用 SQLDelight Schema
+- ✅ **可迁移**：版本号清晰，迁移成本低
+- ✅ **可维护**：结构清晰、语义可读
 
 ### 2.3 模块特性说明
 
-**重要说明**：`datastore/database` 模块是一个**单一功能模块**，专注于数据库 Schema 的定义和版本管理，不包含业务逻辑或平台特定实现。
+`datastore/database` 仅负责 **Schema、索引与查询定义**，不包含业务逻辑或平台驱动实现。
 
 ---
 
@@ -121,54 +115,14 @@
 
 #### 3.1.1 数据库 Schema 管理：SQLDelight
 
-**选择理由**：
-
-- ✅ **KMP 原生支持**：SQLDelight 是 Square 提供的 SQL 代码生成工具，完全支持 KMP
-- ✅ **类型安全**：编译时生成类型安全的 Kotlin 代码，避免运行时错误
-- ✅ **跨平台支持**：支持 Android、iOS、JVM、JS、WASM 等多个平台
-- ✅ **版本管理**：内置版本管理和迁移机制
-- ✅ **代码生成**：自动生成类型安全的查询接口
-
-**替代方案对比**：
-
-| 方案         | 优点                 | 缺点                 | 结论       |
-|------------|--------------------|--------------------|----------|
-| SQLDelight | KMP 原生支持，类型安全，版本管理 | 需要学习 SQLDelight 语法 | ✅ **选择** |
-| Room       | Android 官方支持       | 仅支持 Android        | ❌        |
-| Realm      | 跨平台支持              | 商业许可，学习曲线陡         | ❌        |
-| Exposed    | Kotlin DSL         | 不支持 KMP            | ❌        |
+- ✅ KMP 原生支持
+- ✅ 生成类型安全的 Kotlin API
+- ✅ 可维护的版本管理与迁移
 
 #### 3.1.2 数据库引擎：SQLite
 
-**选择理由**：
-
-- ✅ **跨平台支持**：SQLite 在所有平台上都有实现
-- ✅ **轻量级**：SQLite 是轻量级数据库，适合移动应用
-- ✅ **成熟稳定**：SQLite 是成熟稳定的数据库引擎
-- ✅ **SQLDelight 支持**：SQLDelight 原生支持 SQLite
-
-**平台实现**：
-
-- **Android**：使用 Android 内置 SQLite
-- **iOS**：使用 SQLite3（通过 SQLDelight）
-- **JVM**：使用 SQLite JDBC
-- **JS/WASM**：使用 SQL.js（WebAssembly）
-
-### 3.2 架构模式
-
-#### 3.2.1 Schema 版本管理
-
-**设计原则**：
-
-- **版本号**：使用整数版本号（1、2、3...）
-- **迁移文件**：每个版本对应一个 `.sqm` 迁移文件
-- **自动迁移**：SQLDelight 自动执行迁移脚本
-
-**优势**：
-
-- ✅ **版本追踪**：清晰的版本历史
-- ✅ **自动迁移**：无需手动执行迁移脚本
-- ✅ **向后兼容**：支持从任意版本升级
+- ✅ 所有平台可用
+- ✅ 轻量稳定，适合本地存储
 
 ---
 
@@ -176,25 +130,35 @@
 
 ### 4.1 模块结构
 
-```
+```text
 datastore/database/
 ├── src/
 │   └── commonMain/
 │       └── sqldelight/
 │           └── tech/zhifu/app/myhub/datastore/database/
-│               ├── Card.sq          # 卡片相关表定义
-│               ├── Tag.sq           # 标签表定义
-│               ├── Template.sq      # 模板表定义
-│               ├── User.sq          # 用户相关表定义
-│               ├── Statistics.sq    # 统计信息表定义
-│               ├── 1.sqm            # 版本 1 迁移文件
-│               └── 2.sqm            # 版本 2 迁移文件
+│               ├── card.sq
+│               ├── card_metadata_article.sq
+│               ├── card_metadata_code.sq
+│               ├── card_metadata_idea.sq
+│               ├── card_metadata_quote.sq
+│               ├── card_metadata_todo.sq
+│               ├── card_metadata_word.sq
+│               ├── card_tag.sq
+│               ├── card_template.sq
+│               ├── collection.sq
+│               ├── tag.sq
+│               ├── user.sq
+│               ├── user_card.sq
+│               ├── user_card_type_statistics.sq
+│               ├── user_collection.sq
+│               ├── user_preferences.sq
+│               └── user_statistics.sq
 └── build.gradle.kts
 ```
 
 ### 4.2 数据库 Schema
 
-#### 4.2.1 核心表结构
+#### 4.2.1 核心事实与关系表
 
 **user 表**：
 
@@ -202,10 +166,13 @@ datastore/database/
 CREATE TABLE user (
     id TEXT PRIMARY KEY NOT NULL,
     username TEXT NOT NULL UNIQUE,
-    email TEXT,
     display_name TEXT,
     avatar_url TEXT,
-    created_at TEXT NOT NULL
+    avatar_text TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    status TEXT,
+    last_login_at TEXT
 );
 ```
 
@@ -231,63 +198,53 @@ CREATE TABLE card (
     type TEXT NOT NULL,
     title TEXT,
     content TEXT NOT NULL,
-    author TEXT,
-    source TEXT,
-    language TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+```
+
+**user_card 表（主观关系）**：
+
+```sql
+CREATE TABLE user_card (
+    user_id TEXT NOT NULL,
+    card_id TEXT NOT NULL,
     is_favorite INTEGER NOT NULL DEFAULT 0,
-    is_template INTEGER NOT NULL DEFAULT 0,
+    last_reviewed_at TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    last_reviewed_at TEXT,
-    user_id TEXT NOT NULL DEFAULT ''
-);
-```
-
-**card_tag 表**（多对多关系）：
-
-```sql
-CREATE TABLE card_tag (
-    card_id TEXT NOT NULL,
-    tag_name TEXT NOT NULL,
-    user_id TEXT NOT NULL DEFAULT '',
-    PRIMARY KEY (card_id, tag_name),
+    PRIMARY KEY (user_id, card_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
 );
 ```
 
-**card_metadata 表**：
+**collection 表（结构事实）**：
 
 ```sql
-CREATE TABLE card_metadata (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    quote_author TEXT,
-    quote_category TEXT,
-    code_language TEXT,
-    code_snippet TEXT,
-    article_url TEXT,
-    article_summary TEXT,
-    article_image_url TEXT,
-    word_pronunciation TEXT,
-    word_definition TEXT,
-    word_example TEXT,
-    idea_priority TEXT,
-    idea_status TEXT,
-    user_id TEXT NOT NULL DEFAULT '',
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**checklist_item 表**：
-
-```sql
-CREATE TABLE checklist_item (
+CREATE TABLE collection (
     id TEXT PRIMARY KEY NOT NULL,
-    card_id TEXT NOT NULL,
-    text TEXT NOT NULL,
-    is_completed INTEGER NOT NULL DEFAULT 0,
-    item_order INTEGER NOT NULL DEFAULT 0,
-    user_id TEXT NOT NULL DEFAULT '',
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+    name TEXT NOT NULL,
+    topic TEXT,
+    description TEXT,
+    user_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+```
+
+**user_collection 表（权限关系）**：
+
+```sql
+CREATE TABLE user_collection (
+    user_id TEXT NOT NULL,
+    collection_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'owner',
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, collection_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (collection_id) REFERENCES collection(id) ON DELETE CASCADE
 );
 ```
 
@@ -299,181 +256,207 @@ CREATE TABLE tag (
     name TEXT NOT NULL,
     color TEXT,
     description TEXT,
-    card_count INTEGER NOT NULL DEFAULT 0,
+    user_id TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    user_id TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    card_count INTEGER NOT NULL DEFAULT 0,
     UNIQUE(name, user_id)
 );
 ```
 
-**template 表**：
+**card_tag 表（多对多）**：
 
 ```sql
-CREATE TABLE template (
-    id TEXT PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    card_type TEXT NOT NULL,
-    default_content TEXT,
-    is_system_template INTEGER NOT NULL DEFAULT 0,
+CREATE TABLE card_tag (
+    card_id TEXT NOT NULL,
+    tag_id TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    user_id TEXT NOT NULL DEFAULT ''
+    PRIMARY KEY (card_id, tag_id),
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
 ```
 
-**statistics 表**：
+**card_template 表**：
 
 ```sql
-CREATE TABLE statistics (
+CREATE TABLE card_template (
+    id TEXT PRIMARY KEY NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT,
+    content TEXT,
+    description TEXT,
+    created_at TEXT NOT NULL
+);
+```
+
+#### 4.2.2 Metadata 表（按类型拆分）
+
+**card_metadata_article**：
+
+```sql
+CREATE TABLE card_metadata_article (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    url TEXT NOT NULL,
+    summary TEXT,
+    cover_image_url TEXT,
+    author TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+**card_metadata_code**：
+
+```sql
+CREATE TABLE card_metadata_code (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    language TEXT NOT NULL,
+    snippet TEXT NOT NULL,
+    description TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+**card_metadata_idea**：
+
+```sql
+CREATE TABLE card_metadata_idea (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    priority TEXT,
+    status TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+**card_metadata_quote**：
+
+```sql
+CREATE TABLE card_metadata_quote (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    author TEXT,
+    category TEXT,
+    source TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+**card_metadata_todo**：
+
+```sql
+CREATE TABLE card_metadata_todo (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    priority TEXT,
+    due_at TEXT,
+    completed_at TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+**card_metadata_word**：
+
+```sql
+CREATE TABLE card_metadata_word (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    pronunciation TEXT,
+    definition TEXT NOT NULL,
+    example TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+```
+
+#### 4.2.3 派生与统计表
+
+**user_statistics 表**：
+
+```sql
+CREATE TABLE user_statistics (
     user_id TEXT PRIMARY KEY NOT NULL,
     total_cards INTEGER NOT NULL DEFAULT 0,
     favorite_cards INTEGER NOT NULL DEFAULT 0,
-    recent_edits INTEGER NOT NULL DEFAULT 0
+    recent_edits INTEGER NOT NULL DEFAULT 0,
+    last_sync_at TEXT,
+    updated_at TEXT NOT NULL
 );
 ```
 
-**card_type_statistics 表**：
+**user_card_type_statistics 表**：
 
 ```sql
-CREATE TABLE card_type_statistics (
-    user_id TEXT NOT NULL,
+CREATE TABLE user_card_type_statistics (
     card_type TEXT NOT NULL,
     count INTEGER NOT NULL DEFAULT 0,
+    user_id TEXT NOT NULL DEFAULT '',
     PRIMARY KEY (user_id, card_type)
 );
 ```
 
-**tag_statistics 表**：
+#### 4.2.4 索引设计
+
+索引原则：每个表至少提供 **主键/高频过滤字段** 的索引，包含但不限于：
 
 ```sql
-CREATE TABLE tag_statistics (
-    user_id TEXT NOT NULL,
-    tag_name TEXT NOT NULL,
-    count INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, tag_name)
-);
-```
+-- card
+CREATE INDEX idx_card_type ON card(type);
+CREATE INDEX idx_card_created_at ON card(created_at);
+CREATE INDEX idx_card_updated_at ON card(updated_at);
 
-#### 4.2.2 索引设计
+-- user_card
+CREATE INDEX idx_user_card_user_id ON user_card(user_id);
+CREATE INDEX idx_user_card_card_id ON user_card(card_id);
+CREATE INDEX idx_user_card_updated_at ON user_card(user_id, updated_at);
 
-**性能优化索引**：
+-- collection
+CREATE INDEX idx_collection_user_id ON collection(user_id);
+CREATE INDEX idx_collection_user_name ON collection(user_id, name);
 
-```sql
--- Card 表索引
-CREATE INDEX card_user_id_index ON card(user_id);
-CREATE INDEX card_user_type_index ON card(user_id, type);
-CREATE INDEX card_user_favorite_index ON card(user_id, is_favorite);
-CREATE INDEX card_user_updated_index ON card(user_id, updated_at);
+-- tag
+CREATE INDEX idx_tag_user_id ON tag(user_id);
+CREATE INDEX idx_tag_user_name ON tag(user_id, name);
 
--- Tag 表索引
-CREATE INDEX tag_user_id_index ON tag(user_id);
-CREATE INDEX tag_user_name_index ON tag(user_id, name);
+-- card_tag
+CREATE INDEX idx_card_tag_card_id ON card_tag(card_id);
+CREATE INDEX idx_card_tag_tag_id ON card_tag(tag_id);
 
--- Template 表索引
-CREATE INDEX template_user_id_index ON template(user_id);
-CREATE INDEX template_user_type_index ON template(user_id, card_type);
-
--- 关联表索引
-CREATE INDEX card_tag_user_id_index ON card_tag(user_id);
-CREATE INDEX card_metadata_user_id_index ON card_metadata(user_id);
-CREATE INDEX checklist_item_user_id_index ON checklist_item(user_id);
-
--- 统计表索引
-CREATE INDEX statistics_user_id_index ON statistics(user_id);
-CREATE INDEX card_type_statistics_user_type_index ON card_type_statistics(user_id, card_type);
-CREATE INDEX tag_statistics_user_tag_index ON tag_statistics(user_id, tag_name);
+-- metadata
+CREATE INDEX idx_card_metadata_article_url ON card_metadata_article(url);
+CREATE INDEX idx_card_metadata_code_language ON card_metadata_code(language);
+CREATE INDEX idx_card_metadata_idea_status ON card_metadata_idea(status);
+CREATE INDEX idx_card_metadata_todo_status ON card_metadata_todo(status);
 ```
 
 ### 4.3 版本管理
 
 #### 4.3.1 版本历史
 
-**版本 1**（已废弃）：
-
-- ✅ 初始版本：基础表结构
-- ⚠️ **注意**：此版本的表结构**未关联用户**，所有业务数据为全局共享
-
-**版本 2**（当前版本）：
-
-- ✅ 添加用户关联：所有业务表添加 `user_id` 字段
-- ✅ 实现数据隔离：每个用户只能访问自己的数据
-- ✅ 更新所有查询：添加 `WHERE user_id = ?` 过滤条件
-- ✅ 统计信息按用户统计
-- ✅ 系统模板对所有用户可见（特殊处理）
+- **v1.0**：当前基线版本，完整 Schema 与 CRUD 定义
 
 #### 4.3.2 迁移机制
 
-**迁移文件命名**：
-
-- `1.sqm` - 从版本 0（无版本）到版本 1
-- `2.sqm` - 从版本 1 到版本 2
-- `N.sqm` - 从版本 N-1 到版本 N
-
-**迁移文件内容**（版本 2 示例）：
-
-```sql
--- 版本 2：添加用户关联
-
--- 1. 为所有业务表添加 user_id 字段
-ALTER TABLE card ADD COLUMN user_id TEXT NOT NULL DEFAULT '';
-ALTER TABLE tag ADD COLUMN user_id TEXT NOT NULL DEFAULT '';
--- ... 其他表
-
--- 2. 数据迁移：为现有数据分配默认用户
-UPDATE card SET user_id = COALESCE((SELECT id FROM user LIMIT 1), 'default-user') WHERE user_id = '';
--- ... 其他表
-
--- 3. 添加索引以优化查询性能
-CREATE INDEX card_user_id_index ON card(user_id);
--- ... 其他索引
-```
+v1.0 为全新基线，不承载历史迁移。后续版本通过 `.sqm` 文件进行增量迁移。
 
 ### 4.4 查询接口
 
-#### 4.4.1 Card 查询
+每个表提供基础 CRUD，命名统一为：
 
 ```sql
--- 获取所有卡片（按用户过滤）
-selectAll:
-SELECT * FROM card
-WHERE user_id = ?
-ORDER BY updated_at DESC;
+-- select / insert / update / delete
+selectCardById:
+SELECT * FROM card WHERE id = ?;
 
--- 根据ID获取卡片
-selectById:
-SELECT * FROM card
-WHERE id = ? AND user_id = ?;
-
--- 根据类型获取卡片
-selectByType:
-SELECT * FROM card
-WHERE type = ? AND user_id = ?
-ORDER BY updated_at DESC;
+insertCard:
+INSERT OR REPLACE INTO card (id, type, title, content, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
 ```
 
-#### 4.4.2 Tag 查询
+关系表与统计表提供按主键与外键的查询与删除，例如：
 
 ```sql
--- 获取所有标签（按用户过滤）
-selectAll:
-SELECT * FROM tag
-WHERE user_id = ?
-ORDER BY card_count DESC, name ASC;
+selectUserCardById:
+SELECT * FROM user_card WHERE user_id = ? AND card_id = ?;
 
--- 根据名称获取标签
-selectByName:
-SELECT * FROM tag
-WHERE name = ? AND user_id = ?;
-```
-
-#### 4.4.3 Template 查询
-
-```sql
--- 获取所有模板（包括系统模板）
-selectAll:
-SELECT * FROM template
-WHERE user_id = ? OR is_system_template = 1
-ORDER BY is_system_template DESC, updated_at DESC;
+deleteUserCardsByUserId:
+DELETE FROM user_card WHERE user_id = ?;
 ```
 
 ---
@@ -482,15 +465,13 @@ ORDER BY is_system_template DESC, updated_at DESC;
 
 ### 5.1 SQLDelight 配置
 
-**build.gradle.kts**：
-
 ```kotlin
 sqldelight {
     databases {
         create("MyHubDatabase") {
             packageName.set("tech.zhifu.app.myhub.datastore.database")
             generateAsync.set(true)
-            version = 2
+            version = 1
         }
     }
     linkSqlite = true
@@ -499,72 +480,22 @@ sqldelight {
 
 ### 5.2 版本管理配置
 
-**版本号配置**：
-
 ```kotlin
 sqldelight {
     databases {
         create("MyHubDatabase") {
-            version = 2  // 当前版本号
+            version = 1  // v1.0 基线
         }
     }
 }
 ```
 
-**迁移文件**：
+### 5.3 领域原则落地说明
 
-- `1.sqm` - 版本 1 迁移文件（空文件，仅用于标记版本）
-- `2.sqm` - 版本 2 迁移文件（包含用户关联迁移逻辑）
-
-### 5.3 用户关联实现
-
-#### 5.3.1 表结构变更
-
-所有业务表添加 `user_id` 字段：
-
-```sql
-ALTER TABLE card ADD COLUMN user_id TEXT NOT NULL DEFAULT '';
-ALTER TABLE tag ADD COLUMN user_id TEXT NOT NULL DEFAULT '';
--- ... 其他表
-```
-
-#### 5.3.2 查询更新
-
-所有查询添加 `WHERE user_id = ?` 过滤条件：
-
-```sql
--- 旧查询（版本 1）
-SELECT * FROM card;
-
--- 新查询（版本 2）
-SELECT * FROM card WHERE user_id = ?;
-```
-
-#### 5.3.3 数据迁移
-
-为现有数据分配默认用户：
-
-```sql
-UPDATE card SET user_id = COALESCE((SELECT id FROM user LIMIT 1), 'default-user') WHERE user_id = '';
-```
-
-### 5.4 索引优化
-
-**组合索引**：
-
-```sql
--- 优化常用查询组合
-CREATE INDEX card_user_type_index ON card(user_id, type);
-CREATE INDEX card_user_favorite_index ON card(user_id, is_favorite);
-CREATE INDEX tag_user_name_index ON tag(user_id, name);
-```
-
-**唯一索引**：
-
-```sql
--- 确保用户标签名称唯一
-CREATE UNIQUE INDEX tag_user_name_unique ON tag(user_id, name);
-```
+- **Card 是事实**：Card 表不包含任何用户主观字段
+- **User 是视角**：主观状态统一放在 user_card
+- **Collection 是结构**：结构事实在 collection，权限在 user_collection
+- **Tag 是语义**：Tag 用户私有，跨用户不共享语义
 
 ---
 
@@ -572,42 +503,21 @@ CREATE UNIQUE INDEX tag_user_name_unique ON tag(user_id, name);
 
 ### 6.1 实施阶段
 
-#### 阶段 1：核心 Schema 定义（已完成）
+#### 阶段 1：Schema 定义（已完成）
 
-- ✅ Card 表和相关表（card_tag、card_metadata、checklist_item）
-- ✅ Tag 表
-- ✅ Template 表
-- ✅ User 表和 user_preferences 表
-- ✅ Statistics 相关表
+- ✅ 事实表、关系表、元数据表、统计表
 
-#### 阶段 2：版本管理机制（已完成）
+#### 阶段 2：索引与 CRUD（已完成）
 
-- ✅ SQLDelight 版本配置
-- ✅ 版本 1 迁移文件
-- ✅ 版本 2 迁移文件
-
-#### 阶段 3：用户关联支持（已完成）
-
-- ✅ 所有业务表添加 `user_id` 字段
-- ✅ 更新所有查询添加用户过滤
-- ✅ 数据迁移逻辑
-- ✅ 索引优化
-
-#### 阶段 4：查询接口完善（已完成）
-
-- ✅ Card 查询接口
-- ✅ Tag 查询接口
-- ✅ Template 查询接口
-- ✅ Statistics 查询接口
+- ✅ 所有表补齐索引
+- ✅ 所有表提供基础 CRUD
 
 ### 6.2 里程碑
 
-| 里程碑          | 目标日期       | 状态    |
-|--------------|------------|-------|
-| 核心 Schema 完成 | 2026-01-13 | ✅ 已完成 |
-| 版本管理完成       | 2026-01-13 | ✅ 已完成 |
-| 用户关联完成       | 2026-01-13 | ✅ 已完成 |
-| 查询接口完成       | 2026-01-13 | ✅ 已完成 |
+| 里程碑              | 目标日期       | 状态    |
+|------------------|------------|-------|
+| v1.0 Schema 完成   | 2026-01-20 | ✅ 已完成 |
+| v1.0 索引与 CRUD 完成 | 2026-01-20 | ✅ 已完成 |
 
 ---
 
@@ -615,70 +525,19 @@ CREATE UNIQUE INDEX tag_user_name_unique ON tag(user_id, name);
 
 ### 7.1 技术风险
 
-#### 7.1.1 迁移失败风险
+#### 7.1.1 迁移风险
 
-**风险描述**：数据库迁移失败导致数据丢失或损坏
+**风险描述**：后续版本增量迁移可能导致结构兼容问题  
+**影响**：中  
+**缓解措施**：小步迁移、自动化测试、保持向后兼容
 
-**影响**：高
+### 7.2 维护风险
 
-**缓解措施**：
+#### 7.2.1 语义漂移风险
 
-- ✅ 迁移前备份数据库
-- ✅ 测试迁移脚本
-- ✅ 提供回滚机制
-- ✅ 分阶段迁移
-
-#### 7.1.2 版本兼容性风险
-
-**风险描述**：不同版本客户端使用不同 Schema 导致兼容性问题
-
-**影响**：中
-
-**缓解措施**：
-
-- ✅ 版本化 API
-- ✅ 向后兼容的 Schema 变更
-- ✅ 客户端版本检查
-
-#### 7.1.3 跨平台兼容性风险
-
-**风险描述**：不同平台对 SQLite 的支持不同
-
-**影响**：低
-
-**缓解措施**：
-
-- ✅ 使用 SQLDelight 统一接口
-- ✅ 跨平台测试
-- ✅ 避免平台特定 SQL 特性
-
-### 7.2 业务风险
-
-#### 7.2.1 数据迁移风险
-
-**风险描述**：用户关联迁移导致数据丢失
-
-**影响**：高
-
-**缓解措施**：
-
-- ✅ 迁移前备份
-- ✅ 测试迁移逻辑
-- ✅ 提供数据恢复机制
-
-### 7.3 维护风险
-
-#### 7.3.1 Schema 变更风险
-
-**风险描述**：Schema 变更影响现有功能
-
-**影响**：中
-
-**缓解措施**：
-
-- ✅ 版本化 Schema
-- ✅ 向后兼容的变更
-- ✅ 充分的测试
+**风险描述**：开发中绕过建模原则添加字段导致语义漂移  
+**影响**：中  
+**缓解措施**：文档约束、评审机制、强制 Schema 审核
 
 ---
 
@@ -686,79 +545,17 @@ CREATE UNIQUE INDEX tag_user_name_unique ON tag(user_id, name);
 
 ### 8.1 相关文档
 
-- [MyHub 数据模型模块方案设计](../datastore-model/docs/myhub-datastore-model-infra-v1.0.md)
-- [用户关联设计方案](./user_association_design.md)
-- [实施计划](./user_association_implementation_plan.md)
-- [版本控制和迁移指南](./version_control_migration_guide.md)
+- [MyHub 领域模型图（Card / Collection / User / Tag）](./myhub_领域模型图（card_collection_user_tag）!!!.md)
+- [MyHub 数据建模原则 v1](./myhub_数据建模原则_v1.0.md)
 - [SQLDelight 官方文档](https://cashapp.github.io/sqldelight/)
 
-### 8.2 代码示例
+### 8.2 术语表
 
-#### 8.2.1 创建数据库
-
-```kotlin
-val database = MyHubDatabase(
-    driver = createDriver(),
-    cardAdapter = Card.Adapter(/* ... */),
-    tagAdapter = Tag.Adapter(/* ... */),
-    // ... 其他适配器
-)
-```
-
-#### 8.2.2 查询数据
-
-```kotlin
-// 获取所有卡片
-val cards = database.myHubDatabaseQueries
-    .selectAll(userId = currentUserId)
-    .executeAsList()
-
-// 根据ID获取卡片
-val card = database.myHubDatabaseQueries
-    .selectById(id = cardId, userId = currentUserId)
-    .executeAsOneOrNull()
-```
-
-#### 8.2.3 插入数据
-
-```kotlin
-database.myHubDatabaseQueries.insertCard(
-    id = card.id,
-    type = card.type.name,
-    title = card.title,
-    content = card.content,
-    userId = currentUserId,
-    // ... 其他字段
-)
-```
-
-### 8.3 术语表
-
-| 术语         | 说明                             |
-|------------|--------------------------------|
-| SQLDelight | Square 提供的 SQL 代码生成工具，支持 KMP   |
-| Schema     | 数据库表结构定义                       |
-| 迁移文件（.sqm） | SQLDelight 迁移文件，包含版本升级的 SQL 语句 |
-| 查询文件（.sq）  | SQLDelight 查询文件，定义 SQL 查询和表结构  |
-| user_id    | 用户ID字段，用于多用户数据隔离               |
-| 版本管理       | 数据库 Schema 的版本化管理和自动迁移机制       |
-
-### 8.4 常见问题
-
-#### Q1: 如何添加新的数据库表？
-
-**A**: 创建对应的 `.sq` 文件，定义表结构和查询。如果当前版本已发布，需要在下一个版本的迁移文件中添加表创建语句。
-
-#### Q2: 如何修改现有表结构？
-
-**A**: 在下一个版本的 `.sqm` 迁移文件中添加 `ALTER TABLE` 语句，更新对应的 `.sq` 文件以反映新的表结构，更新所有相关的查询语句。
-
-#### Q3: 如何执行数据库迁移？
-
-**A**: SQLDelight 会自动执行迁移脚本。确保迁移文件按顺序命名（`1.sqm`、`2.sqm`、`N.sqm`），并在 `build.gradle.kts` 中更新版本号。
-
-#### Q4: 如何处理用户关联？
-
-**A**: 从版本 2 开始，所有业务表都包含 `user_id` 字段。查询时添加 `WHERE user_id = ?` 过滤条件，确保数据隔离。
-
----
+| 术语         | 说明                                   |
+|------------|--------------------------------------|
+| Schema     | 数据库表结构定义                             |
+| Metadata   | 按 Card 类型拆分的语义扩展表                    |
+| 关系表        | 用于表达 User × Card / User × Collection |
+| 派生表        | 可重建统计表，不作为事实来源                       |
+| 迁移文件（.sqm） | SQLDelight 版本迁移脚本                    |
+| 查询文件（.sq）  | SQLDelight 查询与表结构定义文件                |

@@ -1,0 +1,14 @@
+[
+  {
+    "cardId": "card-002",
+    "language": "javascript",
+    "snippet": "function quickSort(arr) {\n  if (arr.length <= 1) return arr;\n  let pivot = arr[0];\n  let left = [];\n  let right = [];\n  for (let i = 1; i < arr.length; i++) {\n    if (arr[i] < pivot) left.push(arr[i]);\n    else right.push(arr[i]);\n  }\n  return [...quickSort(left), pivot, ...quickSort(right)];\n}",
+    "description": null
+  },
+  {
+    "cardId": "card-008",
+    "language": "kotlin",
+    "snippet": "fun main() {\n    println(\"Hello, World!\")\n}",
+    "description": null
+  }
+]

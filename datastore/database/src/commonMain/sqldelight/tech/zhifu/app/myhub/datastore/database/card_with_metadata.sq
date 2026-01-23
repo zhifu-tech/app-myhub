@@ -1,0 +1,52 @@
+-- 视图，方便查询和处理
+CREATE VIEW card_with_metadata_view AS
+SELECT
+  c.id         AS card_id,
+  c.type       AS card_type,
+  c.title      AS card_title,
+  c.content    AS card_content,
+  c.user_id    AS card_user_id,
+  c.created_at AS card_created_at,
+  c.updated_at AS card_updated_at,
+
+  ma.url             AS article_url,
+  ma.summary         AS article_summary,
+  ma.cover_image_url AS article_cover_image_url,
+  ma.author          AS article_author,
+
+  mc.language    AS code_language,
+  mc.snippet     AS code_snippet,
+  mc.description AS code_description,
+
+  mi.priority AS idea_priority,
+  mi.status   AS idea_status,
+
+  mq.author   AS quote_author,
+  mq.category AS quote_category,
+  mq.source   AS quote_source,
+
+  mt.status       AS todo_status,
+  mt.priority     AS todo_priority,
+  mt.due_at       AS todo_due_at,
+  mt.completed_at AS todo_completed_at,
+
+  mw.pronunciation AS word_pronunciation,
+  mw.definition    AS word_definition,
+  mw.example       AS word_example
+FROM card c
+LEFT JOIN card_metadata_article ma ON ma.card_id = c.id
+LEFT JOIN card_metadata_code mc ON mc.card_id = c.id
+LEFT JOIN card_metadata_idea mi ON mi.card_id = c.id
+LEFT JOIN card_metadata_quote mq ON mq.card_id = c.id
+LEFT JOIN card_metadata_todo mt ON mt.card_id = c.id
+LEFT JOIN card_metadata_word mw ON mw.card_id = c.id;
+
+selectCardWithMetadataByCardId:
+SELECT v.*
+FROM card_with_metadata_view v
+WHERE card_id = :cardId;
+
+selectCardWithMetadataByUserId:
+SELECT v.*
+FROM card_with_metadata_view v
+WHERE v.card_user_id = :userId;

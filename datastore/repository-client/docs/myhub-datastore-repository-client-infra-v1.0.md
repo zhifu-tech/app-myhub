@@ -5,7 +5,7 @@
 **文档类型**：技术方案设计文档  
 **创建日期**：2026-01-13  
 **锁定日期**：2026-01-13  
-**最后更新**：2026-01-13  
+**最后更新**：2026-01-23  
 **作者**：MyHub Development Team  
 **评审状态**：🟢 通过  
 **方案状态**：🔒 已锁定
@@ -57,6 +57,7 @@
 | v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
 | v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
 | v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
+| v1.0 | 2026-01-23 | 同步当前实现结构        | 落地实现更新 |
 
 ---
 
@@ -160,12 +161,14 @@ datastore/repository-client/
 │   │   └── kotlin/tech/zhifu/app/myhub/datastore/repository/
 │   │       ├── di/
 │   │       │   └── RepositoryModule.kt      # Koin DI 模块
+│   │       ├── SyncChangeApplier.kt
 │   │       └── impl/
 │   │           ├── CardRepositoryImpl.kt
 │   │           ├── TagRepositoryImpl.kt
-│   │           ├── TemplateRepositoryImpl.kt
+│   │           ├── CollectionRepositoryImpl.kt
+│   │           ├── CardTemplateRepositoryImpl.kt
 │   │           ├── UserRepositoryImpl.kt
-│   │           └── StatisticsRepositoryImpl.kt
+│   │           └── SyncRepositoryImpl.kt
 │   └── commonTest/
 │       └── kotlin/.../
 │           ├── CardRepositoryTest.kt
@@ -180,23 +183,14 @@ datastore/repository-client/
 **功能**：
 
 - 协调本地和远程数据源
-- 实现响应式接口（`ReactiveCardRepository`）
-- 数据同步和离线支持
+- 提供自动补齐标签的标准插卡 API（`insertCardWithTags`）
+- 数据同步和离线支持（Outbox + OpLog）
 
 **主要方法**：
 
 ```kotlin
-class CardRepositoryImpl(
-    private val localDataSource: LocalCardDataSource,
-    private val remoteDataSource: RemoteCardDataSource,
-    private val userContextProvider: UserContextProvider,
-    private val userDataSource: LocalUserDataSource
-) : ReactiveCardRepository {
-
-    override suspend fun getAllCards(): List<Card>
-    override fun observeAllCards(): Flow<List<Card>>
-    override suspend fun createCard(card: Card): Card
-    // ...
+interface CardRepository {
+    suspend fun insertCardWithTags(card: Card, needSync: Boolean = true)
 }
 ```
 
@@ -211,7 +205,7 @@ class CardRepositoryImpl(
 **功能**：
 
 - 协调本地和远程标签数据源
-- 实现响应式接口（`ReactiveTagRepository`）
+- 同步变更通过 `SyncChangeApplier` 统一接入
 
 #### 4.2.3 RepositoryModule（Koin DI 模块）
 
@@ -230,9 +224,12 @@ val repositoryModule = module {
         remoteDataSourceModule
     )
 
-    single<ReactiveCardRepository> {
-        CardRepositoryImpl(...)
-    }
+    single<CardRepository> { CardRepositoryImpl(...) }
+    single<TagRepository> { TagRepositoryImpl(...) }
+    single<CollectionRepository> { CollectionRepositoryImpl(...) }
+    single<CardTemplateRepository> { CardTemplateRepositoryImpl(...) }
+    single<UserRepository> { UserRepositoryImpl(...) }
+    single<SyncRepository> { SyncRepositoryImpl(...) }
     // ...
 }
 ```
@@ -244,7 +241,7 @@ val repositoryModule = module {
 ```text
 业务代码
     ↓
-Repository (ReactiveCardRepository)
+Repository (CardRepository)
     ↓
 优先：RemoteDataSource → 保存到 LocalDataSource → 返回数据
 降级：LocalDataSource → 返回数据
@@ -255,9 +252,9 @@ Repository (ReactiveCardRepository)
 ```text
 业务代码
     ↓
-Repository (ReactiveCardRepository)
+Repository (CardRepository)
     ↓
-LocalDataSource.insertCard() → 立即返回
+LocalDataSource.insertCard() → 同步记录写入 Outbox/OpLog
     ↓
 RemoteDataSource.createCard() → 更新 LocalDataSource
 ```
@@ -267,7 +264,7 @@ RemoteDataSource.createCard() → 更新 LocalDataSource
 ```text
 业务代码
     ↓
-Repository.observeAllCards()
+Repository.observeCards()
     ↓
 LocalDataSource.observeCards() → Flow<List<Card>>
     ↓

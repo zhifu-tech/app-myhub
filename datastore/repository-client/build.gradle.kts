@@ -22,30 +22,25 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.cache)
             implementation(projects.core.logger)
-
-            api(projects.datastore.repository)
-
+            implementation(projects.datastore.database)
             implementation(projects.datastore.databaseClient)
             implementation(projects.datastore.datasourceLocal)
             implementation(projects.datastore.datasourceRemote)
-
             implementation(projects.datastore.model)
-
-            implementation(libs.kotlinx.serialization.json)
-
-            implementation(libs.kotlinx.coroutines.core)
+            implementation(projects.datastore.sync)
 
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         commonTest.dependencies {
+            implementation(projects.datastore.databaseTest)
+
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
-
-            implementation(projects.datastore.database)
-
-            implementation(projects.datastore.databaseTest)
         }
     }
 }

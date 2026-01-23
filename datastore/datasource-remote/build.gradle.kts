@@ -21,6 +21,8 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.core.network)
 
+            implementation(projects.datastore.sync)
+
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
         }

@@ -1,0 +1,17 @@
+-- 代码类卡片元数据
+CREATE TABLE card_metadata_code (
+    card_id TEXT PRIMARY KEY NOT NULL,
+
+    language TEXT NOT NULL,                                       -- 事实字段（kotlin / python）
+    snippet TEXT NOT NULL,                                        -- 主体内容
+    description TEXT,
+
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_card_metadata_code_card_id ON card_metadata_code(card_id);
+
+insertCardMetadataCode:
+INSERT OR REPLACE INTO card_metadata_code (card_id, language, snippet, description)
+VALUES (?, ?, ?, ?);

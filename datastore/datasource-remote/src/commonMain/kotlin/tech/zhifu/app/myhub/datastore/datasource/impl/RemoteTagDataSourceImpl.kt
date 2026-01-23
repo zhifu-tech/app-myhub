@@ -11,7 +11,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
-import tech.zhifu.app.myhub.datastore.model.Tag
+import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.network.ApiConfig
 import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
@@ -25,7 +25,9 @@ class RemoteTagDataSourceImpl(
 
     override suspend fun getAllTags(): List<Tag> {
         return try {
-            val response: HttpResponse = httpClient.get("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}")
+            val response: HttpResponse = httpClient.get(
+                "${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}"
+            )
             when (response.status) {
                 HttpStatusCode.OK -> response.body()
                 else -> throw ApiException("Failed to fetch tags: ${response.status}")

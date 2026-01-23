@@ -1,0 +1,54 @@
+-- 同步操作日志表（用于审计与追溯）
+CREATE TABLE sync_oplog (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    operation TEXT NOT NULL, -- INSERT/UPDATE/DELETE
+    payload TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+-- 索引
+
+CREATE INDEX idx_sync_oplog_user_entity ON sync_oplog(user_id, entity_type);
+
+-- CRUD 操作
+
+selectOpLogsByUserId:
+SELECT * FROM sync_oplog
+WHERE user_id = ?
+ORDER BY created_at DESC;
+
+selectOpLogsByUserIdAndEntityAfter:
+SELECT * FROM sync_oplog
+WHERE user_id = ?
+  AND entity_type = ?
+  AND created_at > ?
+ORDER BY created_at ASC
+LIMIT ?;
+
+insertOpLog:
+INSERT OR REPLACE INTO sync_oplog (
+    id,
+    user_id,
+    entity_type,
+    entity_id,
+    operation,
+    payload,
+    created_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteOpLogById:
+DELETE FROM sync_oplog
+WHERE id = ?;
+
+deleteOpLogsByUserId:
+DELETE FROM sync_oplog
+WHERE user_id = ?;
+
+deleteOpLogsBefore:
+DELETE FROM sync_oplog
+WHERE user_id = ?
+  AND created_at < ?;

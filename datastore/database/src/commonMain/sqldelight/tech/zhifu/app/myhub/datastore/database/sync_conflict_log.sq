@@ -1,0 +1,43 @@
+-- 同步冲突日志表
+CREATE TABLE sync_conflict_log (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    local_payload TEXT NOT NULL,
+    remote_payload TEXT NOT NULL,
+    resolved_strategy TEXT NOT NULL, -- LWW/MANUAL/MERGE
+    resolved_at TEXT NOT NULL
+);
+
+-- 索引
+
+CREATE INDEX idx_sync_conflict_user ON sync_conflict_log(user_id);
+
+-- CRUD 操作
+
+selectConflictLogsByUserId:
+SELECT * FROM sync_conflict_log
+WHERE user_id = ?
+ORDER BY resolved_at DESC;
+
+insertConflictLog:
+INSERT OR REPLACE INTO sync_conflict_log (
+    id,
+    user_id,
+    entity_type,
+    entity_id,
+    local_payload,
+    remote_payload,
+    resolved_strategy,
+    resolved_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteConflictLogById:
+DELETE FROM sync_conflict_log
+WHERE id = ?;
+
+deleteConflictLogsByUserId:
+DELETE FROM sync_conflict_log
+WHERE user_id = ?;

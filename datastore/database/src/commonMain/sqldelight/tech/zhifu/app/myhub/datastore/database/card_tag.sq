@@ -1,0 +1,52 @@
+-- 卡片标签关联表（多对多关系）
+CREATE TABLE card_tag (
+  card_id TEXT NOT NULL,
+  tag_id TEXT NOT NULL,
+
+  created_at TEXT NOT NULL,
+
+  PRIMARY KEY (card_id, tag_id),
+  FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_card_tag_card_id ON card_tag(card_id);
+CREATE INDEX idx_card_tag_tag_id ON card_tag(tag_id);
+
+-- CRUD 操作
+
+selectTagsByCardId:
+SELECT t.*
+FROM card_tag ct
+JOIN tag t ON t.id = ct.tag_id
+WHERE ct.card_id = ?
+ORDER BY ct.created_at DESC;
+
+selectTagsByCardIds:
+SELECT ct.card_id, t.*
+FROM card_tag ct
+JOIN tag t ON t.id = ct.tag_id
+WHERE ct.card_id IN ?
+ORDER BY ct.created_at DESC;
+
+selectCardTagsByTagId:
+SELECT * FROM card_tag
+WHERE tag_id = ?
+ORDER BY created_at DESC;
+
+insertCardTag:
+INSERT OR REPLACE INTO card_tag (card_id, tag_id, created_at)
+VALUES (?, ?, ?);
+
+deleteCardTag:
+DELETE FROM card_tag
+WHERE card_id = ? AND tag_id = ?;
+
+deleteCardTagsByCardId:
+DELETE FROM card_tag
+WHERE card_id = ?;
+
+deleteCardTagsByTagId:
+DELETE FROM card_tag
+WHERE tag_id = ?;

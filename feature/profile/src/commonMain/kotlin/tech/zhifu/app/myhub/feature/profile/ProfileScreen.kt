@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.profile
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +21,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -50,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.mixed.Avatar
+import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.feature.profile.resources.Res
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_about
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_account_management
@@ -59,16 +57,12 @@ import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_edit_avata
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_edit_display_name
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_edit_email
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_edit_profile
-import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_favorite_cards
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_joined
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_loading
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_no_user
-import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_recent_edits
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_save
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_settings
-import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_statistics
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_title
-import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_total_cards
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_version
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,15 +121,15 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // 用户信息卡片
-                    ProfileHeaderCard(
-                        user = user,
-                        onEditClick = { viewModel.startEditProfile() }
-                    )
+//                    ProfileHeaderCard(
+//                        user = user,
+//                        onEditClick = { viewModel.startEditProfile() }
+//                    )
 
                     // 统计数据卡片
-                    ProfileStatsCard(
-                        statistics = uiState.statistics
-                    )
+//                    ProfileStatsCard(
+//                        statistics = uiState.statistics
+//                    )
 
                     // 配置入口列表
                     ProfileSettingsList(
@@ -167,7 +161,7 @@ fun ProfileScreen(
  */
 @Composable
 internal fun ProfileHeaderCard(
-    user: tech.zhifu.app.myhub.datastore.model.User,
+    user: User,
     onEditClick: () -> Unit
 ) {
     Surface(
@@ -227,7 +221,7 @@ internal fun ProfileHeaderCard(
 
             // 简介（暂时使用 email 或占位文本）
             Text(
-                text = user.email ?: "Knowledge enthusiast. Creating beautiful study cards.",
+                text = "Knowledge enthusiast. Creating beautiful study cards.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -283,91 +277,91 @@ internal fun ProfileHeaderCard(
         }
     }
 }
-
-/**
- * 统计数据卡片
- */
-@Composable
-internal fun ProfileStatsCard(
-    statistics: tech.zhifu.app.myhub.datastore.model.Statistics?
-) {
-    if (statistics == null) return
-
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.feature_profile_statistics),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                StatItem(
-                    label = stringResource(Res.string.feature_profile_total_cards),
-                    value = "${statistics.totalCards}",
-                    modifier = Modifier.weight(1f)
-                )
-                StatItem(
-                    label = stringResource(Res.string.feature_profile_favorite_cards),
-                    value = "${statistics.favoriteCards}",
-                    modifier = Modifier.weight(1f)
-                )
-                StatItem(
-                    label = stringResource(Res.string.feature_profile_recent_edits),
-                    value = "${statistics.recentEdits}",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
-
-/**
- * 统计项
- */
-@Composable
-internal fun StatItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
+//
+///**
+// * 统计数据卡片
+// */
+//@Composable
+//internal fun ProfileStatsCard(
+//    statistics: tech.zhifu.app.myhub.datastore.model.Statistics?
+//) {
+//    if (statistics == null) return
+//
+//    Surface(
+//        shape = MaterialTheme.shapes.medium,
+//        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//        ) {
+//            Text(
+//                text = stringResource(Res.string.feature_profile_statistics),
+//                style = MaterialTheme.typography.titleMedium,
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//
+//            Spacer(modifier = Modifier.size(16.dp))
+//
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                StatItem(
+//                    label = stringResource(Res.string.feature_profile_total_cards),
+//                    value = "${statistics.totalCards}",
+//                    modifier = Modifier.weight(1f)
+//                )
+//                StatItem(
+//                    label = stringResource(Res.string.feature_profile_favorite_cards),
+//                    value = "${statistics.favoriteCards}",
+//                    modifier = Modifier.weight(1f)
+//                )
+//                StatItem(
+//                    label = stringResource(Res.string.feature_profile_recent_edits),
+//                    value = "${statistics.recentEdits}",
+//                    modifier = Modifier.weight(1f)
+//                )
+//            }
+//        }
+//    }
+//}
+//
+///**
+// * 统计项
+// */
+//@Composable
+//internal fun StatItem(
+//    label: String,
+//    value: String,
+//    modifier: Modifier = Modifier
+//) {
+//    Card(
+//        modifier = modifier,
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.surface
+//        ),
+//        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(12.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                text = value,
+//                style = MaterialTheme.typography.headlineMedium,
+//                fontWeight = FontWeight.Bold,
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//            Text(
+//                text = label,
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
+//        }
+//    }
+//}
 
 /**
  * 配置入口列表

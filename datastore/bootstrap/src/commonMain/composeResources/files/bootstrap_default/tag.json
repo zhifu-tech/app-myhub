@@ -1,0 +1,152 @@
+[
+  {
+    "id": "tag-001",
+    "name": "编程",
+    "color": "#FF5733",
+    "description": "与编程相关的卡片",
+    "userId": "user-000",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-002",
+    "name": "名言",
+    "color": "#33FF57",
+    "description": "名言警句",
+    "userId": "user-000",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-003",
+    "name": "kotlin",
+    "color": "#3357FF",
+    "description": "Kotlin 编程语言相关",
+    "userId": "user-000",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-004",
+    "name": "代码",
+    "color": "#888888",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-005",
+    "name": "javascript",
+    "color": "#F7DF1E",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-006",
+    "name": "algorithms",
+    "color": "#8BC34A",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-007",
+    "name": "idea",
+    "color": "#03A9F4",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-03T00:00:00Z",
+    "updatedAt": "2024-01-03T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-008",
+    "name": "project",
+    "color": "#9C27B0",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-03T00:00:00Z",
+    "updatedAt": "2024-01-03T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-009",
+    "name": "AI",
+    "color": "#FF9800",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-04T00:00:00Z",
+    "updatedAt": "2024-01-04T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-010",
+    "name": "technology",
+    "color": "#607D8B",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-04T00:00:00Z",
+    "updatedAt": "2024-01-04T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-011",
+    "name": "word",
+    "color": "#4CAF50",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-05T00:00:00Z",
+    "updatedAt": "2024-01-05T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-012",
+    "name": "vocabulary",
+    "color": "#795548",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-05T00:00:00Z",
+    "updatedAt": "2024-01-05T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-013",
+    "name": "checklist",
+    "color": "#009688",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-06T00:00:00Z",
+    "updatedAt": "2024-01-06T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-014",
+    "name": "review",
+    "color": "#CDDC39",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-06T00:00:00Z",
+    "updatedAt": "2024-01-06T00:00:00Z",
+    "cardCount": 0
+  },
+  {
+    "id": "tag-015",
+    "name": "示例",
+    "color": "#9E9E9E",
+    "description": null,
+    "userId": "user-000",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z",
+    "cardCount": 0
+  }
+]

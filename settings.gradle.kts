@@ -157,20 +157,17 @@ gradle.beforeProject {
 // 核心基础模块
 // ============================================================================
 include(":core:logger")
+include(":core:cache")
 include(":core:app-build-config")
 include(":core:platform")
 include(":core:platform-compose")
 include(":core:navigation")
 
-// ============================================================================
 // 网络模块
-// ============================================================================
 include(":core:network")
 include(":core:network-test")
 
-// ============================================================================
 // 统计模块
-// ============================================================================
 include(":core:analytics")
 
 // ============================================================================
@@ -181,22 +178,26 @@ include(":datastore:model")
 // 数据库模块
 include(":datastore:database")
 include(":datastore:database-test")
-include(":datastore:database-manage")
 include(":datastore:database-client")
 if (isServerEnabled) {
     include(":datastore:database-server")
 }
+
+// Bootstrap 模块
+include(":datastore:bootstrap")
 
 // 数据源模块
 include(":datastore:datasource-local")
 include(":datastore:datasource-remote")
 
 // 数据仓库模块
-include(":datastore:repository")
 include(":datastore:repository-client")
 if (isServerEnabled) {
     include(":datastore:repository-server")
 }
+
+// 同步模块
+include(":datastore:sync")
 
 // ============================================================================
 // 组件模块
@@ -209,14 +210,14 @@ include(":component:mixed")
 // ============================================================================
 include(":feature:settings-api")
 include(":feature:settings")
-include(":feature:dashboard-api")
-include(":feature:dashboard")
 include(":feature:profile-api")
 include(":feature:profile")
-include(":feature:favorite-api")
-include(":feature:favorite")
 include(":feature:card-api")
 include(":feature:card")
+include(":feature:favorite-api")
+include(":feature:favorite")
+include(":feature:dashboard-api")
+include(":feature:dashboard")
 
 // ============================================================================
 // 应用模块

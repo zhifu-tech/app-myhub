@@ -1,238 +1,201 @@
 package tech.zhifu.app.myhub.datastore.datasource.impl
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
-import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.model.Card
-import tech.zhifu.app.myhub.datastore.model.CardMetadata
-import tech.zhifu.app.myhub.datastore.model.CardType
-import tech.zhifu.app.myhub.datastore.model.ChecklistItem
-import kotlin.time.Instant
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.articleMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.codeMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.ideaMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.quoteMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.todoMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.wordMetadata
 
-/**
- * 本地卡片数据源实现（使用SQLDelight）
- */
 class LocalCardDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalCardDataSource {
 
-    override suspend fun getAllCards(userId: String): List<Card> {
-        return database.cardQueries.selectAll(userId).awaitAsList().map { it.toCard(userId) }
-    }
-
-    override suspend fun getCardById(id: String, userId: String): Card? {
-        return database.cardQueries.selectById(id, userId).awaitAsOneOrNull()?.toCard(userId)
-    }
-
-    override suspend fun insertCard(card: Card, userId: String) {
+    override suspend fun insertCard(card: Card) {
         database.transaction {
-            // 插入卡片
             database.cardQueries.insertCard(
                 id = card.id,
-                type = card.type.name,
+                type = card.type,
                 title = card.title,
                 content = card.content,
-                author = card.author,
-                source = card.source,
-                language = card.language,
-                is_favorite = if (card.isFavorite) 1L else 0L,
-                is_template = if (card.isTemplate) 1L else 0L,
+                user_id = card.userId,
                 created_at = card.createdAt.toString(),
-                updated_at = card.updatedAt.toString(),
-                last_reviewed_at = card.lastReviewedAt?.toString(),
-                user_id = userId
+                updated_at = card.updatedAt.toString()
             )
 
-            // 插入标签
-            card.tags.forEach { tagName ->
-                database.cardQueries.insertCardTag(card.id, tagName, userId)
+            database.card_tagQueries.deleteCardTagsByCardId(card.id)
+            card.tags.forEach { tag ->
+                database.card_tagQueries.insertCardTag(
+                    card_id = card.id,
+                    tag_id = tag.id,
+                    created_at = card.createdAt.toString()
+                )
             }
 
-            // 插入元数据
-            val metadata = card.metadata
-            if (metadata != null) {
-                database.cardQueries.insertCardMetadata(
+            database.user_cardQueries.insertUserCard(
+                user_id = card.userId,
+                card_id = card.id,
+                is_favorite = 0,
+                last_reviewed_at = null,
+                created_at = card.createdAt.toString(),
+                updated_at = card.updatedAt.toString()
+            )
+
+            card.articleMetadata?.let { metadata ->
+                database.card_metadata_articleQueries.insertCardMetadataArticle(
                     card_id = card.id,
-                    quote_author = metadata.quoteAuthor,
-                    quote_category = metadata.quoteCategory,
-                    code_language = metadata.codeLanguage,
-                    code_snippet = metadata.codeSnippet,
-                    article_url = metadata.articleUrl,
-                    article_summary = metadata.articleSummary,
-                    article_image_url = metadata.articleImageUrl,
-                    word_pronunciation = metadata.wordPronunciation,
-                    word_definition = metadata.wordDefinition,
-                    word_example = metadata.wordExample,
-                    idea_priority = metadata.ideaPriority,
-                    idea_status = metadata.ideaStatus,
-                    user_id = userId
+                    url = metadata.url,
+                    summary = metadata.summary,
+                    cover_image_url = metadata.coverImageUrl,
+                    author = metadata.author
                 )
+            }
 
-                // 先删除已存在的待办清单项，避免重复插入
-                database.cardQueries.deleteChecklistItems(card.id, userId)
+            card.codeMetadata?.let { metadata ->
+                database.card_metadata_codeQueries.insertCardMetadataCode(
+                    card_id = card.id,
+                    language = metadata.language,
+                    snippet = metadata.snippet,
+                    description = metadata.description
+                )
+            }
 
-                // 插入待办清单项
-                metadata.checklistItems.forEach { item ->
-                    database.cardQueries.insertChecklistItem(
-                        id = item.id,
-                        card_id = card.id,
-                        text = item.text,
-                        is_completed = if (item.isCompleted) 1L else 0L,
-                        item_order = item.order.toLong(),
-                        user_id = userId
-                    )
-                }
-            } else {
-                // 如果没有元数据，删除现有的 checklist items
-                database.cardQueries.deleteChecklistItems(card.id, userId)
+            card.ideaMetadata?.let { metadata ->
+                database.card_metadata_ideaQueries.insertCardMetadataIdea(
+                    card_id = card.id,
+                    priority = metadata.priority,
+                    status = metadata.status
+                )
+            }
+
+            card.quoteMetadata?.let { metadata ->
+                database.card_metadata_quoteQueries.insertCardMetadataQuote(
+                    card_id = card.id,
+                    author = metadata.author,
+                    category = metadata.category,
+                    source = metadata.source
+                )
+            }
+
+            card.todoMetadata?.let { metadata ->
+                database.card_metadata_todoQueries.insertCardMetadataTodo(
+                    card_id = card.id,
+                    status = metadata.status,
+                    priority = metadata.priority,
+                    due_at = metadata.dueAt?.toString(),
+                    completed_at = metadata.completedAt?.toString()
+                )
+            }
+
+            card.wordMetadata?.let { metadata ->
+                database.card_metadata_wordQueries.insertCardMetadataWord(
+                    card_id = card.id,
+                    pronunciation = metadata.pronunciation,
+                    definition = metadata.definition,
+                    example = metadata.example
+                )
             }
         }
     }
 
-    override suspend fun updateCard(card: Card, userId: String) {
-        database.transaction {
-            // 更新卡片
-            database.cardQueries.updateCard(
-                type = card.type.name,
-                title = card.title,
-                content = card.content,
-                author = card.author,
-                source = card.source,
-                language = card.language,
-                is_favorite = if (card.isFavorite) 1L else 0L,
-                is_template = if (card.isTemplate) 1L else 0L,
-                updated_at = card.updatedAt.toString(),
-                last_reviewed_at = card.lastReviewedAt?.toString(),
-                id = card.id,
-                user_id = userId
-            )
+    override suspend fun getCard(cardId: String): Card? {
+        val card = database.card_with_metadataQueries
+            .selectCardWithMetadataByCardId(cardId)
+            .awaitAsList()
+            .firstOrNull()
+            ?: return null
+        val tags = database.card_tagQueries
+            .selectTagsByCardId(cardId)
+            .awaitAsList()
+            .map { it.toDomain() }
+        return card.toDomain(tags)
+    }
 
-            // 更新标签（先删除再插入）
-            database.cardQueries.deleteCardTags(card.id, userId)
-            card.tags.forEach { tagName ->
-                database.cardQueries.insertCardTag(card.id, tagName, userId)
-            }
-
-            // 更新元数据
-            val metadata = card.metadata
-            if (metadata != null) {
-                database.cardQueries.insertCardMetadata(
-                    card_id = card.id,
-                    quote_author = metadata.quoteAuthor,
-                    quote_category = metadata.quoteCategory,
-                    code_language = metadata.codeLanguage,
-                    code_snippet = metadata.codeSnippet,
-                    article_url = metadata.articleUrl,
-                    article_summary = metadata.articleSummary,
-                    article_image_url = metadata.articleImageUrl,
-                    word_pronunciation = metadata.wordPronunciation,
-                    word_definition = metadata.wordDefinition,
-                    word_example = metadata.wordExample,
-                    idea_priority = metadata.ideaPriority,
-                    idea_status = metadata.ideaStatus,
-                    user_id = userId
-                )
-
-                // 更新待办清单项（先删除再插入）
-                database.cardQueries.deleteChecklistItems(card.id, userId)
-                metadata.checklistItems.forEach { item ->
-                    database.cardQueries.insertChecklistItem(
-                        id = item.id,
-                        card_id = card.id,
-                        text = item.text,
-                        is_completed = if (item.isCompleted) 1L else 0L,
-                        item_order = item.order.toLong(),
-                        user_id = userId
-                    )
-                }
-            } else {
-                // 如果没有元数据，删除现有的
-                database.cardQueries.deleteCardMetadata(card.id, userId)
-                database.cardQueries.deleteChecklistItems(card.id, userId)
-            }
+    override fun observeCard(cardId: String): Flow<Card> {
+        val cardFlow = database.card_with_metadataQueries
+            .selectCardWithMetadataByCardId(cardId)
+            .asFlow()
+            .mapToOne(Dispatchers.Default)
+        val tagsFlow = database.card_tagQueries
+            .selectTagsByCardId(cardId)
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+            .map { rows -> rows.map { it.toDomain() } }
+        return combine(cardFlow, tagsFlow) { card, tags ->
+            card.toDomain(tags)
         }
     }
 
-    override suspend fun deleteCard(id: String, userId: String) {
-        // 由于外键约束，删除卡片会自动删除关联的标签、元数据和待办清单项
-        database.cardQueries.deleteCard(id, userId)
-    }
+    override suspend fun getCards(userId: String): List<Card> {
+        val cards = database.card_with_metadataQueries
+            .selectCardWithMetadataByUserId(userId)
+            .awaitAsList()
+        if (cards.isEmpty()) {
+            return emptyList()
+        }
+        val cardIds = cards.map { it.card_id }
 
-    override suspend fun deleteAllCards(userId: String) {
-        database.cardQueries.deleteAll(userId)
+        val tagRows = database.card_tagQueries
+            .selectTagsByCardIds(cardIds)
+            .awaitAsList()
+
+        val tagsByCardId = tagRows.groupBy { it.card_id }
+            .mapValues { entry -> entry.value.map { it.toDomain() } }
+        return cards.map { card ->
+            card.toDomain(tagsByCardId[card.card_id].orEmpty())
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCards(userId: String): Flow<List<Card>> {
-        return database.cardQueries.selectAll(userId)
+        val cardsFlow = database.card_with_metadataQueries
+            .selectCardWithMetadataByUserId(userId)
             .asFlow()
-            .mapLatest { query ->
-                query.awaitAsList().map { row ->
-                    row.toCard(userId)
+            .mapToList(Dispatchers.Default)
+        val tagsFlow = cardsFlow
+            .map { cards -> cards.map { it.card_id } }
+            .distinctUntilChanged()
+            .flatMapLatest { cardIds ->
+                if (cardIds.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    database.card_tagQueries
+                        .selectTagsByCardIds(cardIds)
+                        .asFlow()
+                        .mapToList(Dispatchers.Default)
                 }
             }
+            .map { rows ->
+                rows.groupBy { it.card_id }
+                    .mapValues { entry -> entry.value.map { it.toDomain() } }
+            }
+        return combine(cardsFlow, tagsFlow) { cards, tagsByCardId ->
+            cards.map { card ->
+                card.toDomain(tagsByCardId[card.card_id].orEmpty())
+            }
+        }
     }
 
-    /**
-     * 将数据库行转换为Card实体
-     */
-    private suspend fun tech.zhifu.app.myhub.datastore.database.Card.toCard(userId: String): Card {
-        val cardId = id
-        val tags = database.cardQueries.selectCardTags(cardId, userId).awaitAsList()
-        val metadataRow = database.cardQueries.selectCardMetadata(cardId, userId).awaitAsOneOrNull()
-        val checklistItems = database.cardQueries.selectChecklistItems(cardId, userId)
-            .awaitAsList()
-            .map { item ->
-                ChecklistItem(
-                    id = item.id,
-                    text = item.text,
-                    isCompleted = item.is_completed == 1L,
-                    order = item.item_order.toInt()
-                )
-            }
+    override suspend fun deleteCard(cardId: String) {
+        database.cardQueries.deleteCard(cardId)
+    }
 
-        val metadata = metadataRow?.let { row ->
-            CardMetadata(
-                quoteAuthor = row.quote_author,
-                quoteCategory = row.quote_category,
-                codeLanguage = row.code_language,
-                codeSnippet = row.code_snippet,
-                articleUrl = row.article_url,
-                articleSummary = row.article_summary,
-                articleImageUrl = row.article_image_url,
-                wordPronunciation = row.word_pronunciation,
-                wordDefinition = row.word_definition,
-                wordExample = row.word_example,
-                checklistItems = checklistItems,
-                ideaPriority = row.idea_priority,
-                ideaStatus = row.idea_status
-            )
-        } ?: if (checklistItems.isNotEmpty()) {
-            CardMetadata(checklistItems = checklistItems)
-        } else {
-            null
-        }
-
-        return Card(
-            id = cardId,
-            type = CardType.valueOf(type),
-            title = title,
-            content = content,
-            author = author,
-            source = source,
-            language = language,
-            tags = tags,
-            isFavorite = is_favorite == 1L,
-            isTemplate = is_template == 1L,
-            createdAt = Instant.parse(created_at),
-            updatedAt = Instant.parse(updated_at),
-            lastReviewedAt = last_reviewed_at?.let { Instant.parse(it) },
-            metadata = metadata
-        )
+    override suspend fun deleteCards(userId: String) {
+        database.cardQueries.deleteCardsByUserId(userId)
     }
 }

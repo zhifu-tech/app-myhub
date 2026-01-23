@@ -2,24 +2,42 @@ package tech.zhifu.app.myhub.di
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
-import tech.zhifu.app.myhub.analytics.di.AppCoroutineScope
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
-import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
+import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
+import tech.zhifu.app.myhub.datastore.bootstrap.di.bootstrapModule
+import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.feature.card.di.cardDetailModule
-import tech.zhifu.app.myhub.logger.LoggerConfig
-import tech.zhifu.app.myhub.logger.di.loggerModule
+import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.feature.profile.di.profileModule
 import tech.zhifu.app.myhub.feature.settings.di.settingsModule
+import tech.zhifu.app.myhub.logger.LoggerConfig
+import tech.zhifu.app.myhub.logger.di.loggerModule
+import kotlin.coroutines.CoroutineContext
 
 fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
+    /**
+     * 应用级 CoroutineScope
+     * 用于管理统计服务的初始化，避免使用 GlobalScope
+     */
+    class AppCoroutineScope : CoroutineScope {
+        private val job = SupervisorJob()
+        override val coroutineContext: CoroutineContext
+            get() = job + Dispatchers.Default
+
+        fun cancel() {
+            job.cancel()
+        }
+    }
+
     val appScope = AppCoroutineScope()
 
     val koinApplication = startKoin {
@@ -35,6 +53,7 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             }, platformModule(),
             // Data module dependencies
             repositoryModule,
+            bootstrapModule,
             settingsModule(),
             dashboardModule(),
             profileModule(),
@@ -53,6 +72,13 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
                     CoroutineScope(Dispatchers.Default)
                 }
             })
+    }
+
+    appScope.launch {
+        val userRepository = koinApplication.koin.get<UserRepository>()
+        if (userRepository.hasUser().not()) {
+            koinApplication.koin.get<Bootstrap>().initialize("default")
+        }
     }
 
     // 初始化统计服务（延迟初始化，避免阻塞应用启动）

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "collection-001",
+    "name": "入门合集",
+    "topic": "onboarding",
+    "description": "用于引导的新手合集",
+    "userId": "user-000",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+]

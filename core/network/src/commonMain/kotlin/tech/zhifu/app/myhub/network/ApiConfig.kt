@@ -59,6 +59,7 @@ object ApiConfig {
     const val TEMPLATES_PATH = "/api/templates"
     const val USERS_PATH = "/api/users"
     const val STATISTICS_PATH = "/api/statistics"
+    const val SYNC_PATH = "/api/sync"
 
     // 超时配置（毫秒）
     const val CONNECT_TIMEOUT = 30_000L

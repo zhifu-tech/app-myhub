@@ -10,8 +10,9 @@ import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 
 private const val THEME_SETTING_KEY = "theme.is_dark"
 
-val SettingsRepository.themeSetting: Setting<Boolean>?
-    get() = get<Boolean>(THEME_SETTING_KEY)
+val SettingsRepository.themeSetting: Setting<Boolean>
+    get() = get(THEME_SETTING_KEY)
+        ?: throw IllegalStateException("Theme setting not found")
 
 /**
  * 主题设置

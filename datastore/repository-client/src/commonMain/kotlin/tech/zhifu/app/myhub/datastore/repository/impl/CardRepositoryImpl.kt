@@ -1,26 +1,18 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
-import tech.zhifu.app.myhub.datastore.model.Card
-import tech.zhifu.app.myhub.datastore.model.CardType
-import tech.zhifu.app.myhub.datastore.model.CreateCardRequest
-import tech.zhifu.app.myhub.datastore.model.SearchFilter
-import tech.zhifu.app.myhub.datastore.model.SortBy
-import tech.zhifu.app.myhub.datastore.model.UpdateCardRequest
-import tech.zhifu.app.myhub.datastore.model.toDomain
-import tech.zhifu.app.myhub.datastore.model.toDto
-import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
-import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.info
-import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Tag
+import tech.zhifu.app.myhub.datastore.repository.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import tech.zhifu.app.myhub.sync.SyncEntityType
+import tech.zhifu.app.myhub.sync.SyncOperations
+import tech.zhifu.app.myhub.sync.SyncPullChange
+import kotlin.random.Random
 import kotlin.time.Clock
 
 /**
@@ -28,299 +20,116 @@ import kotlin.time.Clock
  * 实现本地和远程数据源的协调，支持响应式接口
  */
 class CardRepositoryImpl(
-    private val localDataSource: LocalCardDataSource,
-    private val remoteDataSource: RemoteCardDataSource,
-    private val userContextProvider: UserContextProvider,
-    private val userDataSource: LocalUserDataSource
-) : ReactiveCardRepository {
+    private val localCardDataSource: LocalCardDataSource,
+    private val remoteCardDataSource: RemoteCardDataSource,
+    private val localSyncDataSource: LocalSyncDataSource,
+    private val tagRepository: TagRepository,
+) : CardRepository {
 
-    private val logger = logger("CardRepositoryImpl")
-
-    private suspend fun requireUserId(): String {
-        return userContextProvider.getCurrentUserId()
-            ?: throw IllegalStateException("User not authenticated")
-    }
-
-    override suspend fun getAllCards(): List<Card> {
-        val userId = requireUserId()
-        // 优先从远程获取最新数据
-        return try {
-            // 从远程获取所有卡片
-            val remoteCards = remoteDataSource.getAllCards().map { it.toDomain() }
-
-            logger.info { "Fetched ${remoteCards.size} cards from remote data source" }
-
-            // 保存到本地（使用 INSERT OR REPLACE，自动处理更新或插入）
-            remoteCards.forEach { card ->
-                localDataSource.insertCard(card, userId)
-            }
-            remoteCards
-        } catch (e: Exception) {
-            logger.error(e) {
-                "Failed to fetch cards from remote data source: ${e.message}"
-            }
-            // 如果远程获取失败，返回本地数据（降级处理）
-            localDataSource.getAllCards(userId)
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeAllCards(): Flow<List<Card>> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(emptyList())
-            } else {
-                localDataSource.observeCards(user.id)
-            }
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeCard(id: String): Flow<Card?> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(null)
-            } else {
-                localDataSource.observeCards(user.id).map { cards ->
-                    cards.find { it.id == id }
+    override val syncChangeApplier: SyncChangeApplier = object : SyncChangeApplier {
+        override suspend fun applyChanges(
+            entity: SyncEntityType,
+            operations: SyncOperations,
+            change: SyncPullChange
+        ) {
+            when (operations) {
+                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                    deserializer = Card.serializer(),
+                    payload = change.payload
+                ) {
+                    insertCardWithTags(this, needSync = false)
                 }
+
+                SyncOperations.Delete -> localCardDataSource.deleteCard(change.entityId)
+                else -> {}
             }
         }
     }
 
-    override suspend fun getCardById(id: String): Card? {
-        val userId = requireUserId()
-        // 先从本地获取
-        val localCard = localDataSource.getCardById(id, userId)
-        if (localCard != null) {
-            return localCard
-        }
-
-        // 如果本地没有，从远程获取
-        return try {
-            val remoteCard = remoteDataSource.getCardById(id)?.toDomain()
-            remoteCard?.let { localDataSource.insertCard(it, userId) }
-            remoteCard
-        } catch (_: Exception) {
-            null
-        }
+    override suspend fun getCards(userId: String): List<Card> {
+        return localCardDataSource.getCards(userId)
     }
 
-    override suspend fun searchCards(filter: SearchFilter): List<Card> {
-        val userId = requireUserId()
-        return localDataSource.getAllCards(userId).filter { card ->
-            // 搜索查询匹配
-            val matchesQuery = filter.query?.let { query ->
-                query.isBlank() ||
-                    card.title?.contains(query, ignoreCase = true) == true ||
-                    card.content.contains(query, ignoreCase = true) ||
-                    card.author?.contains(query, ignoreCase = true) == true ||
-                    card.tags.any { it.contains(query, ignoreCase = true) }
-            } ?: true
-
-            // 类型过滤
-            val matchesType = filter.cardTypes.isEmpty() || filter.cardTypes.contains(card.type)
-
-            // 标签过滤
-            val matchesTags = filter.tags.isEmpty() || filter.tags.all { card.tags.contains(it) }
-
-            // 收藏过滤
-            val matchesFavorite = filter.isFavorite?.let { card.isFavorite == it } ?: true
-
-            // 模板过滤
-            val matchesTemplate = filter.isTemplate?.let { card.isTemplate == it } ?: true
-
-            matchesQuery && matchesType && matchesTags && matchesFavorite && matchesTemplate
-        }.sortedWith(compareBy { card ->
-            when (filter.sortBy) {
-                SortBy.CREATED_AT_ASC -> card.createdAt.epochSeconds
-                SortBy.CREATED_AT_DESC -> -card.createdAt.epochSeconds
-                SortBy.UPDATED_AT_ASC -> card.updatedAt.epochSeconds
-                SortBy.UPDATED_AT_DESC -> -card.updatedAt.epochSeconds
-                SortBy.TITLE_ASC -> card.title?.lowercase() ?: ""
-                SortBy.TITLE_DESC -> card.title?.lowercase()?.reversed() ?: ""
-                SortBy.LAST_REVIEWED_AT_ASC -> card.lastReviewedAt?.epochSeconds ?: Long.MAX_VALUE
-                SortBy.LAST_REVIEWED_AT_DESC -> -(card.lastReviewedAt?.epochSeconds ?: Long.MIN_VALUE)
-            }
-        })
+    override fun observeCards(userId: String): Flow<List<Card>> {
+        return localCardDataSource.observeCards(userId)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeSearchCards(filter: SearchFilter): Flow<List<Card>> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(emptyList())
-            } else {
-                observeSearchCardsInternal(filter, user.id)
-            }
-        }
+    override suspend fun getCard(cardId: String): Card? {
+        return localCardDataSource.getCard(cardId)
     }
 
-    private suspend fun observeSearchCardsInternal(filter: SearchFilter, userId: String): Flow<List<Card>> {
-        return localDataSource.observeCards(userId).map { cards ->
-            cards.filter { card ->
-                // 搜索查询匹配
-                val matchesQuery = filter.query?.let { query ->
-                    query.isBlank() ||
-                        card.title?.contains(query, ignoreCase = true) == true ||
-                        card.content.contains(query, ignoreCase = true) ||
-                        card.author?.contains(query, ignoreCase = true) == true ||
-                        card.tags.any { it.contains(query, ignoreCase = true) }
-                } ?: true
-
-                // 类型过滤
-                val matchesType = filter.cardTypes.isEmpty() || filter.cardTypes.contains(card.type)
-
-                // 标签过滤
-                val matchesTags = filter.tags.isEmpty() || filter.tags.all { card.tags.contains(it) }
-
-                // 收藏过滤
-                val matchesFavorite = filter.isFavorite?.let { card.isFavorite == it } ?: true
-
-                // 模板过滤
-                val matchesTemplate = filter.isTemplate?.let { card.isTemplate == it } ?: true
-
-                matchesQuery && matchesType && matchesTags && matchesFavorite && matchesTemplate
-            }.sortedWith(compareBy { card ->
-                when (filter.sortBy) {
-                    SortBy.CREATED_AT_ASC -> card.createdAt.epochSeconds
-                    SortBy.CREATED_AT_DESC -> -card.createdAt.epochSeconds
-                    SortBy.UPDATED_AT_ASC -> card.updatedAt.epochSeconds
-                    SortBy.UPDATED_AT_DESC -> -card.updatedAt.epochSeconds
-                    SortBy.TITLE_ASC -> card.title?.lowercase() ?: ""
-                    SortBy.TITLE_DESC -> card.title?.lowercase()?.reversed() ?: ""
-                    SortBy.LAST_REVIEWED_AT_ASC -> card.lastReviewedAt?.epochSeconds
-                        ?: Long.MAX_VALUE
-
-                    SortBy.LAST_REVIEWED_AT_DESC -> -(card.lastReviewedAt?.epochSeconds
-                        ?: Long.MIN_VALUE)
-                }
-            })
-        }
+    override suspend fun insertCard(card: Card, needSync: Boolean) {
+        insertCardWithTags(card, needSync)
     }
 
-    override suspend fun createCard(card: Card): Card {
-        val userId = requireUserId()
-        // 先保存到本地
-        localDataSource.insertCard(card, userId)
-
-        // 然后同步到远程
-        val request = card.toDto().let { dto ->
-            CreateCardRequest(
-                type = dto.type,
-                title = dto.title,
-                content = dto.content,
-                author = dto.author,
-                source = dto.source,
-                language = dto.language,
-                tags = dto.tags,
-                isFavorite = dto.isFavorite,
-                isTemplate = dto.isTemplate,
-                metadata = dto.metadata
+    override suspend fun insertCardWithTags(card: Card, needSync: Boolean) {
+        val resolvedTags = ensureTags(card.userId, card.tags)
+        val updatedCard = card.copy(tags = resolvedTags)
+        localCardDataSource.insertCard(updatedCard)
+        if (needSync) {
+            localSyncDataSource.recordInsertOperation(
+                userId = updatedCard.userId,
+                entityType = SyncEntityType.Card,
+                entityId = updatedCard.id,
+                payload = updatedCard,
             )
         }
-        val remoteCard = remoteDataSource.createCard(request).toDomain()
-
-        // 更新本地数据
-        localDataSource.updateCard(remoteCard, userId)
-
-        return remoteCard
     }
 
-    override suspend fun updateCard(card: Card): Card {
-        val userId = requireUserId()
-        // 先更新本地
-        val updatedCard = card.copy(updatedAt = Clock.System.now())
-        localDataSource.updateCard(updatedCard, userId)
-
-        // 然后同步到远程
-        val request = UpdateCardRequest(
-            title = updatedCard.title,
-            content = updatedCard.content,
-            author = updatedCard.author,
-            source = updatedCard.source,
-            language = updatedCard.language,
-            tags = updatedCard.tags,
-            isFavorite = updatedCard.isFavorite,
-            isTemplate = updatedCard.isTemplate,
-            metadata = updatedCard.metadata?.toDto()
+    override suspend fun deleteCard(cardId: String) {
+        val card = localCardDataSource.getCard(cardId) ?: return
+        localCardDataSource.deleteCard(cardId)
+        localSyncDataSource.recordDeleteOperation(
+            userId = card.userId,
+            entityType = SyncEntityType.Card,
+            entityId = cardId,
+            payload = card,
         )
-        val remoteCard = remoteDataSource.updateCard(card.id, request).toDomain()
-
-        // 更新本地数据
-        localDataSource.updateCard(remoteCard, userId)
-
-        return remoteCard
     }
 
-    override suspend fun deleteCard(id: String): Boolean {
-        return try {
-            val userId = requireUserId()
-            // 先删除本地
-            localDataSource.deleteCard(id, userId)
+    override fun observeCard(cardId: String): Flow<Card> {
+        return localCardDataSource.observeCard(cardId)
+    }
 
-            // 然后删除远程
-            remoteDataSource.deleteCard(id)
-
-            true
-        } catch (e: Exception) {
-            false
+    override suspend fun fetchCard(cardId: String): Card? {
+        return remoteCardDataSource.getCardById(cardId)?.also { card ->
+            localCardDataSource.insertCard(card)
         }
     }
 
-    override suspend fun toggleFavorite(cardId: String): Card {
-        val userId = requireUserId()
-        val card = localDataSource.getCardById(cardId, userId)
-            ?: throw IllegalStateException("Card not found: $cardId")
-
-        // 先更新本地
-        val updatedCard = card.copy(isFavorite = !card.isFavorite, updatedAt = Clock.System.now())
-        localDataSource.updateCard(updatedCard, userId)
-
-        // 然后同步到远程
-        val remoteCard = remoteDataSource.toggleFavorite(cardId).toDomain()
-        localDataSource.updateCard(remoteCard, userId)
-
-        return remoteCard
-    }
-
-    // ReactiveCardRepository 接口实现
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeFavoriteCards(): Flow<List<Card>> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(emptyList())
-            } else {
-                localDataSource.observeCards(user.id).map { cards ->
-                    cards.filter { it.isFavorite }
-                }
+    override suspend fun fetchCards(userId: String): List<Card> {
+        return remoteCardDataSource.getCards(userId).also { cards ->
+            cards.forEach {
+                localCardDataSource.insertCard(it)
             }
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeCardsByType(type: CardType): Flow<List<Card>> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(emptyList())
+    private suspend fun ensureTags(userId: String, tags: List<Tag>): List<Tag> {
+        if (tags.isEmpty()) return emptyList()
+        val existingTags = tagRepository.getTags(userId)
+        val byId = existingTags.associateBy { it.id }
+        val byName = existingTags.associateBy { it.name }
+        return tags.map { tag ->
+            val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get) ?: byName[tag.name]
+            if (existing != null) {
+                existing
             } else {
-                localDataSource.observeCards(user.id).map { cards ->
-                    cards.filter { it.type == type }
-                }
+                val now = Clock.System.now()
+                val newTag = tag.copy(
+                    id = generateTagId(now),
+                    userId = userId,
+                    createdAt = now,
+                    updatedAt = now
+                )
+                tagRepository.insertTag(newTag, needSync = true)
+                newTag
             }
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observeCardsByTag(tag: String): Flow<List<Card>> {
-        return userDataSource.observeUser().flatMapLatest { user ->
-            if (user == null) {
-                flowOf(emptyList())
-            } else {
-                localDataSource.observeCards(user.id).map { cards ->
-                    cards.filter { it.tags.contains(tag) }
-                }
-            }
-        }
+    private fun generateTagId(now: kotlin.time.Instant): String {
+        val rand = Random.nextInt(0, 1_000_000)
+        return "tag-${now.toEpochMilliseconds()}-$rand"
     }
 }

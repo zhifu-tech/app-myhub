@@ -14,7 +14,7 @@ import tech.zhifu.app.myhub.navigation.AppNavigator
 fun EntryProviderScope<NavKey>.profileEntry(
     navigator: AppNavigator
 ) {
-    entry<ProfileNavKey>() {
+    entry<ProfileNavKey> {
         ProfileScreen()
     }
 }

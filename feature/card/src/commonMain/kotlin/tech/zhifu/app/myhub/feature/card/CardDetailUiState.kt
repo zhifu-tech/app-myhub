@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.card
 
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 /**
  * 卡片详情页 UI 状态

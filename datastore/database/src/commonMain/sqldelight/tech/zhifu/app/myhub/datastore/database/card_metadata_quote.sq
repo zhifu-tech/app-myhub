@@ -1,0 +1,17 @@
+-- 引用 / 摘抄类卡片元数据
+CREATE TABLE card_metadata_quote (
+    card_id TEXT PRIMARY KEY NOT NULL,
+
+    author TEXT,
+    category TEXT,
+    source TEXT,
+
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_card_metadata_quote_card_id ON card_metadata_quote(card_id);
+
+insertCardMetadataQuote:
+INSERT OR REPLACE INTO card_metadata_quote (card_id, author, category, source)
+VALUES (?, ?, ?, ?);

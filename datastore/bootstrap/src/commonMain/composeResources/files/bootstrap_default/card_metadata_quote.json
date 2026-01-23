@@ -1,0 +1,14 @@
+[
+  {
+    "cardId": "card-001",
+    "author": "Dr. Seuss",
+    "category": "LITERATURE",
+    "source": null
+  },
+  {
+    "cardId": "card-007",
+    "author": "Harold Abelson",
+    "category": "Programming",
+    "source": null
+  }
+]

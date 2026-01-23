@@ -295,6 +295,55 @@ Datastore 套件由以下子模块组成，按照职责分为三大类：**核�
 
 ---
 
+### 同步模块
+
+#### 11. `datastore:sync`
+
+**职责**：同步核心协议与调度模型（纯模型/接口）
+
+**主要内容**：
+
+- `SyncScheduleConfig` / `SyncTrigger` / 远端同步请求响应模型
+- 同步触发与协调接口（由客户端实现）
+
+**依赖关系**：
+
+- 仅依赖 Kotlin 标准库与协程
+- 被 `datastore:sync-client` 与 `datastore:repository` 依赖
+
+---
+
+#### 12. `datastore:sync-client`
+
+**职责**：前台自动同步调度实现（基于协程定时器）
+
+**主要内容**：
+
+- `ForegroundSyncScheduler` 前台定时调度器
+- 与 `SyncCoordinator` 协作触发同步
+
+**依赖关系**：
+
+- 依赖 `datastore:sync`
+- 被 `datastore:repository-client` 依赖
+
+---
+
+#### 13. `datastore:sync-server`
+
+**职责**：服务端同步模块占位（后续扩展）
+
+**主要内容**：
+
+- 服务端同步模块基础结构与入口占位
+
+**依赖关系**：
+
+- 依赖 `datastore:sync`
+- 被服务端相关模块按需依赖
+
+---
+
 ## 📁 模块依赖关系图
 
 ### 客户端依赖关系

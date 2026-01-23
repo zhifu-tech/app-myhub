@@ -1,10 +1,8 @@
 package tech.zhifu.app.myhub.component.card
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +34,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
+import tech.zhifu.app.myhub.datastore.model.domain.quoteMetadata
+import tech.zhifu.app.myhub.local.LocalAppTheme
 
 @Composable
 fun QuoteCard(
@@ -56,13 +57,11 @@ fun QuoteCard(
 
     // 使用 remember 缓存数据提取
     val author = remember(card) {
-        card.metadata?.quoteAuthor
-            ?: card.author
-            ?: "Unknown Author"
+        card.quoteMetadata?.author ?: "Unknown Author"
     }
 
     val category = remember(card) {
-        card.metadata?.quoteCategory ?: "GENERAL"
+        card.quoteMetadata?.category ?: "GENERAL"
     }
 
     Card(

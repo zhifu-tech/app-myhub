@@ -3,27 +3,34 @@ package tech.zhifu.app.myhub.datastore.datasource.di
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalStatisticsDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalTemplateDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
-import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardDataSourceImpl
-import tech.zhifu.app.myhub.datastore.datasource.impl.LocalStatisticsDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCardTemplateDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.LocalCollectionDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.LocalSyncDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTagDataSourceImpl
-import tech.zhifu.app.myhub.datastore.datasource.impl.LocalTemplateDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.LocalUserDataSourceImpl
-import tech.zhifu.app.myhub.datastore.datasource.impl.UserContextProviderImpl
 
-/**
- * 本地数据源依赖注入模块
- *
- * 提供所有 LocalDataSource 的实现
- */
 val localDataSourceModule = module {
-    // LocalDataSource 实现（使用SQLDelight）
+
+    single<LocalUserDataSource> {
+        LocalUserDataSourceImpl(
+            database = get<MyHubDatabase>()
+        )
+    }
+
     single<LocalCardDataSource> {
         LocalCardDataSourceImpl(
+            database = get<MyHubDatabase>()
+        )
+    }
+
+    single<LocalCollectionDataSource> {
+        LocalCollectionDataSourceImpl(
             database = get<MyHubDatabase>()
         )
     }
@@ -34,28 +41,15 @@ val localDataSourceModule = module {
         )
     }
 
-    single<LocalTemplateDataSource> {
-        LocalTemplateDataSourceImpl(
+    single<LocalSyncDataSource> {
+        LocalSyncDataSourceImpl(
             database = get<MyHubDatabase>()
         )
     }
 
-    single<LocalUserDataSource> {
-        LocalUserDataSourceImpl(
+    single<LocalCardTemplateDataSource> {
+        LocalCardTemplateDataSourceImpl(
             database = get<MyHubDatabase>()
-        )
-    }
-
-    single<LocalStatisticsDataSource> {
-        LocalStatisticsDataSourceImpl(
-            database = get<MyHubDatabase>()
-        )
-    }
-
-    // UserContextProvider 实现（客户端）
-    single<UserContextProvider> {
-        UserContextProviderImpl(
-            userDataSource = get<LocalUserDataSource>()
         )
     }
 }

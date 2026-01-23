@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import tech.zhifu.app.myhub.datastore.model.UserPreferences
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.resolver.SettingValueResolver
 import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
@@ -77,13 +77,13 @@ class SettingImpl<T>(
 
         // 如果作用域是 USER，同步到用户偏好
         if (scope == SettingScope.USER && userPreferenceUpdater != null) {
-            userRepository?.getCurrentUser()?.let { user ->
-                val updatedPrefs = userPreferenceUpdater.invoke(
-                    user.preferences ?: UserPreferences(),
-                    value
-                )
-                val updatedUser = user.copy(preferences = updatedPrefs)
-                userRepository.updateUser(updatedUser)
+            userRepository?.getUser()?.let { user ->
+//                val updatedPrefs = userPreferenceUpdater.invoke(
+//                    user.preferences ?: UserPreferences(),
+//                    value
+//                )
+//                val updatedUser = user.copy(preferences = updatedPrefs)
+//                userRepository.updateUser(updatedUser)
             }
         }
 

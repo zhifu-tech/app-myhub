@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.component.card
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,7 +34,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
+import tech.zhifu.app.myhub.local.LocalAppTheme
 
 @Composable
 fun IdeaCard(
@@ -48,7 +48,7 @@ fun IdeaCard(
 ) {
     // 使用 LocalAppTheme 获取应用的主题设置
     val isDark = LocalAppTheme.current
-    
+
     val ideaBgColor = CardStyles.IdeaCard.backgroundColor(isDark)
     val ideaBorder = CardStyles.IdeaCard.border(isDark)
 

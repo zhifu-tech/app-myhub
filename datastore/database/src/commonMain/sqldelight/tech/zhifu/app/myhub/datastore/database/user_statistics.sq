@@ -1,0 +1,51 @@
+-- 用户统计缓存表, 可重建，不作为事实来源
+CREATE TABLE user_statistics (
+    user_id TEXT NOT NULL,
+
+    total_cards INTEGER NOT NULL DEFAULT 0,
+    favorite_cards INTEGER NOT NULL DEFAULT 0,
+    recent_edits INTEGER NOT NULL DEFAULT 0,
+
+    last_sync_at TEXT,
+    updated_at TEXT NOT NULL,
+
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_user_statistics_user_id ON user_statistics(user_id);
+CREATE INDEX idx_user_statistics_updated_at ON user_statistics(updated_at);
+
+-- CRUD 操作
+
+selectUserStatisticsByUserId:
+SELECT * FROM user_statistics
+WHERE user_id = ?;
+
+insertUserStatistics:
+INSERT OR REPLACE INTO user_statistics (
+    user_id,
+    total_cards,
+    favorite_cards,
+    recent_edits,
+    last_sync_at,
+    updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateUserStatistics:
+UPDATE user_statistics
+SET total_cards = ?,
+    favorite_cards = ?,
+    recent_edits = ?,
+    last_sync_at = ?,
+    updated_at = ?
+WHERE user_id = ?;
+
+deleteUserStatistics:
+DELETE FROM user_statistics
+WHERE user_id = ?;
+
+deleteAllUserStatistics:
+DELETE FROM user_statistics;

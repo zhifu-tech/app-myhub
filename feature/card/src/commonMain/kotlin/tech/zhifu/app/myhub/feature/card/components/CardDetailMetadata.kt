@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.component.card.formatCreatedTime
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.articleMetadata
 
 /**
  * 元数据展示组件
@@ -45,7 +46,7 @@ fun CardDetailMetadata(
             // 来源（允许折行显示）
             MetadataRow(
                 label = "Source",
-                value = card.metadata?.articleUrl ?: card.source ?: "N/A",
+                value = card.articleMetadata?.url ?: "N/A",
                 allowValueWrap = true
             )
 
@@ -57,7 +58,7 @@ fun CardDetailMetadata(
             // 卡片类型
             MetadataRow(
                 label = "Type",
-                value = card.type.name
+                value = card.type
             )
         }
     }

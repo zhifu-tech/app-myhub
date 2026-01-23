@@ -1,0 +1,47 @@
+-- 卡片模版
+CREATE TABLE card_template (
+    id TEXT PRIMARY KEY NOT NULL,
+
+    type TEXT NOT NULL,
+    title TEXT,
+    content TEXT,
+
+    description TEXT,
+
+    created_at TEXT NOT NULL
+);
+
+-- 索引
+CREATE INDEX idx_card_template_type ON card_template(type);
+CREATE INDEX idx_card_template_created_at ON card_template(created_at);
+
+-- CRUD 操作
+
+selectAllCardTemplates:
+SELECT * FROM card_template
+ORDER BY created_at DESC;
+
+selectCardTemplateById:
+SELECT * FROM card_template
+WHERE id = ?;
+
+selectCardTemplatesByType:
+SELECT * FROM card_template
+WHERE type = ?
+ORDER BY created_at DESC;
+
+insertCardTemplate:
+INSERT OR REPLACE INTO card_template (id, type, title, content, description, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateCardTemplate:
+UPDATE card_template
+SET type = ?,
+    title = ?,
+    content = ?,
+    description = ?
+WHERE id = ?;
+
+deleteCardTemplate:
+DELETE FROM card_template
+WHERE id = ?;

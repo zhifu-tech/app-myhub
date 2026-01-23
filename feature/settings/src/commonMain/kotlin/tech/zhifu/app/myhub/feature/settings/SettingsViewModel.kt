@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
@@ -40,8 +39,8 @@ class SettingsViewModel(
      * 自动从设置项 Flow 中组合生成
      */
     val uiState: StateFlow<SettingsUiState> = combine(
-        themeSetting?.observe() ?: flowOf(true),
-        languageSetting?.observe() ?: flowOf("en"),
+        themeSetting.observe(),
+        languageSetting.observe(),
         _showLanguageDialog
     ) { isDark, languageCode, showDialog ->
         val currentLanguage = languageCode.toLanguage()
@@ -68,8 +67,8 @@ class SettingsViewModel(
         coroutineScope.launch {
             try {
                 logger.info { "Loading settings" }
-                themeSetting?.get()
-                languageSetting?.get()
+                themeSetting.get()
+                languageSetting.get()
                 logger.info { "Settings loaded successfully" }
             } catch (e: Exception) {
                 logger.error(e) {
@@ -87,7 +86,7 @@ class SettingsViewModel(
 
         coroutineScope.launch {
             try {
-                languageSetting?.set(language.code)
+                languageSetting.set(language.code)
                 // 同步更新全局状态
                 customAppLocale = language.code
                 logger.info { "Language updated successfully" }
@@ -107,7 +106,7 @@ class SettingsViewModel(
 
         coroutineScope.launch {
             try {
-                themeSetting?.set(isDarkMode)
+                themeSetting.set(isDarkMode)
                 logger.info { "Theme updated successfully" }
             } catch (e: Exception) {
                 logger.error(e) {

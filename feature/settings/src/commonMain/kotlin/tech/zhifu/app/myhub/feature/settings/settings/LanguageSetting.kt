@@ -10,8 +10,10 @@ import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 
 private const val LANGUAGE_SETTING_KEY = "language.code"
 
-val SettingsRepository.languageSetting: Setting<String>?
-    get() = get<String>(LANGUAGE_SETTING_KEY)
+val SettingsRepository.languageSetting: Setting<String>
+    get() = get(LANGUAGE_SETTING_KEY)
+        ?: throw IllegalStateException("Language setting not found")
+
 
 /**
  * 语言设置

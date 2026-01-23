@@ -3,14 +3,12 @@ package tech.zhifu.app.myhub.datastore.datasource.di
 import io.ktor.client.HttpClient
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteStatisticsDataSource
+import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteTemplateDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteCardDataSourceImpl
-import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteStatisticsDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteSyncDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTagDataSourceImpl
-import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTemplateDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteUserDataSourceImpl
 import tech.zhifu.app.myhub.network.di.networkModule
 
@@ -37,20 +35,14 @@ val remoteDataSourceModule = module {
         )
     }
 
-    single<RemoteTemplateDataSource> {
-        RemoteTemplateDataSourceImpl(
-            httpClient = get<HttpClient>()
-        )
-    }
-
     single<RemoteUserDataSource> {
         RemoteUserDataSourceImpl(
             httpClient = get<HttpClient>()
         )
     }
 
-    single<RemoteStatisticsDataSource> {
-        RemoteStatisticsDataSourceImpl(
+    single<RemoteSyncDataSource> {
+        RemoteSyncDataSourceImpl(
             httpClient = get<HttpClient>()
         )
     }

@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.datastore.repository.ReactiveCardRepository
+import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.feature.card.components.CardDetailActions
 import tech.zhifu.app.myhub.feature.card.components.CardDetailContent
 import tech.zhifu.app.myhub.feature.card.components.CardDetailHeader
@@ -44,12 +44,6 @@ import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthMedium
 
-/**
- * 卡片详情页主界面
- *
- * @param cardId 卡片 ID
- * @param onNavigateBack 返回导航回调
- */
 @Composable
 fun CardDetailScreen(
     cardId: String,
@@ -122,11 +116,11 @@ fun CardDetailScreen(
                             )
 
                             CardDetailTags(
-                                tags = state.card.tags,
+                                tags = emptyList(), //state.card.tags,
                                 onAddTag = { /* TODO: 实现添加标签对话框 */ },
                                 onRemoveTag = { tag ->
-                                    val newTags = state.card.tags.filter { it != tag }
-                                    viewModel.updateTags(newTags)
+//                                    val newTags = state.card.tags.filter { it != tag }
+//                                    viewModel.updateTags(newTags)
                                 }
                             )
 
@@ -175,11 +169,11 @@ fun CardDetailScreen(
                             )
 
                             CardDetailTags(
-                                tags = state.card.tags,
+                                tags = emptyList(),// state.card.tags,
                                 onAddTag = { /* TODO: 实现添加标签对话框 */ },
                                 onRemoveTag = { tag ->
-                                    val newTags = state.card.tags.filter { it != tag }
-                                    viewModel.updateTags(newTags)
+//                                    val newTags = state.card.tags.filter { it != tag }
+//                                    viewModel.updateTags(newTags)
                                 }
                             )
 
@@ -253,11 +247,11 @@ fun CardDetailScreen(
                                 )
 
                                 CardDetailTags(
-                                    tags = state.card.tags,
+                                    tags = emptyList(),// state.card.tags,
                                     onAddTag = { /* TODO: 实现添加标签对话框 */ },
                                     onRemoveTag = { tag ->
-                                        val newTags = state.card.tags.filter { it != tag }
-                                        viewModel.updateTags(newTags)
+//                                        val newTags = state.card.tags.filter { it != tag }
+//                                        viewModel.updateTags(newTags)
                                     }
                                 )
 
@@ -333,7 +327,7 @@ fun CardDetailScreen(
  */
 @Composable
 private fun rememberCardDetailViewModel(cardId: String): CardDetailViewModel {
-    val cardRepository: ReactiveCardRepository = koinInject()
+    val cardRepository: CardRepository = koinInject()
     val coroutineScope: CoroutineScope = koinInject()
 
     return remember(cardId) {

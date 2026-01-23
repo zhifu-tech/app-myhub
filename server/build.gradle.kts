@@ -22,15 +22,12 @@ dependencies {
     implementation(projects.core.logger)
 
     implementation(projects.datastore.model)
-
+    implementation(projects.datastore.sync)
     implementation(projects.datastore.repositoryServer)
-
     implementation(projects.datastore.databaseServer)
-
-    implementation(projects.datastore.databaseManage)
-
     implementation(projects.datastore.datasourceLocal)
 
+    implementation(libs.ktor.http)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverContentNegotiation)
@@ -38,6 +35,7 @@ dependencies {
     implementation(libs.ktor.serverCors)
     implementation(libs.ktor.serverCallLogging)
     implementation(libs.ktor.serverStatusPages)
+    implementation(libs.ktor.utils)
 
     implementation(libs.kotlinx.serialization.json)
 

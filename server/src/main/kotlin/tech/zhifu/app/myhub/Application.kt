@@ -16,16 +16,12 @@ import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
 import tech.zhifu.app.myhub.api.cardsApi
-import tech.zhifu.app.myhub.api.statisticsApi
-import tech.zhifu.app.myhub.api.tagsApi
-import tech.zhifu.app.myhub.api.templatesApi
+import tech.zhifu.app.myhub.api.syncApi
 import tech.zhifu.app.myhub.api.usersApi
 import tech.zhifu.app.myhub.di.initKoin
 import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.service.CardService
-import tech.zhifu.app.myhub.service.StatisticsService
-import tech.zhifu.app.myhub.service.TagService
-import tech.zhifu.app.myhub.service.TemplateService
+import tech.zhifu.app.myhub.service.SyncService
 import tech.zhifu.app.myhub.service.UserService
 
 const val SERVER_PORT = 8083
@@ -34,8 +30,12 @@ fun main() {
     // 初始化 Koin 依赖注入
     initKoin()
 
-    embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    embeddedServer(
+        factory = Netty,
+        port = SERVER_PORT,
+        host = "0.0.0.0",
+        module = Application::module,
+    ).start(wait = true)
 }
 
 fun Application.module() {
@@ -78,13 +78,6 @@ fun Application.module() {
         }
     }
 
-    // 从 Koin 获取 Service 实例
-    val cardService = GlobalContext.get().get<CardService>()
-    val tagService = GlobalContext.get().get<TagService>()
-    val templateService = GlobalContext.get().get<TemplateService>()
-    val userService = GlobalContext.get().get<UserService>()
-    val statisticsService = GlobalContext.get().get<StatisticsService>()
-
     // 配置路由
     routing {
         // 根路径
@@ -98,11 +91,9 @@ fun Application.module() {
         }
 
         // API 路由
-        cardsApi(cardService)
-        tagsApi(tagService)
-        templatesApi(templateService)
-        usersApi(userService)
-        statisticsApi(statisticsService)
+        syncApi(GlobalContext.get().get<SyncService>())
+        usersApi(GlobalContext.get().get<UserService>())
+        cardsApi(GlobalContext.get().get<CardService>())
     }
 }
 

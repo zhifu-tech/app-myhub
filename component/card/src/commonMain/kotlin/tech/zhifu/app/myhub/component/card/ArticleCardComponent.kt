@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.card.resources.Res
 import tech.zhifu.app.myhub.component.card.resources.component_card_type_article
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 internal class ArticleCardComponent : CardComponent {
     @Composable

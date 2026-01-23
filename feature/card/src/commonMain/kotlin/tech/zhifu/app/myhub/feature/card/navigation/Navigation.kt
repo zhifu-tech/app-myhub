@@ -9,7 +9,7 @@ import tech.zhifu.app.myhub.navigation.AppNavigator
 fun EntryProviderScope<NavKey>.cardEntry(navigator: AppNavigator) {
     entry<CardNavKey> { key ->
         CardDetailScreen(
-            cardId = key.id,
+            cardId = key.cardId,
             onNavigateBack = { navigator.goBack() }
         )
     }

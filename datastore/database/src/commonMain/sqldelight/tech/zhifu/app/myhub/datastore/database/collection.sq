@@ -1,0 +1,54 @@
+-- 卡集，用户私有的结构化内容容器
+-- Invariant:
+-- - 每个 collection 只能有一个 owner
+-- - owner.user_id == collection.user_id
+CREATE TABLE collection (
+  id TEXT PRIMARY KEY NOT NULL,
+
+  name TEXT NOT NULL,
+  topic TEXT,
+  description TEXT,
+
+  user_id TEXT NOT NULL,
+
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_collection_user_id ON collection(user_id);
+CREATE INDEX idx_collection_created_at ON collection(created_at);
+CREATE INDEX idx_collection_updated_at ON collection(updated_at);
+CREATE INDEX idx_collection_user_name ON collection(user_id, name);
+
+-- CRUD 操作
+selectCollectionsByUserId:
+SELECT * FROM collection
+WHERE user_id = ?
+ORDER BY updated_at DESC;
+
+selectCollectionById:
+SELECT * FROM collection
+WHERE id = ?;
+
+insertCollection:
+INSERT OR REPLACE INTO collection (id, name, topic, description, user_id, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateCollection:
+UPDATE collection
+SET name = ?,
+    topic = ?,
+    description = ?,
+    updated_at = ?
+WHERE id = ?;
+
+deleteCollection:
+DELETE FROM collection
+WHERE id = ?;
+
+deleteCollectionsByUserId:
+DELETE FROM collection
+WHERE user_id = ?;

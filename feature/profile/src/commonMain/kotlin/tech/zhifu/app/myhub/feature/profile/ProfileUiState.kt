@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.feature.profile
 
-import tech.zhifu.app.myhub.datastore.model.Statistics
-import tech.zhifu.app.myhub.datastore.model.User
+import tech.zhifu.app.myhub.datastore.model.domain.User
 
 /**
  * Profile UI 状态
@@ -9,9 +8,6 @@ import tech.zhifu.app.myhub.datastore.model.User
 data class ProfileUiState(
     // 用户信息
     val user: User? = null,
-
-    // 统计数据
-    val statistics: Statistics? = null,
 
     // UI 状态
     val isLoading: Boolean = false,

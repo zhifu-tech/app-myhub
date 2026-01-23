@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import tech.zhifu.app.myhub.local.LocalAppTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,7 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.datastore.model.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.codeMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
+import tech.zhifu.app.myhub.local.LocalAppTheme
 
 @Composable
 fun CodeCard(
@@ -56,11 +58,11 @@ fun CodeCard(
     }
 
     val codeContent = remember(card) {
-        card.metadata?.codeSnippet ?: card.content
+        card.codeMetadata?.snippet ?: card.content
     }
 
     val language = remember(card) {
-        card.metadata?.codeLanguage ?: card.language ?: "text"
+        card.codeMetadata?.language ?: "text"
     }
 
     Card(
@@ -145,7 +147,10 @@ fun CodeCard(
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), // bg-slate-50
                         shape = RoundedCornerShape(8.dp), // rounded-lg
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)), // border-slate-100
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        ), // border-slate-100
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(

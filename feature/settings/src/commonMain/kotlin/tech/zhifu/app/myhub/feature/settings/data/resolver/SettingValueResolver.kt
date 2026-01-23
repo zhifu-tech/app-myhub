@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.settings.data.resolver
 
-import tech.zhifu.app.myhub.datastore.model.UserPreferences
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.data.store.SettingSerializer
@@ -30,16 +30,16 @@ class SettingValueResolver<T>(
     suspend fun resolve(): T {
         return when (scope) {
             SettingScope.USER -> {
-                // 1. 尝试从用户偏好获取
-                userRepository?.getCurrentUser()?.preferences?.let { prefs ->
-                    userPreferenceExtractor?.invoke(prefs)
-                }
-                // 2. 尝试从本地存储获取
-                    ?: localStore.get(key)?.let {
-                        serializer.deserialize(it)
-                    }
-                    // 3. 使用默认值
-                    ?: defaultValue
+                /* // 1. 尝试从用户偏好获取
+                 userRepository?.getCurrentUser()?.preferences?.let { prefs ->
+                     userPreferenceExtractor?.invoke(prefs)
+                 }
+                 // 2. 尝试从本地存储获取
+                     ?: localStore.get(key)?.let {
+                         serializer.deserialize(it)
+                     }
+                     // 3. 使用默认值
+                     ?:*/ defaultValue
             }
 
             SettingScope.APP -> {

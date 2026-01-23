@@ -1,0 +1,35 @@
+# Build outputs
+build/
+bin/
+out/
+
+# Gradle
+.gradle/
+gradle/wrapper/
+
+# IDE
+.idea/
+*.iml
+
+# iOS
+iosApp/Pods/
+
+# Node
+node_modules/
+kotlin-js-store/
+
+# Generated files
+*.generated.*
+*.min.js
+*.min.css
+
+# Kotlin/Java source (use ktlint instead)
+*.kt
+*.kts
+*.java
+
+# Other
+*.lock
+local.properties
+google-services.json
+GoogleService-Info.plist
