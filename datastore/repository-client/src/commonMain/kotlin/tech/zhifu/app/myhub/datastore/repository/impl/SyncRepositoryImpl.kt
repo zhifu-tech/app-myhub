@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.SyncOutboxStatus
@@ -24,9 +23,7 @@ import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.sync.SyncCoordinator
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncMode
-import tech.zhifu.app.myhub.sync.SyncOperations
 import tech.zhifu.app.myhub.sync.SyncOutboxUploadItem
-import tech.zhifu.app.myhub.sync.SyncPullChange
 import tech.zhifu.app.myhub.sync.SyncPullResponse
 import tech.zhifu.app.myhub.sync.SyncPushRequest
 import tech.zhifu.app.myhub.sync.SyncPushResponse
@@ -43,10 +40,10 @@ class SyncRepositoryImpl(
     private val localSyncDataSource: LocalSyncDataSource,
     private val remoteSyncDataSource: RemoteSyncDataSource,
     private val userRepository: UserRepository,
-    private val tagRepository: TagRepository,
-    private val cardTemplateRepository: CardTemplateRepository,
-    private val cardRepository: CardRepository,
-    private val collectionRepository: CollectionRepository,
+    tagRepository: TagRepository,
+    cardTemplateRepository: CardTemplateRepository,
+    cardRepository: CardRepository,
+    collectionRepository: CollectionRepository,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : SyncRepository, SyncCoordinator {
     private val scheduler = SyncForegroundScheduler(scope, this)
@@ -57,10 +54,6 @@ class SyncRepositoryImpl(
     private val oplogRetentionDays = 30
     private val retryBaseDelayMs = 10_000L
     private val retryMaxDelayMs = 600_000L
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
     private var autoSyncJob: Job? = null
     private val syncAppliers: Map<SyncEntityType, SyncChangeApplier> = mapOf(
         SyncEntityType.User to userRepository.syncUserChangeApplier,
@@ -245,9 +238,7 @@ class SyncRepositoryImpl(
         )
     }
 
-
     private fun statusFlow(userId: String): MutableStateFlow<SyncStatus> {
         return statusMap.getOrPut(userId) { MutableStateFlow(SyncStatus.IDLE) }
     }
-
 }

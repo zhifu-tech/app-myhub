@@ -50,6 +50,22 @@ interface LocalSyncDataSource {
         lastError: String?
     )
 
+    suspend fun insertOutboxAndOpLog(
+        outboxId: String,
+        oplogId: String,
+        userId: String,
+        entityType: String,
+        entityId: String,
+        operation: String,
+        payload: String,
+        sequence: Long,
+        createdAt: String,
+        status: String,
+        retryCount: Long,
+        nextRetryAt: String?,
+        lastError: String?
+    )
+
     suspend fun updateOutboxStatus(
         id: String,
         status: String,

@@ -18,15 +18,23 @@ class LocalCollectionDataSourceImpl(
 ) : LocalCollectionDataSource {
 
     override suspend fun insertCollection(collection: Collection) {
-        database.collectionQueries.insertCollection(
-            id = collection.id,
-            name = collection.name,
-            topic = collection.topic,
-            description = collection.description,
-            user_id = collection.userId,
-            created_at = collection.createdAt.toString(),
-            updated_at = collection.updatedAt.toString()
-        )
+        database.transaction {
+            database.collectionQueries.insertCollection(
+                id = collection.id,
+                name = collection.name,
+                topic = collection.topic,
+                description = collection.description,
+                user_id = collection.userId,
+                created_at = collection.createdAt.toString(),
+                updated_at = collection.updatedAt.toString()
+            )
+            database.user_collectionQueries.insertUserCollection(
+                user_id = collection.userId,
+                collection_id = collection.id,
+                role = "owner",
+                created_at = collection.createdAt.toString()
+            )
+        }
     }
 
     override suspend fun getCollection(collectionId: String): Collection? {

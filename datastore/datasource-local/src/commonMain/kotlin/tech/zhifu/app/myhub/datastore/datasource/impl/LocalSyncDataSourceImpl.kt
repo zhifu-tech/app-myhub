@@ -95,6 +95,48 @@ class LocalSyncDataSourceImpl(
         )
     }
 
+    override suspend fun insertOutboxAndOpLog(
+        outboxId: String,
+        oplogId: String,
+        userId: String,
+        entityType: String,
+        entityId: String,
+        operation: String,
+        payload: String,
+        sequence: Long,
+        createdAt: String,
+        status: String,
+        retryCount: Long,
+        nextRetryAt: String?,
+        lastError: String?
+    ) {
+        database.transaction {
+            database.sync_outboxQueries.insertOutbox(
+                id = outboxId,
+                user_id = userId,
+                entity_type = entityType,
+                entity_id = entityId,
+                operation = operation,
+                payload = payload,
+                sequence = sequence,
+                created_at = createdAt,
+                status = status,
+                retry_count = retryCount,
+                next_retry_at = nextRetryAt,
+                last_error = lastError
+            )
+            database.sync_oplogQueries.insertOpLog(
+                id = oplogId,
+                user_id = userId,
+                entity_type = entityType,
+                entity_id = entityId,
+                operation = operation,
+                payload = payload,
+                created_at = createdAt
+            )
+        }
+    }
+
     override suspend fun updateOutboxStatus(
         id: String,
         status: String,

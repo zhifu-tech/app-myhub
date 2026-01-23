@@ -59,8 +59,10 @@ private suspend fun LocalSyncDataSource.recordOperation(
 ) {
     val timestamp = now.toEpochMilliseconds()
     val outboxId = "outbox-$userId-$entityId-$timestamp"
-    insertOutbox(
-        id = outboxId,
+    val oplogId = "oplog-$userId-$entityId-$timestamp"
+    insertOutboxAndOpLog(
+        outboxId = outboxId,
+        oplogId = oplogId,
         userId = userId,
         entityType = entityType.value,
         entityId = entityId,
@@ -72,14 +74,5 @@ private suspend fun LocalSyncDataSource.recordOperation(
         retryCount = 0,
         nextRetryAt = null,
         lastError = null
-    )
-    insertOpLog(
-        id = "oplog-$userId-$entityId-$timestamp",
-        userId = userId,
-        entityType = entityType.value,
-        entityId = entityId,
-        operation = operation.value,
-        payload = payload,
-        createdAt = now.toString()
     )
 }

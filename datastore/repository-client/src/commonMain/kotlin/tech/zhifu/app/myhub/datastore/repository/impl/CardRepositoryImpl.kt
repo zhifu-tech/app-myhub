@@ -5,15 +5,12 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import tech.zhifu.app.myhub.sync.SyncPullChange
-import kotlin.random.Random
-import kotlin.time.Clock
 
 /**
  * 卡片仓库实现（客户端）
@@ -63,7 +60,7 @@ class CardRepositoryImpl(
     }
 
     override suspend fun insertCardWithTags(card: Card, needSync: Boolean) {
-        val resolvedTags = ensureTags(card.userId, card.tags)
+        val resolvedTags = tagRepository.ensureTags(card.userId, card.tags, needSync = needSync)
         val updatedCard = card.copy(tags = resolvedTags)
         localCardDataSource.insertCard(updatedCard)
         if (needSync) {
@@ -103,33 +100,5 @@ class CardRepositoryImpl(
                 localCardDataSource.insertCard(it)
             }
         }
-    }
-
-    private suspend fun ensureTags(userId: String, tags: List<Tag>): List<Tag> {
-        if (tags.isEmpty()) return emptyList()
-        val existingTags = tagRepository.getTags(userId)
-        val byId = existingTags.associateBy { it.id }
-        val byName = existingTags.associateBy { it.name }
-        return tags.map { tag ->
-            val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get) ?: byName[tag.name]
-            if (existing != null) {
-                existing
-            } else {
-                val now = Clock.System.now()
-                val newTag = tag.copy(
-                    id = generateTagId(now),
-                    userId = userId,
-                    createdAt = now,
-                    updatedAt = now
-                )
-                tagRepository.insertTag(newTag, needSync = true)
-                newTag
-            }
-        }
-    }
-
-    private fun generateTagId(now: kotlin.time.Instant): String {
-        val rand = Random.nextInt(0, 1_000_000)
-        return "tag-${now.toEpochMilliseconds()}-$rand"
     }
 }

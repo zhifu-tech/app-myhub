@@ -13,6 +13,8 @@ import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import tech.zhifu.app.myhub.sync.SyncPullChange
+import kotlin.random.Random
+import kotlin.time.Clock
 
 /**
  * 标签仓库实现（客户端）
@@ -88,6 +90,29 @@ class TagRepositoryImpl(
         }
     }
 
+    override suspend fun ensureTags(userId: String, tags: List<Tag>, needSync: Boolean): List<Tag> {
+        if (tags.isEmpty()) return emptyList()
+        val existingTags = getTags(userId)
+        val byId = existingTags.associateBy { it.id }
+        val byName = existingTags.associateBy { it.name }
+        return tags.map { tag ->
+            val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get) ?: byName[tag.name]
+            if (existing != null) {
+                existing
+            } else {
+                val now = Clock.System.now()
+                val newTag = tag.copy(
+                    id = generateTagId(now),
+                    userId = userId,
+                    createdAt = now,
+                    updatedAt = now
+                )
+                insertTag(newTag, needSync = needSync)
+                newTag
+            }
+        }
+    }
+
     override fun observeTags(userId: String): Flow<List<Tag>> {
         return localTagDataSource.observeTags(userId).onEach { tags ->
             tags.forEach {
@@ -107,5 +132,10 @@ class TagRepositoryImpl(
                 payload = tag
             )
         }
+    }
+
+    private fun generateTagId(now: kotlin.time.Instant): String {
+        val rand = Random.nextInt(0, 1_000_000)
+        return "tag-${now.toEpochMilliseconds()}-$rand"
     }
 }
