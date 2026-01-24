@@ -7,5 +7,4 @@ enum class SyncEntityType(val value: String) {
     Card("card"),
     Tag("tag"),
     Template("template"),
-    Unknown("unknown"),
 }

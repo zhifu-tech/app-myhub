@@ -43,7 +43,10 @@ internal class ThemeSetting(
             }
         },
         userPreferenceUpdater = { prefs, value ->
-            prefs.copy(theme = if (value) "dark" else "light")
+            val targetTheme = if (value) "dark" else "light"
+            prefs.takeIf { it.theme != targetTheme }?.apply {
+                userRepository?.updateUserPreferencesLanguage(prefs.userId, targetTheme)
+            }
         }
     )
 

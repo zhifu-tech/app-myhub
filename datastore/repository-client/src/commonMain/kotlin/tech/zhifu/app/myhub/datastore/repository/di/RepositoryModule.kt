@@ -44,21 +44,21 @@ val repositoryModule = module {
         UserRepositoryImpl(
             localUserDataSource = get<LocalUserDataSource>(),
             remoteUserDataSource = get<RemoteUserDataSource>(),
-            localSyncDataSource = get<LocalSyncDataSource>(),
+            syncRepository = get<SyncRepository>(),
         )
     }
 
     single<TagRepository> {
         TagRepositoryImpl(
             localTagDataSource = get<LocalTagDataSource>(),
-            localSyncDataSource = get<LocalSyncDataSource>(),
+            syncRepository = get<SyncRepository>(),
         )
     }
 
     single<CollectionRepository> {
         CollectionRepositoryImpl(
             localCollectionDataSource = get<LocalCollectionDataSource>(),
-            localSyncDataSource = get<LocalSyncDataSource>(),
+            syncRepository = get<SyncRepository>(),
         )
     }
 
@@ -66,7 +66,7 @@ val repositoryModule = module {
         CardRepositoryImpl(
             localCardDataSource = get<LocalCardDataSource>(),
             remoteCardDataSource = get<RemoteCardDataSource>(),
-            localSyncDataSource = get<LocalSyncDataSource>(),
+            syncRepository = get<SyncRepository>(),
             tagRepository = get<TagRepository>()
         )
     }
@@ -74,7 +74,7 @@ val repositoryModule = module {
     single<CardTemplateRepository> {
         CardTemplateRepositoryImpl(
             localCardTemplateDataSource = get<LocalCardTemplateDataSource>(),
-            localSyncDataSource = get<LocalSyncDataSource>()
+            syncRepository = get<SyncRepository>(),
         )
     }
 
@@ -82,11 +82,11 @@ val repositoryModule = module {
         SyncRepositoryImpl(
             localSyncDataSource = get<LocalSyncDataSource>(),
             remoteSyncDataSource = get<RemoteSyncDataSource>(),
-            cardRepository = get<CardRepository>(),
-            userRepository = get<UserRepository>(),
-            tagRepository = get<TagRepository>(),
-            collectionRepository = get<CollectionRepository>(),
-            cardTemplateRepository = get<CardTemplateRepository>()
+            cardRepository = lazy { get<CardRepository>() },
+            userRepository = lazy { get<UserRepository>() },
+            tagRepository = lazy { get<TagRepository>() },
+            collectionRepository = lazy { get<CollectionRepository>() },
+            cardTemplateRepository = lazy { get<CardTemplateRepository>() }
         )
     }
 }

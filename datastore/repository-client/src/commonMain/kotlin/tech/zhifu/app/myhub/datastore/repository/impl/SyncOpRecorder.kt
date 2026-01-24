@@ -1,14 +1,14 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
 import kotlinx.serialization.DeserializationStrategy
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.SyncOutboxStatus
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-internal suspend fun <T> LocalSyncDataSource.applyChange(
+internal suspend fun <T> SyncRepository.applyChange(
     deserializer: DeserializationStrategy<T>,
     payload: String,
     block: suspend T.() -> Unit
@@ -18,8 +18,7 @@ internal suspend fun <T> LocalSyncDataSource.applyChange(
     block(this)
 }
 
-
-internal suspend inline fun <reified T> LocalSyncDataSource.recordInsertOperation(
+internal suspend inline fun <reified T> SyncRepository.recordInsertOperation(
     userId: String,
     entityType: SyncEntityType,
     entityId: String,
@@ -34,7 +33,7 @@ internal suspend inline fun <reified T> LocalSyncDataSource.recordInsertOperatio
     now = now
 )
 
-internal suspend inline fun <reified T> LocalSyncDataSource.recordDeleteOperation(
+internal suspend inline fun <reified T> SyncRepository.recordDeleteOperation(
     userId: String,
     entityType: SyncEntityType,
     entityId: String,
@@ -49,7 +48,7 @@ internal suspend inline fun <reified T> LocalSyncDataSource.recordDeleteOperatio
     now = now
 )
 
-private suspend fun LocalSyncDataSource.recordOperation(
+private suspend fun SyncRepository.recordOperation(
     userId: String,
     entityType: SyncEntityType,
     entityId: String,

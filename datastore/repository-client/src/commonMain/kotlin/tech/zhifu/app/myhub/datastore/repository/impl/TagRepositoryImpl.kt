@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.onEach
 import tech.zhifu.app.myhub.cache.Cache
 import tech.zhifu.app.myhub.cache.CacheConfig
 import tech.zhifu.app.myhub.cache.cache
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
@@ -22,7 +22,7 @@ import kotlin.time.Clock
  */
 class TagRepositoryImpl(
     private val localTagDataSource: LocalTagDataSource,
-    private val localSyncDataSource: LocalSyncDataSource,
+    private val syncRepository: SyncRepository,
     private val tagCache: Cache<String, Tag> = cache(CacheConfig(maximumSize = 99))
 ) : TagRepository {
 
@@ -34,21 +34,19 @@ class TagRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = Tag.serializer(),
                     payload = change.payload
                 ) {
                     insertTag(this, false)
                 }
 
-                SyncOperations.Delete -> localSyncDataSource.applyChange(
+                SyncOperations.Delete -> syncRepository.applyChange(
                     deserializer = Tag.serializer(),
                     payload = change.payload
                 ) {
                     deleteTag(this.id, false)
                 }
-
-                else -> {}
             }
         }
     }
@@ -56,7 +54,7 @@ class TagRepositoryImpl(
     override suspend fun insertTag(tag: Tag, needSync: Boolean) {
         localTagDataSource.insertTag(tag)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = tag.userId,
                 entityType = SyncEntityType.Tag,
                 entityId = tag.id,
@@ -125,7 +123,7 @@ class TagRepositoryImpl(
         val tag = localTagDataSource.getTag(id)
         localTagDataSource.deleteTag(id)
         if (needSync) {
-            localSyncDataSource.recordDeleteOperation(
+            syncRepository.recordDeleteOperation(
                 userId = id,
                 entityType = SyncEntityType.Tag,
                 entityId = id,

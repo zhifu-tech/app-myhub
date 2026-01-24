@@ -7,3 +7,11 @@ data class SyncPullChange(
     val payload: String,
     val updatedAt: String
 )
+
+fun SyncPullChange.toSyncOperation() = SyncOperations.entries.find {
+    operation == it.value
+}
+
+fun SyncPullChange.toSyncEntityType() = SyncEntityType.entries.firstOrNull {
+    entityType == it.value
+}

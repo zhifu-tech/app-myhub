@@ -2,11 +2,11 @@ package tech.zhifu.app.myhub.datastore.repository.impl
 
 import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
@@ -19,7 +19,7 @@ import tech.zhifu.app.myhub.sync.SyncPullChange
 class CardRepositoryImpl(
     private val localCardDataSource: LocalCardDataSource,
     private val remoteCardDataSource: RemoteCardDataSource,
-    private val localSyncDataSource: LocalSyncDataSource,
+    private val syncRepository: SyncRepository,
     private val tagRepository: TagRepository,
 ) : CardRepository {
 
@@ -30,7 +30,7 @@ class CardRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = Card.serializer(),
                     payload = change.payload
                 ) {
@@ -38,7 +38,6 @@ class CardRepositoryImpl(
                 }
 
                 SyncOperations.Delete -> localCardDataSource.deleteCard(change.entityId)
-                else -> {}
             }
         }
     }
@@ -64,7 +63,7 @@ class CardRepositoryImpl(
         val updatedCard = card.copy(tags = resolvedTags)
         localCardDataSource.insertCard(updatedCard)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = updatedCard.userId,
                 entityType = SyncEntityType.Card,
                 entityId = updatedCard.id,
@@ -76,7 +75,7 @@ class CardRepositoryImpl(
     override suspend fun deleteCard(cardId: String) {
         val card = localCardDataSource.getCard(cardId) ?: return
         localCardDataSource.deleteCard(cardId)
-        localSyncDataSource.recordDeleteOperation(
+        syncRepository.recordDeleteOperation(
             userId = card.userId,
             entityType = SyncEntityType.Card,
             entityId = cardId,

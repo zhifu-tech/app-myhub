@@ -41,7 +41,9 @@ class LanguageSetting(
             prefs.language.takeIf { it.isNotBlank() }
         },
         userPreferenceUpdater = { prefs, value ->
-            prefs.copy(language = value)
+            prefs.takeIf { it.language != value }?.apply {
+                userRepository?.updateUserPreferencesLanguage(prefs.userId, value)
+            }
         }
     )
 

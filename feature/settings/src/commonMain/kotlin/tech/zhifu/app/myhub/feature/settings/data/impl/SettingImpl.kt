@@ -27,7 +27,7 @@ class SettingImpl<T>(
     private val userRepository: UserRepository?,
     private val serializer: SettingSerializer<T>,
     private val userPreferenceExtractor: ((UserPreferences) -> T?)? = null,
-    private val userPreferenceUpdater: ((UserPreferences, T) -> UserPreferences)? = null
+    private val userPreferenceUpdater: (suspend (UserPreferences, T) -> Unit)? = null
 ) : Setting<T> {
 
     private val resolver = SettingValueResolver(
@@ -40,7 +40,7 @@ class SettingImpl<T>(
         userPreferenceExtractor = userPreferenceExtractor
     )
 
-    private val _value = MutableStateFlow<T>(defaultValue)
+    private val _value = MutableStateFlow(defaultValue)
 
     // 使用独立的 CoroutineScope 来加载初始值
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -77,13 +77,8 @@ class SettingImpl<T>(
 
         // 如果作用域是 USER，同步到用户偏好
         if (scope == SettingScope.USER && userPreferenceUpdater != null) {
-            userRepository?.getUser()?.let { user ->
-//                val updatedPrefs = userPreferenceUpdater.invoke(
-//                    user.preferences ?: UserPreferences(),
-//                    value
-//                )
-//                val updatedUser = user.copy(preferences = updatedPrefs)
-//                userRepository.updateUser(updatedUser)
+            userRepository?.getUserPreferences()?.also { pref ->
+                userPreferenceUpdater(pref, value)
             }
         }
 

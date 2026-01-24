@@ -1,17 +1,17 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import tech.zhifu.app.myhub.sync.SyncPullChange
 
 class CardTemplateRepositoryImpl(
     private val localCardTemplateDataSource: LocalCardTemplateDataSource,
-    private val localSyncDataSource: LocalSyncDataSource
+    private val syncRepository: SyncRepository,
 ) : CardTemplateRepository {
 
     override val syncChangeApplier: SyncChangeApplier = object : SyncChangeApplier {
@@ -21,7 +21,7 @@ class CardTemplateRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = CardTemplate.serializer(),
                     payload = change.payload
                 ) {
@@ -29,7 +29,6 @@ class CardTemplateRepositoryImpl(
                 }
 
                 SyncOperations.Delete -> Unit
-                else -> {}
             }
         }
     }
@@ -37,7 +36,7 @@ class CardTemplateRepositoryImpl(
     override suspend fun insertTemplate(template: CardTemplate, userId: String, needSync: Boolean) {
         localCardTemplateDataSource.insertTemplate(template)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = userId,
                 entityType = SyncEntityType.Template,
                 entityId = template.id,

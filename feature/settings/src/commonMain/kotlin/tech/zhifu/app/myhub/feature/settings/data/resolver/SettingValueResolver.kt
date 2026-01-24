@@ -27,34 +27,32 @@ class SettingValueResolver<T>(
     /**
      * 解析设置值
      */
-    suspend fun resolve(): T {
-        return when (scope) {
-            SettingScope.USER -> {
-                /* // 1. 尝试从用户偏好获取
-                 userRepository?.getCurrentUser()?.preferences?.let { prefs ->
-                     userPreferenceExtractor?.invoke(prefs)
-                 }
-                 // 2. 尝试从本地存储获取
-                     ?: localStore.get(key)?.let {
-                         serializer.deserialize(it)
-                     }
-                     // 3. 使用默认值
-                     ?:*/ defaultValue
+    suspend fun resolve(): T = when (scope) {
+        SettingScope.USER -> {
+            // 1. 尝试从用户偏好获取
+            userRepository?.getUserPreferences()?.let { prefs ->
+                userPreferenceExtractor?.invoke(prefs)
             }
-
-            SettingScope.APP -> {
-                // 1. 从本地存储获取
-                localStore.get(key)?.let {
+            // 2. 尝试从本地存储获取
+                ?: localStore.get(key)?.let {
                     serializer.deserialize(it)
                 }
-                // 2. 使用默认值
-                    ?: defaultValue
-            }
+                // 3. 使用默认值
+                ?: defaultValue
+        }
 
-            SettingScope.SESSION -> {
-                // 仅从内存获取（不持久化）
-                defaultValue
+        SettingScope.APP -> {
+            // 1. 从本地存储获取
+            localStore.get(key)?.let {
+                serializer.deserialize(it)
             }
+            // 2. 使用默认值
+                ?: defaultValue
+        }
+
+        SettingScope.SESSION -> {
+            // 仅从内存获取（不持久化）
+            defaultValue
         }
     }
 

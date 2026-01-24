@@ -5,17 +5,17 @@ import tech.zhifu.app.myhub.cache.Cache
 import tech.zhifu.app.myhub.cache.CacheConfig
 import tech.zhifu.app.myhub.cache.cache
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import tech.zhifu.app.myhub.sync.SyncPullChange
 
 class CollectionRepositoryImpl(
     private val localCollectionDataSource: LocalCollectionDataSource,
-    private val localSyncDataSource: LocalSyncDataSource,
+    private val syncRepository: SyncRepository,
     private val collectionCache: Cache<String, Collection> = cache(CacheConfig(maximumSize = 99))
 ) : CollectionRepository {
 
@@ -26,7 +26,7 @@ class CollectionRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = Collection.serializer(),
                     payload = change.payload
                 ) {
@@ -36,8 +36,6 @@ class CollectionRepositoryImpl(
                 SyncOperations.Delete -> {
                     localCollectionDataSource.deleteCollection(change.entityId)
                 }
-
-                else -> {}
             }
         }
     }
@@ -45,7 +43,7 @@ class CollectionRepositoryImpl(
     override suspend fun insertCollection(collection: Collection, needSync: Boolean) {
         localCollectionDataSource.insertCollection(collection)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = collection.userId,
                 entityType = SyncEntityType.Collection,
                 entityId = collection.id,

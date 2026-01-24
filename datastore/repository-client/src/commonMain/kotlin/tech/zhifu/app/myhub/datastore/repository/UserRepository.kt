@@ -20,7 +20,13 @@ interface UserRepository {
 
     suspend fun insertUserPreferences(preferences: UserPreferences, needSync: Boolean = true)
 
+    suspend fun getUserPreferences(): UserPreferences
+
     suspend fun getUserPreferences(userId: String): UserPreferences?
 
     fun observeUserPreferences(userId: String): Flow<UserPreferences>
+
+    suspend fun updateUserPreferencesTheme(userId: String, theme: String)
+
+    suspend fun updateUserPreferencesLanguage(userId: String, language: String)
 }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.SyncOutboxStatus
@@ -24,9 +25,6 @@ import tech.zhifu.app.myhub.sync.SyncCoordinator
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncMode
 import tech.zhifu.app.myhub.sync.SyncOutboxUploadItem
-import tech.zhifu.app.myhub.sync.SyncPullResponse
-import tech.zhifu.app.myhub.sync.SyncPushRequest
-import tech.zhifu.app.myhub.sync.SyncPushResponse
 import tech.zhifu.app.myhub.sync.SyncRequest
 import tech.zhifu.app.myhub.sync.SyncScheduleConfig
 import tech.zhifu.app.myhub.sync.SyncTrigger
@@ -39,11 +37,16 @@ import kotlin.time.Duration.Companion.milliseconds
 class SyncRepositoryImpl(
     private val localSyncDataSource: LocalSyncDataSource,
     private val remoteSyncDataSource: RemoteSyncDataSource,
-    private val userRepository: UserRepository,
-    tagRepository: TagRepository,
-    cardTemplateRepository: CardTemplateRepository,
-    cardRepository: CardRepository,
-    collectionRepository: CollectionRepository,
+    private val userRepository: Lazy<UserRepository>,
+    private val tagRepository: Lazy<TagRepository>,
+    private val cardTemplateRepository: Lazy<CardTemplateRepository>,
+    private val cardRepository: Lazy<CardRepository>,
+    private val collectionRepository: Lazy<CollectionRepository>,
+    override val json: Json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    },
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : SyncRepository, SyncCoordinator {
     private val scheduler = SyncForegroundScheduler(scope, this)
@@ -55,14 +58,16 @@ class SyncRepositoryImpl(
     private val retryBaseDelayMs = 10_000L
     private val retryMaxDelayMs = 600_000L
     private var autoSyncJob: Job? = null
-    private val syncAppliers: Map<SyncEntityType, SyncChangeApplier> = mapOf(
-        SyncEntityType.User to userRepository.syncUserChangeApplier,
-        SyncEntityType.UserPreferences to userRepository.syncUserPreferencesChangeApplier,
-        SyncEntityType.Card to cardRepository.syncChangeApplier,
-        SyncEntityType.Tag to tagRepository.syncChangeApplier,
-        SyncEntityType.Collection to collectionRepository.syncCollectionChangeApplier,
-        SyncEntityType.Template to cardTemplateRepository.syncChangeApplier
-    )
+    private val syncAppliers: Map<SyncEntityType, SyncChangeApplier> by lazy {
+        mapOf(
+            SyncEntityType.User to userRepository.value.syncUserChangeApplier,
+            SyncEntityType.UserPreferences to userRepository.value.syncUserPreferencesChangeApplier,
+            SyncEntityType.Card to cardRepository.value.syncChangeApplier,
+            SyncEntityType.Tag to tagRepository.value.syncChangeApplier,
+            SyncEntityType.Collection to collectionRepository.value.syncCollectionChangeApplier,
+            SyncEntityType.Template to cardTemplateRepository.value.syncChangeApplier
+        )
+    }
 
     override fun observeSyncStatus(userId: String): Flow<SyncStatus> {
         return statusFlow(userId)
@@ -75,7 +80,7 @@ class SyncRepositoryImpl(
     override fun startAutoSync(userId: String) {
         autoSyncJob?.cancel()
         autoSyncJob = scope.launch {
-            userRepository.observeUserPreferences(userId)
+            userRepository.value.observeUserPreferences(userId)
                 .map { pref ->
                     SyncScheduleConfig(
                         interval = pref.syncInterval.milliseconds,
@@ -97,6 +102,38 @@ class SyncRepositoryImpl(
         scheduler.stop()
     }
 
+    override suspend fun insertOutboxAndOpLog(
+        outboxId: String,
+        oplogId: String,
+        userId: String,
+        entityType: String,
+        entityId: String,
+        operation: String,
+        payload: String,
+        sequence: Long,
+        createdAt: String,
+        status: String,
+        retryCount: Long,
+        nextRetryAt: String?,
+        lastError: String?
+    ) {
+        localSyncDataSource.insertOutboxAndOpLog(
+            outboxId = outboxId,
+            oplogId = oplogId,
+            userId = userId,
+            entityType = entityType,
+            entityId = entityId,
+            operation = operation,
+            payload = payload,
+            sequence = sequence,
+            createdAt = createdAt,
+            status = status,
+            retryCount = retryCount,
+            nextRetryAt = nextRetryAt,
+            lastError = lastError,
+        )
+    }
+
     override suspend fun requestSync(request: SyncRequest) {
         val status = statusFlow(request.userId)
         status.value = SyncStatus.RUNNING
@@ -107,19 +144,6 @@ class SyncRepositoryImpl(
         } catch (_: Exception) {
             status.value = SyncStatus.FAILED
         }
-    }
-
-    override suspend fun push(request: SyncPushRequest): SyncPushResponse {
-        return remoteSyncDataSource.pushOutbox(request.userId, request.items)
-    }
-
-    override suspend fun pull(
-        userId: String,
-        entityType: String,
-        sinceToken: String?,
-        limit: Int
-    ): SyncPullResponse {
-        return remoteSyncDataSource.pullChanges(userId, entityType, sinceToken, limit)
     }
 
     private suspend fun pushOutbox(userId: String) {
@@ -186,14 +210,11 @@ class SyncRepositoryImpl(
                 limit = pullLimit
             )
             response.changes.forEach { change ->
-                val entityType = change.toSyncEntityType()
+                val entityType = change.toSyncEntityType() ?: return
+                val operations = change.toSyncOperation() ?: return
                 val applier = syncAppliers[entityType] ?: return@forEach
                 // 1. Apply changes first.
-                applier.applyChanges(
-                    entity = entityType,
-                    operations = change.operation.toSyncOperation(),
-                    change = change
-                )
+                applier.applyChanges(entityType, operations, change)
 
                 // 2. Insert operation log
                 val oplogId = "oplog-${change.entityType}-${change.entityId}-${change.updatedAt}"

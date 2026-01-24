@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.datasource
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.database.Sync_conflict_log
 import tech.zhifu.app.myhub.datastore.database.Sync_oplog
 import tech.zhifu.app.myhub.datastore.database.Sync_outbox
@@ -14,8 +13,6 @@ object SyncOutboxStatus {
 }
 
 interface LocalSyncDataSource {
-    val json: Json
-
     suspend fun getOutboxById(id: String): Sync_outbox?
     suspend fun getOutboxByUserId(userId: String): List<Sync_outbox>
     suspend fun getPendingOutboxByUserId(

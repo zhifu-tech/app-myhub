@@ -16,11 +16,6 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 
 class LocalSyncDataSourceImpl(
     private val database: MyHubDatabase,
-    override val json: Json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = true
-    }
 ) : LocalSyncDataSource {
 
     override suspend fun getOutboxById(id: String): Sync_outbox? {

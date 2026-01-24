@@ -5,12 +5,12 @@ import kotlinx.coroutines.flow.onEach
 import tech.zhifu.app.myhub.cache.Cache
 import tech.zhifu.app.myhub.cache.CacheConfig
 import tech.zhifu.app.myhub.cache.cache
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.SyncChangeApplier
+import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
@@ -21,9 +21,8 @@ import tech.zhifu.app.myhub.sync.SyncPullChange
 class UserRepositoryImpl(
     private val localUserDataSource: LocalUserDataSource,
     private val remoteUserDataSource: RemoteUserDataSource,
-    private val localSyncDataSource: LocalSyncDataSource,
+    private val syncRepository: SyncRepository,
     private val userCache: Cache<String, User> = cache(config = CacheConfig(maximumSize = 1)),
-    private val userPreferencesCache: Cache<String, UserPreferences> = cache(config = CacheConfig(maximumSize = 1)),
     private val currentUserKey: String = "currentUser",
 ) : UserRepository {
 
@@ -35,7 +34,7 @@ class UserRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = User.serializer(),
                     payload = change.payload
                 ) {
@@ -54,7 +53,7 @@ class UserRepositoryImpl(
             change: SyncPullChange
         ) {
             when (operations) {
-                SyncOperations.Insert -> localSyncDataSource.applyChange(
+                SyncOperations.Insert -> syncRepository.applyChange(
                     deserializer = UserPreferences.serializer(),
                     payload = change.payload
                 ) {
@@ -70,7 +69,7 @@ class UserRepositoryImpl(
     override suspend fun insertUser(user: User, needSync: Boolean) {
         localUserDataSource.insertUser(user)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = user.id,
                 entityType = SyncEntityType.User,
                 entityId = user.id,
@@ -118,13 +117,17 @@ class UserRepositoryImpl(
     override suspend fun insertUserPreferences(preferences: UserPreferences, needSync: Boolean) {
         localUserDataSource.insertUserPreferences(preferences)
         if (needSync) {
-            localSyncDataSource.recordInsertOperation(
+            syncRepository.recordInsertOperation(
                 userId = preferences.userId,
                 entityType = SyncEntityType.UserPreferences,
                 entityId = preferences.userId,
                 payload = preferences
             )
         }
+    }
+
+    override suspend fun getUserPreferences(): UserPreferences {
+        return localUserDataSource.getUserPreferences(getUser().id)!!
     }
 
     override suspend fun getUserPreferences(userId: String): UserPreferences? {
@@ -135,5 +138,30 @@ class UserRepositoryImpl(
         return localUserDataSource.observeUserPreferences(userId)
     }
 
+    override suspend fun updateUserPreferencesTheme(userId: String, theme: String) {
+        val current = localUserDataSource.getUserPreferences(userId) ?: UserPreferences(userId = userId)
+        if (current.theme == theme) return
+        val updated = current.copy(theme = theme)
+        localUserDataSource.insertUserPreferences(updated)
+        syncRepository.recordInsertOperation(
+            userId = userId,
+            entityType = SyncEntityType.UserPreferences,
+            entityId = userId,
+            payload = updated
+        )
+    }
+
+    override suspend fun updateUserPreferencesLanguage(userId: String, language: String) {
+        val current = localUserDataSource.getUserPreferences(userId) ?: UserPreferences(userId = userId)
+        if (current.language == language) return
+        val updated = current.copy(language = language)
+        localUserDataSource.insertUserPreferences(updated)
+        syncRepository.recordInsertOperation(
+            userId = userId,
+            entityType = SyncEntityType.UserPreferences,
+            entityId = userId,
+            payload = updated
+        )
+    }
 }
 
