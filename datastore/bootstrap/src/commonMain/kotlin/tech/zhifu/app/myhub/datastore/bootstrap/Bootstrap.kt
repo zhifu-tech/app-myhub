@@ -15,7 +15,7 @@ class Bootstrap(
     private val collectionRepository: CollectionRepository,
     private val cardRepository: CardRepository,
     private val cardTemplateRepository: CardTemplateRepository,
-    private val configBuilder: () -> BootstrapConfigBuilder = ::DefaultBootstrapConfigBuilder
+    private val configBuilder: () -> BootstrapConfigBuilder ,
 ) {
     suspend fun initialize(localeTag: String) {
         logger.info { "Initializing bootstrap with locale tag: $localeTag" }
