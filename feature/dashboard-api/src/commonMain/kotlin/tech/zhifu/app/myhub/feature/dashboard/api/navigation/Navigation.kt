@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.feature.dashboard.api.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
@@ -17,8 +17,8 @@ object DashboardNavKey : NavKey
 
 @Composable
 fun DashboardNavItem() = object : NavItem {
-    override val selectedIcon: ImageVector = Icons.Default.Dashboard
-    override val unselectedIcon: ImageVector = Icons.Outlined.Dashboard
+    override val selectedIcon: ImageVector = Icons.Default.Home
+    override val unselectedIcon: ImageVector = Icons.Outlined.Home
     override val iconText: String = stringResource(Res.string.dashboard)
     override val titleText: String = stringResource(Res.string.dashboard)
 }

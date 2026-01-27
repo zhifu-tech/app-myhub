@@ -1,10 +1,10 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
-import tech.zhifu.app.myhub.datastore.repository.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
-import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
-import tech.zhifu.app.myhub.datastore.repository.TagRepository
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
+import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
+import tech.zhifu.app.myhub.datastore.repository.template.CardTemplateRepository
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import kotlin.random.Random
@@ -15,7 +15,7 @@ class Bootstrap(
     private val collectionRepository: CollectionRepository,
     private val cardRepository: CardRepository,
     private val cardTemplateRepository: CardTemplateRepository,
-    private val configBuilder: () -> BootstrapConfigBuilder ,
+    private val configBuilder: () -> BootstrapConfigBuilder,
 ) {
     suspend fun initialize(localeTag: String) {
         logger.info { "Initializing bootstrap with locale tag: $localeTag" }
@@ -35,7 +35,7 @@ class Bootstrap(
             cardTemplateRepository.insertTemplate(it, config.userId, needSync = false)
         }
         config.cards.forEach {
-            cardRepository.insertCardWithTags(it, needSync = false)
+            cardRepository.insertCard(it, needSync = false)
         }
     }
 }

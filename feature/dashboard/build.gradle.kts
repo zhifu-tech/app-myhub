@@ -22,18 +22,15 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.feature.cardApi)
-            implementation(projects.feature.dashboardApi)
-
-            implementation(projects.component.card)
-
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
-
+            implementation(projects.component.card)
             implementation(projects.datastore.model)
-            implementation(projects.datastore.repositoryClient)
+            implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.cardApi)
+            implementation(projects.feature.dashboardApi)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)

@@ -13,8 +13,8 @@ import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
 import tech.zhifu.app.myhub.datastore.bootstrap.di.bootstrapModule
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.card.di.cardDetailModule
 import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.feature.profile.di.profileModule

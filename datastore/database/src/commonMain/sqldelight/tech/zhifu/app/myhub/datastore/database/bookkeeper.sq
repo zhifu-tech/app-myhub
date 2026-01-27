@@ -1,0 +1,23 @@
+-- Bookkeeper 表：记录失败的同步操作时间戳
+-- 用于 Store5 的 Bookkeeper 组件，追踪需要重试的同步操作
+CREATE TABLE bookkeeper (
+    key TEXT PRIMARY KEY NOT NULL,
+    failed_at INTEGER NOT NULL
+);
+
+-- CRUD 操作
+
+selectByKey:
+SELECT failed_at FROM bookkeeper
+WHERE key = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO bookkeeper (key, failed_at)
+VALUES (?, ?);
+
+deleteByKey:
+DELETE FROM bookkeeper
+WHERE key = ?;
+
+deleteAll:
+DELETE FROM bookkeeper;

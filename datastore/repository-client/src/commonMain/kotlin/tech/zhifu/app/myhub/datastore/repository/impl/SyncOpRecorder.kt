@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.impl
 
 import kotlinx.serialization.DeserializationStrategy
 import tech.zhifu.app.myhub.datastore.datasource.SyncOutboxStatus
-import tech.zhifu.app.myhub.datastore.repository.SyncRepository
+import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import kotlin.time.Clock

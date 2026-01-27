@@ -8,10 +8,10 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.SyncRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 /**
  * 仓库依赖注入模块（服务端）

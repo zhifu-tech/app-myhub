@@ -32,7 +32,7 @@ kotlin {
             implementation(projects.core.platformCompose)
 
             implementation(projects.datastore.model)
-            implementation(projects.datastore.repositoryClient)
+            implementation(projects.datastore.repositoryClientApi)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

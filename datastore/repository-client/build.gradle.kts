@@ -24,16 +24,21 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.cache)
             implementation(projects.core.logger)
+            implementation(projects.core.network)
             implementation(projects.datastore.database)
             implementation(projects.datastore.databaseClient)
             implementation(projects.datastore.datasourceLocal)
             implementation(projects.datastore.datasourceRemote)
             implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClientApi)
             implementation(projects.datastore.sync)
 
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+
+            implementation(libs.mnf.store.cache5)
+            implementation(libs.mnf.store.core5)
         }
 
         commonTest.dependencies {

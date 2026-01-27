@@ -2,18 +2,21 @@ package tech.zhifu.app.myhub.datastore.datasource.impl
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.network.ApiConfig
 import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
-/**
- * 远程卡片数据源实现（使用Ktor Client）
- */
 class RemoteCardDataSourceImpl(
     private val httpClient: HttpClient
 ) : RemoteCardDataSource {
@@ -43,5 +46,31 @@ class RemoteCardDataSourceImpl(
     } catch (e: Exception) {
         if (e is ApiException) throw e
         throw NetworkException("Network error while fetching card", e)
+    }
+
+    override suspend fun upsertCard(card: Card): Card = try {
+        val response: HttpResponse = httpClient.put("${ApiConfig.BASE_URL}${ApiConfig.CARDS_PATH}/${card.id}") {
+            contentType(ContentType.Application.Json)
+            setBody(card)
+        }
+        when (response.status) {
+            HttpStatusCode.OK, HttpStatusCode.Created -> response.body()
+            else -> throw ApiException("Failed to upsert card: ${response.status}")
+        }
+    } catch (e: Exception) {
+        if (e is ApiException) throw e
+        throw NetworkException("Network error while upserting card", e)
+    }
+
+    override suspend fun deleteCard(cardId: String) = try {
+        val response: HttpResponse = httpClient.delete("${ApiConfig.BASE_URL}${ApiConfig.CARDS_PATH}/$cardId")
+        when (response.status) {
+            HttpStatusCode.OK, HttpStatusCode.NoContent -> Unit
+            HttpStatusCode.NotFound -> Unit // 已删除，视为成功
+            else -> throw ApiException("Failed to delete card: ${response.status}")
+        }
+    } catch (e: Exception) {
+        if (e is ApiException) throw e
+        throw NetworkException("Network error while deleting card", e)
     }
 }

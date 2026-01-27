@@ -191,6 +191,7 @@ include(":datastore:datasource-local")
 include(":datastore:datasource-remote")
 
 // 数据仓库模块
+include(":datastore:repository-client-api")
 include(":datastore:repository-client")
 if (isServerEnabled) {
     include(":datastore:repository-server")

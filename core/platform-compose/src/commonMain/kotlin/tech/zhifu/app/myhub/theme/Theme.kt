@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 
 // Material 3 调色板
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD0BCFF),
+    primary = Color(0xFFB4A3FF),
     onPrimary = Color(0xFF381E72),
     primaryContainer = Color(0xFF4F378B),
     onPrimaryContainer = Color(0xFFEADDFF),
@@ -26,22 +26,22 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer = Color(0xFF8C1D18),
     onErrorContainer = Color(0xFFF9DEDC),
     outline = Color(0xFF938F99),
-    background = Color(0xFF1C1B1F),
+    background = Color(0xFF1A1B1F),
     onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF2C2B2F),
+    surface = Color(0xFF2D2E33),
     onSurface = Color(0xFFE6E1E5),
-    surfaceVariant = Color(0xFF49454F),
+    surfaceVariant = Color(0xFF44474E),
     onSurfaceVariant = Color(0xFFCAC4D0),
     inverseSurface = Color(0xFFE6E1E5),
     inverseOnSurface = Color(0xFF313033),
     inversePrimary = Color(0xFF6750A4),
-    surfaceTint = Color(0xFFD0BCFF),
+    surfaceTint = Color(0xFFB4A3FF),
     outlineVariant = Color(0xFF44474E),
     scrim = Color(0xFF000000),
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6750A4),
+    primary = Color(0xFF8B7ACC),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFEADDFF),
     onPrimaryContainer = Color(0xFF21005D),
@@ -58,7 +58,7 @@ private val LightColorScheme = lightColorScheme(
     errorContainer = Color(0xFFF9DEDC),
     onErrorContainer = Color(0xFF410E0B),
     outline = Color(0xFF79747E),
-    background = Color(0xFFFFFBFE),
+    background = Color(0xFFFDFBFF),
     onBackground = Color(0xFF1C1B1F),
     surface = Color(0xFFF5F5F5),
     onSurface = Color(0xFF1C1B1F),
@@ -66,8 +66,8 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF49454F),
     inverseSurface = Color(0xFF313033),
     inverseOnSurface = Color(0xFFF4EFF4),
-    inversePrimary = Color(0xFFD0BCFF),
-    surfaceTint = Color(0xFF6750A4),
+    inversePrimary = Color(0xFFB4A3FF),
+    surfaceTint = Color(0xFF8B7ACC),
     outlineVariant = Color(0xFFC4C6D0),
     scrim = Color(0xFF000000),
 )

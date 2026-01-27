@@ -2,6 +2,15 @@ package tech.zhifu.app.myhub.feature.dashboard
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
+/**
+ * 统计信息
+ */
+data class Statistics(
+    val totalCards: Int = 0,
+    val favoriteCards: Int = 0,
+    val recentEdits: Int = 0,
+    val lastSyncTime: Long? = null
+)
 
 /**
  * 视图类型枚举
@@ -35,7 +44,7 @@ sealed class DashboardUiState {
      * 支持同时显示数据和加载状态（如刷新时）
      */
     data class Content(
-//        val statistics: Statistics,
+        val statistics: Statistics = Statistics(),
         val recentCards: List<Card>,
         val favoriteCards: List<Card>,
         val lastSyncTime: Long?,

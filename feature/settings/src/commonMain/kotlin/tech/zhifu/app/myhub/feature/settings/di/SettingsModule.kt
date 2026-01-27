@@ -1,7 +1,7 @@
 package tech.zhifu.app.myhub.feature.settings.di
 
 import org.koin.dsl.module
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingsRepositoryImpl
 import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore

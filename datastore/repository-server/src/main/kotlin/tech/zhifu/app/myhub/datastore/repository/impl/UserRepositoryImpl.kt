@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.impl
 
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.User
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 /**
  * 用户仓库实现（服务端）

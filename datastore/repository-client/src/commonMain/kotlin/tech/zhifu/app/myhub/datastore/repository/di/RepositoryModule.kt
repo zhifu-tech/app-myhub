@@ -1,30 +1,19 @@
 package tech.zhifu.app.myhub.datastore.repository.di
 
 import org.koin.dsl.module
+import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
+import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.datasource.di.remoteDataSourceModule
-import tech.zhifu.app.myhub.datastore.repository.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
-import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
-import tech.zhifu.app.myhub.datastore.repository.SyncRepository
-import tech.zhifu.app.myhub.datastore.repository.TagRepository
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
-import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.CardTemplateRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.CollectionRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.SyncRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
+import tech.zhifu.app.myhub.datastore.repository.card.di.repositoryCardModule
+import tech.zhifu.app.myhub.datastore.repository.collection.di.collectionRepositoryModule
+import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
+import tech.zhifu.app.myhub.datastore.repository.store.DatabaseBookkeeperStorage
+import tech.zhifu.app.myhub.datastore.repository.sync.di.syncRepositoryModule
+import tech.zhifu.app.myhub.datastore.repository.tag.di.tagRepositoryModule
+import tech.zhifu.app.myhub.datastore.repository.template.di.templateRepositoryModule
+import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
 
 /**
  * 仓库依赖注入模块（客户端）
@@ -32,62 +21,28 @@ import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
  * 提供所有 Repository 的实现
  * 包含本地和远程数据源模块（localDataSourceModule, remoteDataSourceModule）
  */
+@ExperimentalStoreApi
 val repositoryModule = module {
-    // 包含数据源模块（提供 LocalDataSource 和 RemoteDataSource）
     includes(
         databaseModule,
         localDataSourceModule,
-        remoteDataSourceModule
+        remoteDataSourceModule,
     )
 
-    single<UserRepository> {
-        UserRepositoryImpl(
-            localUserDataSource = get<LocalUserDataSource>(),
-            remoteUserDataSource = get<RemoteUserDataSource>(),
-            syncRepository = get<SyncRepository>(),
+    // Bookkeeper 存储（数据库实现 - 持久化）
+    single<BookkeeperStorage> {
+        DatabaseBookkeeperStorage(
+            database = get<MyHubDatabase>()
         )
     }
 
-    single<TagRepository> {
-        TagRepositoryImpl(
-            localTagDataSource = get<LocalTagDataSource>(),
-            syncRepository = get<SyncRepository>(),
-        )
-    }
-
-    single<CollectionRepository> {
-        CollectionRepositoryImpl(
-            localCollectionDataSource = get<LocalCollectionDataSource>(),
-            syncRepository = get<SyncRepository>(),
-        )
-    }
-
-    single<CardRepository> {
-        CardRepositoryImpl(
-            localCardDataSource = get<LocalCardDataSource>(),
-            remoteCardDataSource = get<RemoteCardDataSource>(),
-            syncRepository = get<SyncRepository>(),
-            tagRepository = get<TagRepository>()
-        )
-    }
-
-    single<CardTemplateRepository> {
-        CardTemplateRepositoryImpl(
-            localCardTemplateDataSource = get<LocalCardTemplateDataSource>(),
-            syncRepository = get<SyncRepository>(),
-        )
-    }
-
-    single<SyncRepository> {
-        SyncRepositoryImpl(
-            localSyncDataSource = get<LocalSyncDataSource>(),
-            remoteSyncDataSource = get<RemoteSyncDataSource>(),
-            cardRepository = lazy { get<CardRepository>() },
-            userRepository = lazy { get<UserRepository>() },
-            tagRepository = lazy { get<TagRepository>() },
-            collectionRepository = lazy { get<CollectionRepository>() },
-            cardTemplateRepository = lazy { get<CardTemplateRepository>() }
-        )
-    }
+    // 各个 Repository 模块
+    includes(
+        repositoryCardModule(),
+        tagRepositoryModule(),
+        collectionRepositoryModule(),
+        userRepositoryModule(),
+        templateRepositoryModule(),
+        syncRepositoryModule(),
+    )
 }
-

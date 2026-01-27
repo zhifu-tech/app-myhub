@@ -26,8 +26,7 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.datastore.model)
             implementation(projects.datastore.database)
-//            implementation(projects.datastore.datasourceLocal)
-            implementation(projects.datastore.repositoryClient)
+            implementation(projects.datastore.repositoryClientApi)
 
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.components.componentsResources)

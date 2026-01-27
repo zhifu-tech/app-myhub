@@ -132,6 +132,7 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.datastore.bootstrap)
             implementation(projects.datastore.repositoryClient)
+            implementation(projects.datastore.repositoryClientApi)
 
             implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
             implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)

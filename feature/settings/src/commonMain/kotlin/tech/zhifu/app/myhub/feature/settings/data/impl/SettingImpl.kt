@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.resolver.SettingValueResolver
 import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.data.store.SettingSerializer

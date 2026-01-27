@@ -1,7 +1,7 @@
 package tech.zhifu.app.myhub.service
 
 import tech.zhifu.app.myhub.datastore.model.Tag
-import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
 import kotlin.time.Clock
 
 /**

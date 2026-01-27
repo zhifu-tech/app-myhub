@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.datastore.repository.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.feature.card.components.CardDetailActions
 import tech.zhifu.app.myhub.feature.card.components.CardDetailContent
 import tech.zhifu.app.myhub.feature.card.components.CardDetailHeader
