@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +77,16 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.window.core.layout.WindowSizeClass
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -237,6 +249,18 @@ fun DashboardScreen(
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
+                        // Focus & Review 模块（如果显示）
+                        if (state.showFocusReview && state.reviewProgress.total > 0) {
+                            FocusReviewModule(
+                                reviewProgress = state.reviewProgress,
+                                onStartReview = { viewModel.startReview() },
+                                onDismiss = { viewModel.dismissFocusReview() },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                            )
+                        }
+
                         // 搜索栏和工具栏
                         DashboardToolbar(
                             searchQuery = searchQuery,
@@ -1119,5 +1143,150 @@ fun ListViewItem(
                 }
             }
         }
+    }
+}
+
+// ==================== Focus & Review Module ====================
+
+/**
+ * Focus & Review 模块
+ * 
+ * 根据设计图实现：
+ * - 左侧：圆形进度指示器，显示 "10/15"
+ * - 中间：文本 "focus & review" 和 "Start Review →" 按钮
+ * - 右侧：关闭按钮（X）
+ */
+@Composable
+fun FocusReviewModule(
+    reviewProgress: ReviewProgress,
+    onStartReview: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 左侧：圆形进度指示器
+            CircularProgressWithText(
+                progress = reviewProgress.progress,
+                text = "${reviewProgress.completed}/${reviewProgress.total}",
+                modifier = Modifier.size(64.dp)
+            )
+
+            // 中间：文本和按钮
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "focus & review",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Normal
+                )
+                Button(
+                    onClick = onStartReview,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Start Review",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            // 右侧：关闭按钮
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Dismiss",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 圆形进度指示器，带文本
+ */
+@Composable
+private fun CircularProgressWithText(
+    progress: Float,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    // 在 @Composable 上下文中获取颜色
+    val backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val progressColor = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.onSurface
+    
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        // 绘制圆形进度条
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokeWidth = 6.dp.toPx()
+            val radius = (size.minDimension - strokeWidth) / 2f
+            val center = Offset(size.width / 2f, size.height / 2f)
+
+            // 背景圆
+            drawCircle(
+                color = backgroundColor,
+                radius = radius,
+                center = center,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+
+            // 进度圆
+            val sweepAngle = 360f * progress
+            drawArc(
+                color = progressColor,
+                startAngle = -90f,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2f, radius * 2f),
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+        }
+
+        // 中心文本
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = textColor,
+            textAlign = TextAlign.Center
+        )
     }
 }

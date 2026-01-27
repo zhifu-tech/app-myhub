@@ -1,16 +1,25 @@
 package tech.zhifu.app.myhub.service.di
 
 import org.koin.dsl.module
+import tech.zhifu.app.myhub.auth.TokenService
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
+import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
+import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.service.CardService
+import tech.zhifu.app.myhub.service.CardTemplateService
+import tech.zhifu.app.myhub.service.CollectionService
 import tech.zhifu.app.myhub.service.SyncService
+import tech.zhifu.app.myhub.service.TagService
 import tech.zhifu.app.myhub.service.UserService
 
 val serviceModule = module {
     factory<CardService> {
         CardService(
-            cardRepository = get<CardRepository>()
+            cardRepository = get<CardRepository>(),
+            tagRepository = get<TagRepository>()
         )
     }
 
@@ -23,6 +32,30 @@ val serviceModule = module {
     factory<SyncService> {
         SyncService(
             syncRepository = get<SyncRepository>()
+        )
+    }
+
+    factory<TokenService> {
+        TokenService(
+            userRepository = get<UserRepository>()
+        )
+    }
+
+    factory<TagService> {
+        TagService(
+            tagRepository = get<TagRepository>()
+        )
+    }
+
+    factory<CollectionService> {
+        CollectionService(
+            collectionRepository = get<CollectionRepository>()
+        )
+    }
+
+    factory<CardTemplateService> {
+        CardTemplateService(
+            templateRepository = get<CardTemplateRepository>()
         )
     }
 }

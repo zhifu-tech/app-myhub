@@ -1,69 +1,98 @@
-//package tech.zhifu.app.myhub.datastore.repository.impl
-//
-//import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
-//import tech.zhifu.app.myhub.datastore.datasource.UserContextProvider
-//import tech.zhifu.app.myhub.datastore.model.Tag
-//import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
-//
-///**
-// * 标签仓库实现（服务端）
-// * 使用 LocalTagDataSource 实现，避免代码重复
-// */
-//class TagRepositoryImpl(
-//    private val localDataSource: LocalTagDataSource,
-//    private val userContextProvider: UserContextProvider
-//) : TagRepository {
-//
-//    private suspend fun requireUserId(): String {
-//        return userContextProvider.getCurrentUserId()
-//            ?: throw IllegalStateException("User not authenticated")
-//    }
-//
-//    override suspend fun getAllTags(): List<Tag> {
-//        val userId = requireUserId()
-//        return localDataSource.getAllTags(userId)
-//    }
-//
-//    override suspend fun getTagById(id: String): Tag? {
-//        val userId = requireUserId()
-//        return localDataSource.getTagById(id, userId)
-//    }
-//
-//    override suspend fun getTagByName(name: String): Tag? {
-//        val userId = requireUserId()
-//        return localDataSource.getTagByName(name, userId)
-//    }
-//
-//    override suspend fun createTag(tag: Tag): Tag {
-//        val userId = requireUserId()
-//        // 检查是否已存在同名标签
-//        val existingTag = localDataSource.getTagByName(tag.name, userId)
-//        if (existingTag != null) {
-//            throw IllegalArgumentException("Tag with name '${tag.name}' already exists")
-//        }
-//
-//        try {
-//            localDataSource.insertTag(tag, userId)
-//        } catch (e: Exception) {
-//            throw IllegalArgumentException("Failed to create tag: ${e.message}", e)
-//        }
-//        return tag
-//    }
-//
-//    override suspend fun updateTag(tag: Tag): Tag {
-//        val userId = requireUserId()
-//        localDataSource.updateTag(tag, userId)
-//        return tag
-//    }
-//
-//    override suspend fun deleteTag(id: String): Boolean {
-//        return try {
-//            val userId = requireUserId()
-//            localDataSource.deleteTag(id, userId)
-//            true
-//        } catch (e: Exception) {
-//            false
-//        }
-//    }
-//}
-//
+package tech.zhifu.app.myhub.datastore.repository.impl
+
+import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
+import tech.zhifu.app.myhub.datastore.model.domain.Tag
+import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import kotlin.random.Random
+import kotlin.time.Clock
+
+/**
+ * 标签仓库实现（服务端）
+ * 使用 LocalTagDataSource 实现，避免代码重复
+ */
+class TagRepositoryImpl(
+    private val localDataSource: LocalTagDataSource
+) : TagRepository {
+
+    override suspend fun getTag(tagId: String): Tag? {
+        return localDataSource.getTag(tagId)
+    }
+
+    override suspend fun getTags(userId: String): List<Tag> {
+        return localDataSource.getTags(userId)
+    }
+    
+    override suspend fun getTagByName(name: String, userId: String): Tag? {
+        return localDataSource.getTagByName(name, userId)
+    }
+
+    override suspend fun upsertTag(tag: Tag): Tag {
+        // 检查是否存在（通过 ID 或名称）
+        val existing = tag.id.takeIf { it.isNotBlank() }
+            ?.let { localDataSource.getTag(it) }
+            ?: localDataSource.getTagByName(tag.name, tag.userId)
+        
+        if (existing != null) {
+            // 如果存在，更新（先删除再插入，简单的更新策略）
+            localDataSource.deleteTag(existing.id)
+        }
+        
+        // 插入标签
+        localDataSource.insertTag(tag)
+        
+        // 返回标签（从数据库重新获取以确保数据一致性）
+        return localDataSource.getTag(tag.id) ?: tag
+    }
+
+    override suspend fun deleteTag(tagId: String) {
+        localDataSource.deleteTag(tagId)
+    }
+
+    override suspend fun ensureTags(userId: String, tags: List<Tag>): List<Tag> {
+        if (tags.isEmpty()) return emptyList()
+
+        // 获取用户所有现有标签
+        val existingTags = localDataSource.getTags(userId)
+        val byId = existingTags.associateBy { it.id }
+        val byName = existingTags.associateBy { it.name }
+
+        // 确保每个标签都存在
+        return tags.map { tag ->
+            // 先通过 ID 查找，如果 ID 为空或不存在，则通过名称查找
+            val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get)
+                ?: byName[tag.name]
+            
+            if (existing != null) {
+                // 标签已存在，返回现有标签
+                existing
+            } else {
+                // 标签不存在，创建新标签
+                val now = Clock.System.now()
+                val newTag = tag.copy(
+                    id = generateTagId(now),
+                    userId = userId,
+                    createdAt = now,
+                    updatedAt = now
+                )
+                localDataSource.insertTag(newTag)
+                newTag
+            }
+        }
+    }
+
+    override suspend fun getTagsByIds(tagIds: List<String>): List<Tag> {
+        if (tagIds.isEmpty()) return emptyList()
+
+        return tagIds.mapNotNull { tagId ->
+            localDataSource.getTag(tagId)
+        }
+    }
+    
+    /**
+     * 生成标签 ID
+     */
+    private fun generateTagId(now: kotlin.time.Instant): String {
+        val rand = Random.nextInt(0, 1_000_000)
+        return "tag-${now.toEpochMilliseconds()}-$rand"
+    }
+}

@@ -37,6 +37,16 @@ class LocalCollectionDataSourceImpl(
         }
     }
 
+    override suspend fun updateCollection(collection: Collection) {
+        database.collectionQueries.updateCollection(
+            name = collection.name,
+            topic = collection.topic,
+            description = collection.description,
+            updated_at = collection.updatedAt.toString(),
+            id = collection.id
+        )
+    }
+
     override suspend fun getCollection(collectionId: String): Collection? {
         return database.collectionQueries
             .selectCollectionById(collectionId)

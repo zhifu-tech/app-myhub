@@ -30,6 +30,7 @@ kotlin {
             implementation(projects.datastore.datasourceLocal)
             implementation(projects.datastore.datasourceRemote)
             implementation(projects.datastore.model)
+            implementation(projects.datastore.modelDto)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.datastore.sync)
 

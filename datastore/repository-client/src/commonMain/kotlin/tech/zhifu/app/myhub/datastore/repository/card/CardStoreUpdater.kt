@@ -17,7 +17,7 @@ internal fun createCardStoreUpdater(
         try {
             when {
                 key is CardStoreKey.ById && data is CardStoreData.Single -> {
-                    val updatedCard = remoteCardDataSource.upsertCard(data.card)
+                    val updatedCard = remoteCardDataSource.updateCard(data.card)
                     UpdaterResult.Success.Typed(
                         StoreWriteResponse.Success.Typed(
                             CardStoreData.Single(updatedCard)
@@ -29,7 +29,7 @@ internal fun createCardStoreUpdater(
                     // ⚠️ 批量更新：当前实现逐个更新，未来可以优化为批量 API
                     // 注意：Store5 的 Updater 通常处理单个操作，批量操作可能需要特殊处理
                     val updatedCards = data.cards.map { card ->
-                        remoteCardDataSource.upsertCard(card)
+                        remoteCardDataSource.updateCard(card)
                     }
                     UpdaterResult.Success.Typed(
                         StoreWriteResponse.Success.Typed(

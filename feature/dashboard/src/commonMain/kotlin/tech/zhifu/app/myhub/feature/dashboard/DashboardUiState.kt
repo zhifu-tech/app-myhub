@@ -13,6 +13,17 @@ data class Statistics(
 )
 
 /**
+ * 复习进度信息
+ */
+data class ReviewProgress(
+    val completed: Int = 0,
+    val total: Int = 0
+) {
+    val progress: Float
+        get() = if (total > 0) completed.toFloat() / total.toFloat() else 0f
+}
+
+/**
  * 视图类型枚举
  */
 enum class ViewType {
@@ -50,7 +61,9 @@ sealed class DashboardUiState {
         val lastSyncTime: Long?,
         val viewType: ViewType = ViewType.GRID,
         val isRefreshing: Boolean = false,  // 刷新时仍显示数据
-        val error: String? = null            // 错误时仍显示数据
+        val error: String? = null,         // 错误时仍显示数据
+        val reviewProgress: ReviewProgress = ReviewProgress(), // 复习进度
+        val showFocusReview: Boolean = true // 是否显示 Focus & Review 模块
     ) : DashboardUiState()
 }
 

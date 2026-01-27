@@ -14,7 +14,11 @@ internal fun createCardStoreFetcher(
         }
 
         is CardStoreKey.ByUser -> {
-            val cards = remoteCardDataSource.getCards(key.userId)
+            val cards = remoteCardDataSource.getCards(
+                userId = key.userId,
+                page = 1,
+                limit = 100 // 获取前100条，如果需要更多可以分页获取
+            )
             CardStoreData.Collection.fromCards(cards, key.userId)
         }
     }

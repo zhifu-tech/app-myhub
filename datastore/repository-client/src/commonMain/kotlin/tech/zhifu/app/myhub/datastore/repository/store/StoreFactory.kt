@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.store
 
 import org.mobilenativefoundation.store.cache5.Cache
+import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreData
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Bookkeeper
@@ -12,6 +13,7 @@ import org.mobilenativefoundation.store.store5.StoreBuilder
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
 
+@OptIn(ExperimentalStoreApi::class)
 object StoreFactory {
 
     fun <D : StoreData<String>> createIdentityConverter(): Converter<D, D, D> {

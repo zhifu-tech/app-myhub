@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.datasource.impl
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
@@ -159,6 +160,58 @@ class LocalCardDataSourceImpl(
         return cards.map { card ->
             card.toDomain(tagsByCardId[card.card_id].orEmpty())
         }
+    }
+
+    override suspend fun getCards(
+        userId: String,
+        page: Int,
+        limit: Int,
+        type: String?,
+        isFavorite: Boolean?
+    ): List<Card> {
+        val offset = (page - 1) * limit
+        val isFavoriteInt = isFavorite?.let { if (it) 1L else 0L }
+
+        val cards = database.card_with_metadataQueries
+            .selectCardWithMetadataByUserIdWithFilters(
+                userId = userId,
+                type = type,
+                isFavorite = isFavoriteInt,
+                limit = limit.toLong(),
+                offset = offset.toLong()
+            )
+            .awaitAsList()
+
+        if (cards.isEmpty()) {
+            return emptyList()
+        }
+
+        val cardIds = cards.map { it.card_id }
+        val tagRows = database.card_tagQueries
+            .selectTagsByCardIds(cardIds)
+            .awaitAsList()
+
+        val tagsByCardId = tagRows.groupBy { it.card_id }
+            .mapValues { entry -> entry.value.map { it.toDomain() } }
+        return cards.map { card ->
+            card.toDomain(tagsByCardId[card.card_id].orEmpty())
+        }
+    }
+
+    override suspend fun countCards(
+        userId: String,
+        type: String?,
+        isFavorite: Boolean?
+    ): Long {
+        val isFavoriteInt = isFavorite?.let { if (it) 1L else 0L }
+
+        return database.card_with_metadataQueries
+            .countCardWithMetadataByUserIdWithFilters(
+                userId = userId,
+                type = type,
+                isFavorite = isFavoriteInt
+            )
+            .awaitAsOne()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

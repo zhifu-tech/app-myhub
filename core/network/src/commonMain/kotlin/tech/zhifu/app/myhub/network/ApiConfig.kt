@@ -54,9 +54,11 @@ object ApiConfig {
     }
 
     // API路径
+    const val AUTH_PATH = "/api/auth"
     const val CARDS_PATH = "/api/cards"
     const val TAGS_PATH = "/api/tags"
     const val TEMPLATES_PATH = "/api/templates"
+    const val COLLECTIONS_PATH = "/api/collections"
     const val USERS_PATH = "/api/users"
     const val STATISTICS_PATH = "/api/statistics"
     const val SYNC_PATH = "/api/sync"

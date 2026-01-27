@@ -4,17 +4,18 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 dependencies {
+
     implementation(projects.core.logger)
     implementation(projects.datastore.database)
     implementation(projects.datastore.datasourceLocal)
     implementation(projects.datastore.databaseServer)
-    implementation(projects.datastore.repositoryServer)
-    implementation(projects.datastore.sync)
     implementation(projects.datastore.model)
+    implementation(projects.datastore.repositoryServerApi)
+    implementation(projects.datastore.sync)
 
     implementation(libs.koin.core)
     implementation(libs.kotlinx.serialization.json)

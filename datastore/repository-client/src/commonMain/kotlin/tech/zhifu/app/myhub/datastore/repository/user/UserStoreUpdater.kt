@@ -17,7 +17,7 @@ internal fun createUserStoreUpdater(
         try {
             when {
                 key is UserStoreKey.ById && data is UserStoreData.UserData -> {
-                    val updatedUser = remoteUserDataSource.updateUser(data.user)
+                    val updatedUser = remoteUserDataSource.updateUser(key.id, data.user)
                     UpdaterResult.Success.Typed(
                         StoreWriteResponse.Success.Typed(
                             UserStoreData.UserData(updatedUser)

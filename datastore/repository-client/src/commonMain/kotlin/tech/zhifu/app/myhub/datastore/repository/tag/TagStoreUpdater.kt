@@ -17,7 +17,7 @@ internal fun createTagStoreUpdater(
         try {
             when {
                 key is TagStoreKey.ById && data is TagStoreData.Single -> {
-                    val updatedTag = remoteTagDataSource.updateTag(data.tag)
+                    val updatedTag = remoteTagDataSource.updateTag(key.id, data.tag, data.tag.userId)
                     UpdaterResult.Success.Typed(
                         StoreWriteResponse.Success.Typed(
                             TagStoreData.Single(updatedTag)
@@ -27,7 +27,7 @@ internal fun createTagStoreUpdater(
 
                 key is TagStoreKey.ByUser && data is TagStoreData.Collection -> {
                     val updatedTags = data.tags.map { tag ->
-                        remoteTagDataSource.updateTag(tag)
+                        remoteTagDataSource.updateTag(tag.id, tag, tag.userId)
                     }
                     UpdaterResult.Success.Typed(
                         StoreWriteResponse.Success.Typed(

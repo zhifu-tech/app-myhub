@@ -13,6 +13,7 @@ import tech.zhifu.app.myhub.datastore.repository.store.DatabaseBookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.sync.di.syncRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.tag.di.tagRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.template.di.templateRepositoryModule
+import tech.zhifu.app.myhub.datastore.repository.auth.di.authModule
 import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
 
 /**
@@ -35,6 +36,9 @@ val repositoryModule = module {
             database = get<MyHubDatabase>()
         )
     }
+
+    // 认证模块
+    includes(authModule)
 
     // 各个 Repository 模块
     includes(

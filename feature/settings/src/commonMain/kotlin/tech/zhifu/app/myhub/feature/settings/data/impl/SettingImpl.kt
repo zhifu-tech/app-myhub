@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.resolver.SettingValueResolver
-import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.data.store.SettingSerializer
 import tech.zhifu.app.myhub.feature.settings.domain.Setting
 import tech.zhifu.app.myhub.feature.settings.domain.SettingScope

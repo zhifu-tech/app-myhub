@@ -9,24 +9,9 @@ import kotlin.test.assertNotNull
 class KtorClientFactoryTest {
 
     @Test
-    fun `test KtorClientFactory creates engine`() {
-        // Given
-        val factory = KtorClientFactory()
-
+    fun `test createHttpClient without auth`() {
         // When
-        val engine = factory.createEngine()
-
-        // Then
-        assertNotNull(engine)
-    }
-
-    @Test
-    fun `test createHttpClient with factory`() {
-        // Given
-        val factory = KtorClientFactory()
-
-        // When
-        val httpClient = createHttpClient(factory)
+        val httpClient = createHttpClient()
 
         // Then
         assertNotNull(httpClient)
@@ -34,11 +19,8 @@ class KtorClientFactoryTest {
 
     @Test
     fun `test createHttpClient returns configured HttpClient`() {
-        // Given
-        val factory = KtorClientFactory()
-
         // When
-        val httpClient = createHttpClient(factory)
+        val httpClient = createHttpClient()
 
         // Then - 验证 HttpClient 已创建且不为空
         assertNotNull(httpClient)

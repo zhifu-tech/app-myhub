@@ -19,6 +19,10 @@ CREATE INDEX idx_card_type ON card(type);
 CREATE INDEX idx_card_user_id ON card(user_id);
 CREATE INDEX idx_card_created_at ON card(created_at);
 CREATE INDEX idx_card_updated_at ON card(updated_at);
+-- 复合索引：优化按用户和类型筛选的查询
+CREATE INDEX idx_card_user_id_type ON card(user_id, type);
+-- 复合索引：优化按用户和更新时间排序的查询
+CREATE INDEX idx_card_user_id_updated_at ON card(user_id, updated_at);
 
 insertCard:
 INSERT OR REPLACE INTO card (id, type, title, content, user_id, created_at, updated_at)

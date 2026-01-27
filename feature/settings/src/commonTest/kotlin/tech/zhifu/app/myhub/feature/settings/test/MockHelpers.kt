@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.settings.test
 
-import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 
 /**
  * Mock LocalSettingStore 用于测试

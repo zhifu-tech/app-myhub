@@ -1,118 +1,222 @@
 package tech.zhifu.app.myhub.service
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Tag
+import tech.zhifu.app.myhub.datastore.model.dto.CardResponse
+import tech.zhifu.app.myhub.datastore.model.dto.CreateCardRequest
+import tech.zhifu.app.myhub.datastore.model.dto.PaginatedResponse
+import tech.zhifu.app.myhub.datastore.model.dto.PaginationInfo
+import tech.zhifu.app.myhub.datastore.model.dto.PartialUpdateCardRequest
+import tech.zhifu.app.myhub.datastore.model.dto.UpdateCardRequest
+import tech.zhifu.app.myhub.datastore.model.dto.toResponse
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import tech.zhifu.app.myhub.exception.ForbiddenException
+import tech.zhifu.app.myhub.exception.NotFoundException
+import kotlin.time.Clock
 
 /**
  * 卡片服务
  * 处理卡片相关的业务逻辑
  */
 class CardService(
-    private val cardRepository: CardRepository
+    private val cardRepository: CardRepository,
+    private val tagRepository: TagRepository
 ) {
-    suspend fun getCards(userId: String): List<Card> {
-        return cardRepository.getCards(userId)
+    /**
+     * 获取卡片列表（支持分页和筛选）
+     */
+    suspend fun getCards(
+        userId: String,
+        page: Int = 1,
+        limit: Int = 20,
+        type: String? = null,
+        isFavorite: Boolean? = null
+    ): PaginatedResponse<CardResponse> {
+        // 验证分页参数
+        require(page > 0) { "Page must be greater than 0" }
+        require(limit in 1..100) { "Limit must be between 1 and 100" }
+
+        val cards = cardRepository.getCards(
+            userId = userId,
+            page = page,
+            limit = limit,
+            type = type,
+            isFavorite = isFavorite
+        )
+
+        val total = cardRepository.countCards(
+            userId = userId,
+            type = type,
+            isFavorite = isFavorite
+        )
+
+        return PaginatedResponse(
+            data = cards.map { it.toResponse() },
+            pagination = PaginationInfo(
+                page = page,
+                limit = limit,
+                total = total,
+                totalPages = ((total + limit - 1) / limit).toInt()
+            )
+        )
     }
 
-    suspend fun getCardById(id: String): Card? {
-        return cardRepository.getCard(id)
+    /**
+     * 获取指定卡片
+     */
+    suspend fun getCard(id: String, userId: String): CardResponse {
+        val card = cardRepository.getCard(id)
+            ?: throw NotFoundException("Card", id)
+
+        // 验证用户权限
+        if (card.userId != userId) {
+            throw ForbiddenException("Not authorized to access this card")
+        }
+
+        return card.toResponse()
+    }
+
+    /**
+     * 创建卡片
+     */
+    suspend fun createCard(request: CreateCardRequest, userId: String): CardResponse {
+        // 验证请求
+        request.validate()
+
+        // 处理标签：从 tagIds 获取 Tag 对象
+        val tags = resolveTags(request.tagIds, userId)
+
+        // 创建卡片
+        val card = Card(
+            id = generateCardId(),
+            type = request.type,
+            title = request.title,
+            content = request.content,
+            userId = userId,
+            createdAt = Clock.System.now(),
+            updatedAt = Clock.System.now(),
+            tags = tags
+        )
+
+        val created = cardRepository.upsertCard(card)
+        return created.toResponse()
+    }
+
+    /**
+     * 完整更新卡片
+     */
+    suspend fun updateCard(
+        id: String,
+        request: UpdateCardRequest,
+        userId: String
+    ): CardResponse {
+        // 验证请求
+        request.validate()
+
+        // 检查卡片是否存在
+        val existing = cardRepository.getCard(id)
+            ?: throw NotFoundException("Card", id)
+
+        // 验证用户权限
+        if (existing.userId != userId) {
+            throw ForbiddenException("Not authorized to update this card")
+        }
+
+        // 处理标签：从 tagIds 获取 Tag 对象
+        val tags = resolveTags(request.tagIds, userId)
+
+        // 更新卡片
+        val updated = existing.copy(
+            type = request.type,
+            title = request.title,
+            content = request.content,
+            updatedAt = Clock.System.now(),
+            tags = tags
+        )
+
+        val saved = cardRepository.upsertCard(updated)
+        return saved.toResponse()
+    }
+
+    /**
+     * 部分更新卡片
+     */
+    suspend fun partialUpdateCard(
+        id: String,
+        request: PartialUpdateCardRequest,
+        userId: String
+    ): CardResponse {
+        // 验证请求
+        request.validate()
+
+        // 检查卡片是否存在
+        val existing = cardRepository.getCard(id)
+            ?: throw NotFoundException("Card", id)
+
+        // 验证用户权限
+        if (existing.userId != userId) {
+            throw ForbiddenException("Not authorized to update this card")
+        }
+
+        // 处理标签：如果提供了 tagIds，则更新标签；否则保持原有标签
+        val tags = request.tagIds?.let { tagIds ->
+            resolveTags(tagIds, userId)
+        } ?: existing.tags
+
+        // 部分更新
+        val updated = existing.copy(
+            type = request.type ?: existing.type,
+            title = request.title ?: existing.title,
+            content = request.content ?: existing.content,
+            updatedAt = Clock.System.now(),
+            tags = tags
+        )
+
+        val saved = cardRepository.upsertCard(updated)
+        return saved.toResponse()
+    }
+
+    /**
+     * 删除卡片
+     */
+    suspend fun deleteCard(id: String, userId: String) {
+        // 检查卡片是否存在
+        val existing = cardRepository.getCard(id)
+            ?: throw NotFoundException("Card", id)
+
+        // 验证用户权限
+        if (existing.userId != userId) {
+            throw ForbiddenException("Not authorized to delete this card")
+        }
+
+        cardRepository.deleteCard(id)
+    }
+
+    /**
+     * 生成卡片 ID
+     */
+    private fun generateCardId(): String {
+        return "card-${System.currentTimeMillis()}-${(0..9999).random()}"
+    }
+
+    /**
+     * 从 tagIds 解析 Tag 对象列表
+     * 如果 tagId 不存在，抛出 NotFoundException
+     */
+    private suspend fun resolveTags(tagIds: List<String>, userId: String): List<Tag> {
+        if (tagIds.isEmpty()) return emptyList()
+
+        val tags = tagIds.map { tagId ->
+            val tag = tagRepository.getTag(tagId)
+                ?: throw NotFoundException("Tag", tagId)
+            // 验证标签属于当前用户
+            if (tag.userId != userId) {
+                throw ForbiddenException("Not authorized to use tag: $tagId")
+            }
+            tag
+        }
+
+        return tags
     }
 }
-//
-//    suspend fun searchCards(
-//        query: String? = null,
-//        types: String? = null,
-//        tags: String? = null,
-//        favorite: Boolean? = null,
-//        template: Boolean? = null,
-//        sortBy: String? = null
-//    ): List<CardDto> {
-//        val cardTypes = types?.split(",")?.mapNotNull { typeStr ->
-//            try {
-//                CardType.valueOf(typeStr.trim().uppercase())
-//            } catch (e: Exception) {
-//                null
-//            }
-//        } ?: emptyList()
-//
-//        val tagList = tags?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-//
-//        val sortByEnum = try {
-//            sortBy?.let { SortBy.valueOf(it.uppercase()) }
-//                ?: SortBy.UPDATED_AT_DESC
-//        } catch (e: Exception) {
-//            SortBy.UPDATED_AT_DESC
-//        }
-//
-//        val filter = SearchFilter(
-//            query = query,
-//            cardTypes = cardTypes,
-//            tags = tagList,
-//            isFavorite = favorite,
-//            isTemplate = template,
-//            sortBy = sortByEnum
-//        )
-//
-//        return cardRepository.searchCards(filter).map { it.toDto() }
-//    }
-//
-//    suspend fun createCard(request: CreateCardRequest): CardDto {
-//        // 验证卡片类型
-//        try {
-//            CardType.valueOf(request.type.uppercase())
-//        } catch (e: Exception) {
-//            throw tech.zhifu.app.myhub.exception.ValidationException("Invalid card type: ${request.type}")
-//        }
-//
-//        // 验证内容不为空
-//        if (request.content.isBlank()) {
-//            throw tech.zhifu.app.myhub.exception.ValidationException("Card content cannot be empty")
-//        }
-//
-//        // 转换为 Card 模型
-//        val card = request.toDomain()
-//        val createdCard = cardRepository.createCard(card)
-//        return createdCard.toDto()
-//    }
-//
-//    suspend fun updateCard(id: String, request: UpdateCardRequest): CardDto {
-//        val existing = cardRepository.getCard(id)
-//            ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Card", id)
-//
-//        // 如果提供了内容，验证不为空
-//        request.content?.let {
-//            if (it.isBlank()) {
-//                throw tech.zhifu.app.myhub.exception.ValidationException("Card content cannot be empty")
-//            }
-//        }
-//
-//        // 合并更新
-//        val updatedCard = existing.copy(
-//            title = request.title ?: existing.title,
-//            content = request.content ?: existing.content,
-//            author = request.author ?: existing.author,
-//            source = request.source ?: existing.source,
-//            language = request.language ?: existing.language,
-//            tags = request.tags ?: existing.tags,
-//            isFavorite = request.isFavorite ?: existing.isFavorite,
-//            isTemplate = request.isTemplate ?: existing.isTemplate,
-//            updatedAt = Clock.System.now(),
-//            metadata = request.metadata?.toDomain() ?: existing.metadata
-//        )
-//
-//        val savedCard = cardRepository.updateCard(updatedCard)
-//        return savedCard.toDto()
-//    }
-//
-//    suspend fun deleteCard(id: String): Boolean {
-//        return cardRepository.deleteCard(id)
-//    }
-//
-//    suspend fun toggleFavorite(id: String): CardDto {
-//        val existing = cardRepository.getCard(id)
-//            ?: throw tech.zhifu.app.myhub.exception.NotFoundException("Card", id)
-//        val toggledCard = cardRepository.toggleFavorite(id)
-//        return toggledCard.toDto()
-//    }
-//}
-

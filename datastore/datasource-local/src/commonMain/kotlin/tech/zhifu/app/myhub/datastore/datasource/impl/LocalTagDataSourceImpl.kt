@@ -42,6 +42,13 @@ class LocalTagDataSourceImpl(
             .mapToList(Dispatchers.Default)
             .map { tags -> tags.map(DbTag::toDomain) }
     }
+    
+    override suspend fun getTagByName(name: String, userId: String): Tag? {
+        return database.tagQueries
+            .selectTagByName(name, userId)
+            .awaitAsOneOrNull()
+            ?.toDomain()
+    }
 
     override suspend fun insertTag(tag: Tag) {
         database.tagQueries.insertTag(
@@ -53,6 +60,18 @@ class LocalTagDataSourceImpl(
             created_at = tag.createdAt.toString(),
             updated_at = tag.updatedAt.toString(),
             card_count = tag.cardCount.toLong()
+        )
+    }
+
+    override suspend fun updateTag(tag: Tag) {
+        database.tagQueries.updateTag(
+            name = tag.name,
+            color = tag.color,
+            description = tag.description,
+            updated_at = tag.updatedAt.toString(),
+            card_count = tag.cardCount.toLong(),
+            id = tag.id,
+            user_id = tag.userId
         )
     }
 

@@ -70,26 +70,26 @@ docker-compose up -d
 
 ### 常用配置项
 
-| 变量名 | 说明 | 默认值 | 必需 |
-|--------|------|--------|------|
-| `SERVER_PORT` | 服务器端口 | `8083` | 否 |
-| `DB_TYPE` | 数据库类型 | `SQLITE` | 否 |
-| `DB_PATH` | SQLite 数据库路径 | `.myhub/myhub.db` | SQLite 模式 |
-| `DB_HOST` | PostgreSQL 主机 | `localhost` | PostgreSQL 模式 |
-| `DB_PORT` | PostgreSQL 端口 | `5432` | PostgreSQL 模式 |
-| `DB_NAME` | 数据库名称 | `myhub` | PostgreSQL 模式 |
-| `DB_USER` | 数据库用户名 | `postgres` | PostgreSQL 模式 |
-| `DB_PASSWORD` | 数据库密码 | - | PostgreSQL 模式（必需） |
+| 变量名           | 说明            | 默认值               | 必需                |
+|---------------|---------------|-------------------|-------------------|
+| `SERVER_PORT` | 服务器端口         | `8083`            | 否                 |
+| `DB_TYPE`     | 数据库类型         | `SQLITE`          | 否                 |
+| `DB_PATH`     | SQLite 数据库路径  | `.myhub/myhub.db` | SQLite 模式         |
+| `DB_HOST`     | PostgreSQL 主机 | `localhost`       | PostgreSQL 模式     |
+| `DB_PORT`     | PostgreSQL 端口 | `5432`            | PostgreSQL 模式     |
+| `DB_NAME`     | 数据库名称         | `myhub`           | PostgreSQL 模式     |
+| `DB_USER`     | 数据库用户名        | `postgres`        | PostgreSQL 模式     |
+| `DB_PASSWORD` | 数据库密码         | -                 | PostgreSQL 模式（必需） |
 
 ## 🔒 安全提示
 
 1. **永远不要提交 `.env` 文件到版本控制**
-   - `.env` 文件已添加到 `.gitignore`
-   - 只提交 `.env.example` 作为模板
+    - `.env` 文件已添加到 `.gitignore`
+    - 只提交 `.env.example` 作为模板
 
 2. **生产环境使用强密码**
-   - 修改 `DB_PASSWORD` 和 `POSTGRES_PASSWORD`
-   - 使用密码管理器生成强密码
+    - 修改 `DB_PASSWORD` 和 `POSTGRES_PASSWORD`
+    - 使用密码管理器生成强密码
 
 3. **限制文件权限**
    ```bash

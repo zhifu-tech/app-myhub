@@ -435,24 +435,24 @@ DB_PATH=.myhub/myhub.db
 
 1. **永远不要提交敏感信息到版本控制**
 
-   - 使用 `.gitignore` 排除 `.env` 文件
-   - 提供 `.env.example` 作为模板
+    - 使用 `.gitignore` 排除 `.env` 文件
+    - 提供 `.env.example` 作为模板
 
 2. **优先级顺序**（从高到低）
 
-   - 命令行环境变量
-   - `.env` 文件
-   - 系统环境变量
-   - 代码中的默认值
+    - 命令行环境变量
+    - `.env` 文件
+    - 系统环境变量
+    - 代码中的默认值
 
 3. **使用环境变量管理工具**
 
-   - 开发：`.env` 文件
-   - 生产：密钥管理服务（AWS Secrets Manager, HashiCorp Vault 等）
+    - 开发：`.env` 文件
+    - 生产：密钥管理服务（AWS Secrets Manager, HashiCorp Vault 等）
 
 4. **验证配置**
-   - 启动时检查必需的环境变量
-   - 提供清晰的错误信息
+    - 启动时检查必需的环境变量
+    - 提供清晰的错误信息
 
 ---
 

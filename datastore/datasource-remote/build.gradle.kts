@@ -19,6 +19,7 @@ kotlin {
             implementation(projects.core.platform)
             implementation(projects.core.logger)
             implementation(projects.datastore.model)
+            implementation(projects.datastore.modelDto)
             implementation(projects.core.network)
 
             implementation(projects.datastore.sync)

@@ -26,9 +26,9 @@ class ApiConfigTest {
         assertTrue(baseUrl.isNotEmpty(), "BASE_URL should not be empty, got: '$baseUrl'")
         // URL 应该以 http:// 或 https:// 开头，或者至少包含一个冒号（表示有端口或协议）
         // 注意：系统属性可能包含任何值，所以只验证非空
-        val isValidUrl = baseUrl.startsWith("http://") || 
-                        baseUrl.startsWith("https://") || 
-                        baseUrl.contains(":")
+        val isValidUrl = baseUrl.startsWith("http://") ||
+            baseUrl.startsWith("https://") ||
+            baseUrl.contains(":")
         assertTrue(
             isValidUrl,
             "BASE_URL should be a valid URL format (starts with http:// or https://, or contains ':'), got: '$baseUrl'"

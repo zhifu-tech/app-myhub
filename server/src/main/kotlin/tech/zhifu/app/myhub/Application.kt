@@ -8,20 +8,29 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
-import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
 import org.koin.core.context.GlobalContext
+import tech.zhifu.app.myhub.api.authApi
+import tech.zhifu.app.myhub.api.cardTemplatesApi
 import tech.zhifu.app.myhub.api.cardsApi
+import tech.zhifu.app.myhub.api.collectionsApi
 import tech.zhifu.app.myhub.api.syncApi
+import tech.zhifu.app.myhub.api.tagsApi
 import tech.zhifu.app.myhub.api.usersApi
+import tech.zhifu.app.myhub.auth.TokenService
+import tech.zhifu.app.myhub.auth.configureAuthentication
+import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.di.initKoin
-import tech.zhifu.app.myhub.exception.ApiException
+import tech.zhifu.app.myhub.exception.configException
 import tech.zhifu.app.myhub.service.CardService
+import tech.zhifu.app.myhub.service.CardTemplateService
+import tech.zhifu.app.myhub.service.CollectionService
 import tech.zhifu.app.myhub.service.SyncService
+import tech.zhifu.app.myhub.service.TagService
 import tech.zhifu.app.myhub.service.UserService
 
 const val SERVER_PORT = 8083
@@ -55,28 +64,20 @@ fun Application.module() {
     install(CORS) {
         anyHost()
         allowHeader("Content-Type")
+        allowHeader("Authorization")
         allowMethod(io.ktor.http.HttpMethod.Get)
         allowMethod(io.ktor.http.HttpMethod.Post)
         allowMethod(io.ktor.http.HttpMethod.Put)
+        allowMethod(io.ktor.http.HttpMethod.Patch)
         allowMethod(io.ktor.http.HttpMethod.Delete)
         allowMethod(io.ktor.http.HttpMethod.Options)
     }
 
+    // 配置认证（JWT）
+    configureAuthentication()
+
     // 配置错误处理
-    install(StatusPages) {
-        exception<ApiException> { call, exception ->
-            call.respond(exception.statusCode, ErrorResponse(exception.message ?: "Unknown error"))
-        }
-        exception<IllegalArgumentException> { call, exception ->
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse(exception.message ?: "Invalid request"))
-        }
-        exception<Exception> { call, exception ->
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                ErrorResponse("Internal server error: ${exception.message}")
-            )
-        }
-    }
+    configException()
 
     // 配置路由
     routing {
@@ -91,16 +92,20 @@ fun Application.module() {
         }
 
         // API 路由
+        // 认证 API（不需要认证）
+        authApi(
+            tokenService = GlobalContext.get().get<TokenService>(),
+            userService = GlobalContext.get().get<UserService>(),
+            userRepository = GlobalContext.get().get<UserRepository>()
+        )
+
+        // 需要认证的 API
         syncApi(GlobalContext.get().get<SyncService>())
         usersApi(GlobalContext.get().get<UserService>())
         cardsApi(GlobalContext.get().get<CardService>())
+        tagsApi(GlobalContext.get().get<TagService>())
+        collectionsApi(GlobalContext.get().get<CollectionService>())
+        cardTemplatesApi(GlobalContext.get().get<CardTemplateService>())
     }
 }
 
-/**
- * 错误响应格式
- */
-@kotlinx.serialization.Serializable
-data class ErrorResponse(
-    val error: String
-)

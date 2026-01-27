@@ -1,19 +1,18 @@
 package tech.zhifu.app.myhub.feature.settings.di
 
 import org.koin.dsl.module
+import tech.zhifu.app.myhub.settings.di.coreSettingsModule
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingsRepositoryImpl
-import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
-import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStoreImpl
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.feature.settings.settings.LanguageSetting
 import tech.zhifu.app.myhub.feature.settings.settings.ThemeSetting
 
 fun settingsModule() = module {
-    factory<LocalSettingStore> {
-        LocalSettingStoreImpl()
-    }
+    // 包含 core/settings 模块（提供 LocalSettingStore）
+    includes(coreSettingsModule)
 
     factory<SettingsRepository> {
         SettingsRepositoryImpl().apply {

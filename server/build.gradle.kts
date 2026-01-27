@@ -15,18 +15,22 @@ application {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 dependencies {
     implementation(projects.core.logger)
 
     implementation(projects.datastore.model)
+    implementation(projects.datastore.modelDto)
     implementation(projects.datastore.sync)
+    implementation(projects.datastore.repositoryServerApi)
     implementation(projects.datastore.repositoryServer)
     implementation(projects.datastore.databaseServer)
     implementation(projects.datastore.datasourceLocal)
 
+    implementation(libs.koin.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.http)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
@@ -35,13 +39,12 @@ dependencies {
     implementation(libs.ktor.serverCors)
     implementation(libs.ktor.serverCallLogging)
     implementation(libs.ktor.serverStatusPages)
+    implementation(libs.ktor.serverAuth)
+    implementation(libs.ktor.serverAuthJwt)
     implementation(libs.ktor.utils)
 
-    implementation(libs.kotlinx.serialization.json)
-
     implementation(libs.logback)
-
-    implementation(libs.koin.core)
+    implementation(libs.jwt.auth0)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)

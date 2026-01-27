@@ -29,6 +29,19 @@ class LocalUserDataSourceImpl(
         )
     }
 
+    override suspend fun updateUser(user: User) {
+        database.userQueries.updateUser(
+            username = user.username,
+            display_name = user.displayName,
+            avatar_url = user.avatarUrl,
+            avatar_text = user.avatarText,
+            updated_at = user.updatedAt.toString(),
+            status = user.status,
+            last_login_at = user.lastLoginAt.toString(),
+            id = user.id
+        )
+    }
+
     override suspend fun getUser(): User {
         return database.userQueries.selectCurrentUser()
             .executeAsOne()
@@ -68,6 +81,17 @@ class LocalUserDataSourceImpl(
             default_card_type = preferences.defaultCardType,
             auto_sync = if (preferences.autoSync) 1L else 0L,
             sync_interval = preferences.syncInterval
+        )
+    }
+
+    override suspend fun updateUserPreferences(preferences: UserPreferences) {
+        database.user_preferencesQueries.updateUserPreferences(
+            theme = preferences.theme,
+            language = preferences.language,
+            default_card_type = preferences.defaultCardType,
+            auto_sync = if (preferences.autoSync) 1L else 0L,
+            sync_interval = preferences.syncInterval,
+            user_id = preferences.userId
         )
     }
 

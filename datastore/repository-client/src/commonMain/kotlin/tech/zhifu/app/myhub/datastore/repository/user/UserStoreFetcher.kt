@@ -11,15 +11,15 @@ fun createUserStoreFetcher(
 ): UserStoreFetcher = Fetcher.of { key ->
     when (key) {
         is UserStoreKey.ById -> {
-            val user = remoteUserDataSource.fetchUser(key.id)
+            val user = remoteUserDataSource.getUser(key.id)
                 ?: throw NoSuchElementException("User not found: ${key.id}")
             UserStoreData.UserData(user)
         }
 
         is UserStoreKey.PreferencesById -> {
-            // RemoteUserDataSource 没有 fetchUserPreferences
-            // 返回默认值，实际偏好会从本地存储读取
-            UserStoreData.PreferencesData(UserPreferences(userId = key.id))
+            val preferences = remoteUserDataSource.getUserPreferences(key.id)
+                ?: UserPreferences(userId = key.id) // 如果不存在，返回默认值
+            UserStoreData.PreferencesData(preferences)
         }
     }
 }

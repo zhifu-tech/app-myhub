@@ -8,10 +8,15 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import kotlinx.serialization.Serializable
+import io.ktor.http.contentType
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
+import tech.zhifu.app.myhub.datastore.model.dto.CreateTagRequest
+import tech.zhifu.app.myhub.datastore.model.dto.TagResponse
+import tech.zhifu.app.myhub.datastore.model.dto.UpdateTagRequest
+import tech.zhifu.app.myhub.datastore.model.dto.toDomain
 import tech.zhifu.app.myhub.network.ApiConfig
 import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
@@ -23,13 +28,19 @@ class RemoteTagDataSourceImpl(
     private val httpClient: HttpClient
 ) : RemoteTagDataSource {
 
-    override suspend fun getAllTags(): List<Tag> {
+    override suspend fun getTags(userId: String): List<Tag> {
         return try {
             val response: HttpResponse = httpClient.get(
                 "${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}"
             )
             when (response.status) {
-                HttpStatusCode.OK -> response.body()
+                HttpStatusCode.OK -> {
+                    val tagResponses: List<TagResponse> = response.body()
+                    // TagResponse 不包含 userId，需要从参数传入
+                    tagResponses.map { tagResponse ->
+                        tagResponse.toDomain().copy(userId = userId)
+                    }
+                }
                 else -> throw ApiException("Failed to fetch tags: ${response.status}")
             }
         } catch (e: Exception) {
@@ -38,11 +49,14 @@ class RemoteTagDataSourceImpl(
         }
     }
 
-    override suspend fun getTagById(id: String): Tag? {
+    override suspend fun getTagById(id: String, userId: String): Tag? {
         return try {
             val response: HttpResponse = httpClient.get("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}/$id")
             when (response.status) {
-                HttpStatusCode.OK -> response.body()
+                HttpStatusCode.OK -> {
+                    val tagResponse: TagResponse = response.body()
+                    tagResponse.toDomain().copy(userId = userId)
+                }
                 HttpStatusCode.NotFound -> null
                 else -> throw ApiException("Failed to fetch tag: ${response.status}")
             }
@@ -52,19 +66,22 @@ class RemoteTagDataSourceImpl(
         }
     }
 
-    override suspend fun createTag(tag: Tag): Tag {
+    override suspend fun createTag(tag: Tag, userId: String): Tag {
         return try {
-            // 构建创建请求
             val request = CreateTagRequest(
                 name = tag.name,
                 color = tag.color,
                 description = tag.description
             )
             val response: HttpResponse = httpClient.post("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}") {
+                contentType(ContentType.Application.Json)
                 setBody(request)
             }
             when (response.status) {
-                HttpStatusCode.Created, HttpStatusCode.OK -> response.body()
+                HttpStatusCode.Created -> {
+                    val tagResponse: TagResponse = response.body()
+                    tagResponse.toDomain().copy(userId = userId)
+                }
                 else -> throw ApiException("Failed to create tag: ${response.status}")
             }
         } catch (e: Exception) {
@@ -73,20 +90,23 @@ class RemoteTagDataSourceImpl(
         }
     }
 
-    override suspend fun updateTag(tag: Tag): Tag {
+    override suspend fun updateTag(id: String, tag: Tag, userId: String): Tag {
         return try {
-            // 构建更新请求
             val request = UpdateTagRequest(
                 name = tag.name,
                 color = tag.color,
                 description = tag.description
             )
-            val response: HttpResponse = httpClient.put("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}/${tag.id}") {
+            val response: HttpResponse = httpClient.put("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}/$id") {
+                contentType(ContentType.Application.Json)
                 setBody(request)
             }
             when (response.status) {
-                HttpStatusCode.OK -> response.body()
-                HttpStatusCode.NotFound -> throw ApiException("Tag not found: ${tag.id}")
+                HttpStatusCode.OK -> {
+                    val tagResponse: TagResponse = response.body()
+                    tagResponse.toDomain().copy(userId = userId)
+                }
+                HttpStatusCode.NotFound -> throw ApiException("Tag not found: $id")
                 else -> throw ApiException("Failed to update tag: ${response.status}")
             }
         } catch (e: Exception) {
@@ -95,18 +115,16 @@ class RemoteTagDataSourceImpl(
         }
     }
 
-    override suspend fun deleteTag(id: String) {
+    override suspend fun deleteTag(id: String, userId: String) {
         try {
             val response: HttpResponse = httpClient.delete("${ApiConfig.BASE_URL}${ApiConfig.TAGS_PATH}/$id")
             when (response.status) {
                 HttpStatusCode.OK, HttpStatusCode.NoContent -> {
                     // 成功删除
                 }
-
                 HttpStatusCode.NotFound -> {
                     // 标签不存在，视为成功
                 }
-
                 else -> throw ApiException("Failed to delete tag: ${response.status}")
             }
         } catch (e: Exception) {
@@ -115,24 +133,4 @@ class RemoteTagDataSourceImpl(
         }
     }
 }
-
-/**
- * 创建标签请求
- */
-@Serializable
-data class CreateTagRequest(
-    val name: String,
-    val color: String? = null,
-    val description: String? = null
-)
-
-/**
- * 更新标签请求
- */
-@Serializable
-data class UpdateTagRequest(
-    val name: String? = null,
-    val color: String? = null,
-    val description: String? = null
-)
 

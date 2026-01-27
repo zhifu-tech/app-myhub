@@ -5,8 +5,9 @@ import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 
 interface LocalUserDataSource {
-
     suspend fun insertUser(user: User)
+
+    suspend fun updateUser(user: User)
 
     suspend fun getUser(): User
     suspend fun getUserOrNull(): User?
@@ -18,6 +19,8 @@ interface LocalUserDataSource {
     suspend fun deleteUser(userId: String)
 
     suspend fun insertUserPreferences(preferences: UserPreferences)
+
+    suspend fun updateUserPreferences(preferences: UserPreferences)
 
     suspend fun getUserPreferences(userId: String): UserPreferences?
 

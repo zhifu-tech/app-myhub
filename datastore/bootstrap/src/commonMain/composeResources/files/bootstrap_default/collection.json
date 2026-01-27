@@ -1,11 +1,38 @@
 [
   {
     "id": "collection-001",
-    "name": "入门合集",
-    "topic": "onboarding",
-    "description": "用于引导的新手合集",
-    "userId": "user-000",
+    "name": "Literature Classics",
+    "topic": "literature",
+    "description": "Classic literature quotes and excerpts",
+    "userId": "user-001",
     "createdAt": "2024-01-01T00:00:00Z",
     "updatedAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "collection-002",
+    "name": "Algorithm Mastery",
+    "topic": "algorithm",
+    "description": "Algorithm implementations and code snippets",
+    "userId": "user-001",
+    "createdAt": "2024-01-02T00:00:00Z",
+    "updatedAt": "2024-01-02T00:00:00Z"
+  },
+  {
+    "id": "collection-003",
+    "name": "AI Trends",
+    "topic": "ai",
+    "description": "Latest trends and insights in artificial intelligence",
+    "userId": "user-001",
+    "createdAt": "2024-01-03T00:00:00Z",
+    "updatedAt": "2024-01-03T00:00:00Z"
+  },
+  {
+    "id": "collection-004",
+    "name": "Learning Lab",
+    "topic": "learning",
+    "description": "Experimental learning and knowledge exploration",
+    "userId": "user-001",
+    "createdAt": "2024-01-04T00:00:00Z",
+    "updatedAt": "2024-01-04T00:00:00Z"
   }
 ]

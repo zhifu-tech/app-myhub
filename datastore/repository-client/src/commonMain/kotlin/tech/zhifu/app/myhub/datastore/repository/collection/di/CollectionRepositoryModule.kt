@@ -39,11 +39,13 @@ fun collectionRepositoryModule() = module {
     }
     factory<CollectionStoreFetcher> {
         createCollectionStoreFetcher(
-            localCollectionDataSource = get()
+            remoteCollectionDataSource = get()
         )
     }
     factory<CollectionStoreUpdater> {
-        createCollectionStoreUpdater()
+        createCollectionStoreUpdater(
+            remoteCollectionDataSource = get()
+        )
     }
     factory<CollectionStore> {
         StoreFactory.createMutableStore(

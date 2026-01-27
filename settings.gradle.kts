@@ -162,6 +162,7 @@ include(":core:app-build-config")
 include(":core:platform")
 include(":core:platform-compose")
 include(":core:navigation")
+include(":core:settings")
 
 // 网络模块
 include(":core:network")
@@ -174,6 +175,7 @@ include(":core:analytics")
 // 数据存储模块
 // ============================================================================
 include(":datastore:model")
+include(":datastore:model-dto")
 
 // 数据库模块
 include(":datastore:database")
@@ -194,6 +196,7 @@ include(":datastore:datasource-remote")
 include(":datastore:repository-client-api")
 include(":datastore:repository-client")
 if (isServerEnabled) {
+    include(":datastore:repository-server-api")
     include(":datastore:repository-server")
 }
 

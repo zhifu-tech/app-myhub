@@ -26,6 +26,7 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
+            implementation(projects.core.settings)
 
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
@@ -39,9 +40,6 @@ kotlin {
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
-
-            implementation(libs.multiplatform.settings)
-            implementation(libs.multiplatform.settings.no.arg)
 
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)

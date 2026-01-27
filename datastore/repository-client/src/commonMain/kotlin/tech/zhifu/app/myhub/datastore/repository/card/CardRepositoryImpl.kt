@@ -71,7 +71,7 @@ class CardRepositoryImpl(
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.cached(
                 key = CardStoreKey.ByUser(userId),
-                refresh = false
+                refresh = refresh
             )
         )
 

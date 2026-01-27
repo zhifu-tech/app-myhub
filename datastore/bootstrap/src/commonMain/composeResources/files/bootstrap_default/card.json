@@ -70,5 +70,41 @@
     "userId": "user-001",
     "createdAt": "2024-01-02T00:00:00Z",
     "updatedAt": "2024-01-02T00:00:00Z"
+  },
+  {
+    "id": "card-009",
+    "type": "quote",
+    "title": "Steve Jobs Quote",
+    "content": "\"The only way to do great work is to love what you do.\"",
+    "userId": "user-001",
+    "createdAt": "2024-01-07T00:00:00Z",
+    "updatedAt": "2024-01-07T00:00:00Z"
+  },
+  {
+    "id": "card-010",
+    "type": "quote",
+    "title": "C.G. Jung Quote",
+    "content": "\"The privilege of a lifetime is to become who you truly are.\"",
+    "userId": "user-001",
+    "createdAt": "2024-01-08T00:00:00Z",
+    "updatedAt": "2024-01-08T00:00:00Z"
+  },
+  {
+    "id": "card-011",
+    "type": "article",
+    "title": "Understanding the Transformer Architecture",
+    "content": "A deep dive into self-attention mechanisms and how they revolutionized NLP processing. The transformer architecture introduced a new paradigm for sequence-to-sequence tasks, enabling parallel processing and capturing long-range dependencies.",
+    "userId": "user-001",
+    "createdAt": "2024-01-09T00:00:00Z",
+    "updatedAt": "2024-01-09T00:00:00Z"
+  },
+  {
+    "id": "card-012",
+    "type": "todo",
+    "title": "WEEKLY REVIEW",
+    "content": "• Archive completed assets\n• Tag new captures\n• Set goals for next week",
+    "userId": "user-001",
+    "createdAt": "2024-01-10T00:00:00Z",
+    "updatedAt": "2024-01-10T00:00:00Z"
   }
 ]

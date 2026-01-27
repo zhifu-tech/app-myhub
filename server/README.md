@@ -176,15 +176,18 @@ docker run -d \
 可以通过 `.env` 文件或环境变量配置服务器和数据库。推荐使用 `.env` 文件进行配置。
 
 **配置方式优先级**（从高到低）：
+
 1. Docker Compose 中的 `environment:` 直接定义
 2. `.env` 文件中的配置
 3. 系统环境变量
 4. 代码中的默认值
 
 **服务器配置：**
+
 - `SERVER_PORT` - 服务器端口（默认：8083）
 
 **数据库配置：**
+
 - `DB_TYPE` - 数据库类型：`SQLITE` 或 `POSTGRESQL`（默认：SQLITE）
 - `DB_HOST` - PostgreSQL 主机地址（PostgreSQL 模式，默认：localhost）
 - `DB_PORT` - PostgreSQL 端口（PostgreSQL 模式，默认：5432）
@@ -194,11 +197,32 @@ docker run -d \
 - `DB_PATH` - SQLite 数据库文件路径（SQLite 模式，默认：.myhub/myhub.db）
 
 **PostgreSQL 服务配置**（仅用于 docker-compose.yml）：
+
 - `POSTGRES_DB` - PostgreSQL 数据库名称（默认：myhub）
 - `POSTGRES_USER` - PostgreSQL 用户名（默认：myhub_user）
 - `POSTGRES_PASSWORD` - PostgreSQL 密码（默认：myhub_password）
 
-详细的环境变量配置说明请参考 [环境变量配置指南](docs/environment-variables.md)。
+**JWT 认证配置**：
+
+- `JWT_SECRET` - JWT 签名密钥（**必须设置**，至少 32 个字符）
+- `JWT_ISSUER` - Token 发行者（可选，默认：myhub-api）
+- `JWT_AUDIENCE` - Token 受众（可选，默认：myhub-client）
+
+**快速配置 JWT**：
+
+```bash
+# 1. 复制配置文件（如果还没有）
+cp .env.example .env
+
+# 2. .env 文件中已包含一个生成的示例 Secret，可以直接使用（开发环境）
+# 生产环境请重新生成：./scripts/generate-jwt-secret.sh
+```
+
+详细的环境变量配置说明请参考：
+
+- [环境变量配置指南](docs/environment-variables.md)
+- [JWT 配置指南](docs/jwt-setup-guide.md)
+- [JWT 认证实现文档](docs/jwt-authentication-implementation.md)
 
 #### 健康检查
 

@@ -39,7 +39,7 @@ class RemoteSyncDataSourceImpl(
             append(limit)
         }
         val response: HttpResponse = httpClient.get(
-            "${ApiConfig.BASE_URL}${ApiConfig.SYNC_PATH}/pull$query"
+            "${ApiConfig.BASE_URL}${ApiConfig.SYNC_PATH}/changes$query"
         )
         when (response.status) {
             HttpStatusCode.OK -> response.body()
@@ -55,7 +55,7 @@ class RemoteSyncDataSourceImpl(
         items: List<SyncOutboxUploadItem>
     ): SyncPushResponse = try {
         val response: HttpResponse = httpClient.post(
-            "${ApiConfig.BASE_URL}${ApiConfig.SYNC_PATH}/push"
+            "${ApiConfig.BASE_URL}${ApiConfig.SYNC_PATH}"
         ) {
             setBody(SyncPushRequest(userId = userId, items = items))
         }

@@ -15,17 +15,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.platform)
             implementation(projects.core.logger)
-
-            api(libs.ktor.client.core)
-            api(libs.ktor.client.content.negotiation)
-            api(libs.ktor.serialization.kotlinx.json)
-            api(libs.ktor.client.logging)
-
-            implementation(libs.kotlinx.coroutines.core)
+            implementation(projects.core.platform)
+            implementation(projects.core.settings)
 
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.krypto)
+            api(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         commonTest.dependencies {

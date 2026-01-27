@@ -3,15 +3,24 @@ package tech.zhifu.app.myhub.datastore.repository.di
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
+import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
+import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
+import tech.zhifu.app.myhub.datastore.repository.TagRepository
+import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
+import tech.zhifu.app.myhub.datastore.repository.impl.CardTemplateRepositoryImpl
+import tech.zhifu.app.myhub.datastore.repository.impl.CollectionRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.SyncRepositoryImpl
+import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 /**
  * 仓库依赖注入模块（服务端）
@@ -25,9 +34,16 @@ val repositoryModule = module {
     includes(localDataSourceModule)
 
     // Repository 实现（服务端）
+    single<TagRepository> {
+        TagRepositoryImpl(
+            localDataSource = get<LocalTagDataSource>()
+        )
+    }
+
     single<CardRepository> {
         CardRepositoryImpl(
             localDataSource = get<LocalCardDataSource>(),
+            tagRepository = get<TagRepository>()
         )
     }
 
@@ -41,6 +57,18 @@ val repositoryModule = module {
     single<SyncRepository> {
         SyncRepositoryImpl(
             localSyncDataSource = get<LocalSyncDataSource>()
+        )
+    }
+
+    single<CollectionRepository> {
+        CollectionRepositoryImpl(
+            localDataSource = get<LocalCollectionDataSource>()
+        )
+    }
+
+    single<CardTemplateRepository> {
+        CardTemplateRepositoryImpl(
+            localDataSource = get<LocalCardTemplateDataSource>()
         )
     }
 }

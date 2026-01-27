@@ -50,3 +50,23 @@ selectCardWithMetadataByUserId:
 SELECT v.*
 FROM card_with_metadata_view v
 WHERE v.card_user_id = :userId;
+
+-- 支持筛选和分页的查询
+selectCardWithMetadataByUserIdWithFilters:
+SELECT v.*
+FROM card_with_metadata_view v
+INNER JOIN user_card uc ON uc.card_id = v.card_id AND uc.user_id = :userId
+WHERE v.card_user_id = :userId
+  AND (:type IS NULL OR v.card_type = :type)
+  AND (:isFavorite IS NULL OR uc.is_favorite = :isFavorite)
+ORDER BY v.card_updated_at DESC
+LIMIT :limit OFFSET :offset;
+
+-- 计数查询（用于分页）
+countCardWithMetadataByUserIdWithFilters:
+SELECT COUNT(*)
+FROM card_with_metadata_view v
+INNER JOIN user_card uc ON uc.card_id = v.card_id AND uc.user_id = :userId
+WHERE v.card_user_id = :userId
+  AND (:type IS NULL OR v.card_type = :type)
+  AND (:isFavorite IS NULL OR uc.is_favorite = :isFavorite);

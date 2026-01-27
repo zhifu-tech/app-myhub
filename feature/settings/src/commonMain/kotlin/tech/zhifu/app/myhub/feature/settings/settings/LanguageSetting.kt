@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.feature.settings.settings
 
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingImpl
-import tech.zhifu.app.myhub.feature.settings.data.store.LocalSettingStore
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.data.store.StringSettingSerializer
 import tech.zhifu.app.myhub.feature.settings.domain.Setting
 import tech.zhifu.app.myhub.feature.settings.domain.SettingScope

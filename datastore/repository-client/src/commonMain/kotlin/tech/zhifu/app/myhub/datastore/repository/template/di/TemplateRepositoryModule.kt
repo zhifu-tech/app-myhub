@@ -39,11 +39,13 @@ fun templateRepositoryModule() = module {
     }
     factory<TemplateStoreFetcher> {
         createTemplateStoreFetcher(
-            localCardTemplateDataSource = get()
+            remoteCardTemplateDataSource = get()
         )
     }
     factory<TemplateStoreUpdater> {
-        createTemplateStoreUpdater()
+        createTemplateStoreUpdater(
+            remoteCardTemplateDataSource = get()
+        )
     }
     factory<TemplateStore> {
         StoreFactory.createMutableStore(

@@ -15,6 +15,7 @@ import tech.zhifu.app.myhub.datastore.repository.card.cards
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.logger.warn
 import kotlin.time.Clock
 
 /**
@@ -26,7 +27,7 @@ import kotlin.time.Clock
 class DashboardViewModel(
     private val cardRepository: CardRepository,
     private val coroutineScope: CoroutineScope,
-    private val userId: String = "guest-1" // TODO: 从用户会话获取
+    private val userId: String = "user-001" // fixme: 需要移除
 ) {
     private val logger = logger("Dashboard")
 
@@ -48,14 +49,13 @@ class DashboardViewModel(
         logger.info { "Loading dashboard data" }
         _uiState.value = DashboardUiState.InitialLoading()
 
-        // 使用 observeCards 监听数据变化，refresh = true 触发网络刷新
-        cardRepository.streamCards(userId, refresh = true)
+        // 使用 streamCards 监听数据变化
+        // refresh = false 表示优先使用缓存（本地数据），避免网络错误时无法使用
+        // 如果需要刷新，可以通过 refresh() 方法单独触发
+        cardRepository.streamCards(userId, refresh = false)
             .onEach { response ->
                 when (response) {
-                    is StoreReadResponse.Initial -> {
-                        // 初始状态，不做处理
-                    }
-
+                    is StoreReadResponse.Initial -> {}
                     is StoreReadResponse.Loading -> {
                         logger.info { "Loading cards from ${response.origin}" }
                     }
@@ -72,6 +72,13 @@ class DashboardViewModel(
                         // 获取收藏的卡片
                         val favoriteCards = cards.filter { it.isFavorite }
 
+                        // 计算复习进度（TODO: 实际应该从 user_card.last_reviewed_at 计算）
+                        // 暂时使用模拟数据：假设有 5 张卡片需要复习，总共 15 张卡片
+                        val reviewProgress = ReviewProgress(
+                            completed = 10, // 已完成复习的卡片数
+                            total = 15     // 需要复习的卡片总数
+                        )
+
                         // 更新状态
                         val currentState = _uiState.value
                         _uiState.value = when (currentState) {
@@ -84,7 +91,9 @@ class DashboardViewModel(
                                 ),
                                 recentCards = recentCards,
                                 favoriteCards = favoriteCards,
-                                lastSyncTime = Clock.System.now().toEpochMilliseconds()
+                                lastSyncTime = Clock.System.now().toEpochMilliseconds(),
+                                reviewProgress = reviewProgress,
+                                showFocusReview = true // 初始加载时默认显示
                             )
 
                             is DashboardUiState.Content -> currentState.copy(
@@ -97,7 +106,8 @@ class DashboardViewModel(
                                 recentCards = recentCards,
                                 favoriteCards = favoriteCards,
                                 lastSyncTime = Clock.System.now().toEpochMilliseconds(),
-                                isRefreshing = false
+                                isRefreshing = false,
+                                reviewProgress = reviewProgress
                             )
                         }
                     }
@@ -110,17 +120,73 @@ class DashboardViewModel(
                         val errorMessage = response.errorMessageOrNull() ?: "Unknown error"
                         logger.error { "Error loading cards: $errorMessage" }
 
+                        // 网络错误时，不立即设置空数据，而是等待本地数据加载
+                        // Store5 会自动从 SourceOfTruth（本地数据库）加载数据
+                        // 只有在没有本地数据且是初始加载时才设置错误状态
                         val currentState = _uiState.value
-                        _uiState.value = when (currentState) {
-                            is DashboardUiState.InitialLoading -> DashboardUiState.Content(
-                                statistics = Statistics(),
-                                recentCards = emptyList(),
-                                favoriteCards = emptyList(),
-                                lastSyncTime = currentState.lastSyncTime,
-                                error = errorMessage
-                            )
 
-                            is DashboardUiState.Content -> currentState.copy(
+                        // 如果已经有数据（从本地加载的），只记录错误但不影响显示
+                        if (currentState is DashboardUiState.Content && currentState.recentCards.isNotEmpty()) {
+                            // 有本地数据，只更新错误信息（用于提示用户网络不可用）
+                            _uiState.value = currentState.copy(
+                                error = "网络连接失败，显示本地数据",
+                                isRefreshing = false
+                            )
+                        } else if (currentState is DashboardUiState.InitialLoading) {
+                            // 初始加载且网络错误，主动从本地数据库加载数据
+                            logger.info { "Network error, attempting to load from local database" }
+                            coroutineScope.launch {
+                                try {
+                                    val localCards = cardRepository.getCards(userId)?.cards ?: emptyList()
+                                    if (localCards.isNotEmpty()) {
+                                        logger.info { "Loaded ${localCards.size} cards from local database" }
+                                        val recentCards = localCards
+                                            .sortedByDescending { it.updatedAt }
+                                            .take(10)
+                                        val favoriteCards = localCards.filter { it.isFavorite }
+                                        val reviewProgress = ReviewProgress(completed = 10, total = 15)
+
+                                        _uiState.value = DashboardUiState.Content(
+                                            statistics = Statistics(
+                                                totalCards = localCards.size,
+                                                favoriteCards = favoriteCards.size,
+                                                recentEdits = recentCards.size,
+                                                lastSyncTime = Clock.System.now().toEpochMilliseconds()
+                                            ),
+                                            recentCards = recentCards,
+                                            favoriteCards = favoriteCards,
+                                            lastSyncTime = Clock.System.now().toEpochMilliseconds(),
+                                            reviewProgress = reviewProgress,
+                                            showFocusReview = true,
+                                            error = "网络连接失败，显示本地数据"
+                                        )
+                                    } else {
+                                        // 本地也没有数据，显示错误
+                                        logger.warn { "No local data available" }
+                                        _uiState.value = DashboardUiState.Content(
+                                            statistics = Statistics(),
+                                            recentCards = emptyList(),
+                                            favoriteCards = emptyList(),
+                                            lastSyncTime = currentState.lastSyncTime,
+                                            error = errorMessage,
+                                            showFocusReview = false
+                                        )
+                                    }
+                                } catch (localError: Exception) {
+                                    logger.error(localError) { "Failed to load from local database" }
+                                    _uiState.value = DashboardUiState.Content(
+                                        statistics = Statistics(),
+                                        recentCards = emptyList(),
+                                        favoriteCards = emptyList(),
+                                        lastSyncTime = currentState.lastSyncTime,
+                                        error = errorMessage,
+                                        showFocusReview = false
+                                    )
+                                }
+                            }
+                        } else if (currentState is DashboardUiState.Content) {
+                            // Content 状态但没有数据，可能是网络错误
+                            _uiState.value = currentState.copy(
                                 error = errorMessage,
                                 isRefreshing = false
                             )
@@ -132,16 +198,62 @@ class DashboardViewModel(
             .catch { e ->
                 logger.error(e) { "Failed to load dashboard data: ${e.message}" }
                 val currentState = _uiState.value
-                _uiState.value = when (currentState) {
-                    is DashboardUiState.InitialLoading -> DashboardUiState.Content(
-                        statistics = Statistics(),
-                        recentCards = emptyList(),
-                        favoriteCards = emptyList(),
-                        lastSyncTime = currentState.lastSyncTime,
-                        error = e.message ?: "Failed to load data"
-                    )
 
-                    is DashboardUiState.Content -> currentState.copy(
+                // 网络错误时，尝试从本地数据库加载数据
+                if (currentState is DashboardUiState.InitialLoading) {
+                    logger.info { "Network error, attempting to load from local database" }
+                    // 尝试从本地加载数据（不触发网络请求）
+                    coroutineScope.launch {
+                        try {
+                            val localCards = cardRepository.getCards(userId)?.cards ?: emptyList()
+                            if (localCards.isNotEmpty()) {
+                                logger.info { "Loaded ${localCards.size} cards from local database" }
+                                val recentCards = localCards
+                                    .sortedByDescending { it.updatedAt }
+                                    .take(10)
+                                val favoriteCards = localCards.filter { it.isFavorite }
+                                val reviewProgress = ReviewProgress(completed = 10, total = 15)
+
+                                _uiState.value = DashboardUiState.Content(
+                                    statistics = Statistics(
+                                        totalCards = localCards.size,
+                                        favoriteCards = favoriteCards.size,
+                                        recentEdits = recentCards.size,
+                                        lastSyncTime = Clock.System.now().toEpochMilliseconds()
+                                    ),
+                                    recentCards = recentCards,
+                                    favoriteCards = favoriteCards,
+                                    lastSyncTime = Clock.System.now().toEpochMilliseconds(),
+                                    reviewProgress = reviewProgress,
+                                    showFocusReview = true,
+                                    error = "网络连接失败，显示本地数据"
+                                )
+                            } else {
+                                // 本地也没有数据，显示错误
+                                _uiState.value = DashboardUiState.Content(
+                                    statistics = Statistics(),
+                                    recentCards = emptyList(),
+                                    favoriteCards = emptyList(),
+                                    lastSyncTime = currentState.lastSyncTime,
+                                    error = e.message ?: "无法加载数据，请检查网络连接",
+                                    showFocusReview = false
+                                )
+                            }
+                        } catch (localError: Exception) {
+                            logger.error(localError) { "Failed to load from local database" }
+                            _uiState.value = DashboardUiState.Content(
+                                statistics = Statistics(),
+                                recentCards = emptyList(),
+                                favoriteCards = emptyList(),
+                                lastSyncTime = currentState.lastSyncTime,
+                                error = e.message ?: "无法加载数据",
+                                showFocusReview = false
+                            )
+                        }
+                    }
+                } else if (currentState is DashboardUiState.Content) {
+                    // Content 状态，只更新错误信息
+                    _uiState.value = currentState.copy(
                         error = e.message ?: "Failed to load data",
                         isRefreshing = false
                     )
@@ -242,5 +354,17 @@ class DashboardViewModel(
         if (currentState is DashboardUiState.Content) {
             _uiState.value = currentState.copy(viewType = viewType)
         }
+    }
+
+    fun dismissFocusReview() {
+        val currentState = _uiState.value
+        if (currentState is DashboardUiState.Content) {
+            _uiState.value = currentState.copy(showFocusReview = false)
+        }
+    }
+
+    fun startReview() {
+        logger.info { "Start review flow" }
+        // TODO: 导航到复习页面
     }
 }
