@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.card.di.cardModule
@@ -21,8 +22,12 @@ import tech.zhifu.app.myhub.feature.profile.di.profileModule
 import tech.zhifu.app.myhub.feature.settings.di.settingsModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
 import tech.zhifu.app.myhub.logger.di.loggerModule
+import tech.zhifu.app.myhub.logger.error
+import tech.zhifu.app.myhub.logger.info
+import tech.zhifu.app.myhub.logger.logger
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalStoreApi::class)
 fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
     /**
      * 应用级 CoroutineScope
@@ -32,10 +37,6 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
         private val job = SupervisorJob()
         override val coroutineContext: CoroutineContext
             get() = job + Dispatchers.Default
-
-        fun cancel() {
-            job.cancel()
-        }
     }
 
     val appScope = AppCoroutineScope()
@@ -50,8 +51,8 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
                     appName = "Myhub",
                     useAndroidLogger = true,
                 )
-            }, platformModule(),
-            // Data module dependencies
+            },
+            platformModule(),
             repositoryModule,
             bootstrapModule,
             settingsModule(),
@@ -71,13 +72,21 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
                 factory<CoroutineScope> {
                     CoroutineScope(Dispatchers.Default)
                 }
-            })
+            }
+        )
     }
 
     appScope.launch {
-        val userRepository = koinApplication.koin.get<UserRepository>()
-        if (userRepository.hasUser().not()) {
-            koinApplication.koin.get<Bootstrap>().initialize("default")
+        try {
+            val userRepository = koinApplication.koin.get<UserRepository>()
+            if (userRepository.hasUser().not()) {
+                logger.info { "First launch detected, initializing bootstrap..." }
+                koinApplication.koin.get<Bootstrap>().initialize("default")
+                logger.info { "Bootstrap initialization completed" }
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Bootstrap initialization failed" }
+            // 可以选择继续启动或抛出异常
         }
     }
 
@@ -88,8 +97,7 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             delay(100)
             koinApplication.koin.get<AnalyticsManager>().initialize()
         } catch (e: Exception) {
-            // 统计初始化失败不应影响应用启动
-            println("Failed to initialize analytics: ${e.message}")
+            logger.error(e) { "Failed to initialize analytics: ${e.message}" }
         }
     }
 }

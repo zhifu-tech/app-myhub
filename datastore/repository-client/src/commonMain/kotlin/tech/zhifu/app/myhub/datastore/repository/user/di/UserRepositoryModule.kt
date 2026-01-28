@@ -3,64 +3,45 @@ package tech.zhifu.app.myhub.datastore.repository.user.di
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
-import tech.zhifu.app.myhub.datastore.repository.store.StoreFactory
+import tech.zhifu.app.myhub.datastore.repository.store.createMutableStore
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.user.UserPreferencesSyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.user.UserStore
-import tech.zhifu.app.myhub.datastore.repository.user.UserStoreBookkeeper
-import tech.zhifu.app.myhub.datastore.repository.user.UserStoreCache
-import tech.zhifu.app.myhub.datastore.repository.user.UserStoreFetcher
-import tech.zhifu.app.myhub.datastore.repository.user.UserStoreSourceOfTruth
-import tech.zhifu.app.myhub.datastore.repository.user.UserStoreUpdater
 import tech.zhifu.app.myhub.datastore.repository.user.UserSyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.user.createUserStoreBookkeeper
 import tech.zhifu.app.myhub.datastore.repository.user.createUserStoreCache
 import tech.zhifu.app.myhub.datastore.repository.user.createUserStoreFetcher
 import tech.zhifu.app.myhub.datastore.repository.user.createUserStoreSourceOfTruth
 import tech.zhifu.app.myhub.datastore.repository.user.createUserStoreUpdater
+import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
 @OptIn(ExperimentalStoreApi::class)
 fun userRepositoryModule() = module {
-    factory<UserStoreCache> {
-        createUserStoreCache()
-    }
-    factory<UserStoreSourceOfTruth> {
-        createUserStoreSourceOfTruth(
-            localUserDataSource = get()
-        )
-    }
-    factory<UserStoreBookkeeper> {
-        createUserStoreBookkeeper(
-            bookkeeperStorage = get()
-        )
-    }
-    factory<UserStoreFetcher> {
-        createUserStoreFetcher(
-            remoteUserDataSource = get()
-        )
-    }
-    factory<UserStoreUpdater> {
-        createUserStoreUpdater(
-            remoteUserDataSource = get()
-        )
-    }
-    factory<UserStore> {
-        StoreFactory.createMutableStore(
-            cache = get(),
-            sourceOfTruth = get(),
-            bookkeeper = get(),
-            fetcher = get(),
-            updater = get(),
-        )
-    }
     single<UserRepository> {
+        val logger = logger("user-repo")
         UserRepositoryImpl(
-            store = get(),
             localUserDataSource = get(),
             syncRepository = get(),
+            store = createMutableStore(
+                cache = createUserStoreCache(),
+                sourceOfTruth = createUserStoreSourceOfTruth(
+                    localUserDataSource = get(),
+                    logger = logger,
+                ),
+                bookkeeper = createUserStoreBookkeeper(
+                    bookkeeperStorage = get()
+                ),
+                fetcher = createUserStoreFetcher(
+                    remoteUserDataSource = get()
+                ),
+                updater = createUserStoreUpdater(
+                    remoteUserDataSource = get(),
+                    logger = logger,
+                ),
+            ),
+            logger = logger
         )
     }
     factory<SyncChangeApplier>(

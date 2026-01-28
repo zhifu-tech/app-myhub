@@ -14,7 +14,6 @@ import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
 @OptIn(ExperimentalStoreApi::class)
@@ -22,7 +21,7 @@ class UserRepositoryImpl(
     private val store: UserStore,
     private val localUserDataSource: LocalUserDataSource,
     private val syncRepository: SyncRepository,
-    private val logger: Logger = logger("UserRepo")
+    private val logger: Logger,
 ) : UserRepository {
 
     // ==================== User 操作 ====================
@@ -73,6 +72,8 @@ class UserRepositoryImpl(
                 refresh = refresh
             )
         )
+
+    override fun streamUser(): Flow<User> = localUserDataSource.observeUser()
 
     // ==================== UserPreferences 操作 ====================
 

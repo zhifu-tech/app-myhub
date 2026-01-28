@@ -1,51 +1,57 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createUserStoreSourceOfTruth(
-    localUserDataSource: LocalUserDataSource
+    localUserDataSource: LocalUserDataSource,
+    logger: Logger,
 ): UserStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
+        logger.debug {
+            "reader called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
         when (key) {
             is UserStoreKey.ById -> flow {
-                try {
-                    // LocalUserDataSource 没有 observeUserById，使用 getUser
-                    val user = localUserDataSource.getUser(key.id)
-                    if (user != null) {
-                        emit(UserStoreData.UserData(user))
-                    } else {
-                        emit(null)
-                    }
-                } catch (_: Exception) {
+                val user = localUserDataSource.getUser(key.id)
+                if (user != null) {
+                    emit(UserStoreData.UserData(user))
+                } else {
                     emit(null)
                 }
             }
 
-            is UserStoreKey.PreferencesById -> {
-                localUserDataSource.observeUserPreferences(key.id).map { preferences ->
-                    UserStoreData.PreferencesData(preferences)
+            is UserStoreKey.PreferencesById -> flow {
+                val userPreferences = localUserDataSource.getUserPreferences(userId = key.id)
+                if (userPreferences != null) {
+                    emit(UserStoreData.PreferencesData(userPreferences))
+                } else {
+                    emit(null)
                 }
             }
         }
     },
     writer = { key, data ->
-        when {
-            key is UserStoreKey.ById && data is UserStoreData.UserData -> {
+        logger.debug {
+            "writer called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
+        when (key) {
+            is UserStoreKey.ById if data is UserStoreData.UserData -> {
                 localUserDataSource.insertUser(data.user)
             }
 
-            key is UserStoreKey.PreferencesById && data is UserStoreData.PreferencesData -> {
+            is UserStoreKey.PreferencesById if data is UserStoreData.PreferencesData -> {
                 localUserDataSource.insertUserPreferences(data.preferences)
             }
 
-            else -> {
-                // Store5 框架应该保证类型匹配，这里主要是防御性编程
-            }
+            else -> {}
         }
     },
     delete = { key ->
@@ -57,5 +63,4 @@ fun createUserStoreSourceOfTruth(
             }
         }
     },
-    deleteAll = { }
 )

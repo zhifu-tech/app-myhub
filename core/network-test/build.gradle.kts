@@ -16,7 +16,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.network)
-            api(libs.ktor.client.mock)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         commonTest.dependencies {

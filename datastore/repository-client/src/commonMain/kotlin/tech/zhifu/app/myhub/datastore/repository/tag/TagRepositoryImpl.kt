@@ -12,7 +12,9 @@ import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
+import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import kotlin.random.Random
@@ -52,14 +54,26 @@ class TagRepositoryImpl(
             logger.error(it) { "get tag for {tag:$tagId} from store failed" }
         }.getOrNull()
 
-    override suspend fun getTags(userId: String): TagStoreData? =
-        runCatching {
-            store.get<TagStoreKey, TagStoreData, StoreWriteResponse>(
-                key = TagStoreKey.ByUser(userId)
-            )
-        }.onFailure {
-            logger.error(it) { "get tags for {user:$userId} from store failed" }
-        }.getOrNull()
+    override suspend fun getTags(userId: String): TagStoreData {
+        val storeInstance = System.identityHashCode(store)
+        val storeType = store::class.qualifiedName
+        val key = TagStoreKey.ByUser(userId)
+        val keyType = key::class.qualifiedName
+        val keyInstance = System.identityHashCode(key)
+
+        logger.info {
+            "TagRepository.getTags: " +
+                "store=$storeType@$storeInstance, " +
+                "key=$key (type=$keyType, instance=$keyInstance), " +
+                "userId=$userId"
+        }
+
+        return store.get<TagStoreKey, TagStoreData, StoreWriteResponse>(
+            key = key
+        ).also {
+            logger.info { "TagRepository.getTags: result=$it" }
+        }
+    }
 
     override fun streamTag(tagId: String, refresh: Boolean): Flow<StoreReadResponse<TagStoreData>> =
         store.stream<StoreWriteResponse>(
@@ -85,12 +99,15 @@ class TagRepositoryImpl(
         )
 
     override suspend fun ensureTags(userId: String, tags: List<Tag>, needSync: Boolean): List<Tag> {
+        logger.debug { "ensure tags: $tags" }
         if (tags.isEmpty()) return emptyList()
 
         val existingTags = getTags(userId)?.tags ?: emptyList()
         val byId = existingTags.associateBy { it.id }
         val byName = existingTags.associateBy { it.name }
-
+        logger.debug { "existing tags: $existingTags" }
+        logger.debug { "byId: $byId" }
+        logger.debug { "byName: $byName" }
         return tags.map { tag ->
             val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get) ?: byName[tag.name]
             if (existing != null) {
@@ -103,7 +120,9 @@ class TagRepositoryImpl(
                     createdAt = now,
                     updatedAt = now
                 )
+                logger.debug { "new tag: $newTag" }
                 insertTag(newTag, needSync = needSync)
+                logger.debug { "inserted new tag: $newTag" }
                 newTag
             }
         }

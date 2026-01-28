@@ -1,50 +1,56 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
+import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createTagStoreSourceOfTruth(
-    localTagDataSource: LocalTagDataSource
+    localTagDataSource: LocalTagDataSource,
+    logger: Logger,
 ): TagStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
+        logger.debug {
+            "reader called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
         when (key) {
             is TagStoreKey.ById -> flow {
-                try {
-                    localTagDataSource.observeTag(key.id).collect { tag ->
-                        emit(TagStoreData.Single(tag))
-                    }
-                } catch (_: Exception) {
-                    emit(null)
+                localTagDataSource.observeTag(key.id).collect { tag ->
+                    emit(TagStoreData.Single(tag))
                 }
             }
 
-            is TagStoreKey.ByUser -> {
-                localTagDataSource.observeTags(key.userId).map { tags ->
-                    if (tags.isEmpty()) null
-                    else TagStoreData.Collection.fromTags(tags, key.userId)
+            is TagStoreKey.ByUser -> flow {
+                localTagDataSource.observeTags(key.userId).collect { tags ->
+                    emit(
+                        if (tags.isEmpty()) null as? TagStoreData.Collection?
+                        else TagStoreData.Collection.fromTags(tags, key.userId)
+                    )
                 }
             }
         }
     },
     writer = { key, data ->
-        when {
-            key is TagStoreKey.ById && data is TagStoreData.Single -> {
+        logger.debug {
+            "writer called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
+        when (key) {
+            is TagStoreKey.ById if data is TagStoreData.Single -> {
                 localTagDataSource.insertTag(data.tag)
             }
 
-            key is TagStoreKey.ByUser && data is TagStoreData.Collection -> {
+            is TagStoreKey.ByUser if data is TagStoreData.Collection -> {
                 data.tags.forEach { tag ->
                     localTagDataSource.insertTag(tag)
                 }
             }
 
-            else -> {
-                // Store5 框架应该保证类型匹配，这里主要是防御性编程
-            }
+            else -> {}
         }
     },
     delete = { key ->

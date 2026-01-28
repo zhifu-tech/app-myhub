@@ -8,11 +8,13 @@ import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
 import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
@@ -26,9 +28,12 @@ class CardRepositoryImpl(
 ) : CardRepository {
 
     override suspend fun insertCard(card: Card, needSync: Boolean) {
+        logger.debug { "insert card: $card" }
         // 1. 业务逻辑：确保 Tags 存在
-        val resolvedTags = tagRepository.ensureTags(card.userId, card.tags, needSync = needSync)
+        val resolvedTags: List<Tag> = tagRepository.ensureTags(card.userId, card.tags, needSync = needSync)
+        logger.debug { "resoved tags: $resolvedTags" }
         val updatedCard = card.copy(tags = resolvedTags)
+        logger.debug { "resolved tags: $resolvedTags" }
 
         // 2. 通过 Store 写入
         store.write(

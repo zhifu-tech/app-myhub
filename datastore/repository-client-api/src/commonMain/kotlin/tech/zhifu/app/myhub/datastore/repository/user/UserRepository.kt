@@ -17,6 +17,9 @@ interface UserRepository {
 
     suspend fun getUser(userId: String): UserStoreData?
 
+    @Deprecated("不能使用这个")
+    fun streamUser(): Flow<User>
+
     fun streamUser(userId: String, refresh: Boolean = false): Flow<StoreReadResponse<UserStoreData>>
 
     // ==================== UserPreferences 操作 ====================

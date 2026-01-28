@@ -41,6 +41,7 @@ class RemoteTagDataSourceImpl(
                         tagResponse.toDomain().copy(userId = userId)
                     }
                 }
+
                 else -> throw ApiException("Failed to fetch tags: ${response.status}")
             }
         } catch (e: Exception) {
@@ -57,6 +58,7 @@ class RemoteTagDataSourceImpl(
                     val tagResponse: TagResponse = response.body()
                     tagResponse.toDomain().copy(userId = userId)
                 }
+
                 HttpStatusCode.NotFound -> null
                 else -> throw ApiException("Failed to fetch tag: ${response.status}")
             }
@@ -82,6 +84,7 @@ class RemoteTagDataSourceImpl(
                     val tagResponse: TagResponse = response.body()
                     tagResponse.toDomain().copy(userId = userId)
                 }
+
                 else -> throw ApiException("Failed to create tag: ${response.status}")
             }
         } catch (e: Exception) {
@@ -106,6 +109,7 @@ class RemoteTagDataSourceImpl(
                     val tagResponse: TagResponse = response.body()
                     tagResponse.toDomain().copy(userId = userId)
                 }
+
                 HttpStatusCode.NotFound -> throw ApiException("Tag not found: $id")
                 else -> throw ApiException("Failed to update tag: ${response.status}")
             }
@@ -122,9 +126,11 @@ class RemoteTagDataSourceImpl(
                 HttpStatusCode.OK, HttpStatusCode.NoContent -> {
                     // 成功删除
                 }
+
                 HttpStatusCode.NotFound -> {
                     // 标签不存在，视为成功
                 }
+
                 else -> throw ApiException("Failed to delete tag: ${response.status}")
             }
         } catch (e: Exception) {

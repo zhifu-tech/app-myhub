@@ -5,7 +5,7 @@ import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 
 internal fun createCardStoreFetcher(
     remoteCardDataSource: RemoteCardDataSource
-): Fetcher<CardStoreKey, CardStoreData> = Fetcher.of { key ->
+): CardStoreFetcher = Fetcher.of { key ->
     when (key) {
         is CardStoreKey.ById -> {
             val card = remoteCardDataSource.getCardById(key.id)

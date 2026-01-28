@@ -5,7 +5,7 @@ import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.template.CardTemplateRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.logger.info
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import kotlin.random.Random
 
@@ -18,25 +18,31 @@ class Bootstrap(
     private val configBuilder: () -> BootstrapConfigBuilder,
 ) {
     suspend fun initialize(localeTag: String) {
-        logger.info { "Initializing bootstrap with locale tag: $localeTag" }
+        logger.debug { "Initializing bootstrap with locale tag: $localeTag" }
         val config = configBuilder().buildConfig(
             userId = generateUUId(),
             localeTag = localeTag,
         )
         userRepository.insertUser(config.user)
+        logger.debug { "Inserted user: ${config.user}" }
         userRepository.insertUserPreferences(config.userPreferences)
+        logger.debug { "Inserted user preferences: ${config.userPreferences}" }
         config.tags.forEach {
             tagRepository.insertTag(it)
         }
+        logger.debug { "Inserted tags: ${config.tags}" }
         config.collections.forEach {
             collectionRepository.insertCollection(it)
         }
+        logger.debug { "Inserted collections: ${config.collections}" }
         config.templates.forEach {
             cardTemplateRepository.insertTemplate(it, config.userId, needSync = false)
         }
+        logger.debug { "Inserted templates: ${config.templates}" }
         config.cards.forEach {
             cardRepository.insertCard(it, needSync = false)
         }
+        logger.debug { "Inserted cards: ${config.cards}" }
     }
 }
 

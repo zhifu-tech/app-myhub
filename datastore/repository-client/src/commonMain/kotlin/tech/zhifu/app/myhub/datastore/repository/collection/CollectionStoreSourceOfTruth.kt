@@ -1,50 +1,56 @@
 package tech.zhifu.app.myhub.datastore.repository.collection
 
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
+import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreSourceOfTruth(
-    localCollectionDataSource: LocalCollectionDataSource
+    localCollectionDataSource: LocalCollectionDataSource,
+    logger: Logger,
 ): CollectionStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
+        logger.debug {
+            "reader called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
         when (key) {
             is CollectionStoreKey.ById -> flow {
-                try {
-                    localCollectionDataSource.observeCollection(key.id).collect { collection ->
-                        emit(CollectionStoreData.Single(collection))
-                    }
-                } catch (_: Exception) {
-                    emit(null)
+                localCollectionDataSource.observeCollection(key.id).collect { collection ->
+                    emit(CollectionStoreData.Single(collection))
                 }
             }
 
-            is CollectionStoreKey.ByUser -> {
-                localCollectionDataSource.observeCollections(key.userId).map { collections ->
-                    if (collections.isEmpty()) null
-                    else CollectionStoreData.Items.fromCollections(collections, key.userId)
+            is CollectionStoreKey.ByUser -> flow {
+                localCollectionDataSource.observeCollections(key.userId).collect { collections ->
+                    emit(
+                        if (collections.isEmpty()) null
+                        else CollectionStoreData.Items.fromCollections(collections, key.userId)
+                    )
                 }
             }
         }
     },
     writer = { key, data ->
-        when {
-            key is CollectionStoreKey.ById && data is CollectionStoreData.Single -> {
+        logger.debug {
+            "writer called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
+        when (key) {
+            is CollectionStoreKey.ById if data is CollectionStoreData.Single -> {
                 localCollectionDataSource.insertCollection(data.collection)
             }
 
-            key is CollectionStoreKey.ByUser && data is CollectionStoreData.Items -> {
+            is CollectionStoreKey.ByUser if data is CollectionStoreData.Items -> {
                 data.collections.forEach { collection ->
                     localCollectionDataSource.insertCollection(collection)
                 }
             }
 
-            else -> {
-                // Store5 框架应该保证类型匹配，这里主要是防御性编程
-            }
+            else -> {}
         }
     },
     delete = { key ->

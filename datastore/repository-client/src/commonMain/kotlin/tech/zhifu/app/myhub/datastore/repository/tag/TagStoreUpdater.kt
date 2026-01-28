@@ -5,48 +5,56 @@ import org.mobilenativefoundation.store.store5.Updater
 import org.mobilenativefoundation.store.store5.UpdaterResult
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.network.NetworkException
 
 internal fun createTagStoreUpdater(
     remoteTagDataSource: RemoteTagDataSource,
-    logger: Logger = logger("TagStoreUpdater")
+    logger: Logger,
 ): TagStoreUpdater = Updater.by(
     post = { key, data ->
-        try {
-            when {
-                key is TagStoreKey.ById && data is TagStoreData.Single -> {
-                    val updatedTag = remoteTagDataSource.updateTag(key.id, data.tag, data.tag.userId)
-                    UpdaterResult.Success.Typed(
-                        StoreWriteResponse.Success.Typed(
-                            TagStoreData.Single(updatedTag)
+        logger.debug("updater") {
+            "post is called with key: $key (type=${key::class.qualifiedName}, " +
+                "data=$data, instance=${System.identityHashCode(key)}"
+        }
+        when (key) {
+            is TagStoreKey.ById if data is TagStoreData.Single -> {
+                val updatedTag = remoteTagDataSource.updateTag(
+                    id = key.id,
+                    tag = data.tag,
+                    userId = data.tag.userId,
+                )
+                UpdaterResult.Success.Typed(
+                    value = StoreWriteResponse.Success.Typed(
+                        value = TagStoreData.Single(
+                            tag = updatedTag
                         )
                     )
-                }
-
-                key is TagStoreKey.ByUser && data is TagStoreData.Collection -> {
-                    val updatedTags = data.tags.map { tag ->
-                        remoteTagDataSource.updateTag(tag.id, tag, tag.userId)
-                    }
-                    UpdaterResult.Success.Typed(
-                        StoreWriteResponse.Success.Typed(
-                            TagStoreData.Collection.fromTags(updatedTags, data.userId)
-                        )
-                    )
-                }
-
-                else -> {
-                    logger.error { "Unsupported key/data combination: key=${key::class}, data=${data::class}" }
-                    UpdaterResult.Error.Message("Unsupported operation: key and data type mismatch")
-                }
+                )
             }
-        } catch (e: NetworkException) {
-            logger.error(e) { "Network error during tag update: key=$key" }
-            UpdaterResult.Error.Exception(e)
-        } catch (e: Exception) {
-            logger.error(e) { "Unexpected error during tag update: key=$key" }
-            UpdaterResult.Error.Exception(e)
+
+            is TagStoreKey.ByUser if data is TagStoreData.Collection -> {
+                val updatedTags = data.tags.map { tag ->
+                    remoteTagDataSource.updateTag(
+                        id = tag.id,
+                        tag = tag,
+                        userId = tag.userId,
+                    )
+                }
+                UpdaterResult.Success.Typed(
+                    value = StoreWriteResponse.Success.Typed(
+                        value = TagStoreData.Collection.fromTags(
+                            tags = updatedTags,
+                            userId = data.userId,
+                        )
+                    )
+                )
+            }
+
+            else -> {
+                logger.error { "Unsupported key/data combination: key=${key::class}, data=${data::class}" }
+                UpdaterResult.Error.Message("Unsupported operation: key and data type mismatch")
+            }
         }
     }
 )

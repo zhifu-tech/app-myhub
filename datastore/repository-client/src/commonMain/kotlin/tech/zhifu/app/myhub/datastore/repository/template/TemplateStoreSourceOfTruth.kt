@@ -4,58 +4,59 @@ import kotlinx.coroutines.flow.flow
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createTemplateStoreSourceOfTruth(
-    localCardTemplateDataSource: LocalCardTemplateDataSource
+    localCardTemplateDataSource: LocalCardTemplateDataSource,
+    logger: Logger,
 ): TemplateStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
+        logger.debug {
+            "reader called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
         flow {
-            try {
-                when (key) {
-                    is TemplateStoreKey.ById -> {
-                        val templates = localCardTemplateDataSource.getTemplates()
-                        val template = templates.find { it.id == key.id }
-                        if (template != null) {
-                            emit(TemplateStoreData.Single(template))
-                        } else {
-                            emit(null)
-                        }
-                    }
-
-                    is TemplateStoreKey.All -> {
-                        val templates = localCardTemplateDataSource.getTemplates()
-                        if (templates.isEmpty()) {
-                            emit(null)
-                        } else {
-                            emit(TemplateStoreData.Collection.fromTemplates(templates))
-                        }
+            when (key) {
+                is TemplateStoreKey.ById -> {
+                    val templates = localCardTemplateDataSource.getTemplates()
+                    val template = templates.find { it.id == key.id }
+                    if (template != null) {
+                        emit(TemplateStoreData.Single(template))
+                    } else {
+                        emit(null)
                     }
                 }
-            } catch (_: Exception) {
-                emit(null)
+
+                is TemplateStoreKey.All -> {
+                    val templates = localCardTemplateDataSource.getTemplates()
+                    if (templates.isEmpty()) {
+                        emit(null)
+                    } else {
+                        emit(TemplateStoreData.Collection.fromTemplates(templates))
+                    }
+                }
             }
         }
     },
     writer = { key, data ->
-        when {
-            key is TemplateStoreKey.ById && data is TemplateStoreData.Single -> {
+        logger.debug {
+            "writer called with key: $key (type=${key::class.qualifiedName}, " +
+                "instance=${System.identityHashCode(key)}"
+        }
+        when (key) {
+            is TemplateStoreKey.ById if data is TemplateStoreData.Single -> {
                 localCardTemplateDataSource.insertTemplate(data.template)
             }
 
-            key is TemplateStoreKey.All && data is TemplateStoreData.Collection -> {
+            is TemplateStoreKey.All if data is TemplateStoreData.Collection -> {
                 data.templates.forEach { template ->
                     localCardTemplateDataSource.insertTemplate(template)
                 }
             }
 
-            else -> {
-                // Store5 框架应该保证类型匹配，这里主要是防御性编程
-            }
+            else -> {}
         }
     },
-    delete = { _ ->
-        // LocalCardTemplateDataSource 没有 delete 方法
-    },
-    deleteAll = { }
 )

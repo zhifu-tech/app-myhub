@@ -14,31 +14,23 @@ import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
 
 @OptIn(ExperimentalStoreApi::class)
-object StoreFactory {
-
-    fun <D : StoreData<String>> createIdentityConverter(): Converter<D, D, D> {
-        return Converter.Builder<D, D, D>()
-            .fromNetworkToLocal { it }
-            .fromOutputToLocal { it }
-            .build()
-    }
-
-    fun <K : StoreKey<String>, D : StoreData<String>> createMutableStore(
-        cache: Cache<K, D>,
-        sourceOfTruth: SourceOfTruth<K, D, D>,
-        bookkeeper: Bookkeeper<K>,
-        fetcher: Fetcher<K, D>,
-        updater: Updater<K, D, StoreWriteResponse>
-    ): MutableStore<K, D> {
-        return StoreBuilder.from(
-            memoryCache = cache,
-            sourceOfTruth = sourceOfTruth,
-            fetcher = fetcher,
-        ).toMutableStoreBuilder(
-            converter = createIdentityConverter<D>()
-        ).build(
-            updater = updater,
-            bookkeeper = bookkeeper
-        )
-    }
-}
+fun <K : StoreKey<String>, D : StoreData<String>> createMutableStore(
+    cache: Cache<K, D>,
+    sourceOfTruth: SourceOfTruth<K, D, D>,
+    bookkeeper: Bookkeeper<K>,
+    fetcher: Fetcher<K, D>,
+    updater: Updater<K, D, StoreWriteResponse>,
+    converter: Converter<D, D, D> = Converter.Builder<D, D, D>()
+        .fromNetworkToLocal { it }
+        .fromOutputToLocal { it }
+        .build()
+): MutableStore<K, D> = StoreBuilder.from(
+    memoryCache = cache,
+    sourceOfTruth = sourceOfTruth,
+    fetcher = fetcher,
+).toMutableStoreBuilder(
+    converter = converter,
+).build(
+    updater = updater,
+    bookkeeper = bookkeeper
+)

@@ -11,6 +11,7 @@ fun createUserStoreFetcher(
 ): UserStoreFetcher = Fetcher.of { key ->
     when (key) {
         is UserStoreKey.ById -> {
+            // FIXME:
             val user = remoteUserDataSource.getUser(key.id)
                 ?: throw NoSuchElementException("User not found: ${key.id}")
             UserStoreData.UserData(user)

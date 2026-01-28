@@ -16,25 +16,24 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.platform)
             implementation(projects.core.logger)
+            implementation(projects.core.network)
+            implementation(projects.core.platform)
+
             implementation(projects.datastore.model)
             implementation(projects.datastore.modelDto)
-            implementation(projects.core.network)
-
             implementation(projects.datastore.sync)
 
-            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         commonTest.dependencies {
+            implementation(projects.core.networkTest)
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
-
-            implementation(projects.datastore.model)
-
-            implementation(projects.core.networkTest)
         }
     }
 }

@@ -27,7 +27,7 @@ typealias CardStoreFetcher = Fetcher<CardStoreKey, CardStoreData>
 @OptIn(ExperimentalStoreApi::class)
 fun createCardStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.CARD
-): CardStoreCache = CardStoreCache(
+): CardStoreCache = StoreMultiCache(
     keyProvider = object : KeyProvider<String, CardStoreData.Single> {
         override fun fromCollection(
             key: StoreKey.Collection<String>,

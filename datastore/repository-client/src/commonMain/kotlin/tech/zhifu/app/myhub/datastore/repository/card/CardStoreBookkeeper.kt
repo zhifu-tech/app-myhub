@@ -3,7 +3,9 @@ package tech.zhifu.app.myhub.datastore.repository.card
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 
-internal fun createCardStoreBookkeeper(bookkeeperStorage: BookkeeperStorage): Bookkeeper<CardStoreKey> = Bookkeeper.by(
+internal fun createCardStoreBookkeeper(
+    bookkeeperStorage: BookkeeperStorage
+): CardStoreBookkeeper = Bookkeeper.by(
     getLastFailedSync = { key ->
         val keyString = when (key) {
             is CardStoreKey.ById -> "card:${key.id}"
