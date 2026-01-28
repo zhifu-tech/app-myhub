@@ -8,8 +8,11 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -17,122 +20,99 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.LaunchedEffect
-import androidx.window.core.layout.WindowSizeClass
-import tech.zhifu.app.myhub.datastore.model.domain.Collection
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.card.CardComponent
-import tech.zhifu.app.myhub.component.card.displayTitle
-import tech.zhifu.app.myhub.component.card.formatUpdatedTime
 import tech.zhifu.app.myhub.component.card.getContentPreview
 import tech.zhifu.app.myhub.component.card.typeIconColor
-import tech.zhifu.app.myhub.component.card.typeIconText
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
-import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_cards_to_review
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_days_ago
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_favorites
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_hours_ago
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_just_now
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_last_synced
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_minutes_ago
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_never_synced
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_cards_to_review
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recent_edits
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_total
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
-import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthExpanded
+import tech.zhifu.app.myhub.ui.isWidthLarge
 import tech.zhifu.app.myhub.ui.isWidthMedium
-import kotlin.time.Clock
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -146,7 +126,6 @@ fun DashboardScreen(
     onNavigateToLogin: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
 
     val snackbarHostState = remember { SnackbarHostState() }
     // 401 未授权时提示并跳转登录
@@ -164,6 +143,7 @@ fun DashboardScreen(
         sizeClass.isWidthCompact() -> 1
         sizeClass.isWidthMedium() -> 2
         sizeClass.isWidthExpanded() -> 3
+        sizeClass.isWidthLarge() -> 4
         else -> 3 // 默认值，实际上不会到达这里
     }
 
@@ -171,27 +151,11 @@ fun DashboardScreen(
 
     // 从 state 中获取数据（用于 AppBar 显示）
     val contentState = uiState as? DashboardUiState.Content
-    val recentEditsCount = /*contentState?.statistics?.recentEdits ?:*/ 0
-    val lastSyncTime = contentState?.lastSyncTime
     val isRefreshing = contentState?.isRefreshing ?: false
-
-    // 格式化最后同步时间
-    val syncTimeText = when {
-        lastSyncTime == null -> stringResource(Res.string.feature_dashboard_never_synced)
-        else -> {
-            val now = Clock.System.now().toEpochMilliseconds()
-            val diff = now - lastSyncTime
-            when {
-                diff < 60_000 -> stringResource(Res.string.feature_dashboard_just_now)
-                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, (diff / 60_000))
-                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, (diff / 3_600_000))
-                else -> stringResource(Res.string.feature_dashboard_days_ago, (diff / 86_400_000))
-            }
-        }
-    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             LargeFlexibleTopAppBar(
@@ -204,15 +168,21 @@ fun DashboardScreen(
                 },
                 subtitle = {
                     Row(
+                        modifier = Modifier.heightIn(max = 28.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (contentState?.reviewCardsCount ?: 0 > 0) {
-                                stringResource(Res.string.feature_dashboard_cards_to_review, contentState?.reviewCardsCount ?: 0)
+                            text = if ((contentState?.reviewCardsCount ?: 0) > 0) {
+                                stringResource(
+                                    Res.string.feature_dashboard_cards_to_review,
+                                    contentState?.reviewCardsCount ?: 0
+                                )
                             } else {
                                 stringResource(Res.string.feature_dashboard_no_cards_to_review)
                             },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -241,20 +211,7 @@ fun DashboardScreen(
                         }
                     }
                 },
-                titleHorizontalAlignment = Alignment.Start,
-                navigationIcon = {
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                            TooltipAnchorPosition.Above
-                        ),
-                        tooltip = { PlainTooltip { Text("Menu") } },
-                        state = rememberTooltipState(),
-                    ) {
-                        IconButton(onClick = { /* doSomething() */ }) {
-                            Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
-                        }
-                    }
-                },
+                navigationIcon = {},
                 actions = {
                     // 搜索按钮
                     TooltipBox(
@@ -331,50 +288,96 @@ fun DashboardScreen(
                         onRefresh = { viewModel.refresh() },
                         state = pullToRefreshState
                     ) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding),
-                            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(56.dp) // mb-14 = 56.dp
-                        ) {
-                            // Focus & Review 模块（如果显示）
-                            if (state.showFocusReview && state.reviewProgress.total > 0) {
-                                item {
-                                    FocusReviewModule(
-                                        reviewProgress = state.reviewProgress,
-                                        onStartReview = { viewModel.startReview() },
-                                        onDismiss = { viewModel.dismissFocusReview() },
+                        // Box 应用 innerPadding，使整块内容（含浮动模块）从 AppBar 下方开始，避免被遮挡
+                        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                            // 使用瀑布流：FullLine 放整行模块，卡片项自然形成瀑布流
+                            LazyVerticalStaggeredGrid(
+                                columns = StaggeredGridCells.Fixed(columns),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(
+                                    start = 32.dp,
+                                    end = 32.dp,
+                                    top = if (state.showFocusReview && state.reviewProgress.total > 0) 120.dp else 16.dp,
+                                    bottom = 16.dp
+                                ),
+                                verticalItemSpacing = 20.dp,
+                                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                            ) {
+                                // Asset Collections 模块
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    AssetCollectionsModule(
+                                        collections = state.collections,
+                                        onCollectionClick = { /* TODO: 导航到 Collection 详情 */ },
+                                        onViewAllClick = { /* TODO: 导航到所有 Collections */ },
+                                        onLoadMore = { viewModel.loadMoreCollections() },
+                                        isLoadingMore = state.isLoadingMoreCollections,
+                                        hasMore = state.hasMoreCollections,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 36.dp)
+                                    )
+                                }
+
+                                // Latest Captures 标题行
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    LatestCapturesTitleRow(
+                                        onViewAllClick = { /* TODO: 导航到全部 Captures */ },
+                                        modifier = Modifier.padding(bottom = 4.dp) // 与卡片区 24.dp
+                                    )
+                                }
+
+                                // Latest Captures 卡片：瀑布流
+                                items(
+                                    items = state.recentCards,
+                                    key = { it.id }
+                                ) { card ->
+                                    LatestCaptureCardItem(
+                                        card = card,
+                                        onCardClick = { onNavigateToCardDetail(card.id) },
+                                        onEdit = { viewModel.editCard(card.id) },
+                                        onFavorite = { viewModel.toggleFavorite(card.id) }
+                                    )
+                                }
+
+                                // New Capture 占位
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    NewCaptureCard(
+                                        onClick = { /* TODO: 导航到新建卡片页面 */ },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
+
+                                // Load more
+                                if (state.hasMoreCards) {
+                                    item(span = StaggeredGridItemSpan.FullLine) {
+                                        if (state.isLoadingMoreCards) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                            }
+                                        } else {
+                                            Box(modifier = Modifier.size(0.dp)) {
+                                                LaunchedEffect(Unit) { viewModel.loadMoreCards() }
+                                            }
+                                        }
+                                    }
+                                }
                             }
 
-                            // Asset Collections 模块
-                            item {
-                                AssetCollectionsModule(
-                                    collections = state.collections,
-                                    onCollectionClick = { /* TODO: 导航到 Collection 详情 */ },
-                                    onViewAllClick = { /* TODO: 导航到所有 Collections */ },
-                                    onLoadMore = { viewModel.loadMoreCollections() },
-                                    isLoadingMore = state.isLoadingMoreCollections,
-                                    hasMore = state.hasMoreCollections,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            // Latest Captures 模块
-                            item {
-                                LatestCapturesModule(
-                                    cards = state.recentCards,
-                                    onCardClick = { onNavigateToCardDetail(it.id) },
-                                    onEdit = { viewModel.editCard(it.id) },
-                                    onFavorite = { viewModel.toggleFavorite(it.id) },
-                                    onLoadMore = { viewModel.loadMoreCards() },
-                                    isLoadingMore = state.isLoadingMoreCards,
-                                    hasMore = state.hasMoreCards,
-                                    columns = columns,
-                                    modifier = Modifier.fillMaxWidth()
+                            // Focus & Review 模块：浮动在内容之上，位于 AppBar 下方（避免被遮挡），宽度包裹内容
+                            if (state.showFocusReview && state.reviewProgress.total > 0) {
+                                FocusReviewModule(
+                                    reviewProgress = state.reviewProgress,
+                                    onStartReview = { viewModel.startReview() },
+                                    onDismiss = { viewModel.dismissFocusReview() },
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(start = 32.dp, end = 32.dp, top = 16.dp)
+                                        .zIndex(1f)
                                 )
                             }
                         }
@@ -385,95 +388,12 @@ fun DashboardScreen(
     )
 }
 
-// ==================== Header Components ====================
-
-@Composable
-fun DashboardHeader(
-    recentEditsCount: Int,
-    lastSyncTime: Long?,
-    isLoading: Boolean,
-    onRefresh: () -> Unit
-) {
-    // 格式化最后同步时间
-    val syncTimeText = when {
-        lastSyncTime == null -> stringResource(Res.string.feature_dashboard_never_synced)
-        else -> {
-            val now = Clock.System.now().toEpochMilliseconds()
-            val diff = now - lastSyncTime
-            when {
-                diff < 60_000 -> stringResource(Res.string.feature_dashboard_just_now)
-                diff < 3_600_000 -> stringResource(Res.string.feature_dashboard_minutes_ago, (diff / 60_000))
-                diff < 86_400_000 -> stringResource(Res.string.feature_dashboard_hours_ago, (diff / 3_600_000))
-                else -> stringResource(Res.string.feature_dashboard_days_ago, (diff / 86_400_000))
-            }
-        }
-    }
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f), // backdrop-blur effect
-        tonalElevation = 0.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp) // px-6 py-4
-        ) {
-            // 统一布局：所有尺寸都使用水平布局，保持一致性
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(Res.string.feature_dashboard_good_evening),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = if (recentEditsCount > 0) {
-                            stringResource(Res.string.feature_dashboard_cards_to_review, recentEditsCount)
-                        } else {
-                            stringResource(Res.string.feature_dashboard_no_cards_to_review)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp) // mt-1
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp) // gap-3
-                ) {
-                    Text(
-                        text = stringResource(Res.string.feature_dashboard_last_synced, syncTimeText),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                    // 刷新按钮（带旋转动画）
-                    RefreshButton(
-                        isLoading = isLoading,
-                        onRefresh = onRefresh
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * 刷新按钮组件
- * 在加载时显示旋转动画并禁用按钮
- */
 @Composable
 private fun RefreshButton(
     isLoading: Boolean,
     onRefresh: () -> Unit
 ) {
-    // 根据加载状态使用不同的动画
+    // 根据加载状态使用不同的动画, 在加载时显示旋转动画并禁用按钮
     val rotationAngle = if (isLoading) {
         // 加载时使用无限旋转动画
         val infiniteTransition = rememberInfiniteTransition(label = "refresh_rotation")
@@ -511,719 +431,6 @@ private fun RefreshButton(
     }
 }
 
-// ==================== Toolbar Components ====================
-
-/**
- * 视图类型切换按钮组
- */
-@Composable
-private fun ViewTypeToggle(
-    currentViewType: ViewType,
-    onViewTypeChange: (ViewType) -> Unit
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.height(44.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            ViewTypeToggleButton(
-                viewType = ViewType.GRID,
-                icon = Icons.Default.GridView,
-                contentDescription = "Grid View",
-                isSelected = currentViewType == ViewType.GRID,
-                onClick = { onViewTypeChange(ViewType.GRID) }
-            )
-            ViewTypeToggleButton(
-                viewType = ViewType.LIST,
-                icon = Icons.AutoMirrored.Filled.ViewList,
-                contentDescription = "List View",
-                isSelected = currentViewType == ViewType.LIST,
-                onClick = { onViewTypeChange(ViewType.LIST) }
-            )
-        }
-    }
-}
-
-/**
- * 视图类型切换按钮
- */
-@Composable
-private fun ViewTypeToggleButton(
-    viewType: ViewType,
-    icon: ImageVector,
-    contentDescription: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        color = if (isSelected) {
-            MaterialTheme.colorScheme.surface
-        } else {
-            Color.Transparent
-        },
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.size(36.dp),
-        tonalElevation = if (isSelected) 1.dp else 0.dp
-    ) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun DashboardToolbar(
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-//    statistics: Statistics,
-    sizeClass: WindowSizeClass,
-    viewType: ViewType,
-    onViewTypeChange: (ViewType) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background,
-        tonalElevation = 0.dp
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // 搜索栏和工具栏行
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 搜索栏
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        modifier = Modifier
-                            .weight(1f, fill = true)
-                            .height(44.dp)
-                            .widthIn(min = if (sizeClass.isWidthCompact()) 150.dp else 200.dp),
-                        placeholder = {
-                            Text(
-                                text = stringResource(Res.string.feature_dashboard_search_placeholder),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.bodySmall
-                    )
-
-                    // 工具栏（统计信息和视图切换）
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 统计信息（仅3列时显示，与搜索栏同一行）
-                        // 2列时统计信息在Grid上方显示，不在这里显示
-                        if (sizeClass.isWidthAtLeastExpanded()) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surface,
-                                border = BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                                ),
-                                modifier = Modifier.height(44.dp)
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(Color(0xFF10b981)) // emerald-500
-                                        )
-                                        Text(
-                                            text = "0", //${statistics.totalCards} ${stringResource(Res.string.feature_dashboard_total)}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .width(1.dp)
-                                            .height(16.dp)
-                                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-                                    )
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(Color(0xFFf59e0b)) // amber-500
-                                        )
-                                        Text(
-                                            text = "0",//"${statistics.favoriteCards} ${stringResource(Res.string.feature_dashboard_favorites)}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // 视图切换
-                        ViewTypeToggle(
-                            currentViewType = viewType,
-                            onViewTypeChange = onViewTypeChange
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                thickness = 1.dp
-            )
-        }
-    }
-}
-
-// ==================== Statistics Components ====================
-
-/**
- * 统计卡片行（移动端：3列网格布局）
- *
- * HTML规则：grid grid-cols-3 gap-4 mb-8
- * - 3列网格布局
- * - gap-4 = 16.dp
- * - mb-8 = 32.dp (底部间距)
- */
-@Composable
-fun StatsCardsRow(
-//    statistics: Statistics,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp) // gap-4 = 16.dp
-    ) {
-        StatCard(
-            label = stringResource(Res.string.feature_dashboard_total),
-            value = "0", //"${statistics.totalCards}",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            label = stringResource(Res.string.feature_dashboard_recent_edits),
-            value = "0",//"${statistics.recentEdits}",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            label = stringResource(Res.string.feature_dashboard_favorites),
-            value = "0",// "${statistics.favoriteCards}",
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-/**
- * 统计卡片可滑动行（中型和扩展布局：横向滑动）
- */
-@Composable
-fun StatsCardsScrollableRow(
-//    statistics: Statistics
-) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(horizontal = 0.dp)
-    ) {
-        item {
-            StatCard(
-                label = stringResource(Res.string.feature_dashboard_total),
-                value = "0",//"${statistics.totalCards}",
-                modifier = Modifier.width(140.dp)
-            )
-        }
-        item {
-            StatCard(
-                label = stringResource(Res.string.feature_dashboard_recent_edits),
-                value = "0", //"${statistics.recentEdits}",
-                modifier = Modifier.width(140.dp)
-            )
-        }
-        item {
-            StatCard(
-                label = stringResource(Res.string.feature_dashboard_favorites),
-                value = "0",// "${statistics.favoriteCards}",
-                modifier = Modifier.width(140.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun StatCard(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-// ==================== View Components ====================
-
-/**
- * Grid 视图组件（瀑布流布局）
- *
- * 根据设计稿规则：
- * - 1列：统计卡片在 Grid 内部，作为第一个 item，随列表滚动
- * - 2列和3列：统计信息在工具栏中（已实现），Grid 内部不显示
- * - 使用 gap-6 (24.dp) 和 space-y-6 (24.dp)
- */
-@Composable
-fun DashboardGridView(
-    cards: List<Card>,
-    columns: Int,
-//    statistics: Statistics?,
-    sizeClass: WindowSizeClass,
-    onEdit: (Card) -> Unit,
-    onFavorite: (Card) -> Unit,
-    onCardClick: (Card) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // 直接使用 LazyVerticalStaggeredGrid，统计卡片作为第一个 item
-    // 注意：不能在 LazyColumn 中嵌套 LazyVerticalStaggeredGrid，会导致无限高度约束错误
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(columns),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp), // gap-6 = 24.dp
-        verticalItemSpacing = 24.dp, // space-y-6 = 24.dp
-        modifier = modifier
-    ) {
-//        // 统计卡片：1列和2列时在 Grid 内部，作为第一个 item，随列表滚动
-//        // 3列时统计信息在工具栏中显示，Grid 内部不显示
-//        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
-//            // 使用 item 让统计卡片占据整行（跨所有列）
-//            // 对于 LazyVerticalStaggeredGrid，使用 span 参数让 item 跨越多列
-//            item(span = StaggeredGridItemSpan.FullLine) {
-//                StatsCardsRow(
-//                    statistics = statistics,
-//                    modifier = Modifier.padding(
-//                        bottom = if (sizeClass.isWidthAtLeastExpanded()) 12.dp else 24.dp // 单列时缩小间距为1/2
-//                    )
-//                )
-//            }
-//        }
-
-        // 卡片列表
-        items(cards) { card ->
-            CardComponent(
-                card = card,
-                onEdit = { onEdit(card) },
-                onFavorite = { onFavorite(card) },
-                onCardClick = { onCardClick(card) }
-            )
-        }
-    }
-}
-
-/**
- * List 视图组件
- */
-@Composable
-fun DashboardListView(
-    cards: List<Card>,
-    columns: Int,
-//    statistics: Statistics?,
-    sizeClass: WindowSizeClass,
-    onEdit: (Card) -> Unit,
-    onFavorite: (Card) -> Unit,
-    onCardClick: (Card) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // 列表内容
-    LazyColumn(
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-    ) {
-//        // 统计卡片：1列和2列时在 List 内部，作为第一个 item，随列表滚动
-//        // 3列时统计信息在工具栏中显示，List 内部不显示
-//        if (statistics != null && !sizeClass.isWidthAtLeastExpanded()) {
-//            item {
-//                StatsCardsRow(
-//                    statistics = statistics,
-//                    modifier = Modifier.padding(
-//                        bottom = if (sizeClass.isWidthCompact()) 12.dp else 24.dp // 单列时缩小间距为1/2
-//                    )
-//                )
-//            }
-//        }
-
-        // 列表头部（仅在桌面端显示，在统计信息之后）
-        if (!sizeClass.isWidthCompact()) {
-            item {
-                ListViewHeader(sizeClass = sizeClass)
-            }
-        }
-
-        items(cards) { card ->
-            ListViewItem(
-                card = card,
-                sizeClass = sizeClass,
-                onEdit = { onEdit(card) },
-                onFavorite = { onFavorite(card) },
-                onCardClick = { onCardClick(card) }
-            )
-        }
-    }
-}
-
-// ==================== List View Components ====================
-
-/**
- * 列表头部（表头）
- */
-@Composable
-fun ListViewHeader(
-    sizeClass: WindowSizeClass,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        color = Color.Transparent
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Name & Content 列
-            Text(
-                text = "Name & Content",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(if (sizeClass.isWidthCompact()) 1f else 0.4f)
-            )
-
-            // Tags 列（桌面端显示）
-            if (!sizeClass.isWidthCompact()) {
-                Text(
-                    text = "Tags",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(0.3f)
-                )
-            }
-
-            // Last Modified 列（桌面端显示）
-            if (!sizeClass.isWidthCompact()) {
-                Text(
-                    text = "Last Modified",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(0.2f)
-                )
-            }
-
-            // Actions 列（桌面端显示）
-            if (!sizeClass.isWidthCompact()) {
-                Box(
-                    modifier = Modifier.weight(0.1f),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Text(
-                        text = "Actions",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-
-    // 分隔线
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .padding(horizontal = 24.dp)
-            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-    )
-}
-
-/**
- * 列表项组件
- */
-@Composable
-fun ListViewItem(
-    card: Card,
-    sizeClass: WindowSizeClass,
-    onEdit: (Card) -> Unit,
-    onFavorite: (Card) -> Unit,
-    onCardClick: (Card) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-
-    // 获取卡片显示信息（使用 Card 扩展方法）
-    // @Composable 函数需要提前定义，确保在 Composable 上下文中正确调用
-    val formattedDate = card.formatUpdatedTime()
-
-    // 多次使用的值提前定义，避免重复计算
-    val iconColor = card.typeIconColor
-
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { onCardClick(card) }
-            ),
-        shape = RoundedCornerShape(12.dp),
-        color = if (isHovered) {
-            MaterialTheme.colorScheme.surface
-        } else {
-            Color.Transparent
-        },
-        border = if (isHovered) {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-        } else {
-            BorderStroke(1.dp, Color.Transparent)
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 图标和标题/内容
-            Row(
-                modifier = Modifier.weight(if (sizeClass.isWidthCompact()) 1f else 0.4f),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 图标
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(iconColor.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = card.typeIconText,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = iconColor
-                        )
-                    }
-                }
-
-                // 标题和内容预览
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = card.displayTitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (isHovered) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                        maxLines = 1
-                    )
-                    Text(
-                        text = card.getContentPreview(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-            }
-
-            // Tags（桌面端显示）
-            if (!sizeClass.isWidthCompact()) {
-                Row(
-                    modifier = Modifier.weight(0.3f),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    card.tags.take(2).forEach { tag ->
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                            )
-                        ) {
-                            Text(
-                                text = tag.name,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // 最后修改时间
-            if (!sizeClass.isWidthCompact()) {
-                Text(
-                    text = formattedDate,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(0.2f)
-                )
-            }
-
-            // 操作按钮（桌面端显示）
-            if (!sizeClass.isWidthCompact()) {
-                val buttonAlpha = if (isHovered) 1f else 0.6f
-                Row(
-                    modifier = Modifier.weight(0.1f),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = { onFavorite(card) },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Favorite",
-                            tint = if (card.isFavorite) {
-                                Color(0xFFFFB020)
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = buttonAlpha)
-                            },
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    IconButton(
-                        onClick = { onEdit(card) },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = buttonAlpha),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-// ==================== Focus & Review Module ====================
-
-/**
- * Focus & Review 模块
- *
- * 根据设计图实现：
- * - 左侧：圆形进度指示器，显示 "10/15"
- * - 中间：文本 "focus & review" 和 "Start Review →" 按钮
- * - 右侧：关闭按钮（X）
- */
 @Composable
 fun FocusReviewModule(
     reviewProgress: ReviewProgress,
@@ -1232,7 +439,7 @@ fun FocusReviewModule(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.wrapContentWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
         ),
@@ -1241,7 +448,7 @@ fun FocusReviewModule(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .wrapContentWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -1255,7 +462,7 @@ fun FocusReviewModule(
 
             // 中间：文本和按钮
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.wrapContentWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
@@ -1271,7 +478,7 @@ fun FocusReviewModule(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.wrapContentWidth()
                 ) {
                     Text(
                         text = "Start Review",
@@ -1423,94 +630,109 @@ fun AssetCollectionsModule(
 
         Spacer(modifier = Modifier.height(24.dp)) // mb-6 = 24.dp
 
-        // Collection 卡片网格（不可使用 Lazy 布局，因本模块作为 LazyColumn 的 item，会触发无限高度约束）
-        val sizeClass = LocalWindowSizeClass.current
-        val gridColumns = when {
-            sizeClass.isWidthCompact() -> 1
-            sizeClass.isWidthMedium() -> 2
-            else -> 4
-        }
-        Column(
+        // 设计稿：横向一排 Collection 卡片（LazyRow），固定宽度 4:3，rounded-3xl
+        val cardWidth = 280.dp
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            contentPadding = PaddingValues(end = if (hasMore && isLoadingMore) 56.dp else 0.dp)
         ) {
-            for (row in collections.chunked(gridColumns)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    for (i in 0 until gridColumns) {
-                        if (i < row.size) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                CollectionCard(
-                                    collection = row[i],
-                                    onClick = { onCollectionClick(row[i]) },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
+            items(
+                items = collections,
+                key = { it.id }
+            ) { collection ->
+                CollectionCard(
+                    collection = collection,
+                    onClick = { onCollectionClick(collection) },
+                    modifier = Modifier.width(cardWidth)
+                )
             }
-            if (hasMore) {
-                if (isLoadingMore) {
+            if (hasMore && isLoadingMore) {
+                item {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .width(cardWidth)
+                            .height(250.dp)
                             .padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
-                } else {
-                    LaunchedEffect(Unit) {
-                        onLoadMore()
-                    }
                 }
             }
+        }
+        if (hasMore && !isLoadingMore) {
+            LaunchedEffect(Unit) { onLoadMore() }
         }
     }
 }
 
 /**
  * Collection 卡片组件
- * 根据设计稿实现：2x2 预览网格 + Collection 名称 + Assets 数量
+ * 设计稿像素级：卡片本体仅包含预览区（背景+细边框）；标题与数量在卡片下方、直接落在页面背景上，无独立背景/边框；整块可点击，hover 仅卡片抬起。
  */
 @Composable
 fun CollectionCard(
     collection: Collection,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    previewLines: List<String>? = null
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val liftY = animateFloatAsState(
+        targetValue = if (isHovered) -4f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "collection_lift"
+    )
     Column(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .hoverable(interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
     ) {
-        // 预览区域（2x2 网格）
-        Box(
+        // 卡片本体：仅预览区；hover 时选中光圈 ring-1 ring-primary/40（设计稿）
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(4f / 3f)
-                .clip(RoundedCornerShape(24.dp)) // rounded-3xl = 24.dp
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(12.dp) // p-3 = 12.dp
+                .graphicsLayer { translationY = liftY.value },
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(
+                1.dp,
+                if (isHovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                else MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            // 2x2 网格布局
-            if (collection.cards.isNotEmpty()) {
-                // 显示预览卡片（最多 3 条，显示为 2x2 网格）
-                val previewItems = collection.cards.take(3)
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    // 第一行：左侧大图（row-span-2），右侧小图
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(4f / 3f)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(12.dp)
+            ) {
+                val useLocalPreview = previewLines != null && previewLines.size >= 3
+                val pl = previewLines
+                val line0 =
+                    if (useLocalPreview && pl != null) pl[0] else collection.cards.getOrNull(0)?.getContentPreview(80)
+                        .orEmpty()
+                val line1 =
+                    if (useLocalPreview && pl != null) pl[1] else collection.cards.getOrNull(1)?.getContentPreview(30)
+                        .orEmpty()
+                val line2 =
+                    if (useLocalPreview && pl != null) pl[2] else collection.cards.getOrNull(2)?.getContentPreview(30)
+                        .orEmpty()
+                val hasPreview = useLocalPreview || collection.cards.isNotEmpty()
+                if (hasPreview) {
                     Row(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // 左侧大图（占据 2 行）
                         Box(
                             modifier = Modifier
                                 .weight(2f)
@@ -1518,116 +740,109 @@ fun CollectionCard(
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.surface)
                         ) {
-                            // 显示第一张预览卡片的内容预览
-                            if (previewItems.isNotEmpty()) {
+                            if (line0.isNotEmpty()) {
                                 Text(
-                                    text = previewItems[0].getContentPreview(50),
+                                    text = line0,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }
                         }
-                        // 右侧小图
-                        if (previewItems.size > 1) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
-                            ) {
-                                Text(
-                                    text = previewItems[1].getContentPreview(20),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(8.dp)
-                                )
-                            }
-                        }
-                    }
-                    // 第二行：右侧小图
-                    if (previewItems.size > 2) {
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Spacer(modifier = Modifier.weight(2f))
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxHeight()
+                                    .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(MaterialTheme.colorScheme.surface)
                             ) {
-                                Text(
-                                    text = previewItems[2].getContentPreview(20),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(8.dp)
-                                )
+                                if (line1.isNotEmpty()) {
+                                    Text(
+                                        text = line1,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                            ) {
+                                if (line2.isNotEmpty()) {
+                                    Text(
+                                        text = line2,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                }
-            } else {
-                // 如果没有预览卡片，显示占位符
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.size(48.dp)
-                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(12.dp)) // mb-3 = 12.dp
-
-        // Collection 名称和数量
-        Text(
-            text = collection.name,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 4.dp) // px-1 = 4.dp
-        )
-        Text(
-            text = "${collection.cardCount} Assets",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.padding(horizontal = 4.dp) // px-1 = 4.dp
-        )
+        // 标题与数量：在卡片下方，直接落在页面背景上，无边框、无卡片背景（设计稿像素级）
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = collection.name,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "${collection.cardCount} Assets",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        }
     }
 }
 
 // ==================== Latest Captures Module ====================
 
 /**
- * Latest Captures 模块
- * 根据设计稿实现：标题 + info 图标 + 瀑布流卡片 + New Capture 占位符
+ * Latest Captures 标题行：标题 + info + View All（用于瀑布流布局中 FullLine）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LatestCapturesModule(
-    cards: List<Card>,
-    onCardClick: (Card) -> Unit,
-    onEdit: (Card) -> Unit,
-    onFavorite: (Card) -> Unit,
-    onLoadMore: () -> Unit,
-    isLoadingMore: Boolean,
-    hasMore: Boolean,
-    columns: Int,
+fun LatestCapturesTitleRow(
+    onViewAllClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // 标题行
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1652,56 +867,68 @@ fun LatestCapturesModule(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp)) // mb-6 = 24.dp
-
-        // 卡片网格（不可使用 Lazy 布局，因本模块作为 LazyColumn 的 item，会触发无限高度约束）
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+        TextButton(
+            onClick = onViewAllClick,
+            contentPadding = PaddingValues(0.dp)
         ) {
-            for (row in cards.chunked(columns)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    for (i in 0 until columns) {
-                        if (i < row.size) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                CardComponent(
-                                    card = row[i],
-                                    onEdit = { onEdit(row[i]) },
-                                    onFavorite = { onFavorite(row[i]) },
-                                    onCardClick = { onCardClick(row[i]) }
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-            NewCaptureCard(
-                onClick = { /* TODO: 导航到新建卡片页面 */ },
-                modifier = Modifier.fillMaxWidth()
+            Text(
+                text = "View All",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary
             )
-            if (hasMore) {
-                if (isLoadingMore) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    }
-                } else {
-                    LaunchedEffect(Unit) {
-                        onLoadMore()
-                    }
-                }
-            }
         }
+    }
+}
+
+/**
+ * 单张 Latest Capture 卡片（左侧类型色条 + CardComponent），用于瀑布流一项
+ * 设计稿：单一边框，hover 时变色（border-slate-800/50 → hover:border-primary），避免光圈与固有边框双线
+ */
+@Composable
+fun LatestCaptureCardItem(
+    card: Card,
+    onCardClick: () -> Unit,
+    onEdit: () -> Unit,
+    onFavorite: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val accentColor = card.typeIconColor
+    val captureInteractionSource = remember { MutableInteractionSource() }
+    val captureHovered by captureInteractionSource.collectIsHoveredAsState()
+    val captureLiftY = animateFloatAsState(
+        targetValue = if (captureHovered) -4f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "capture_lift"
+    )
+    // 始终一层边框：未 hover = 灰（设计稿 border-slate-800/50），hover = primary，避免双光圈
+    val borderColor = if (captureHovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer { translationY = captureLiftY.value }
+            .border(2.dp, borderColor, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .hoverable(captureInteractionSource)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(
+                    accentColor,
+                    RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
+                )
+        )
+        CardComponent(
+            card = card,
+            onEdit = { onEdit() },
+            onFavorite = { onFavorite() },
+            onCardClick = { onCardClick() },
+            modifier = Modifier.weight(1f),
+            suppressDefaultBorder = true
+        )
     }
 }
 
@@ -1714,51 +941,60 @@ fun NewCaptureCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    val shape = RoundedCornerShape(16.dp)
     Card(
         modifier = modifier
-            .clickable(onClick = onClick)
-            .height(200.dp), // min-h-[200px]
+            .height(200.dp) // min-h-[200px]
+            .drawBehind {
+                drawRoundRect(
+                    color = borderColor,
+                    style = Stroke(
+                        width = 2.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(8.dp.toPx(), 8.dp.toPx()))
+                    ),
+                    cornerRadius = CornerRadius(16.dp.toPx())
+                )
+            }
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        shape = RoundedCornerShape(16.dp), // rounded-2xl = 16.dp
-        border = BorderStroke(
-            2.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-        )
+        shape = shape,
+        border = null
     ) {
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp), // p-6 = 24.dp
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // 加号图标
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp), // p-6 = 24.dp
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
             ) {
-                // 加号图标
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "New Capture",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp)) // gap-3 = 12.dp
-
-                // "New Capture" 文本
-                Text(
-                    text = "New Capture",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "New Capture",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
                 )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp)) // gap-3 = 12.dp
+
+            // "New Capture" 文本
+            Text(
+                text = "New Capture",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
         }
     }
 }

@@ -16,13 +16,15 @@ internal class WordCardComponent : CardComponent {
         onEdit: (Card) -> Unit,
         onFavorite: (Card) -> Unit,
         onCardClick: (Card) -> Unit,
-        modifier: Modifier
+        modifier: Modifier,
+        suppressDefaultBorder: Boolean
     ) = WordCard(
         card = card,
         onEdit = onEdit,
         onFavorite = onFavorite,
         onCardClick = onCardClick,
-        modifier = modifier
+        modifier = modifier,
+        suppressDefaultBorder = suppressDefaultBorder
     )
 
     @Composable

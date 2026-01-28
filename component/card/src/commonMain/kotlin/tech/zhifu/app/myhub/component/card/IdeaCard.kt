@@ -44,7 +44,8 @@ fun IdeaCard(
     onEdit: (Card) -> Unit = {},
     onFavorite: (Card) -> Unit = {},
     onCardClick: (Card) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    suppressDefaultBorder: Boolean = false
 ) {
     // 使用 LocalAppTheme 获取应用的主题设置
     val isDark = LocalAppTheme.current
@@ -69,7 +70,7 @@ fun IdeaCard(
         colors = CardDefaults.cardColors(
             containerColor = ideaBgColor
         ),
-        border = ideaBorder,
+        border = if (suppressDefaultBorder) null else ideaBorder,
         elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {

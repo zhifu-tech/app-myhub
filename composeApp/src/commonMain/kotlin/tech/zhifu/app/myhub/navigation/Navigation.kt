@@ -20,18 +20,24 @@ fun navAppStartKey(): NavKey = DashboardNavKey
 
 fun navAppKeySet(): Set<NavKey> = setOf(
     DashboardNavKey,
+    ExploreNavKey,
+    FavoritesNavKey,
     ProfileNavKey,
 )
 
 @Composable
 fun navAppKeyItemMap(): Map<NavKey, NavItem> = mapOf(
     DashboardNavKey to DashboardNavItem(),
+    ExploreNavKey to ExploreNavItem(),
+    FavoritesNavKey to FavoritesNavItem(),
     ProfileNavKey to ProfileNavItem(),
 )
 
 fun navKeySerializerModule() = SerializersModule {
     polymorphic(NavKey::class) {
         subclass(DashboardNavKey::class)
+        subclass(ExploreNavKey::class)
+        subclass(FavoritesNavKey::class)
         subclass(ProfileNavKey::class)
         subclass(CardNavKey::class)
     }
@@ -42,6 +48,8 @@ fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvide
     dashboardEntry(this@navEntryProvider) {
         this@navEntryProvider.navigate(ProfileNavKey)
     }
+    entry<ExploreNavKey> { PlaceholderScreen("Explore") }
+    entry<FavoritesNavKey> { PlaceholderScreen("Favorites") }
     profileEntry(this@navEntryProvider)
     cardEntry(this@navEntryProvider)
 }

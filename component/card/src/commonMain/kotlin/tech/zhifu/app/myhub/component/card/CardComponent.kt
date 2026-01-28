@@ -14,6 +14,8 @@ internal interface CardComponent {
         onFavorite: (Card) -> Unit = {},
         onCardClick: (Card) -> Unit = {},
         modifier: Modifier = Modifier,
+        /** 为 true 时卡片不绘制默认边框，由外层（如 Dashboard）统一绘制，避免双边框 */
+        suppressDefaultBorder: Boolean = false,
     )
 
     @Composable

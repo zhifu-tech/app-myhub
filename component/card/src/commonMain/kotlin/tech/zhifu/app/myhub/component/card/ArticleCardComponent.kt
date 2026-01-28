@@ -15,13 +15,15 @@ internal class ArticleCardComponent : CardComponent {
         onEdit: (Card) -> Unit,
         onFavorite: (Card) -> Unit,
         onCardClick: (Card) -> Unit,
-        modifier: Modifier
+        modifier: Modifier,
+        suppressDefaultBorder: Boolean
     ) = ArticleCard(
         card = card,
         onEdit = onEdit,
         onFavorite = onFavorite,
         onCardClick = onCardClick,
-        modifier = modifier
+        modifier = modifier,
+        suppressDefaultBorder = suppressDefaultBorder
     )
 
     @Composable

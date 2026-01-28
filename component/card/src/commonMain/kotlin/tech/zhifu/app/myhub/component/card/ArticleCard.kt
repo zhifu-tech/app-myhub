@@ -45,7 +45,8 @@ fun ArticleCard(
     onEdit: (Card) -> Unit = {},
     onFavorite: (Card) -> Unit = {},
     onCardClick: (Card) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    suppressDefaultBorder: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -74,7 +75,7 @@ fun ArticleCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = CardStyles.defaultBorder(),
+        border = if (suppressDefaultBorder) null else CardStyles.defaultBorder(),
         elevation = CardStyles.cardElevation(isHovered)
     ) {
         Box {

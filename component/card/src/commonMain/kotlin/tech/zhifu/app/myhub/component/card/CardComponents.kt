@@ -48,8 +48,9 @@ fun CardComponent(
     onFavorite: (Card) -> Unit = {},
     onCardClick: (Card) -> Unit = {},
     modifier: Modifier = Modifier,
+    suppressDefaultBorder: Boolean = false,
 ) = card.toComponent()
-    .CardComponent(card, onEdit, onFavorite, onCardClick, modifier)
+    .CardComponent(card, onEdit, onFavorite, onCardClick, modifier, suppressDefaultBorder)
 
 /**
  * 获取卡片的显示标题

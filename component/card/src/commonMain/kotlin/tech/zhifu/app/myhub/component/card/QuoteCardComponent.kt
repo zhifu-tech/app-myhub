@@ -17,13 +17,15 @@ internal class QuoteCardComponent : CardComponent {
         onEdit: (Card) -> Unit,
         onFavorite: (Card) -> Unit,
         onCardClick: (Card) -> Unit,
-        modifier: Modifier
+        modifier: Modifier,
+        suppressDefaultBorder: Boolean
     ) = QuoteCard(
         card = card,
         onEdit = onEdit,
         onFavorite = onFavorite,
         onCardClick = onCardClick,
         modifier = modifier,
+        suppressDefaultBorder = suppressDefaultBorder
     )
 
     @Composable

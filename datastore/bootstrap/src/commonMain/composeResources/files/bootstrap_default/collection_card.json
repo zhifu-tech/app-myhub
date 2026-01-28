@@ -1,67 +1,15 @@
 [
-  {
-    "collectionId": "collection-001",
-    "cardId": "card-001",
-    "createdAt": "2024-01-01T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-001",
-    "cardId": "card-007",
-    "createdAt": "2024-01-01T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-001",
-    "cardId": "card-009",
-    "createdAt": "2024-01-07T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-001",
-    "cardId": "card-010",
-    "createdAt": "2024-01-08T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-002",
-    "cardId": "card-002",
-    "createdAt": "2024-01-02T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-002",
-    "cardId": "card-008",
-    "createdAt": "2024-01-02T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-003",
-    "cardId": "card-004",
-    "createdAt": "2024-01-04T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-003",
-    "cardId": "card-011",
-    "createdAt": "2024-01-09T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-003",
-    "cardId": "card-video-001",
-    "createdAt": "2024-01-11T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-004",
-    "cardId": "card-003",
-    "createdAt": "2024-01-03T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-004",
-    "cardId": "card-005",
-    "createdAt": "2024-01-05T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-004",
-    "cardId": "card-006",
-    "createdAt": "2024-01-06T00:00:00Z"
-  },
-  {
-    "collectionId": "collection-004",
-    "cardId": "card-012",
-    "createdAt": "2024-01-10T00:00:00Z"
-  }
+  {"collectionId": "collection-001", "cardId": "card-001", "createdAt": "2024-01-10T00:00:00Z"},
+  {"collectionId": "collection-001", "cardId": "card-009", "createdAt": "2024-01-09T00:00:00Z"},
+  {"collectionId": "collection-001", "cardId": "card-010", "createdAt": "2024-01-08T00:00:00Z"},
+  {"collectionId": "collection-001", "cardId": "card-007", "createdAt": "2024-01-07T00:00:00Z"},
+  {"collectionId": "collection-002", "cardId": "card-002", "createdAt": "2024-01-10T00:00:00Z"},
+  {"collectionId": "collection-002", "cardId": "card-008", "createdAt": "2024-01-09T00:00:00Z"},
+  {"collectionId": "collection-003", "cardId": "card-011", "createdAt": "2024-01-11T00:00:00Z"},
+  {"collectionId": "collection-003", "cardId": "card-004", "createdAt": "2024-01-10T00:00:00Z"},
+  {"collectionId": "collection-003", "cardId": "card-video-001", "createdAt": "2024-01-09T00:00:00Z"},
+  {"collectionId": "collection-004", "cardId": "card-012", "createdAt": "2024-01-10T00:00:00Z"},
+  {"collectionId": "collection-004", "cardId": "card-006", "createdAt": "2024-01-06T00:00:00Z"},
+  {"collectionId": "collection-004", "cardId": "card-005", "createdAt": "2024-01-05T00:00:00Z"},
+  {"collectionId": "collection-004", "cardId": "card-003", "createdAt": "2024-01-03T00:00:00Z"}
 ]

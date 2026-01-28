@@ -1,10 +1,12 @@
 package tech.zhifu.app.myhub
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -102,26 +104,46 @@ private fun AppContent(
             else -> NavigationSuiteType.WideNavigationRailCollapsed
         }
 
-        NavigationSuiteScaffold(
-            state = navSuitState,
-            navigationSuiteType = navSuitType,
-            navigationItems = {
-                NavigationItems(
-                    appState = appState,
-                    items = navAppKeyItemMap(),
-                    currentKey = appState.navigationState.currentAppKey,
-                    navSuitType = navSuitType,
-                    onNavigate = navigator::navigate
-                )
-            },
-            primaryActionContent = {
-                PrimaryActionContent(navSuitType = navSuitType)
-            }
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            NavDisplay(
-                entries = entries,
-                sceneStrategy = sceneStrategy,
-                onBack = navigator::goBack
+            NavigationSuiteScaffold(
+                state = navSuitState,
+                navigationSuiteType = navSuitType,
+                navigationItems = {
+                    NavigationItems(
+                        appState = appState,
+                        items = navAppKeyItemMap(),
+                        currentKey = appState.navigationState.currentAppKey,
+                        navSuitType = navSuitType,
+                        onNavigate = navigator::navigate
+                    )
+                },
+                primaryActionContent = {
+                    PrimaryActionContent()
+                }
+            ) {
+                NavDisplay(
+                    entries = entries,
+                    sceneStrategy = sceneStrategy,
+                    onBack = navigator::goBack
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrimaryActionContent() {
+    Column (Modifier.padding(start = 20.dp)) {
+        FloatingActionButton(
+            onClick = { /* Logo，可扩展为回到首页等 */ },
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.AutoStories,
+                contentDescription = null,
+                modifier = Modifier.size(28.dp)
             )
         }
     }
@@ -155,40 +177,5 @@ private fun NavigationItems(
                 )
             }
         )
-    }
-}
-
-@Composable
-private fun PrimaryActionContent(
-    navSuitType: NavigationSuiteType
-) {
-    when {
-        navSuitType.toString().contains("NavigationRail") -> {
-            Box(Modifier.padding(start = 20.dp)) {
-                FloatingActionButton(
-                    onClick = {},
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoStories,
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-
-        else -> {
-            Box(Modifier.padding(start = 20.dp)) {
-                FloatingActionButton(
-                    onClick = {},
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoStories,
-                        contentDescription = null
-                    )
-                }
-            }
-        }
     }
 }

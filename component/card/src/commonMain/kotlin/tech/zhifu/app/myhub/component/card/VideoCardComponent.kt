@@ -13,13 +13,15 @@ internal class VideoCardComponent : CardComponent {
         onEdit: (Card) -> Unit,
         onFavorite: (Card) -> Unit,
         onCardClick: (Card) -> Unit,
-        modifier: Modifier
+        modifier: Modifier,
+        suppressDefaultBorder: Boolean
     ) = VideoCard(
         card = card,
         onEdit = onEdit,
         onFavorite = onFavorite,
         onCardClick = onCardClick,
-        modifier = modifier
+        modifier = modifier,
+        suppressDefaultBorder = suppressDefaultBorder
     )
 
     @Composable
