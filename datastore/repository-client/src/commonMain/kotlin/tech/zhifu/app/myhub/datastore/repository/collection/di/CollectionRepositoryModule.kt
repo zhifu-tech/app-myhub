@@ -22,6 +22,7 @@ fun collectionRepositoryModule() = module {
         val logger = logger("collection-repo")
         CollectionRepositoryImpl(
             syncRepository = get(),
+            localCollectionDataSource = get(),
             store = createMutableStore(
                 cache = createCollectionStoreCache(),
                 sourceOfTruth = createCollectionStoreSourceOfTruth(
@@ -32,7 +33,8 @@ fun collectionRepositoryModule() = module {
                     bookkeeperStorage = get()
                 ),
                 fetcher = createCollectionStoreFetcher(
-                    remoteCollectionDataSource = get()
+                    remoteCollectionDataSource = get(),
+                    logger = logger
                 ),
                 updater = createCollectionStoreUpdater(
                     remoteCollectionDataSource = get(),

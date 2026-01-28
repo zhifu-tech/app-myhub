@@ -23,7 +23,6 @@ typealias CardStoreBookkeeper = Bookkeeper<CardStoreKey>
 typealias CardStoreUpdater = Updater<CardStoreKey, CardStoreData, StoreWriteResponse>
 typealias CardStoreFetcher = Fetcher<CardStoreKey, CardStoreData>
 
-
 @OptIn(ExperimentalStoreApi::class)
 fun createCardStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.CARD
@@ -37,7 +36,11 @@ fun createCardStoreCache(
         override fun fromSingle(
             key: StoreKey.Single<String>,
             value: CardStoreData.Single
-        ): StoreKey.Collection<String> = CardStoreKey.ByUser(value.card.userId)
+        ): StoreKey.Collection<String> = CardStoreKey.ByUser(
+            userId = value.card.userId,
+            page = 1,
+            pageSize = 20
+        )
     },
     singlesCache = CacheBuilder<StoreKey.Single<String>, CardStoreData.Single>()
         .maximumSize(config.singleCacheSize.toLong())

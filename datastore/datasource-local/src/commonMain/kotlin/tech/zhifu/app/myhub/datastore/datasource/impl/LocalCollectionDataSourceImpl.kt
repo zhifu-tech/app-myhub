@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.datasource.impl
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
@@ -9,12 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
-import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
-import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.database.Collection as DbCollection
+import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
+import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.Collection
+import kotlin.time.Instant
 
 class LocalCollectionDataSourceImpl(
-    private val database: MyHubDatabase
+    private val database: MyHubDatabase,
 ) : LocalCollectionDataSource {
 
     override suspend fun insertCollection(collection: Collection) {
@@ -59,14 +62,39 @@ class LocalCollectionDataSourceImpl(
             .selectCollectionById(collectionId)
             .asFlow()
             .mapToOne(Dispatchers.Default)
-            .map(DbCollection::toDomain)
+            .map { it.toDomain() }
     }
 
-    override suspend fun getCollections(userId: String): List<Collection> {
-        return database.collectionQueries
-            .selectCollectionsByUserId(userId)
+    override suspend fun getCollections(
+        userId: String,
+        page: Int,
+        pageSize: Int
+    ): List<Collection> {
+        val offset = (page - 1) * pageSize
+
+        val pagedCollections = database.collectionQueries
+            .selectCollectionsByUserIdPaged(
+                user_id = userId,
+                limit = pageSize.toLong(),
+                offset = offset.toLong()
+            )
             .awaitAsList()
-            .map(DbCollection::toDomain)
+
+        if (pagedCollections.isEmpty()) {
+            return emptyList()
+        }
+
+        val collectionIds = pagedCollections.map { it.id }
+        val cardCounts = getCollectionCardCounts(collectionIds)
+        val previewCardsMap = collectionIds.associateWith { getCollectionPreviewCards(it) }
+
+        return pagedCollections.map { dbCollection ->
+            val collection = dbCollection.toDomain()
+            collection.copy(
+                cardCount = cardCounts[collection.id] ?: 0,
+                cards = previewCardsMap[collection.id] ?: emptyList()
+            )
+        }
     }
 
     override fun observeCollections(userId: String): Flow<List<Collection>> {
@@ -74,7 +102,7 @@ class LocalCollectionDataSourceImpl(
             .selectCollectionsByUserId(userId)
             .asFlow()
             .mapToList(Dispatchers.Default)
-            .map { collections -> collections.map(DbCollection::toDomain) }
+            .map { collections -> collections.map { it.toDomain() } }
     }
 
     override suspend fun deleteCollection(collectionId: String) {
@@ -83,5 +111,53 @@ class LocalCollectionDataSourceImpl(
 
     override suspend fun deleteCollections(userId: String) {
         database.collectionQueries.deleteCollectionsByUserId(userId)
+    }
+
+    override suspend fun getCollectionPreviewCards(collectionId: String): List<Card> {
+        val cardIds: List<String> = database.collection_cardQueries
+            .selectCollectionPreviewCardIds(collection_id = collectionId)
+            .awaitAsList()
+
+        if (cardIds.isEmpty()) {
+            return emptyList()
+        }
+
+        val tagRows = database.card_tagQueries
+            .selectTagsByCardIds(cardIds)
+            .awaitAsList()
+        val tagsByCardId = tagRows.groupBy { it.card_id }
+            .mapValues { entry -> entry.value.map { it.toDomain() } }
+
+        return cardIds.mapNotNull { cardId ->
+            val fullCard = database.card_with_metadataQueries
+                .selectCardWithMetadataByCardId(cardId)
+                .awaitAsList()
+                .firstOrNull() ?: return@mapNotNull null
+            fullCard.toDomain(tagsByCardId[cardId].orEmpty())
+        }
+    }
+
+    override suspend fun getCollectionCardCounts(collectionIds: List<String>): Map<String, Int> {
+        if (collectionIds.isEmpty()) {
+            return emptyMap()
+        }
+        return collectionIds.associateWith { id ->
+            database.collection_cardQueries
+                .selectCollectionCardCount(collection_id = id)
+                .awaitAsOne()
+                .toInt()
+        }
+    }
+
+    override suspend fun insertCollectionCard(
+        collectionId: String,
+        cardId: String,
+        createdAt: Instant
+    ) {
+        database.collection_cardQueries.insertCollectionCard(
+            collection_id = collectionId,
+            card_id = cardId,
+            created_at = createdAt.toString()
+        )
     }
 }

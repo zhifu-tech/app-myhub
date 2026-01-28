@@ -8,7 +8,9 @@ interface CardRepository {
 
     suspend fun insertCard(card: Card, needSync: Boolean = true)
 
-    suspend fun getCards(userId: String): CardStoreData?
+    suspend fun getCards(userId: String, page: Int, pageSize: Int): CardStoreData?
+
+    suspend fun getCards(cardIds: List<String>): CardStoreData?
 
     suspend fun getCard(cardId: String): CardStoreData?
 
@@ -22,4 +24,6 @@ interface CardRepository {
 
     suspend fun clearCard(cardId: String)
     suspend fun clearCards(userId: String)
+
+    suspend fun getReviewProgress(userId: String): tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 }

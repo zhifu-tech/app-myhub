@@ -40,6 +40,7 @@ fun repositoryCardModule() = module {
             ),
             syncRepository = get(),
             tagRepository = get(),
+            localCardDataSource = get(),
         )
     }
     factory<SyncChangeApplier>(

@@ -12,8 +12,15 @@ class CollectionRepositoryImpl(
     private val localDataSource: LocalCollectionDataSource
 ) : CollectionRepository {
 
-    override suspend fun getCollections(userId: String): List<Collection> {
-        return localDataSource.getCollections(userId)
+    override suspend fun getCollections(userId: String, page: Int, pageSize: Int): List<Collection> {
+//        val dbCollection = localDataSource.getCollection2()
+        // 如果指定了分页参数，使用分页查询
+        if (page != null && pageSize != null) {
+            return localDataSource.getCollections(userId, page, pageSize)
+        }
+        // 否则返回所有集合（使用默认分页参数，但获取所有数据需要特殊处理）
+        // 为了获取所有数据，使用一个很大的 pageSize
+        return localDataSource.getCollections(userId, page = 1, pageSize = Int.MAX_VALUE)
     }
 
     override suspend fun getCollectionById(collectionId: String): Collection? {

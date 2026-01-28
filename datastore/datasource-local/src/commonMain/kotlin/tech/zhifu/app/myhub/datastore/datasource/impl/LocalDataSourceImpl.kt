@@ -7,6 +7,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataCode
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataIdea
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataQuote
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataTodo
+import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataVideo
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataWord
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
@@ -18,6 +19,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.isCode
 import tech.zhifu.app.myhub.datastore.model.domain.isIdea
 import tech.zhifu.app.myhub.datastore.model.domain.isQuote
 import tech.zhifu.app.myhub.datastore.model.domain.isTodo
+import tech.zhifu.app.myhub.datastore.model.domain.isVideo
 import tech.zhifu.app.myhub.datastore.model.domain.isWord
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -26,9 +28,9 @@ internal typealias DbUser = tech.zhifu.app.myhub.datastore.database.User
 internal typealias DbCurrentUser = tech.zhifu.app.myhub.datastore.database.SelectCurrentUser
 internal typealias DbUserPreferences = tech.zhifu.app.myhub.datastore.database.User_preferences
 internal typealias DbTag = tech.zhifu.app.myhub.datastore.database.Tag
-internal typealias DbCollection = tech.zhifu.app.myhub.datastore.database.Collection
 internal typealias DbCard = tech.zhifu.app.myhub.datastore.database.Card_with_metadata_view
 internal typealias DbCardTemplate = tech.zhifu.app.myhub.datastore.database.Card_template
+internal typealias DbCollection = tech.zhifu.app.myhub.datastore.database.Collection
 
 private fun String?.toInstant(def: Instant = Clock.System.now()) =
     this?.let { Instant.parse(it) } ?: def
@@ -90,6 +92,14 @@ internal fun DbCard.toDomain(
             pronunciation = word_pronunciation,
             definition = word_definition.orEmpty(),
             example = word_example
+        )
+
+        card_type.isVideo -> CardMetadataVideo(
+            cardId = card_id,
+            videoUrl = video_video_url.orEmpty(),
+            thumbnailUrl = video_thumbnail_url,
+            durationSeconds = video_duration_seconds?.toInt(),
+            platform = video_platform
         )
 
         else -> null

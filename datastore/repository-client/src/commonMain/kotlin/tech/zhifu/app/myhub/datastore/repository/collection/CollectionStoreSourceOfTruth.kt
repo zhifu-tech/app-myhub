@@ -25,12 +25,15 @@ fun createCollectionStoreSourceOfTruth(
             }
 
             is CollectionStoreKey.ByUser -> flow {
-                localCollectionDataSource.observeCollections(key.userId).collect { collections ->
-                    emit(
-                        if (collections.isEmpty()) null
-                        else CollectionStoreData.Items.fromCollections(collections, key.userId)
-                    )
-                }
+                val pagedCollections = localCollectionDataSource.getCollections(
+                    userId = key.userId,
+                    page = key.page,
+                    pageSize = key.pageSize
+                )
+                emit(
+                    if (pagedCollections.isEmpty()) null
+                    else CollectionStoreData.Items.fromCollections(pagedCollections, key.userId)
+                )
             }
         }
     },

@@ -7,12 +7,14 @@ import tech.zhifu.app.myhub.component.card.CodeCardComponent
 import tech.zhifu.app.myhub.component.card.IdeaCardComponent
 import tech.zhifu.app.myhub.component.card.QuoteCardComponent
 import tech.zhifu.app.myhub.component.card.TodoCardComponent
+import tech.zhifu.app.myhub.component.card.VideoCardComponent
 import tech.zhifu.app.myhub.component.card.WordCardComponent
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_ARTICLE
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_CODE
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_IDEA
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_QUOTE
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_TODO
+import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_VIDEO
 import tech.zhifu.app.myhub.datastore.model.domain.CARD_TYPE_WORD
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
 
@@ -34,7 +36,8 @@ val cardModule = module {
             CARD_TYPE_CODE to CodeCardComponent(),
             CARD_TYPE_IDEA to IdeaCardComponent(),
             CARD_TYPE_WORD to WordCardComponent(),
-            CARD_TYPE_TODO to TodoCardComponent()
+            CARD_TYPE_TODO to TodoCardComponent(),
+            CARD_TYPE_VIDEO to VideoCardComponent()
         )
     }
 }

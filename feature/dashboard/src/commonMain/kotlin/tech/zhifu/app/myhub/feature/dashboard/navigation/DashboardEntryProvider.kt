@@ -8,13 +8,15 @@ import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavKey
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 fun EntryProviderScope<NavKey>.dashboardEntry(
-    navigator: AppNavigator
+    navigator: AppNavigator,
+    onNavigateToLogin: () -> Unit
 ) {
     entry<DashboardNavKey>(
 //        metadata =
     ) {
         DashboardScreen(
             onNavigateToCardDetail = navigator::navigateToCardDetail,
+            onNavigateToLogin = onNavigateToLogin,
         )
     }
 }

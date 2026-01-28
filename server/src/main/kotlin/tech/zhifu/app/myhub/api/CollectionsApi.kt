@@ -32,13 +32,20 @@ import tech.zhifu.app.myhub.service.CollectionService
 fun Route.collectionsApi(collectionService: CollectionService) {
     authenticate("auth-bearer") {
         route("/api/collections") {
-            // GET /api/collections - 获取用户的所有卡集
+            // GET /api/collections - 获取用户的卡集列表（支持分页）
             get {
                 try {
                     // 从认证中获取 userId
                     val userId = call.getCurrentUserId()
 
-                    val collections = collectionService.getCollections(userId)
+                    val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                    val pageSize = call.request.queryParameters["pageSize"]?.toIntOrNull() ?: 20
+
+                    val collections = collectionService.getCollections(
+                        userId = userId,
+                        page = page,
+                        pageSize = pageSize
+                    )
                     call.respond(HttpStatusCode.OK, collections)
                 } catch (e: UnauthorizedException) {
                     throw e

@@ -41,8 +41,8 @@ fun Route.cardsApi(cardService: CardService) {
                     // 从认证中获取 userId
                     val userId = call.getCurrentUserId()
 
-                    val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-                    val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 20
+                    val page = call.request.queryParameters["page"]?.toIntOrNull()
+                    val limit = call.request.queryParameters["limit"]?.toIntOrNull()
                     val type = call.request.queryParameters["type"]
                     val isFavorite = call.request.queryParameters["isFavorite"]?.toBoolean()
 

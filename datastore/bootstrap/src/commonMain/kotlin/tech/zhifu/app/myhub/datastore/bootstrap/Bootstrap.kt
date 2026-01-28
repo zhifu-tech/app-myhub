@@ -43,6 +43,11 @@ class Bootstrap(
             cardRepository.insertCard(it, needSync = false)
         }
         logger.debug { "Inserted cards: ${config.cards}" }
+
+        config.collectionCards.forEach {
+            collectionRepository.insertCollectionCard(it)
+        }
+        logger.debug { "Inserted collection cards: ${config.collectionCards}" }
     }
 }
 

@@ -11,5 +11,8 @@ data class Collection(
     val description: String? = null,
     val userId: String,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+
+    val cardCount: Int = 0,
+    val cards: List<Card> = emptyList()
 )

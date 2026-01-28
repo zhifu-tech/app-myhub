@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
 /**
  * 统计信息
@@ -11,17 +12,6 @@ data class Statistics(
     val recentEdits: Int = 0,
     val lastSyncTime: Long? = null
 )
-
-/**
- * 复习进度信息
- */
-data class ReviewProgress(
-    val completed: Int = 0,
-    val total: Int = 0
-) {
-    val progress: Float
-        get() = if (total > 0) completed.toFloat() / total.toFloat() else 0f
-}
 
 /**
  * 视图类型枚举
@@ -63,7 +53,20 @@ sealed class DashboardUiState {
         val isRefreshing: Boolean = false,  // 刷新时仍显示数据
         val error: String? = null,         // 错误时仍显示数据
         val reviewProgress: ReviewProgress = ReviewProgress(), // 复习进度
-        val showFocusReview: Boolean = true // 是否显示 Focus & Review 模块
+        val showFocusReview: Boolean = true, // 是否显示 Focus & Review 模块
+        // 新增字段
+        val collections: List<tech.zhifu.app.myhub.datastore.model.domain.Collection> = emptyList(),
+        val collectionCardCounts: Map<String, Int> = emptyMap(), // collectionId -> cardCount
+        val reviewCardsCount: Int = 0, // 待复习卡片数量
+        // 分页相关字段
+        val hasMoreCards: Boolean = false,
+        val isLoadingMoreCards: Boolean = false,
+        val cardsPage: Int = 1,
+        val cardsPageSize: Int = 20,
+        val hasMoreCollections: Boolean = false,
+        val isLoadingMoreCollections: Boolean = false,
+        val collectionsPage: Int = 1,
+        val collectionsPageSize: Int = 10
     ) : DashboardUiState()
 }
 

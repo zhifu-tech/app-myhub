@@ -7,7 +7,9 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
+import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
+import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
@@ -20,6 +22,7 @@ import tech.zhifu.app.myhub.sync.SyncEntityType
 class CollectionRepositoryImpl(
     private val store: CollectionStore,
     private val syncRepository: SyncRepository,
+    private val localCollectionDataSource: LocalCollectionDataSource,
     private val logger: Logger = logger("CollectionRepo")
 ) : CollectionRepository {
 
@@ -50,14 +53,15 @@ class CollectionRepositoryImpl(
             logger.error(it) { "get collection for {collection:$collectionId} from store failed" }
         }.getOrNull()
 
-    override suspend fun getCollections(userId: String): CollectionStoreData? =
-        runCatching {
+    override suspend fun getCollections(userId: String, page: Int, pageSize: Int): CollectionStoreData? {
+        return runCatching {
             store.get<CollectionStoreKey, CollectionStoreData, StoreWriteResponse>(
-                key = CollectionStoreKey.ByUser(userId)
+                key = CollectionStoreKey.ByUser(userId, page, pageSize)
             )
         }.onFailure {
             logger.error(it) { "get collections for {user:$userId} from store failed" }
         }.getOrNull()
+    }
 
     override fun streamCollection(
         collectionId: String,
@@ -73,7 +77,7 @@ class CollectionRepositoryImpl(
     override fun streamCollections(userId: String, refresh: Boolean): Flow<StoreReadResponse<CollectionStoreData>> =
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.cached(
-                key = CollectionStoreKey.ByUser(userId),
+                key = CollectionStoreKey.ByUser(userId, page = 1, pageSize = 10),
                 refresh = refresh
             )
         )
@@ -87,6 +91,14 @@ class CollectionRepositoryImpl(
             entityType = SyncEntityType.Collection,
             entityId = collectionId,
             payload = collection,
+        )
+    }
+
+    override suspend fun insertCollectionCard(collectionCard: CollectionCard) {
+        localCollectionDataSource.insertCollectionCard(
+            collectionId = collectionCard.collectionId,
+            cardId = collectionCard.cardId,
+            createdAt = collectionCard.createdAt
         )
     }
 }

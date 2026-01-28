@@ -9,7 +9,7 @@ interface CollectionRepository {
     /**
      * 获取指定用户的卡集列表
      */
-    suspend fun getCollections(userId: String): List<Collection>
+    suspend fun getCollections(userId: String, page: Int, pageSize: Int): List<Collection>
 
     /**
      * 根据 ID 获取卡集

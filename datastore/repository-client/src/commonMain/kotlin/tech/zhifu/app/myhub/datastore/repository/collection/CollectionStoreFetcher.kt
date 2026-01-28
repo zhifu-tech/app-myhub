@@ -3,10 +3,12 @@ package tech.zhifu.app.myhub.datastore.repository.collection
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Fetcher
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCollectionDataSource
+import tech.zhifu.app.myhub.logger.Logger
 
 @OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreFetcher(
-    remoteCollectionDataSource: RemoteCollectionDataSource
+    remoteCollectionDataSource: RemoteCollectionDataSource,
+    logger: Logger
 ): CollectionStoreFetcher = Fetcher.of { key ->
     when (key) {
         is CollectionStoreKey.ById -> {
@@ -19,7 +21,11 @@ fun createCollectionStoreFetcher(
         }
 
         is CollectionStoreKey.ByUser -> {
-            val collections = remoteCollectionDataSource.getCollections(key.userId)
+            val collections = remoteCollectionDataSource.getCollections(
+                userId = key.userId,
+                page = key.page,
+                pageSize = key.pageSize
+            )
             CollectionStoreData.Items.fromCollections(collections, key.userId)
         }
     }

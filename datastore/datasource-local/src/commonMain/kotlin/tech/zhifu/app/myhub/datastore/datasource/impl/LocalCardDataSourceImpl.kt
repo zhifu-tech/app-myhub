@@ -16,11 +16,13 @@ import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.model.domain.articleMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.codeMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.ideaMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.quoteMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.todoMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.videoMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.wordMetadata
 
 class LocalCardDataSourceImpl(
@@ -111,6 +113,16 @@ class LocalCardDataSourceImpl(
                     example = metadata.example
                 )
             }
+
+            card.videoMetadata?.let { metadata ->
+                database.card_metadata_videoQueries.insertVideoMetadata(
+                    card_id = card.id,
+                    video_url = metadata.videoUrl,
+                    thumbnail_url = metadata.thumbnailUrl,
+                    duration_seconds = metadata.durationSeconds?.toLong(),
+                    platform = metadata.platform
+                )
+            }
         }
     }
 
@@ -142,25 +154,6 @@ class LocalCardDataSourceImpl(
         }
     }
 
-    override suspend fun getCards(userId: String): List<Card> {
-        val cards = database.card_with_metadataQueries
-            .selectCardWithMetadataByUserId(userId)
-            .awaitAsList()
-        if (cards.isEmpty()) {
-            return emptyList()
-        }
-        val cardIds = cards.map { it.card_id }
-
-        val tagRows = database.card_tagQueries
-            .selectTagsByCardIds(cardIds)
-            .awaitAsList()
-
-        val tagsByCardId = tagRows.groupBy { it.card_id }
-            .mapValues { entry -> entry.value.map { it.toDomain() } }
-        return cards.map { card ->
-            card.toDomain(tagsByCardId[card.card_id].orEmpty())
-        }
-    }
 
     override suspend fun getCards(
         userId: String,
@@ -250,5 +243,46 @@ class LocalCardDataSourceImpl(
 
     override suspend fun deleteCards(userId: String) {
         database.cardQueries.deleteCardsByUserId(userId)
+    }
+
+    override suspend fun getUnreviewedCards(userId: String): List<Card> {
+        // selectUnreviewedCards 返回的是 Card 行，需要转换为完整的 Card 对象
+        val cardRows = database.user_cardQueries
+            .selectUnreviewedCards(userId)
+            .awaitAsList()
+
+        if (cardRows.isEmpty()) {
+            return emptyList()
+        }
+
+        val cardIds = cardRows.map { it.id }
+
+        // 从 card_with_metadata 获取完整卡片信息
+        val cards = cardIds.mapNotNull { cardId ->
+            val cardRow = database.card_with_metadataQueries
+                .selectCardWithMetadataByCardId(cardId)
+                .awaitAsList()
+                .firstOrNull()
+                ?: return@mapNotNull null
+
+            val tags = database.card_tagQueries
+                .selectTagsByCardId(cardId)
+                .awaitAsList()
+                .map { it.toDomain() }
+
+            cardRow.toDomain(tags)
+        }
+
+        return cards
+    }
+
+    override suspend fun getReviewProgress(userId: String): ReviewProgress {
+        val progress = database.user_cardQueries
+            .selectReviewProgress(user_id = userId)
+            .awaitAsOne()
+        return ReviewProgress(
+            completed = progress.completed.toInt(),
+            total = progress.total_count.toInt()
+        )
     }
 }

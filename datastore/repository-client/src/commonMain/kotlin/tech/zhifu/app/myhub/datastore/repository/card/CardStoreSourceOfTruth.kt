@@ -24,13 +24,30 @@ internal fun createCardStoreSourceOfTruth(
                 }
             }
 
-            is CardStoreKey.ByUser -> flow {
-                localCardDataSource.observeCards(key.userId).collect { cards ->
-                    emit(
-                        if (cards.isEmpty()) null
-                        else CardStoreData.Collection.fromCards(cards, key.userId)
-                    )
+            is CardStoreKey.ByIds -> flow {
+                val cards = key.ids.mapNotNull { id ->
+                    localCardDataSource.getCard(id)
                 }
+                emit(
+                    if (cards.isEmpty()) null
+                    else CardStoreData.CollectionIds(
+                        items = cards.map { CardStoreData.Single(it) },
+                        ids = key.ids
+                    )
+                )
+            }
+
+            is CardStoreKey.ByUser -> flow {
+                // 使用分页查询获取卡片
+                val pagedCards = localCardDataSource.getCards(
+                    userId = key.userId,
+                    page = key.page,
+                    limit = key.pageSize
+                )
+                emit(
+                    if (pagedCards.isEmpty()) null
+                    else CardStoreData.Collection.fromCards(pagedCards, key.userId)
+                )
             }
         }
     },
@@ -42,6 +59,12 @@ internal fun createCardStoreSourceOfTruth(
         when (key) {
             is CardStoreKey.ById if data is CardStoreData.Single -> {
                 localCardDataSource.insertCard(data.card)
+            }
+
+            is CardStoreKey.ByIds if data is CardStoreData.CollectionIds -> {
+                data.cards.forEach { card ->
+                    localCardDataSource.insertCard(card)
+                }
             }
 
             is CardStoreKey.ByUser if data is CardStoreData.Collection -> {
@@ -56,6 +79,7 @@ internal fun createCardStoreSourceOfTruth(
     delete = { key ->
         when (key) {
             is CardStoreKey.ById -> localCardDataSource.deleteCard(key.id)
+            is CardStoreKey.ByIds -> key.ids.forEach { localCardDataSource.deleteCard(it) }
             is CardStoreKey.ByUser -> localCardDataSource.deleteCards(key.userId)
         }
     },

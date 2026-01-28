@@ -28,14 +28,18 @@ class CardService(
      */
     suspend fun getCards(
         userId: String,
-        page: Int = 1,
-        limit: Int = 20,
+        page: Int? = null,
+        limit: Int? = null,
         type: String? = null,
         isFavorite: Boolean? = null
     ): PaginatedResponse<CardResponse> {
-        // 验证分页参数
-        require(page > 0) { "Page must be greater than 0" }
-        require(limit in 1..100) { "Limit must be between 1 and 100" }
+        // 验证分页参数（如果提供了）
+        if (page != null) {
+            require(page > 0) { "Page must be greater than 0" }
+        }
+        if (limit != null) {
+            require(limit in 1..100) { "Limit must be between 1 and 100" }
+        }
 
         val cards = cardRepository.getCards(
             userId = userId,
@@ -44,20 +48,28 @@ class CardService(
             type = type,
             isFavorite = isFavorite
         )
+        
+        // 如果未指定分页，返回所有数据（total = cards.size）
+        val actualPage = page ?: 1
+        val actualLimit = limit ?: cards.size
 
-        val total = cardRepository.countCards(
-            userId = userId,
-            type = type,
-            isFavorite = isFavorite
-        )
+        val total = if (page != null && limit != null) {
+            cardRepository.countCards(
+                userId = userId,
+                type = type,
+                isFavorite = isFavorite
+            )
+        } else {
+            cards.size.toLong()
+        }
 
         return PaginatedResponse(
             data = cards.map { it.toResponse() },
             pagination = PaginationInfo(
-                page = page,
-                limit = limit,
+                page = actualPage,
+                limit = actualLimit,
                 total = total,
-                totalPages = ((total + limit - 1) / limit).toInt()
+                totalPages = if (actualLimit > 0) ((total + actualLimit - 1) / actualLimit).toInt() else 1
             )
         )
     }

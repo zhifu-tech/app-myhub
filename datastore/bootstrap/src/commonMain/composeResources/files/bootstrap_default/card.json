@@ -106,5 +106,14 @@
     "userId": "user-001",
     "createdAt": "2024-01-10T00:00:00Z",
     "updatedAt": "2024-01-10T00:00:00Z"
+  },
+  {
+    "id": "card-video-001",
+    "type": "video",
+    "title": "The Future of Generative AI",
+    "content": "A comprehensive overview of generative AI technologies and their impact on various industries.",
+    "userId": "user-001",
+    "createdAt": "2024-01-11T00:00:00Z",
+    "updatedAt": "2024-01-11T00:00:00Z"
   }
 ]

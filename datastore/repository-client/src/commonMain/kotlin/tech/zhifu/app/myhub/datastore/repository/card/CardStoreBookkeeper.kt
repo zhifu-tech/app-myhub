@@ -9,6 +9,7 @@ internal fun createCardStoreBookkeeper(
     getLastFailedSync = { key ->
         val keyString = when (key) {
             is CardStoreKey.ById -> "card:${key.id}"
+            is CardStoreKey.ByIds -> "cards:ids:${key.ids.sorted().joinToString(",")}"
             is CardStoreKey.ByUser -> "cards:${key.userId}"
         }
         bookkeeperStorage.getLastFailedSync(keyString)
@@ -16,6 +17,7 @@ internal fun createCardStoreBookkeeper(
     setLastFailedSync = { key, timestamp ->
         val keyString = when (key) {
             is CardStoreKey.ById -> "card:${key.id}"
+            is CardStoreKey.ByIds -> "cards:ids:${key.ids.sorted().joinToString(",")}"
             is CardStoreKey.ByUser -> "cards:${key.userId}"
         }
         bookkeeperStorage.setLastFailedSync(keyString, timestamp)
@@ -23,6 +25,7 @@ internal fun createCardStoreBookkeeper(
     clear = { key ->
         val keyString = when (key) {
             is CardStoreKey.ById -> "card:${key.id}"
+            is CardStoreKey.ByIds -> "cards:ids:${key.ids.sorted().joinToString(",")}"
             is CardStoreKey.ByUser -> "cards:${key.userId}"
         }
         bookkeeperStorage.clearFailedSync(keyString)

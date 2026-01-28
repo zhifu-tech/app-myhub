@@ -39,7 +39,9 @@ fun navKeySerializerModule() = SerializersModule {
 
 @Composable
 fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvider {
-    dashboardEntry(this@navEntryProvider)
+    dashboardEntry(this@navEntryProvider) {
+        this@navEntryProvider.navigate(ProfileNavKey)
+    }
     profileEntry(this@navEntryProvider)
     cardEntry(this@navEntryProvider)
 }

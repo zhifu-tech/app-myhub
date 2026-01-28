@@ -8,6 +8,7 @@ fun dashboardModule() = module {
     factory {
         DashboardViewModel(
             cardRepository = get(),
+            collectionRepository = get(),
             userRepository = get(),
             coroutineScope = get(),
         )

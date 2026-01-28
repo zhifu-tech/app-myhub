@@ -7,6 +7,7 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
+import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
@@ -24,6 +25,7 @@ class CardRepositoryImpl(
     private val store: CardStore,
     private val syncRepository: SyncRepository,
     private val tagRepository: TagRepository,
+    private val localCardDataSource: LocalCardDataSource,
     private val logger: Logger = logger("CardRepo")
 ) : CardRepository {
 
@@ -54,14 +56,26 @@ class CardRepositoryImpl(
         }
     }
 
-    override suspend fun getCards(userId: String): CardStoreData? =
-        runCatching {
+    override suspend fun getCards(userId: String, page: Int, pageSize: Int): CardStoreData? {
+        return runCatching {
             store.get<CardStoreKey, CardStoreData, StoreWriteResponse>(
-                key = CardStoreKey.ByUser(userId)
+                key = CardStoreKey.ByUser(userId, page, pageSize)
             )
         }.onFailure {
             logger.error(it) { "get cards for {user:$userId} from store failed" }
         }.getOrNull()
+    }
+
+    override suspend fun getCards(cardIds: List<String>): CardStoreData {
+        return store.get<CardStoreKey, CardStoreData, StoreWriteResponse>(
+            key = CardStoreKey.ByIds(cardIds)
+        )
+    }
+
+
+    override suspend fun getReviewProgress(userId: String): tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress {
+        return localCardDataSource.getReviewProgress(userId)
+    }
 
     override suspend fun getCard(cardId: String): CardStoreData? =
         runCatching {
@@ -75,7 +89,7 @@ class CardRepositoryImpl(
     override fun streamCards(userId: String, refresh: Boolean): Flow<StoreReadResponse<CardStoreData>> =
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.cached(
-                key = CardStoreKey.ByUser(userId),
+                key = CardStoreKey.ByUser(userId, page = 1, pageSize = 20),
                 refresh = refresh
             )
         )
@@ -91,7 +105,7 @@ class CardRepositoryImpl(
     override suspend fun fetchCards(userId: String): Flow<StoreReadResponse<CardStoreData>> =
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.fresh(
-                key = CardStoreKey.ByUser(userId)
+                key = CardStoreKey.ByUser(userId, page = 1, pageSize = 20)
             )
         )
 
@@ -115,8 +129,9 @@ class CardRepositoryImpl(
     }
 
     override suspend fun clearCards(userId: String) {
-        getCards(userId)?.cards ?: return
-        store.clear(key = CardStoreKey.ByUser(userId))
+        val cardsData = getCards(userId, page = 1, pageSize = 1)
+        cardsData?.cards ?: return
+        store.clear(key = CardStoreKey.ByUser(userId, page = 1, pageSize = 1))
 
         syncRepository.recordDeleteOperation(
             userId = userId,

@@ -36,7 +36,11 @@ fun createCollectionStoreCache(
         override fun fromSingle(
             key: StoreKey.Single<String>,
             value: CollectionStoreData.Single
-        ): StoreKey.Collection<String> = CollectionStoreKey.ByUser(value.collection.userId)
+        ): StoreKey.Collection<String> = CollectionStoreKey.ByUser(
+            userId = value.collection.userId,
+            page = 1,
+            pageSize = 10
+        )
     },
     singlesCache = CacheBuilder<StoreKey.Single<String>, CollectionStoreData.Single>()
         .maximumSize(config.singleCacheSize.toLong())

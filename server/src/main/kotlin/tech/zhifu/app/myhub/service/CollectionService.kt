@@ -18,10 +18,18 @@ class CollectionService(
     private val collectionRepository: CollectionRepository
 ) {
     /**
-     * 获取用户的所有卡集
+     * 获取用户的卡集列表（支持分页）
+     * @param userId 用户 ID
+     * @param page 页码（从 1 开始），如果为 null 则返回所有集合
+     * @param pageSize 每页数量，仅在 page 不为 null 时有效
+     * @return 集合列表（如果指定了分页，返回的集合包含 cardCount 和 previewCards）
      */
-    suspend fun getCollections(userId: String): List<CollectionResponse> {
-        val collections = collectionRepository.getCollections(userId)
+    suspend fun getCollections(
+        userId: String,
+        page: Int,
+        pageSize: Int
+    ): List<CollectionResponse> {
+        val collections = collectionRepository.getCollections(userId, page, pageSize)
         return collections.map { it.toResponse() }
     }
 

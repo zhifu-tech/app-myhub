@@ -25,10 +25,28 @@ class RemoteCollectionDataSourceImpl(
     private val httpClient: HttpClient
 ) : RemoteCollectionDataSource {
 
-    override suspend fun getCollections(userId: String): List<Collection> {
+    override suspend fun getCollections(
+        userId: String,
+        page: Int?,
+        pageSize: Int?
+    ): List<Collection> {
         return try {
+            val query = buildString {
+                page?.let {
+                    append("?page=")
+                    append(it)
+                }
+                pageSize?.let {
+                    if (page != null) {
+                        append("&pageSize=")
+                    } else {
+                        append("?pageSize=")
+                    }
+                    append(it)
+                }
+            }
             val response: HttpResponse = httpClient.get(
-                "${ApiConfig.BASE_URL}${ApiConfig.COLLECTIONS_PATH}"
+                "${ApiConfig.BASE_URL}${ApiConfig.COLLECTIONS_PATH}$query"
             )
             when (response.status) {
                 HttpStatusCode.OK -> {

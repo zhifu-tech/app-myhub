@@ -18,10 +18,12 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataCode
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataIdea
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataQuote
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataTodo
+import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataVideo
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadataWord
 import tech.zhifu.app.myhub.datastore.model.domain.CardTag
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
+import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
@@ -30,6 +32,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.isCode
 import tech.zhifu.app.myhub.datastore.model.domain.isIdea
 import tech.zhifu.app.myhub.datastore.model.domain.isQuote
 import tech.zhifu.app.myhub.datastore.model.domain.isTodo
+import tech.zhifu.app.myhub.datastore.model.domain.isVideo
 import tech.zhifu.app.myhub.datastore.model.domain.isWord
 import kotlin.time.Instant
 
@@ -56,7 +59,11 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
 
         val collections = readResource("collection.json", localeDir)
             .let { json.decodeFromString<List<Collection>>(it) }
-            .map { it.copy(userId = userId) }
+            .map { it -> it.copy(userId = userId) }
+        val collectionCards = readOptionalResource("collection_card.json", localeDir)
+            ?.let { json.decodeFromString<List<CollectionCard>>(it) }
+            .orEmpty()
+
         val tags: List<Tag> = readResource("tag.json", localeDir)
             .let { json.decodeFromString<List<Tag>>(it) }
             .map { tag -> tag.copy(userId = userId) }
@@ -85,9 +92,13 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
         val cardMetadataWords = readOptionalResource("card_metadata_word.json", localeDir)
             ?.let { json.decodeFromString<List<CardMetadataWord>>(it) }
             .orEmpty()
+        val cardMetadataVideos = readOptionalResource("card_metadata_video.json", localeDir)
+            ?.let { json.decodeFromString<List<CardMetadataVideo>>(it) }
+            .orEmpty()
 
         val cardTemplates = readResource("template.json", localeDir)
             .let { json.decodeFromString<List<CardTemplate>>(it) }
+
 
         val quoteMetadataByCardId = cardMetadataQuotes.associateBy { it.cardId }
         val codeMetadataByCardId = cardMetadataCodes.associateBy { it.cardId }
@@ -95,6 +106,7 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
         val ideaMetadataByCardId = cardMetadataIdeas.associateBy { it.cardId }
         val todoMetadataByCardId = cardMetadataTodos.associateBy { it.cardId }
         val wordMetadataByCardId = cardMetadataWords.associateBy { it.cardId }
+        val videoMetadataByCardId = cardMetadataVideos.associateBy { it.cardId }
 
         val cards = readResource("card.json", localeDir)
             .let { json.decodeFromString<List<Card>>(it) }
@@ -107,6 +119,7 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
                     cardType.isIdea -> ideaMetadataByCardId[card.id]
                     cardType.isTodo -> todoMetadataByCardId[card.id]
                     cardType.isWord -> wordMetadataByCardId[card.id]
+                    cardType.isVideo -> videoMetadataByCardId[card.id]
                     else -> null
                 }
                 card.copy(
@@ -125,7 +138,8 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
             tags = tags,
             collections = collections,
             cards = cards,
-            templates = cardTemplates
+            templates = cardTemplates,
+            collectionCards = collectionCards
         )
     }
 

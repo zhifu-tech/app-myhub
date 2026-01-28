@@ -32,14 +32,20 @@ SELECT
 
   mw.pronunciation AS word_pronunciation,
   mw.definition    AS word_definition,
-  mw.example       AS word_example
+  mw.example       AS word_example,
+
+  mv.video_url         AS video_video_url,
+  mv.thumbnail_url      AS video_thumbnail_url,
+  mv.duration_seconds   AS video_duration_seconds,
+  mv.platform          AS video_platform
 FROM card c
 LEFT JOIN card_metadata_article ma ON ma.card_id = c.id
 LEFT JOIN card_metadata_code mc ON mc.card_id = c.id
 LEFT JOIN card_metadata_idea mi ON mi.card_id = c.id
 LEFT JOIN card_metadata_quote mq ON mq.card_id = c.id
 LEFT JOIN card_metadata_todo mt ON mt.card_id = c.id
-LEFT JOIN card_metadata_word mw ON mw.card_id = c.id;
+LEFT JOIN card_metadata_word mw ON mw.card_id = c.id
+LEFT JOIN card_metadata_video mv ON mv.card_id = c.id;
 
 selectCardWithMetadataByCardId:
 SELECT v.*

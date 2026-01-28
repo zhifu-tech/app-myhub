@@ -17,16 +17,26 @@ class CardRepositoryImpl(
 
     override suspend fun getCards(
         userId: String,
-        page: Int,
-        limit: Int,
+        page: Int?,
+        limit: Int?,
         type: String?,
         isFavorite: Boolean?
     ): List<Card> {
-        // 使用数据库层面的分页和筛选
+        // 如果指定了分页参数，使用分页查询
+        if (page != null && limit != null) {
+            return localDataSource.getCards(
+                userId = userId,
+                page = page,
+                limit = limit,
+                type = type,
+                isFavorite = isFavorite
+            )
+        }
+        // 否则返回所有卡片（使用分页查询，pageSize 设置为一个很大的值）
         return localDataSource.getCards(
             userId = userId,
-            page = page,
-            limit = limit,
+            page = 1,
+            limit = Int.MAX_VALUE,
             type = type,
             isFavorite = isFavorite
         )
