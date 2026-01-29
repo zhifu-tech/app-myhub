@@ -12,8 +12,9 @@
 2. [核心概念](#2-核心概念)
 3. [架构设计](#3-架构设计)
 4. [内存缓存机制深入分析](#4-内存缓存机制深入分析)
-   - 4.12 [StoreMultiCache 深入分析](#412-storemulticache-深入分析)
+    - 4.12 [StoreMultiCache 深入分析](#412-storemulticache-深入分析)
 5. [使用指南](#5-使用指南)
+    - 5.1 [添加依赖](#51-添加依赖) · 5.2 [创建只读 Store](#52-创建只读-store) · 5.3 [创建可变 MutableStore](#53-创建可变-mutablestore) · 5.4 [读取数据](#54-读取数据) · 5.5 [写入数据](#55-写入数据mutablestore) · 5.6 [清除缓存](#56-清除缓存)
 6. [MyHub 集成实践](#6-myhub-集成实践)
 7. [最佳实践](#7-最佳实践)
 8. [常见问题](#8-常见问题)
@@ -420,10 +421,10 @@ override fun stream(request: StoreReadRequest<Key>): Flow<StoreReadResponse<Outp
 
 ```kotlin
 // 源码：store/src/commonMain/kotlin/.../impl/RealStore.kt
-}.onEach {
-    // 每当有数据被分发时，保存到内存缓存
-    if (it.origin != StoreReadResponseOrigin.Cache) {
-        it.dataOrNull()?.let { data ->
+    }.onEach {
+        // 每当有数据被分发时，保存到内存缓存
+        if (it.origin != StoreReadResponseOrigin.Cache) {
+            it.dataOrNull()?.let { data ->
             memCache?.put(request.key, data)  // ⬅️ 按 Key 存储
         }
     }
@@ -440,8 +441,8 @@ internal suspend fun write(key: Key, value: Output): StoreDelegateWriteResult =
             StoreDelegateWriteResult.Success
         }
     } catch (error: Throwable) {
-        StoreDelegateWriteResult.Error.Exception(error)
-    }
+    StoreDelegateWriteResult.Error.Exception(error)
+}
 ```
 
 ### 4.5 LocalCache 核心实现（Guava Cache 的 KMP 移植）
@@ -451,26 +452,26 @@ internal suspend fun write(key: Key, value: Output): StoreDelegateWriteResult =
 internal class LocalCache<K : Any, V : Any>(builder: CacheBuilder<K, V>) {
     // 分段锁设计（类似 ConcurrentHashMap）
     private val segments: Array<Segment<K, V>?>
-    
+
     // 按 Key 的 hashCode 选择 segment
     private fun segmentFor(hash: Int): Segment<K, V> =
         segments[hash ushr segmentShift and segmentMask] as Segment<K, V>
-    
+
     // hash 函数（Wang/Jenkins hash）
     private fun hash(key: K): Int = rehash(key.hashCode())
-    
+
     // 获取缓存值
     fun getIfPresent(key: K): V? {
         val hash = hash(key)  // ⬅️ 使用 Key 的 hashCode
         return segmentFor(hash).get(key, hash)
     }
-    
+
     // 存储缓存值
     fun put(key: K, value: V): V? {
         val hash = hash(key)  // ⬅️ 使用 Key 的 hashCode
         return segmentFor(hash).put(key, hash, value, false)
     }
-    
+
     // 清除指定 key
     fun remove(key: K): V? {
         val hash = hash(key)
@@ -522,14 +523,14 @@ private fun expireEntries(now: Long) {
 private class AccessQueue<K : Any, V : Any> : MutableQueue<ReferenceEntry<K, V>> {
     // 双向链表头
     private val head: ReferenceEntry<K, V> = ...
-    
+
     // 添加到队尾（最近访问）
     override fun add(value: ReferenceEntry<K, V>) {
         connectAccessOrder(value.previousInAccessQueue, value.nextInAccessQueue)
         connectAccessOrder(head.previousInAccessQueue, value)
         connectAccessOrder(value, head)
     }
-    
+
     // 从队头获取（最久未访问）
     override fun peek(): ReferenceEntry<K, V>? {
         val next = head.nextInAccessQueue
@@ -541,7 +542,7 @@ private class AccessQueue<K : Any, V : Any> : MutableQueue<ReferenceEntry<K, V>>
 private fun evictEntries(newest: ReferenceEntry<K, V>) {
     if (!map.evictsBySize) return
     drainRecencyQueue()
-    
+
     while (totalWeight > maxSegmentWeight) {
         val e = nextEvictable  // 获取队头（最久未访问）
         if (!removeEntry(e, e.hash, RemovalCause.SIZE)) {
@@ -615,10 +616,10 @@ private fun evictEntries(newest: ReferenceEntry<K, V>) {
 
 ### 4.10 缓存共享的真相
 
-| 缓存层 | 是否共享 | 说明 |
-|-------|---------|------|
-| **内存缓存** | ❌ 不共享 | 每个 Key 有独立的缓存条目，不同 Store 有独立的 Cache 实例 |
-| **SourceOfTruth** | ✅ 共享 | 多个 Store 可以使用同一个数据库/DataSource |
+| 缓存层               | 是否共享  | 说明                                     |
+|-------------------|-------|----------------------------------------|
+| **内存缓存**          | ❌ 不共享 | 每个 Key 有独立的缓存条目，不同 Store 有独立的 Cache 实例 |
+| **SourceOfTruth** | ✅ 共享  | 多个 Store 可以使用同一个数据库/DataSource         |
 
 **Store5 设计原则**：内存缓存采用简单的 Key-Value 映射，不做任何规范化（normalization）或跨 Key 关联。
 
@@ -679,11 +680,11 @@ class StoreMultiCache<Id, Key, Single, Collection, Output>(
 
 要使用 `StoreMultiCache`，需要满足以下条件：
 
-| 组件 | 要求 |
-|-----|-----|
-| **Key** | 实现 `StoreKey` 接口的 sealed class，包含 `Single` 和 `Collection` 子类型 |
-| **Output** | 实现 `StoreData` 接口的 sealed class，包含 `Single` 和 `Collection` 子类型 |
-| **KeyProvider** | 实现 Key 类型之间的转换逻辑 |
+| 组件              | 要求                                                             |
+|-----------------|----------------------------------------------------------------|
+| **Key**         | 实现 `StoreKey` 接口的 sealed class，包含 `Single` 和 `Collection` 子类型  |
+| **Output**      | 实现 `StoreData` 接口的 sealed class，包含 `Single` 和 `Collection` 子类型 |
+| **KeyProvider** | 实现 Key 类型之间的转换逻辑                                               |
 
 #### 4.12.3 正确的使用方式
 
@@ -727,8 +728,8 @@ class CardKeyProvider : KeyProvider<String, CardOutput.Single> {
 }
 
 // 4. 创建 StoreMultiCache
-val multiCache = StoreMultiCache<String, CardStoreKey, CardOutput.Single, 
-                                  CardOutput.Collection, CardOutput>(
+val multiCache = StoreMultiCache<String, CardStoreKey, CardOutput.Single,
+        CardOutput.Collection, CardOutput>(
     keyProvider = CardKeyProvider(),
     singlesCache = CacheBuilder<StoreKey.Single<String>, CardOutput.Single>()
         .maximumSize(500)
@@ -794,11 +795,11 @@ override fun put(key: Key, value: Output) {
 
 #### 4.12.5 注意事项
 
-| 注意点 | 说明 |
-|-------|------|
-| **实验性 API** | 标记为 `@ExperimentalStoreApi`，API 可能变化 |
-| **单 Store 设计** | 必须使用单个 Store，Key 和 Output 都是 sealed class |
-| **不要手动调用** | Store 内部自动调用 `memCache.put()`，不要在外部手动调用 |
+| 注意点                | 说明                                        |
+|--------------------|-------------------------------------------|
+| **实验性 API**        | 标记为 `@ExperimentalStoreApi`，API 可能变化      |
+| **单 Store 设计**     | 必须使用单个 Store，Key 和 Output 都是 sealed class |
+| **不要手动调用**         | Store 内部自动调用 `memCache.put()`，不要在外部手动调用   |
 | **KeyProvider 实现** | 需要正确实现 `fromCollection` 和 `fromSingle` 方法 |
 
 ### 4.13 MemoryPolicy 配置详解
@@ -828,7 +829,7 @@ MemoryPolicy.builder<String, List<Card>>()
     .build()
 ```
 
-### 4.13 缓存调试技巧
+### 4.14 缓存调试技巧
 
 ```kotlin
 // 1. 检查缓存命中情况
@@ -854,7 +855,7 @@ store.stream(StoreReadRequest.skipMemory(key, refresh = true))  // 仅跳过内�
 
 ## 5. 使用指南
 
-### 4.1 添加依赖
+### 5.1 添加依赖
 
 ```kotlin
 // gradle/libs.versions.toml
@@ -876,7 +877,7 @@ dependencies {
 }
 ```
 
-### 4.2 创建只读 Store
+### 5.2 创建只读 Store
 
 ```kotlin
 // 简单 Store（仅网络 + 内存缓存）
@@ -910,7 +911,7 @@ val store: Store<String, Card> = StoreBuilder
     .build()
 ```
 
-### 4.3 创建可变 MutableStore
+### 5.3 创建可变 MutableStore
 
 ```kotlin
 val mutableStore: MutableStore<String, Card> = MutableStoreBuilder
@@ -946,7 +947,7 @@ val mutableStore: MutableStore<String, Card> = MutableStoreBuilder
     )
 ```
 
-### 4.4 读取数据
+### 5.4 读取数据
 
 ```kotlin
 // 流式读取（推荐）
@@ -984,7 +985,7 @@ val card = store.fresh(key)  // 强制网络
 val card = store.get(key)    // 优先缓存
 ```
 
-### 4.5 写入数据（MutableStore）
+### 5.5 写入数据（MutableStore）
 
 ```kotlin
 // 写入并同步
@@ -1006,7 +1007,7 @@ viewModelScope.launch {
 }
 ```
 
-### 4.6 清除缓存
+### 5.6 清除缓存
 
 ```kotlin
 // 清除单个 key
@@ -1116,9 +1117,9 @@ class CardStoreImpl(
 ) : CardStore {
 
     // StoreMultiCache - 支持列表自动分解
-    private val multiCache: StoreMultiCache<String, CardStoreKey, 
-                                            CardOutput.Single, CardOutput.Collection, 
-                                            CardOutput> by lazy {
+    private val multiCache: StoreMultiCache<String, CardStoreKey,
+            CardOutput.Single, CardOutput.Collection,
+            CardOutput> by lazy {
         StoreMultiCache(
             keyProvider = CardKeyProvider(),
             singlesCache = CacheBuilder<StoreKey.Single<String>, CardOutput.Single>()
@@ -1298,12 +1299,12 @@ val dashboardModule = module {
 
 ### 6.8 待优化项
 
-| 问题              | 当前状态                    | 建议               |
-|-----------------|-------------------------|------------------|
-| Bookkeeper 持久化  | 内存实现，重启丢失               | 改为 SQLDelight 存储 |
-| Updater         | 部分实现                    | 完善远程同步           |
-| 与 Repository 重叠 | 两套数据层并存                 | 统一为 Store 模式     |
-| 错误处理           | 基础实现                    | 添加重试和降级策略        |
+| 问题              | 当前状态      | 建议               |
+|-----------------|-----------|------------------|
+| Bookkeeper 持久化  | 内存实现，重启丢失 | 改为 SQLDelight 存储 |
+| Updater         | 部分实现      | 完善远程同步           |
+| 与 Repository 重叠 | 两套数据层并存   | 统一为 Store 模式     |
+| 错误处理            | 基础实现      | 添加重试和降级策略        |
 
 ---
 
@@ -1448,10 +1449,10 @@ val cardStore: Store<String, Card>         // Cache B
 
 **数据共享方案**：
 
-| 方案 | 说明 | 推荐场景 |
-|-----|------|---------|
-| **通过 SourceOfTruth** | 多个 Store 使用同一个数据库，数据自动共享 | 简单场景 |
-| **单一 Store + StoreMultiCache** | 一个 Store + 列表自动分解到单项缓存 | **推荐** |
+| 方案                             | 说明                       | 推荐场景   |
+|--------------------------------|--------------------------|--------|
+| **通过 SourceOfTruth**           | 多个 Store 使用同一个数据库，数据自动共享 | 简单场景   |
+| **单一 Store + StoreMultiCache** | 一个 Store + 列表自动分解到单项缓存   | **推荐** |
 
 详见第 4 章"内存缓存机制深入分析"。
 
@@ -1467,8 +1468,8 @@ val cardStore: Store<String, Card>         // Cache B
 // ✅ 正确：传入 StoreBuilder
 val store = StoreBuilder.from(
     fetcher = ...,
-    sourceOfTruth = ...,
-    memoryCache = storeMultiCache  // 正确用法
+sourceOfTruth = ...,
+memoryCache = storeMultiCache  // 正确用法
 ).toMutableStoreBuilder(converter).build(updater, bookkeeper)
 
 // ❌ 错误：在外部手动调用
@@ -1477,13 +1478,13 @@ storeMultiCache.put(key, value)  // 不要这样做！
 
 ### Q6: StoreMultiCache 和普通 Cache 有什么区别？
 
-| 特性 | 普通 Cache | StoreMultiCache |
-|-----|-----------|-----------------|
-| 列表分解 | ❌ 不支持 | ✅ 自动将列表分解到单项缓存 |
-| 单项更新同步 | ❌ 不支持 | ✅ 更新单项时自动更新对应列表 |
-| Key 要求 | 任意类型 | 必须实现 `StoreKey` 接口 |
-| Output 要求 | 任意类型 | 必须实现 `StoreData` 接口 |
-| API 稳定性 | 稳定 | `@ExperimentalStoreApi` |
+| 特性        | 普通 Cache | StoreMultiCache         |
+|-----------|----------|-------------------------|
+| 列表分解      | ❌ 不支持    | ✅ 自动将列表分解到单项缓存          |
+| 单项更新同步    | ❌ 不支持    | ✅ 更新单项时自动更新对应列表         |
+| Key 要求    | 任意类型     | 必须实现 `StoreKey` 接口      |
+| Output 要求 | 任意类型     | 必须实现 `StoreData` 接口     |
+| API 稳定性   | 稳定       | `@ExperimentalStoreApi` |
 
 ### Q7: alpha 版本是否稳定？
 
@@ -1495,8 +1496,51 @@ Store5 5.1.0-alpha08 的核心 API 已相对稳定，但仍可能有小改动。
 
 ---
 
+## 9. 与 Store5 源码的对照说明
+
+> 本节基于对 [gh-store-store](https://github.com/MobileNativeFoundation/Store) 源码的阅读，确保文档与库行为一致。
+
+### 9.1 Fetcher 与异常
+
+**源码结论**（`store5/Fetcher.kt`）：
+
+- **Store 不会捕获 Fetcher 抛出的异常**，异常会直接传播给调用方。
+- 注释原文：*"Store does not catch exceptions thrown by a Fetcher. This is done in order to avoid silently swallowing NPEs and such. Use FetcherResult.Error to communicate expected errors."*
+- `Fetcher.of` / `Fetcher.ofFlow` 内部会把**正常返回值**包成 `FetcherResult.Data`，把 **Flow 中的异常** 包成 `FetcherResult.Error.Exception`；但 **fetch 块内直接抛出的异常不会被捕获**，会向上传播。
+
+**实践建议**：
+
+- **可预期的业务错误**（如 404、无数据）：优先用 `Fetcher.ofResult` 返回 `FetcherResult.Error`，由 Store 按错误路径处理。
+- **不可预期异常**（如 NPE、网络层抛错）：可在 Fetcher 内 `try/catch` 后转为 `FetcherResult.Error.Exception(e)`，或让调用方（如 Repository）统一处理。
+
+### 9.2 SourceOfTruth 的 reader
+
+**源码结论**（`store5/SourceOfTruth.kt`）：
+
+- `reader(key: Key): Flow<Output?>` 用于从本地持久化按 key 读取并**持续观察**；Store 通过此 Flow 把本地变化推送给 collector。
+- `SourceOfTruth.of` 的 Flow 重载：`reader: (Key) -> Flow<Output?>`，即每个 key 对应一个 Flow，且应**随本地数据变化持续发射**（如 SQLDelight/Room 的 observe 能力）。
+
+**实践建议**：
+
+- 使用支持「可观察」的本地 API（如 `observeCard(id)`）并在 reader 中返回该 Flow，避免仅做单次查询后 `emit` 一次就结束，否则无法反映后续本地写入/更新。
+
+### 9.3 StoreBuilder.from 重载
+
+**源码结论**（`store5/StoreBuilder.kt`）：
+
+- 支持：`from(fetcher)`、`from(fetcher, sourceOfTruth)`、`from(fetcher, sourceOfTruth, memoryCache)`、以及带 `converter` 的重载。
+- 使用 `StoreMultiCache` 时，需使用带 `memoryCache: Cache<Key, Output>` 的 `from(...)`，且 `Cache` 的 Key/Output 类型需与 Store 的 Key/Output 一致（我们通过 StoreKey/StoreData 的 sealed 类型满足）。
+
+### 9.4 版本与 API 稳定性
+
+- 文档基于 **Store5 5.1.0-alpha08** 及对应 cache5/core5。
+- `StoreKey` / `StoreData` / `StoreMultiCache` 等来自 **core5** 与 **cache5**，部分为 `@ExperimentalStoreApi`，升级时需关注 CHANGELOG 与 API 变更。
+
+---
+
 ## 参考资料
 
 - [Store5 GitHub](https://github.com/MobileNativeFoundation/Store)
-- [Store5 官方文档](https://mobilenativefoundation.github.io/Store/)
+- [Store5 官方文档](https://store.mobilenativefoundation.org)
+- [gh-store-store 本地源码](../../../gh-store-store)（Store.kt、Fetcher.kt、SourceOfTruth.kt、StoreBuilder.kt）
 - [KMP 官方文档](https://kotlinlang.org/docs/multiplatform.html)

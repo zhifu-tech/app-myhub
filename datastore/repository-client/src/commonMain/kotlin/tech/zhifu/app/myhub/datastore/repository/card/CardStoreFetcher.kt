@@ -1,25 +1,28 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
 import org.mobilenativefoundation.store.store5.Fetcher
+import org.mobilenativefoundation.store.store5.FetcherResult
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 
 internal fun createCardStoreFetcher(
     remoteCardDataSource: RemoteCardDataSource
-): CardStoreFetcher = Fetcher.of { key ->
+): CardStoreFetcher = Fetcher.ofResult { key ->
     when (key) {
         is CardStoreKey.ById -> {
             val card = remoteCardDataSource.getCardById(key.id)
-                ?: throw NoSuchElementException("Card not found: ${key.id}")
-            CardStoreData.Single(card)
+            if (card == null) FetcherResult.Error.Message("Card not found: ${key.id}")
+            else FetcherResult.Data(CardStoreData.Single(card))
         }
 
         is CardStoreKey.ByIds -> {
             val cards = key.ids.mapNotNull { id ->
                 remoteCardDataSource.getCardById(id)
             }
-            CardStoreData.CollectionIds(
-                items = cards.map { CardStoreData.Single(it) },
-                ids = key.ids
+            FetcherResult.Data(
+                CardStoreData.CollectionIds(
+                    items = cards.map { CardStoreData.Single(it) },
+                    ids = key.ids
+                )
             )
         }
 
@@ -29,7 +32,7 @@ internal fun createCardStoreFetcher(
                 page = key.page,
                 limit = key.pageSize
             )
-            CardStoreData.Collection.fromCards(cards, key.userId)
+            FetcherResult.Data(CardStoreData.Collection.fromCards(cards, key.userId))
         }
     }
 }

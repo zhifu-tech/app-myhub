@@ -2,6 +2,14 @@
 
 本地数据源实现模块，提供基于 SQLDelight 的本地数据存储功能。
 
+## 命名约定
+
+- 所有 DataSource 接口与文件名统一为 `*DataSource`（驼峰 DataSource），例如 `LocalUserDataSource.kt`、`LocalCardDataSource.kt`。
+
+## 测试策略
+
+- 上层（Repository/Store）推荐使用 **Fake** 实现（如 `FakeLocalCardDataSource`）注入；本模块测试可使用 SQLDelight 的 **in-memory driver** 对重点 CRUD 与 observe* 做集成测试。详见 [Datasource 代码组织改进计划](../../docs/datasource-code-organization-improvement-plan.md) 第 3.5.1 节。
+
 ## 📋 功能特性
 
 - ✅ **跨平台支持**：支持 Android、iOS、JVM、JS、WASM 平台

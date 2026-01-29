@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.collection
 
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
@@ -24,17 +25,12 @@ fun createCollectionStoreSourceOfTruth(
                 }
             }
 
-            is CollectionStoreKey.ByUser -> flow {
-                val pagedCollections = localCollectionDataSource.getCollections(
-                    userId = key.userId,
-                    page = key.page,
-                    pageSize = key.pageSize
-                )
-                emit(
+            is CollectionStoreKey.ByUser -> localCollectionDataSource.observeCollections(key.userId)
+                .map { fullList ->
+                    val pagedCollections = fullList.drop((key.page - 1) * key.pageSize).take(key.pageSize)
                     if (pagedCollections.isEmpty()) null
                     else CollectionStoreData.Items.fromCollections(pagedCollections, key.userId)
-                )
-            }
+                }
         }
     },
     writer = { key, data ->

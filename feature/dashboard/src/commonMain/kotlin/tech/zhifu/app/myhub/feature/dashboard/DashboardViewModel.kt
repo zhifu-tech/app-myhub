@@ -46,6 +46,10 @@ class DashboardViewModel(
 
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
+    /** 暂存已收到的卡集，避免 collections 先于 cards 到达时被丢弃（InitialLoading 无法写入 collections） */
+    private val _latestCollections = MutableStateFlow<List<Collection>>(emptyList())
+    private val _latestHasMoreCollections = MutableStateFlow(false)
+
     /** 401 未授权时发出一次，用于触发跳转登录 */
     private val _navigateToLogin = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
     val navigateToLogin: SharedFlow<Unit> = _navigateToLogin.asSharedFlow()
@@ -64,6 +68,8 @@ class DashboardViewModel(
     private fun loadDashboardData() {
         logger.info { "Loading dashboard data" }
         _uiState.value = DashboardUiState.InitialLoading()
+        _latestCollections.value = emptyList()
+        _latestHasMoreCollections.value = false
         userRepository.streamUser()
             .catch { e ->
                 logger.error(e) { "User not found, waiting for bootstrap..." }
@@ -158,6 +164,10 @@ class DashboardViewModel(
                 lastSyncTime = Clock.System.now().toEpochMilliseconds(),
                 reviewProgress = currentReviewProgress,
                 showFocusReview = true,
+                collections = _latestCollections.value,
+                hasMoreCollections = _latestHasMoreCollections.value,
+                collectionsPage = 1,
+                collectionsPageSize = 10,
                 hasMoreCards = hasMoreCards,
                 cardsPage = 1,
                 cardsPageSize = pageSize
@@ -217,14 +227,15 @@ class DashboardViewModel(
     }
 
     private fun updateUiStateWithCollections(collections: List<Collection>, userId: String) {
-        // collections 已经是从 store 获取的分页数据（page=1, pageSize=10）
         val pageSize = 10
         val hasMoreCollections = collections.size >= pageSize
+        _latestCollections.value = collections
+        _latestHasMoreCollections.value = hasMoreCollections
 
         val currentState = _uiState.value
         _uiState.value = when (currentState) {
             is DashboardUiState.InitialLoading -> {
-                // 如果还没有 Content 状态，等待 Cards 加载完成
+                // 暂存到 _latestCollections，等 cards 到达转为 Content 时会合并
                 currentState
             }
 

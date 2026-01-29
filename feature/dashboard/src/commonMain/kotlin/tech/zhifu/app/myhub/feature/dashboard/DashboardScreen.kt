@@ -40,14 +40,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -92,6 +91,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -216,7 +216,7 @@ fun DashboardScreen(
                                     fontWeight = FontWeight.Medium
                                 )
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -458,61 +458,85 @@ fun FocusReviewModule(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val startReviewInteractionSource = remember { MutableInteractionSource() }
+    val startReviewHovered by startReviewInteractionSource.collectIsHoveredAsState()
+    val density = LocalDensity.current
+    val arrowOffsetPx = with(density) { 4.dp.toPx() }
+    val arrowOffsetX by animateFloatAsState(
+        targetValue = if (startReviewHovered) arrowOffsetPx else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "arrow_translation_x"
+    )
     Card(
         modifier = modifier.wrapContentWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            CircularProgressWithText(
-                progress = reviewProgress.progress,
-                text = "${reviewProgress.completed}/${reviewProgress.total}",
-                modifier = Modifier.size(64.dp)
-            )
-            Column(
-                modifier = Modifier.wrapContentWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+        Box(modifier = Modifier.wrapContentWidth()) {
+            Row(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(start = 20.dp, top = 20.dp, end = 56.dp, bottom = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "focus & review",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Normal
+                CircularProgressWithText(
+                    progress = reviewProgress.progress,
+                    text = "${reviewProgress.completed}/${reviewProgress.total}",
+                    modifier = Modifier.size(64.dp)
                 )
-                Button(
-                    onClick = onStartReview,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.wrapContentWidth()
+                Column(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "Start Review",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold
+                        text = "focus & review",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Normal
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .hoverable(startReviewInteractionSource)
+                            .clickable(
+                                indication = null,
+                                interactionSource = startReviewInteractionSource,
+                                onClick = onStartReview
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Start Review",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .graphicsLayer { translationX = arrowOffsetX }
+                        )
+                    }
                 }
             }
             IconButton(
                 onClick = onDismiss,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(top = 16.dp, end = 16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,

@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.template
 
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
@@ -17,27 +17,17 @@ fun createTemplateStoreSourceOfTruth(
             "reader called with key: $key (type=${key::class.qualifiedName}, " +
                 "instance=${System.identityHashCode(key)}"
         }
-        flow {
-            when (key) {
-                is TemplateStoreKey.ById -> {
-                    val templates = localCardTemplateDataSource.getTemplates()
-                    val template = templates.find { it.id == key.id }
-                    if (template != null) {
-                        emit(TemplateStoreData.Single(template))
-                    } else {
-                        emit(null)
-                    }
+        when (key) {
+            is TemplateStoreKey.ById -> localCardTemplateDataSource.observeTemplates()
+                .map { templates ->
+                    templates.find { it.id == key.id }?.let { TemplateStoreData.Single(it) }
                 }
 
-                is TemplateStoreKey.All -> {
-                    val templates = localCardTemplateDataSource.getTemplates()
-                    if (templates.isEmpty()) {
-                        emit(null)
-                    } else {
-                        emit(TemplateStoreData.Collection.fromTemplates(templates))
-                    }
+            is TemplateStoreKey.All -> localCardTemplateDataSource.observeTemplates()
+                .map { templates ->
+                    if (templates.isEmpty()) null
+                    else TemplateStoreData.Collection.fromTemplates(templates)
                 }
-            }
         }
     },
     writer = { key, data ->

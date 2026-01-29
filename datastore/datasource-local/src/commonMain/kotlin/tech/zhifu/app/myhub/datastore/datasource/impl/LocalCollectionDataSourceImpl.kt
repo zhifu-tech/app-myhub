@@ -8,6 +8,8 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.database.Collection as DbCollection
@@ -102,7 +104,26 @@ class LocalCollectionDataSourceImpl(
             .selectCollectionsByUserId(userId)
             .asFlow()
             .mapToList(Dispatchers.Default)
-            .map { collections -> collections.map { it.toDomain() } }
+            .map { dbCollections -> dbCollections.map { it.toDomain() } }
+            .flatMapLatest { collections ->
+                flow {
+                    if (collections.isEmpty()) {
+                        emit(emptyList())
+                        return@flow
+                    }
+                    val collectionIds = collections.map { it.id }
+                    val cardCounts = getCollectionCardCounts(collectionIds)
+                    val previewCardsMap = collectionIds.associateWith { id -> getCollectionPreviewCards(id) }
+                    emit(
+                        collections.map { c ->
+                            c.copy(
+                                cardCount = cardCounts[c.id] ?: 0,
+                                cards = previewCardsMap[c.id] ?: emptyList()
+                            )
+                        }
+                    )
+                }
+            }
     }
 
     override suspend fun deleteCollection(collectionId: String) {

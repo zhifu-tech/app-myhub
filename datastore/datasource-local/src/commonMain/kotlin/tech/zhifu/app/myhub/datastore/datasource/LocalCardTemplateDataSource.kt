@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.datastore.datasource
 
+import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 
 interface LocalCardTemplateDataSource {
@@ -10,6 +11,9 @@ interface LocalCardTemplateDataSource {
     suspend fun getTemplate(templateId: String): CardTemplate?
 
     suspend fun getTemplates(): List<CardTemplate>
+
+    /** 可持续观察模板列表变化，供 Store SourceOfTruth 使用。 */
+    fun observeTemplates(): Flow<List<CardTemplate>>
 
     suspend fun getTemplatesByType(type: String): List<CardTemplate>
 

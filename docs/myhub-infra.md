@@ -49,6 +49,13 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 
 ## [数据仓库客户端模块方案设计](../datastore/repository-client/docs/myhub-datastore-repository-client-infra-v1.0.md)
 
+## Store 与 Datasource 使用与改进
+
+- [Store5 架构设计及使用指南](./store5-architecture-guide.md)（含与 gh-store-store 源码对照）
+- [Store 使用问题与纠正说明](./store-usage-issues.md)
+- [Datasource 使用梳理及与 Store 的关系](./datasource-usage-and-store.md)
+- [Datasource 代码组织改进计划](./datasource-code-organization-improvement-plan.md)
+
 ## [数据仓库服务端模块方案设计](../datastore/repository-server/docs/myhub-datastore-repository-server-infra-v1.0.md)
 
 ## [同步机制方案设计](./myhub-sync-infra-v1.0.md)

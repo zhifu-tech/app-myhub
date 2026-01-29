@@ -2,6 +2,11 @@ package tech.zhifu.app.myhub.datastore.datasource.impl
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
@@ -44,6 +49,14 @@ class LocalCardTemplateDataSourceImpl(
             .selectAllCardTemplates()
             .awaitAsList()
             .map(DbCardTemplate::toDomain)
+    }
+
+    override fun observeTemplates(): Flow<List<CardTemplate>> {
+        return database.card_templateQueries
+            .selectAllCardTemplates()
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+            .map { it.map(DbCardTemplate::toDomain) }
     }
 
     override suspend fun getTemplatesByType(type: String): List<CardTemplate> {

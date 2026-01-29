@@ -2,6 +2,15 @@
 
 远程数据源实现模块，提供基于 Ktor Client 的 HTTP API 通信功能。
 
+## 命名约定
+
+- 所有 DataSource 接口与文件名统一为 `*DataSource`（驼峰 DataSource），例如 `RemoteCardDataSource.kt`。
+
+## 异常与测试约定
+
+- **异常约定**：读单条接口在「资源不存在」时返回 `null` 不抛异常（如 `getCardById` 的 404 → `null`）；HTTP 4xx/5xx 或服务端错误抛 `ApiException`；网络层异常抛 `NetworkException`。详见 [Datasource 代码组织改进计划](../../docs/datasource-code-organization-improvement-plan.md) 第 3.3.1 节。
+- **测试策略**：上层（Repository/Store）推荐使用 Fake 实现；本模块测试可使用 Ktor MockEngine 或契约测试，避免直连真实后端。详见同上第 3.5.1 节。
+
 ## 📋 功能特性
 
 - ✅ **跨平台支持**：支持 Android、iOS、JVM、JS、WASM 平台
