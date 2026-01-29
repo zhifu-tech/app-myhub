@@ -21,7 +21,7 @@ internal fun createUserStoreUpdater(
             is UserStoreKey.ById if data is UserStoreData.UserData -> remoteUserDataSource
                 .updateUser(
                     id = key.id,
-                    user = data.user,
+                    user = data.user!!,
                 )
                 .let { UserStoreData.UserData(it) }
                 .let { StoreWriteResponse.Success.Typed(it) }

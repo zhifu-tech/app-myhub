@@ -21,8 +21,8 @@ import tech.zhifu.app.myhub.datastore.model.dto.PaginatedResponse
 import tech.zhifu.app.myhub.datastore.model.dto.PartialUpdateCardRequest
 import tech.zhifu.app.myhub.datastore.model.dto.UpdateCardRequest
 import tech.zhifu.app.myhub.datastore.model.dto.toDomain
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
 class RemoteCardDataSourceImpl(
@@ -58,7 +58,8 @@ class RemoteCardDataSourceImpl(
                 val paginatedResponse: PaginatedResponse<CardResponse> = response.body()
                 paginatedResponse.data.map { it.toDomain() }
             }
-            else -> throw ApiException("Failed to fetch cards: ${response.status}")
+
+            else -> throw ApiException(response.status, "Failed to fetch cards: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -74,8 +75,9 @@ class RemoteCardDataSourceImpl(
                 val cardResponse: CardResponse = response.body()
                 cardResponse.toDomain()
             }
+
             HttpStatusCode.NotFound -> null
-            else -> throw ApiException("Failed to fetch card: ${response.status}")
+            else -> throw ApiException(response.status, "Failed to fetch card: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -98,7 +100,8 @@ class RemoteCardDataSourceImpl(
                 val cardResponse: CardResponse = response.body()
                 cardResponse.toDomain()
             }
-            else -> throw ApiException("Failed to create card: ${response.status}")
+
+            else -> throw ApiException(response.status, "Failed to create card: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -121,7 +124,8 @@ class RemoteCardDataSourceImpl(
                 val cardResponse: CardResponse = response.body()
                 cardResponse.toDomain()
             }
-            else -> throw ApiException("Failed to update card: ${response.status}")
+
+            else -> throw ApiException(response.status, "Failed to update card: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -144,7 +148,8 @@ class RemoteCardDataSourceImpl(
                 val cardResponse: CardResponse = response.body()
                 cardResponse.toDomain()
             }
-            else -> throw ApiException("Failed to partially update card: ${response.status}")
+
+            else -> throw ApiException(response.status, "Failed to partially update card: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -156,7 +161,7 @@ class RemoteCardDataSourceImpl(
         when (response.status) {
             HttpStatusCode.OK, HttpStatusCode.NoContent -> Unit
             HttpStatusCode.NotFound -> Unit // 已删除，视为成功
-            else -> throw ApiException("Failed to delete card: ${response.status}")
+            else -> throw ApiException(response.status, "Failed to delete card: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e

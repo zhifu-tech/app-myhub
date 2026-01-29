@@ -17,8 +17,8 @@ import tech.zhifu.app.myhub.datastore.model.dto.CreateTagRequest
 import tech.zhifu.app.myhub.datastore.model.dto.TagResponse
 import tech.zhifu.app.myhub.datastore.model.dto.UpdateTagRequest
 import tech.zhifu.app.myhub.datastore.model.dto.toDomain
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
 /**
@@ -42,7 +42,7 @@ class RemoteTagDataSourceImpl(
                     }
                 }
 
-                else -> throw ApiException("Failed to fetch tags: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to fetch tags: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -60,7 +60,7 @@ class RemoteTagDataSourceImpl(
                 }
 
                 HttpStatusCode.NotFound -> null
-                else -> throw ApiException("Failed to fetch tag: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to fetch tag: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -85,7 +85,7 @@ class RemoteTagDataSourceImpl(
                     tagResponse.toDomain().copy(userId = userId)
                 }
 
-                else -> throw ApiException("Failed to create tag: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to create tag: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -110,8 +110,8 @@ class RemoteTagDataSourceImpl(
                     tagResponse.toDomain().copy(userId = userId)
                 }
 
-                HttpStatusCode.NotFound -> throw ApiException("Tag not found: $id")
-                else -> throw ApiException("Failed to update tag: ${response.status}")
+                HttpStatusCode.NotFound -> throw ApiException(response.status, "Tag not found: $id")
+                else -> throw ApiException(response.status, "Failed to update tag: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -131,7 +131,7 @@ class RemoteTagDataSourceImpl(
                     // 标签不存在，视为成功
                 }
 
-                else -> throw ApiException("Failed to delete tag: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to delete tag: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e

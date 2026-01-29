@@ -61,7 +61,7 @@ class LocalUserDataSourceImpl(
             ?.toDomain()
     }
 
-    override fun observeUser(): Flow<User> {
+    override fun observeUser(): Flow<User?> {
         return database.userQueries
             .selectCurrentUser()
             .asFlow()

@@ -15,6 +15,7 @@ interface RemoteCollectionDataSource {
         page: Int? = null,
         pageSize: Int? = null
     ): List<Collection>
+
     suspend fun getCollectionById(id: String, userId: String): Collection?
     suspend fun createCollection(collection: Collection, userId: String): Collection
     suspend fun updateCollection(id: String, collection: Collection, userId: String): Collection

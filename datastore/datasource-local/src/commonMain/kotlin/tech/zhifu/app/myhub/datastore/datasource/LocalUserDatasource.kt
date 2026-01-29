@@ -14,7 +14,7 @@ interface LocalUserDataSource {
 
     suspend fun getUser(userId: String): User?
 
-    fun observeUser(): Flow<User>
+    fun observeUser(): Flow<User?>
 
     suspend fun deleteUser(userId: String)
 

@@ -75,21 +75,13 @@ fun createHttpClient(
                             refreshToken = refreshToken
                         )
                         newTokens
-                    } catch (e: ApiException) {
-                        // Refresh token 过期或无效，清除 token，需要重新登录
-                        if (e.message?.contains("Unauthorized") == true ||
-                            e.message?.contains("expired") == true ||
-                            e.message?.contains("invalid") == true
-                        ) {
-                            tokenStorage.clearTokens()
-                        }
-                        null
-                    } catch (e: NetworkException) {
-                        // 网络错误，不清除 token（可能是临时网络问题）
-                        null
                     } catch (e: Exception) {
-                        // 其他错误，记录日志但不清除 token
-                        logger.error(e) { "Token refresh failed" }
+                        // Refresh 失败：按 message 判断是否需清除 token（与 exception.ApiException 等兼容）
+                        val isAuthFailure = e.message?.contains("Unauthorized", ignoreCase = true) == true ||
+                            e.message?.contains("expired", ignoreCase = true) == true ||
+                            e.message?.contains("invalid", ignoreCase = true) == true
+                        if (isAuthFailure) tokenStorage.clearTokens()
+                        if (e !is NetworkException) logger.error(e) { "Token refresh failed" }
                         null
                     }
                 }

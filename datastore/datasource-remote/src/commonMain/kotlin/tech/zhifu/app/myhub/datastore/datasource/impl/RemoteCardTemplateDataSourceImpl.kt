@@ -18,8 +18,8 @@ import tech.zhifu.app.myhub.datastore.model.dto.CardTemplateResponse
 import tech.zhifu.app.myhub.datastore.model.dto.CreateCardTemplateRequest
 import tech.zhifu.app.myhub.datastore.model.dto.UpdateCardTemplateRequest
 import tech.zhifu.app.myhub.datastore.model.dto.toDomain
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
 class RemoteCardTemplateDataSourceImpl(
@@ -39,7 +39,8 @@ class RemoteCardTemplateDataSourceImpl(
                     val templateResponses: List<CardTemplateResponse> = response.body()
                     templateResponses.map { it.toDomain() }
                 }
-                else -> throw ApiException("Failed to fetch templates: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to fetch templates: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -57,8 +58,9 @@ class RemoteCardTemplateDataSourceImpl(
                     val templateResponse: CardTemplateResponse = response.body()
                     templateResponse.toDomain()
                 }
+
                 HttpStatusCode.NotFound -> null
-                else -> throw ApiException("Failed to fetch template: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to fetch template: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -83,7 +85,8 @@ class RemoteCardTemplateDataSourceImpl(
                     val templateResponse: CardTemplateResponse = response.body()
                     templateResponse.toDomain()
                 }
-                else -> throw ApiException("Failed to create template: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to create template: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -108,8 +111,9 @@ class RemoteCardTemplateDataSourceImpl(
                     val templateResponse: CardTemplateResponse = response.body()
                     templateResponse.toDomain()
                 }
-                HttpStatusCode.NotFound -> throw ApiException("Template not found: $id")
-                else -> throw ApiException("Failed to update template: ${response.status}")
+
+                HttpStatusCode.NotFound -> throw ApiException(response.status, "Template not found: $id")
+                else -> throw ApiException(response.status, "Failed to update template: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -124,10 +128,12 @@ class RemoteCardTemplateDataSourceImpl(
                 HttpStatusCode.OK, HttpStatusCode.NoContent -> {
                     // 成功删除
                 }
+
                 HttpStatusCode.NotFound -> {
                     // 模板不存在，视为成功
                 }
-                else -> throw ApiException("Failed to delete template: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to delete template: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e

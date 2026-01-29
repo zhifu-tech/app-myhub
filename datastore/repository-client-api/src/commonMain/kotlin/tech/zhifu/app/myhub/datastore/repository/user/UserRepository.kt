@@ -11,14 +11,15 @@ interface UserRepository {
 
     suspend fun insertUser(user: User, needSync: Boolean = true)
 
-    suspend fun hasUser(): Boolean
+    suspend fun hasUser(): Boolean = getUserOrNull() != null
 
     suspend fun getUser(): User
 
+    suspend fun getUserOrNull(): User?
+
     suspend fun getUser(userId: String): UserStoreData?
 
-    @Deprecated("不能使用这个")
-    fun streamUser(): Flow<User>
+    fun streamUser(): Flow<User?>
 
     fun streamUser(userId: String, refresh: Boolean = false): Flow<StoreReadResponse<UserStoreData>>
 

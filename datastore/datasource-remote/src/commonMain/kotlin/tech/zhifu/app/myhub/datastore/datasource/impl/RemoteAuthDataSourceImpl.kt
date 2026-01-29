@@ -12,8 +12,8 @@ import tech.zhifu.app.myhub.datastore.model.dto.LoginRequest
 import tech.zhifu.app.myhub.datastore.model.dto.LoginResponse
 import tech.zhifu.app.myhub.datastore.model.dto.RefreshTokenRequest
 import tech.zhifu.app.myhub.datastore.model.dto.RefreshTokenResponse
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
 /**
@@ -48,8 +48,8 @@ class RemoteAuthDataSourceImpl(
         when (response.status) {
             HttpStatusCode.OK -> response.body<LoginResponse>()
             else -> throw ApiException(
-                "Login failed with status ${response.status.value}",
-                null
+                response.status,
+                "Login failed with status ${response.status.value}"
             )
         }
     } catch (e: ApiException) {
@@ -71,12 +71,13 @@ class RemoteAuthDataSourceImpl(
         when (response.status) {
             HttpStatusCode.OK -> response.body<RefreshTokenResponse>()
             HttpStatusCode.Unauthorized -> throw ApiException(
-                "Refresh token expired or invalid",
-                null
+                HttpStatusCode.Unauthorized,
+                "Refresh token expired or invalid"
             )
+
             else -> throw ApiException(
-                "Token refresh failed with status ${response.status.value}",
-                null
+                response.status,
+                "Token refresh failed with status ${response.status.value}"
             )
         }
     } catch (e: ApiException) {

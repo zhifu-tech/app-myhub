@@ -9,8 +9,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPath
 import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 import tech.zhifu.app.myhub.sync.SyncOutboxUploadItem
 import tech.zhifu.app.myhub.sync.SyncPullResponse
@@ -43,7 +43,7 @@ class RemoteSyncDataSourceImpl(
         )
         when (response.status) {
             HttpStatusCode.OK -> response.body()
-            else -> throw ApiException("Failed to pull sync changes: ${response.status}")
+            else -> throw ApiException(response.status, "Failed to pull sync changes: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e
@@ -61,7 +61,7 @@ class RemoteSyncDataSourceImpl(
         }
         when (response.status) {
             HttpStatusCode.OK -> response.body()
-            else -> throw ApiException("Failed to push sync outbox: ${response.status}")
+            else -> throw ApiException(response.status, "Failed to push sync outbox: ${response.status}")
         }
     } catch (e: Exception) {
         if (e is ApiException) throw e

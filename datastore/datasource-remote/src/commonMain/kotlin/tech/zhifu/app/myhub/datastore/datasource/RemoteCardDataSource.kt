@@ -10,14 +10,14 @@ interface RemoteCardDataSource {
         type: String? = null,
         isFavorite: Boolean? = null
     ): List<Card>
-    
+
     suspend fun getCardById(id: String): Card?
-    
+
     suspend fun createCard(card: Card): Card
-    
+
     suspend fun updateCard(card: Card): Card
-    
+
     suspend fun partialUpdateCard(card: Card): Card
-    
+
     suspend fun deleteCard(cardId: String)
 }

@@ -10,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.model.dto.CreateUserRequest
 import tech.zhifu.app.myhub.datastore.model.dto.UpdateUserRequest
 import tech.zhifu.app.myhub.exception.ApiException
@@ -151,7 +152,7 @@ fun Route.usersApi(userService: UserService) {
                     val id = call.parameters["id"]
                         ?: throw ValidationException("User ID is required")
 
-                    val preferences = call.receive<tech.zhifu.app.myhub.datastore.model.domain.UserPreferences>()
+                    val preferences = call.receive<UserPreferences>()
                     val updated = userService.upsertUserPreferences(id, preferences)
 
                     call.respond(HttpStatusCode.OK, updated)

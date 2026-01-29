@@ -9,8 +9,8 @@ import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 sealed class UserStoreData : StoreData<String> {
 
     data class UserData(
-        val user: User,
-        override val id: String = user.id
+        val user: User?,
+        override val id: String = user?.id.orEmpty()
     ) : UserStoreData(), StoreData.Single<String>
 
     data class PreferencesData(

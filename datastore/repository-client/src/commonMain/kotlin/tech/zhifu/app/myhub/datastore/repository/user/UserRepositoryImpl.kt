@@ -1,13 +1,15 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
@@ -18,13 +20,10 @@ import tech.zhifu.app.myhub.sync.SyncEntityType
 
 @OptIn(ExperimentalStoreApi::class)
 class UserRepositoryImpl(
-    private val store: UserStore,
-    private val localUserDataSource: LocalUserDataSource,
-    private val syncRepository: SyncRepository,
     private val logger: Logger,
+    private val syncRepository: SyncRepository,
+    private val store: UserStore,
 ) : UserRepository {
-
-    // ==================== User 操作 ====================
 
     override suspend fun insertUser(user: User, needSync: Boolean) {
         store.write(
@@ -44,26 +43,25 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun hasUser(): Boolean {
-        return localUserDataSource.getUserOrNull() != null
-    }
-
-    override suspend fun getUser(): User {
-        val localUser = localUserDataSource.getUserOrNull()
-        if (localUser != null) {
-            return localUser
-        }
+    override suspend fun getUser(): User = getUserOrNull() ?: run {
+        logger.error { "Get User before bootstrap finished" }
         throw IllegalStateException("At least one user is needed!")
     }
 
-    override suspend fun getUser(userId: String): UserStoreData? =
-        runCatching {
-            store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
-                key = UserStoreKey.ById(userId)
+    override suspend fun getUserOrNull(): User? =
+        store.stream<StoreWriteResponse>(
+            request = StoreReadRequest.localOnly(
+                key = UserStoreKey.ById(""/*current user*/)
             )
-        }.onFailure {
-            logger.error(it) { "get user for {user:$userId} from store failed" }
-        }.getOrNull()
+        ).first()
+            .let { it as? StoreReadResponse.Data }
+            ?.let { it.value as? UserStoreData.UserData }
+            ?.user
+
+    override suspend fun getUser(userId: String): UserStoreData =
+        store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
+            key = UserStoreKey.ById(userId)
+        )
 
     override fun streamUser(userId: String, refresh: Boolean): Flow<StoreReadResponse<UserStoreData>> =
         store.stream<StoreWriteResponse>(
@@ -73,9 +71,15 @@ class UserRepositoryImpl(
             )
         )
 
-    override fun streamUser(): Flow<User> = localUserDataSource.observeUser()
-
-    // ==================== UserPreferences 操作 ====================
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun streamUser(): Flow<User?> =
+        store.stream<StoreWriteResponse>(
+            request = StoreReadRequest.localOnly(
+                key = UserStoreKey.ById(""), // 约定：空 id 表示当前登录用户
+            )
+        ).map {
+            (it as? StoreReadResponse.Data)?.value?.user
+        }
 
     override suspend fun insertUserPreferences(preferences: UserPreferences, needSync: Boolean) {
         store.write(
@@ -97,18 +101,16 @@ class UserRepositoryImpl(
 
     override suspend fun getUserPreferences(): UserPreferences {
         val user = getUser()
-        return getUserPreferences(user.id)?.preferences
-            ?: throw IllegalStateException("UserPreferences not found")
+        return getUserPreferences(user.id).preferences ?: run {
+            logger.error { "Get UserPreferences before bootstrap finished. " }
+            throw IllegalStateException("UserPreferences not found")
+        }
     }
 
-    override suspend fun getUserPreferences(userId: String): UserStoreData? =
-        runCatching {
-            store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
-                key = UserStoreKey.PreferencesById(userId)
-            )
-        }.onFailure {
-            logger.error(it) { "get user preferences for {user:$userId} from store failed" }
-        }.getOrNull()
+    override suspend fun getUserPreferences(userId: String): UserStoreData =
+        store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
+            key = UserStoreKey.PreferencesById(userId)
+        )
 
     override fun streamUserPreferences(userId: String, refresh: Boolean): Flow<StoreReadResponse<UserStoreData>> =
         store.stream<StoreWriteResponse>(
@@ -119,14 +121,14 @@ class UserRepositoryImpl(
         )
 
     override suspend fun updateUserPreferencesTheme(userId: String, theme: String) {
-        val current = getUserPreferences(userId)?.preferences ?: UserPreferences(userId = userId)
+        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
         if (current.theme == theme) return
         val updated = current.copy(theme = theme)
         insertUserPreferences(updated, needSync = true)
     }
 
     override suspend fun updateUserPreferencesLanguage(userId: String, language: String) {
-        val current = getUserPreferences(userId)?.preferences ?: UserPreferences(userId = userId)
+        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
         if (current.language == language) return
         val updated = current.copy(language = language)
         insertUserPreferences(updated, needSync = true)

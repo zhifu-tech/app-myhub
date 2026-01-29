@@ -17,8 +17,8 @@ import tech.zhifu.app.myhub.datastore.model.dto.CollectionResponse
 import tech.zhifu.app.myhub.datastore.model.dto.CreateCollectionRequest
 import tech.zhifu.app.myhub.datastore.model.dto.UpdateCollectionRequest
 import tech.zhifu.app.myhub.datastore.model.dto.toDomain
+import tech.zhifu.app.myhub.exception.ApiException
 import tech.zhifu.app.myhub.network.ApiConfig
-import tech.zhifu.app.myhub.network.ApiException
 import tech.zhifu.app.myhub.network.NetworkException
 
 class RemoteCollectionDataSourceImpl(
@@ -53,7 +53,8 @@ class RemoteCollectionDataSourceImpl(
                     val collectionResponses: List<CollectionResponse> = response.body()
                     collectionResponses.map { it.toDomain() }
                 }
-                else -> throw ApiException("Failed to fetch collections: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to fetch collections: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -71,8 +72,9 @@ class RemoteCollectionDataSourceImpl(
                     val collectionResponse: CollectionResponse = response.body()
                     collectionResponse.toDomain()
                 }
+
                 HttpStatusCode.NotFound -> null
-                else -> throw ApiException("Failed to fetch collection: ${response.status}")
+                else -> throw ApiException(response.status, "Failed to fetch collection: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -96,7 +98,8 @@ class RemoteCollectionDataSourceImpl(
                     val collectionResponse: CollectionResponse = response.body()
                     collectionResponse.toDomain()
                 }
-                else -> throw ApiException("Failed to create collection: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to create collection: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -120,8 +123,9 @@ class RemoteCollectionDataSourceImpl(
                     val collectionResponse: CollectionResponse = response.body()
                     collectionResponse.toDomain()
                 }
-                HttpStatusCode.NotFound -> throw ApiException("Collection not found: $id")
-                else -> throw ApiException("Failed to update collection: ${response.status}")
+
+                HttpStatusCode.NotFound -> throw ApiException(response.status, "Collection not found: $id")
+                else -> throw ApiException(response.status, "Failed to update collection: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e
@@ -136,10 +140,12 @@ class RemoteCollectionDataSourceImpl(
                 HttpStatusCode.OK, HttpStatusCode.NoContent -> {
                     // 成功删除
                 }
+
                 HttpStatusCode.NotFound -> {
                     // 卡集不存在，视为成功
                 }
-                else -> throw ApiException("Failed to delete collection: ${response.status}")
+
+                else -> throw ApiException(response.status, "Failed to delete collection: ${response.status}")
             }
         } catch (e: Exception) {
             if (e is ApiException) throw e

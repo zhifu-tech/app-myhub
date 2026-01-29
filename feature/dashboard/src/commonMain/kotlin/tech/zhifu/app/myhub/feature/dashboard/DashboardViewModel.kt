@@ -1,23 +1,25 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
+import tech.zhifu.app.myhub.datastore.model.domain.User
+import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.card.CardStoreData
 import tech.zhifu.app.myhub.datastore.repository.card.cards
@@ -66,10 +68,10 @@ class DashboardViewModel(
             .catch { e ->
                 logger.error(e) { "User not found, waiting for bootstrap..." }
             }
-            .distinctUntilChangedBy { user -> user.id }
+            .mapNotNull { it }
+            .distinctUntilChangedBy { user: User -> user.id }
             .onEach { user ->
                 logger.info { "User observed: ${user.id}" }
-                // 第二步：用户存在后，获取 userId 并加载数据
                 loadCardsForUser(user.id)
                 loadCollectionsForUser(user.id)
                 loadReviewProgress(user.id)
@@ -191,14 +193,17 @@ class DashboardViewModel(
                         logger.info { "Received ${collections.size} collections from ${response.origin}" }
                         updateUiStateWithCollections(collections, userId)
                     }
+
                     is StoreReadResponse.Loading -> {
                         logger.info { "Loading collections from ${response.origin}" }
                     }
+
                     is StoreReadResponse.Error -> {
                         val errorMessage = response.errorMessageOrNull()
                         logger.error { "Error loading collections: $errorMessage" }
                         if (isUnauthorizedError(errorMessage)) requestNavigateToLogin()
                     }
+
                     else -> {
                         // 其他状态不需要特殊处理
                     }
@@ -222,6 +227,7 @@ class DashboardViewModel(
                 // 如果还没有 Content 状态，等待 Cards 加载完成
                 currentState
             }
+
             is DashboardUiState.Content -> currentState.copy(
                 collections = collections,
                 hasMoreCollections = hasMoreCollections,
@@ -352,7 +358,7 @@ class DashboardViewModel(
         if (currentState is DashboardUiState.Content && currentState.isRefreshing) {
             // 简单处理：延迟一点时间后结束刷新，确保所有数据都已更新
             coroutineScope.launch {
-                kotlinx.coroutines.delay(300) // 给一点缓冲时间
+                delay(300) // 给一点缓冲时间
                 val updatedState = _uiState.value
                 if (updatedState is DashboardUiState.Content) {
                     _uiState.value = updatedState.copy(isRefreshing = false)
@@ -457,28 +463,6 @@ class DashboardViewModel(
 
     fun toggleFavorite(cardId: String) {
         // TODO: 实现收藏切换
-    }
-
-    fun viewCard(cardId: String) {
-        logger.info { "View card: $cardId" }
-    }
-
-    fun toggleViewType() {
-        val currentState = _uiState.value
-        if (currentState is DashboardUiState.Content) {
-            val newViewType = when (currentState.viewType) {
-                ViewType.GRID -> ViewType.LIST
-                ViewType.LIST -> ViewType.GRID
-            }
-            _uiState.value = currentState.copy(viewType = newViewType)
-        }
-    }
-
-    fun setViewType(viewType: ViewType) {
-        val currentState = _uiState.value
-        if (currentState is DashboardUiState.Content) {
-            _uiState.value = currentState.copy(viewType = viewType)
-        }
     }
 
     fun dismissFocusReview() {

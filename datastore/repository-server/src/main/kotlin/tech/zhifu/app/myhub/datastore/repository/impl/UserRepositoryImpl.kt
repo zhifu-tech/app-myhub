@@ -4,6 +4,7 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
+import tech.zhifu.app.myhub.logger.logger
 
 /**
  * 用户仓库实现（服务端）
@@ -25,6 +26,9 @@ class UserRepositoryImpl(
             try {
                 localDataSource.updateUser(user)
             } catch (e: Exception) {
+                logger.error("user-rep", e) {
+                    "Failed to update user: ${e.message}"
+                }
                 throw IllegalArgumentException("Failed to update user: ${e.message}", e)
             }
         } else {
@@ -32,6 +36,9 @@ class UserRepositoryImpl(
             try {
                 localDataSource.insertUser(user)
             } catch (e: Exception) {
+                logger.error("user-repo", e) {
+                    "Failed to create user: ${e.message}"
+                }
                 throw IllegalArgumentException("Failed to create user: ${e.message}", e)
             }
         }
@@ -60,6 +67,9 @@ class UserRepositoryImpl(
             try {
                 localDataSource.updateUserPreferences(preferences)
             } catch (e: Exception) {
+                logger.error("user-repo", e) {
+                    "Failed to update user preferences: ${e.message}"
+                }
                 throw IllegalArgumentException("Failed to update user preferences: ${e.message}", e)
             }
         } else {
@@ -67,6 +77,9 @@ class UserRepositoryImpl(
             try {
                 localDataSource.insertUserPreferences(preferences)
             } catch (e: Exception) {
+                logger.error("user-repo", e) {
+                    "Failed to create user preferences: ${e.message}"
+                }
                 throw IllegalArgumentException("Failed to create user preferences: ${e.message}", e)
             }
         }

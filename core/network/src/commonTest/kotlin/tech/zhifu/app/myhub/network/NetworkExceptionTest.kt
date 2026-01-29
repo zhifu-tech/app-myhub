@@ -6,36 +6,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /**
- * NetworkException 和 ApiException 测试
+ * NetworkException 测试（API 异常统一使用 tech.zhifu.app.myhub.exception.ApiException）
  */
 class NetworkExceptionTest {
-
-    @Test
-    fun `test ApiException creation with message`() {
-        // Given
-        val message = "API error occurred"
-
-        // When
-        val exception = ApiException(message)
-
-        // Then
-        assertEquals(message, exception.message)
-        assertNull(exception.cause)
-    }
-
-    @Test
-    fun `test ApiException creation with message and cause`() {
-        // Given
-        val message = "API error occurred"
-        val cause = RuntimeException("Root cause")
-
-        // When
-        val exception = ApiException(message, cause)
-
-        // Then
-        assertEquals(message, exception.message)
-        assertEquals(cause, exception.cause)
-    }
 
     @Test
     fun `test NetworkException creation with message`() {
@@ -65,34 +38,12 @@ class NetworkExceptionTest {
     }
 
     @Test
-    fun `test ApiException is Exception`() {
-        // Given
-        val exception = ApiException("Test")
-
-        // Then
-        assertNotNull(exception as? Exception)
-    }
-
-    @Test
     fun `test NetworkException is Exception`() {
         // Given
         val exception = NetworkException("Test")
 
         // Then
         assertNotNull(exception as? Exception)
-    }
-
-    @Test
-    fun `test ApiException can be thrown and caught`() {
-        // Given
-        val exception = ApiException("Test error")
-
-        // When & Then
-        try {
-            throw exception
-        } catch (e: ApiException) {
-            assertEquals("Test error", e.message)
-        }
     }
 
     @Test

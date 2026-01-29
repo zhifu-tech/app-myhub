@@ -22,7 +22,7 @@ fun userRepositoryModule() = module {
     single<UserRepository> {
         val logger = logger("user-repo")
         UserRepositoryImpl(
-            localUserDataSource = get(),
+            logger = logger,
             syncRepository = get(),
             store = createMutableStore(
                 cache = createUserStoreCache(),
@@ -40,8 +40,7 @@ fun userRepositoryModule() = module {
                     remoteUserDataSource = get(),
                     logger = logger,
                 ),
-            ),
-            logger = logger
+            )
         )
     }
     factory<SyncChangeApplier>(

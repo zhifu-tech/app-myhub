@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
@@ -18,12 +19,15 @@ fun createUserStoreSourceOfTruth(
                 "instance=${System.identityHashCode(key)}"
         }
         when (key) {
-            is UserStoreKey.ById -> flow {
-                val user = localUserDataSource.getUser(key.id)
-                if (user != null) {
-                    emit(UserStoreData.UserData(user))
-                } else {
-                    emit(null)
+            is UserStoreKey.ById -> if (key.id.isEmpty()) {
+                localUserDataSource.observeUser().map {
+                    UserStoreData.UserData(it)
+                }
+            } else {
+                flow {
+                    val user = localUserDataSource.getUser(key.id)
+                    if (user != null) emit(UserStoreData.UserData(user))
+                    else emit(null)
                 }
             }
 
@@ -44,7 +48,9 @@ fun createUserStoreSourceOfTruth(
         }
         when (key) {
             is UserStoreKey.ById if data is UserStoreData.UserData -> {
-                localUserDataSource.insertUser(data.user)
+                data.user?.let {
+                    localUserDataSource.insertUser(it)
+                }
             }
 
             is UserStoreKey.PreferencesById if data is UserStoreData.PreferencesData -> {

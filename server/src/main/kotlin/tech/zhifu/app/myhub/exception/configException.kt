@@ -13,7 +13,7 @@ internal fun Application.configException() {
     install(StatusPages) {
         exception<UnauthorizedException> { call, exception ->
             call.respond(
-                status = HttpStatusCode.Companion.Unauthorized,
+                status = HttpStatusCode.Unauthorized,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "UNAUTHORIZED",
@@ -26,7 +26,7 @@ internal fun Application.configException() {
 
         exception<NotFoundException> { call, exception ->
             call.respond(
-                status = HttpStatusCode.Companion.NotFound,
+                status = HttpStatusCode.NotFound,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "NOT_FOUND",
@@ -39,7 +39,7 @@ internal fun Application.configException() {
 
         exception<ValidationException> { call, exception ->
             call.respond(
-                status = HttpStatusCode.Companion.BadRequest,
+                status = HttpStatusCode.BadRequest,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "VALIDATION_ERROR",
@@ -52,7 +52,7 @@ internal fun Application.configException() {
 
         exception<ForbiddenException> { call, exception ->
             call.respond(
-                status = HttpStatusCode.Companion.Forbidden,
+                status = HttpStatusCode.Forbidden,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "FORBIDDEN",
@@ -78,7 +78,7 @@ internal fun Application.configException() {
 
         exception<IllegalArgumentException> { call, exception ->
             call.respond(
-                status = HttpStatusCode.Companion.BadRequest,
+                status = HttpStatusCode.BadRequest,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "BAD_REQUEST",
@@ -92,7 +92,7 @@ internal fun Application.configException() {
         exception<Exception> { call, exception ->
             exception.printStackTrace() // 记录错误日志
             call.respond(
-                status = HttpStatusCode.Companion.InternalServerError,
+                status = HttpStatusCode.InternalServerError,
                 message = ErrorResponse(
                     error = ErrorDetail(
                         code = "INTERNAL_SERVER_ERROR",
