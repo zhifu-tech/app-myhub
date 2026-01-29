@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.codeMetadata
@@ -144,22 +145,26 @@ fun CodeCard(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 代码块（浅色背景，对齐设计稿：bg-slate-50 border border-slate-100）
+                    // 代码块（浅色背景，对齐设计稿；固定最大高度 + 行数截断，避免算法卡片过长）
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), // bg-slate-50
-                        shape = RoundedCornerShape(8.dp), // rounded-lg
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(
                             1.dp,
                             MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                        ), // border-slate-100
-                        modifier = Modifier.fillMaxWidth()
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
                     ) {
                         Text(
                             text = codeContent,
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(12.dp) // p-3 = 12.dp
+                            maxLines = 6,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
 
@@ -176,7 +181,7 @@ fun CodeCard(
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text(
-                                        text = "#$tag",
+                                        text = "#${tag.name}",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

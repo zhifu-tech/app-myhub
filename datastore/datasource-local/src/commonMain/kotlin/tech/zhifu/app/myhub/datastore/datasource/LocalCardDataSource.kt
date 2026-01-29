@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.datastore.datasource
 
 import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
 interface LocalCardDataSource {
 
@@ -33,5 +34,5 @@ interface LocalCardDataSource {
 
     suspend fun getUnreviewedCards(userId: String): List<Card>
 
-    suspend fun getReviewProgress(userId: String): tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
+    suspend fun getReviewProgress(userId: String): ReviewProgress
 }

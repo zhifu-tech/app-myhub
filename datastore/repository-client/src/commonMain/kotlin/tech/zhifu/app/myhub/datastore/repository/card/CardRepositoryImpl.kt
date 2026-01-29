@@ -9,6 +9,7 @@ import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
@@ -72,8 +73,7 @@ class CardRepositoryImpl(
         )
     }
 
-
-    override suspend fun getReviewProgress(userId: String): tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress {
+    override suspend fun getReviewProgress(userId: String): ReviewProgress {
         return localCardDataSource.getReviewProgress(userId)
     }
 
@@ -98,7 +98,7 @@ class CardRepositoryImpl(
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.cached(
                 key = CardStoreKey.ById(cardId),
-                refresh = false
+                refresh = refresh
             )
         )
 

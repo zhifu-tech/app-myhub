@@ -4,6 +4,16 @@
   <string name="feature_dashboard_good_evening">Good evening, Scholar</string>
   <string name="feature_dashboard_cards_to_review">You have %1$d cards to review today.</string>
   <string name="feature_dashboard_no_cards_to_review">No cards to review today.</string>
+  <string name="feature_dashboard_focus_and_review">Focus &amp; Review</string>
+  <string name="feature_dashboard_asset_collections">Asset Collections</string>
+  <string name="feature_dashboard_latest_captures">Latest Captures</string>
+  <string name="feature_dashboard_view_all">View All</string>
+  <string name="feature_dashboard_new_capture">New Capture</string>
+  <string name="feature_dashboard_curated_library">Your curated library of cards</string>
+  <string name="feature_dashboard_recently_added">Recently added cards across all categories</string>
+  <string name="feature_dashboard_search">Search</string>
+  <string name="feature_dashboard_refresh">Refresh</string>
+  <string name="feature_dashboard_more_options">More options</string>
   <string name="feature_dashboard_last_synced">Last synced: %1$s</string>
   <string name="feature_dashboard_never_synced">Never synced</string>
   <string name="feature_dashboard_just_now">Just now</string>

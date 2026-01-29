@@ -4,6 +4,16 @@
   <string name="feature_dashboard_good_evening">晚上好，學者</string>
   <string name="feature_dashboard_cards_to_review">你今天有 %1$d 張卡片需要復習。</string>
   <string name="feature_dashboard_no_cards_to_review">今天沒有需要復習的卡片。</string>
+  <string name="feature_dashboard_focus_and_review">專注復習</string>
+  <string name="feature_dashboard_asset_collections">資產合集</string>
+  <string name="feature_dashboard_latest_captures">最新摘錄</string>
+  <string name="feature_dashboard_view_all">查看全部</string>
+  <string name="feature_dashboard_new_capture">新建摘錄</string>
+  <string name="feature_dashboard_curated_library">你整理的卡片庫</string>
+  <string name="feature_dashboard_recently_added">各分類最近添加的卡片</string>
+  <string name="feature_dashboard_search">搜索</string>
+  <string name="feature_dashboard_refresh">刷新</string>
+  <string name="feature_dashboard_more_options">更多選項</string>
   <string name="feature_dashboard_last_synced">上次同步：%1$s</string>
   <string name="feature_dashboard_never_synced">從未同步</string>
   <string name="feature_dashboard_just_now">剛剛</string>

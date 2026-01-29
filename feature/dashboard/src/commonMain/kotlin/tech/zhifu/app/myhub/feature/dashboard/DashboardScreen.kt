@@ -90,6 +90,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -99,20 +100,32 @@ import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.card.CardComponent
+import tech.zhifu.app.myhub.component.card.CardStyles
 import tech.zhifu.app.myhub.component.card.getContentPreview
 import tech.zhifu.app.myhub.component.card.typeIconColor
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_asset_collections
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_cards_to_review
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_curated_library
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_focus_and_review
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_latest_captures
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_more_options
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_new_capture
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_no_cards_to_review
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recently_added
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_refresh
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_view_all
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthExpanded
 import tech.zhifu.app.myhub.ui.isWidthLarge
 import tech.zhifu.app.myhub.ui.isWidthMedium
+
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -127,11 +140,10 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    // 401 未授权时提示并跳转登录
+    val sbHostState = remember { SnackbarHostState() }
     LaunchedEffect(viewModel.navigateToLogin) {
         viewModel.navigateToLogin.collect {
-            snackbarHostState.showSnackbar(
+            sbHostState.showSnackbar(
                 message = "登录已过期，请重新登录",
                 duration = SnackbarDuration.Short
             )
@@ -144,12 +156,9 @@ fun DashboardScreen(
         sizeClass.isWidthMedium() -> 2
         sizeClass.isWidthExpanded() -> 3
         sizeClass.isWidthLarge() -> 4
-        else -> 3 // 默认值，实际上不会到达这里
+        else -> 3
     }
-
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
-    // 从 state 中获取数据（用于 AppBar 显示）
     val contentState = uiState as? DashboardUiState.Content
     val isRefreshing = contentState?.isRefreshing ?: false
     val showAppBarReviewEntrance = (contentState?.reviewProgress?.total ?: 0) > 0
@@ -157,7 +166,7 @@ fun DashboardScreen(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(sbHostState) },
         topBar = {
             LargeFlexibleTopAppBar(
                 title = {
@@ -202,7 +211,7 @@ fun DashboardScreen(
                                 )
                             ) {
                                 Text(
-                                    text = "Focus & Review",
+                                    text = stringResource(Res.string.feature_dashboard_focus_and_review),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -217,49 +226,24 @@ fun DashboardScreen(
                 },
                 navigationIcon = {},
                 actions = {
-                    // 搜索按钮
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                            TooltipAnchorPosition.Above
-                        ),
-                        tooltip = { PlainTooltip { Text("Search") } },
-                        state = rememberTooltipState(),
-                    ) {
-                        IconButton(onClick = { /* TODO: 打开搜索 */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Search,
-                                contentDescription = "Search"
-                            )
-                        }
-                    }
-                    // 刷新按钮
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                            TooltipAnchorPosition.Above
-                        ),
-                        tooltip = { PlainTooltip { Text("Refresh") } },
-                        state = rememberTooltipState(),
-                    ) {
-                        RefreshButton(
-                            isLoading = isRefreshing,
-                            onRefresh = { viewModel.refresh() }
-                        )
-                    }
-                    // 更多选项按钮
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                            TooltipAnchorPosition.Above
-                        ),
-                        tooltip = { PlainTooltip { Text("More options") } },
-                        state = rememberTooltipState(),
-                    ) {
-                        IconButton(onClick = { /* TODO: 打开更多选项 */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-                    }
+                    TooltipIconButton(
+                        icon = Icons.Filled.Search,
+                        tooltipText = stringResource(Res.string.feature_dashboard_search),
+                        contentDescription = stringResource(Res.string.feature_dashboard_search),
+                        onClick = { /* TODO */ }
+                    )
+                    TooltipIconButton(
+                        icon = Icons.Filled.Refresh,
+                        tooltipText = stringResource(Res.string.feature_dashboard_refresh),
+                        contentDescription = stringResource(Res.string.feature_dashboard_refresh),
+                        content = { RefreshButton(isLoading = isRefreshing, onRefresh = { viewModel.refresh() }) }
+                    )
+                    TooltipIconButton(
+                        icon = Icons.Filled.MoreVert,
+                        tooltipText = stringResource(Res.string.feature_dashboard_more_options),
+                        contentDescription = stringResource(Res.string.feature_dashboard_more_options),
+                        onClick = { /* TODO */ }
+                    )
                 },
                 scrollBehavior = scrollBehavior,
             )
@@ -274,7 +258,6 @@ fun DashboardScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        // 可以在这里添加加载指示器
                         Text(
                             text = "Loading...",
                             style = MaterialTheme.typography.bodyLarge,
@@ -284,7 +267,6 @@ fun DashboardScreen(
                 }
 
                 is DashboardUiState.Content -> {
-                    // 下拉刷新：使用 Material3 PullToRefreshBox
                     val pullToRefreshState = rememberPullToRefreshState()
                     PullToRefreshBox(
                         modifier = Modifier.fillMaxSize(),
@@ -292,22 +274,19 @@ fun DashboardScreen(
                         onRefresh = { viewModel.refresh() },
                         state = pullToRefreshState
                     ) {
-                        // Box 应用 innerPadding，使整块内容（含浮动模块）从 AppBar 下方开始，避免被遮挡
                         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                            // 使用瀑布流：FullLine 放整行模块，卡片项自然形成瀑布流
                             LazyVerticalStaggeredGrid(
                                 columns = StaggeredGridCells.Fixed(columns),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
-                                    start = 32.dp,
-                                    end = 32.dp,
-                                    top = if (state.showFocusReview && state.reviewProgress.total > 0) 120.dp else 16.dp,
-                                    bottom = 16.dp
+                                    start = DashboardLayout.ContentPaddingH,
+                                    end = DashboardLayout.ContentPaddingH,
+                                    top = if (state.showFocusReview && state.reviewProgress.total > 0) DashboardLayout.FocusReviewReservedTop else DashboardLayout.FocusReviewTopPadding,
+                                    bottom = DashboardLayout.FocusReviewTopPadding
                                 ),
-                                verticalItemSpacing = 20.dp,
-                                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                verticalItemSpacing = DashboardLayout.GridSpacing,
+                                horizontalArrangement = Arrangement.spacedBy(DashboardLayout.GridSpacing)
                             ) {
-                                // Asset Collections 模块
                                 item(span = StaggeredGridItemSpan.FullLine) {
                                     AssetCollectionsModule(
                                         collections = state.collections,
@@ -318,19 +297,17 @@ fun DashboardScreen(
                                         hasMore = state.hasMoreCollections,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(bottom = 36.dp)
+                                            .padding(bottom = DashboardLayout.SectionBottomSpacing)
                                     )
                                 }
 
-                                // Latest Captures 标题行
                                 item(span = StaggeredGridItemSpan.FullLine) {
                                     LatestCapturesTitleRow(
                                         onViewAllClick = { /* TODO: 导航到全部 Captures */ },
-                                        modifier = Modifier.padding(bottom = 4.dp) // 与卡片区 24.dp
+                                        modifier = Modifier.padding(bottom = DashboardLayout.SectionTitleSpacing)
                                     )
                                 }
 
-                                // Latest Captures 卡片：瀑布流
                                 items(
                                     items = state.recentCards,
                                     key = { it.id }
@@ -343,15 +320,13 @@ fun DashboardScreen(
                                     )
                                 }
 
-                                // New Capture 占位
-                                item(span = StaggeredGridItemSpan.FullLine) {
+                                item(span = StaggeredGridItemSpan.SingleLane) {
                                     NewCaptureCard(
                                         onClick = { /* TODO: 导航到新建卡片页面 */ },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
 
-                                // Load more
                                 if (state.hasMoreCards) {
                                     item(span = StaggeredGridItemSpan.FullLine) {
                                         if (state.isLoadingMoreCards) {
@@ -372,7 +347,6 @@ fun DashboardScreen(
                                 }
                             }
 
-                            // Focus & Review 模块：浮动在内容之上，位于 AppBar 下方（避免被遮挡），宽度包裹内容
                             if (state.showFocusReview && state.reviewProgress.total > 0) {
                                 FocusReviewModule(
                                     reviewProgress = state.reviewProgress,
@@ -380,7 +354,11 @@ fun DashboardScreen(
                                     onDismiss = { viewModel.dismissFocusReview() },
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .padding(start = 32.dp, end = 32.dp, top = 16.dp)
+                                        .padding(
+                                            start = DashboardLayout.ContentPaddingH,
+                                            end = DashboardLayout.ContentPaddingH,
+                                            top = DashboardLayout.FocusReviewTopPadding
+                                        )
                                         .zIndex(1f)
                                 )
                             }
@@ -392,14 +370,33 @@ fun DashboardScreen(
     )
 }
 
+private fun Modifier.cardInteraction(
+    interactionSource: MutableInteractionSource,
+    onClick: () -> Unit
+) = hoverable(interactionSource).clickable(
+    interactionSource = interactionSource,
+    indication = null,
+    onClick = onClick
+)
+
+private object DashboardLayout {
+    val ContentPaddingH = 32.dp
+    val SectionTitleSpacing = 24.dp
+    val SectionBottomSpacing = 36.dp
+    val GridSpacing = 20.dp
+    val FocusReviewTopPadding = 16.dp
+    val FocusReviewReservedTop = 120.dp
+    val CollectionTitleTop = 12.dp
+    val CollectionTitlePaddingH = 4.dp
+}
+
+
 @Composable
 private fun RefreshButton(
     isLoading: Boolean,
     onRefresh: () -> Unit
 ) {
-    // 根据加载状态使用不同的动画, 在加载时显示旋转动画并禁用按钮
     val rotationAngle = if (isLoading) {
-        // 加载时使用无限旋转动画
         val infiniteTransition = rememberInfiniteTransition(label = "refresh_rotation")
         infiniteTransition.animateFloat(
             initialValue = 0f,
@@ -411,7 +408,6 @@ private fun RefreshButton(
             label = "rotation"
         )
     } else {
-        // 停止加载时平滑回到 0 度
         animateFloatAsState(
             targetValue = 0f,
             animationSpec = tween(durationMillis = 200, easing = LinearEasing),
@@ -432,6 +428,26 @@ private fun RefreshButton(
                 .size(20.dp)
                 .rotate(rotationAngle.value)
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TooltipIconButton(
+    icon: ImageVector,
+    tooltipText: String,
+    contentDescription: String,
+    onClick: (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null
+) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(tooltipText) } },
+        state = rememberTooltipState(),
+    ) {
+        if (content != null) content() else IconButton(onClick = onClick ?: {}) {
+            Icon(imageVector = icon, contentDescription = contentDescription)
+        }
     }
 }
 
@@ -457,14 +473,11 @@ fun FocusReviewModule(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 左侧：圆形进度指示器
             CircularProgressWithText(
                 progress = reviewProgress.progress,
                 text = "${reviewProgress.completed}/${reviewProgress.total}",
                 modifier = Modifier.size(64.dp)
             )
-
-            // 中间：文本和按钮
             Column(
                 modifier = Modifier.wrapContentWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -497,8 +510,6 @@ fun FocusReviewModule(
                     )
                 }
             }
-
-            // 右侧：关闭按钮
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier.size(40.dp)
@@ -514,16 +525,12 @@ fun FocusReviewModule(
     }
 }
 
-/**
- * 圆形进度指示器，带文本
- */
 @Composable
 private fun CircularProgressWithText(
     progress: Float,
     text: String,
     modifier: Modifier = Modifier
 ) {
-    // 在 @Composable 上下文中获取颜色
     val backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     val progressColor = MaterialTheme.colorScheme.primary
     val textColor = MaterialTheme.colorScheme.onSurface
@@ -532,21 +539,16 @@ private fun CircularProgressWithText(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        // 绘制圆形进度条
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidth = 6.dp.toPx()
             val radius = (size.minDimension - strokeWidth) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
-
-            // 背景圆
             drawCircle(
                 color = backgroundColor,
                 radius = radius,
                 center = center,
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
-
-            // 进度圆
             val sweepAngle = 360f * progress
             drawArc(
                 color = progressColor,
@@ -558,8 +560,6 @@ private fun CircularProgressWithText(
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
         }
-
-        // 中心文本
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
@@ -570,12 +570,6 @@ private fun CircularProgressWithText(
     }
 }
 
-// ==================== Asset Collections Module ====================
-
-/**
- * Asset Collections 模块
- * 根据设计稿实现：标题 + info 图标 + "View All" 链接 + Collection 卡片网格
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetCollectionsModule(
@@ -588,7 +582,6 @@ fun AssetCollectionsModule(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        // 标题行
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -599,21 +592,19 @@ fun AssetCollectionsModule(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Asset Collections",
+                    text = stringResource(Res.string.feature_dashboard_asset_collections),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                        TooltipAnchorPosition.Above
-                    ),
-                    tooltip = { PlainTooltip { Text("Your curated library of cards") } },
+                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                    tooltip = { PlainTooltip { Text(stringResource(Res.string.feature_dashboard_curated_library)) } },
                     state = rememberTooltipState(),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Info,
-                        contentDescription = "Info",
+                        contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
@@ -624,7 +615,7 @@ fun AssetCollectionsModule(
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Text(
-                    text = "View All",
+                    text = stringResource(Res.string.feature_dashboard_view_all),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary
@@ -632,9 +623,7 @@ fun AssetCollectionsModule(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp)) // mb-6 = 24.dp
-
-        // 设计稿：横向一排 Collection 卡片（LazyRow），固定宽度 4:3，rounded-3xl
+        Spacer(modifier = Modifier.height(DashboardLayout.SectionTitleSpacing))
         val cardWidth = 280.dp
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -665,22 +654,17 @@ fun AssetCollectionsModule(
                 }
             }
         }
-        if (hasMore && !isLoadingMore) {
-            LaunchedEffect(Unit) { onLoadMore() }
+        LaunchedEffect(hasMore, isLoadingMore) {
+            if (hasMore && !isLoadingMore) onLoadMore()
         }
     }
 }
 
-/**
- * Collection 卡片组件
- * 设计稿像素级：卡片本体仅包含预览区（背景+细边框）；标题与数量在卡片下方、直接落在页面背景上，无独立背景/边框；整块可点击，hover 仅卡片抬起。
- */
 @Composable
 fun CollectionCard(
     collection: Collection,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    previewLines: List<String>? = null
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -691,14 +675,8 @@ fun CollectionCard(
     )
     Column(
         modifier = modifier
-            .hoverable(interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
+            .cardInteraction(interactionSource, onClick)
     ) {
-        // 卡片本体：仅预览区；hover 时选中光圈 ring-1 ring-primary/40（设计稿）
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -717,21 +695,13 @@ fun CollectionCard(
                     .fillMaxWidth()
                     .aspectRatio(4f / 3f)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(Color(0xFF1E1F23))
                     .padding(12.dp)
             ) {
-                val useLocalPreview = previewLines != null && previewLines.size >= 3
-                val pl = previewLines
-                val line0 =
-                    if (useLocalPreview && pl != null) pl[0] else collection.cards.getOrNull(0)?.getContentPreview(80)
-                        .orEmpty()
-                val line1 =
-                    if (useLocalPreview && pl != null) pl[1] else collection.cards.getOrNull(1)?.getContentPreview(30)
-                        .orEmpty()
-                val line2 =
-                    if (useLocalPreview && pl != null) pl[2] else collection.cards.getOrNull(2)?.getContentPreview(30)
-                        .orEmpty()
-                val hasPreview = useLocalPreview || collection.cards.isNotEmpty()
+                val line0 = collection.cards.getOrNull(0)?.getContentPreview(80).orEmpty()
+                val line1 = collection.cards.getOrNull(1)?.getContentPreview(30).orEmpty()
+                val line2 = collection.cards.getOrNull(2)?.getContentPreview(30).orEmpty()
+                val hasPreview = collection.cards.isNotEmpty()
                 if (hasPreview) {
                     Row(
                         modifier = Modifier.fillMaxSize(),
@@ -808,11 +778,14 @@ fun CollectionCard(
                 }
             }
         }
-        // 标题与数量：在卡片下方，直接落在页面背景上，无边框、无卡片背景（设计稿像素级）
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 6.dp),
+                .padding(
+                    top = DashboardLayout.CollectionTitleTop,
+                    start = DashboardLayout.CollectionTitlePaddingH,
+                    end = DashboardLayout.CollectionTitlePaddingH
+                ),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
@@ -830,11 +803,6 @@ fun CollectionCard(
     }
 }
 
-// ==================== Latest Captures Module ====================
-
-/**
- * Latest Captures 标题行：标题 + info + View All（用于瀑布流布局中 FullLine）
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LatestCapturesTitleRow(
@@ -851,21 +819,19 @@ fun LatestCapturesTitleRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Latest Captures",
+                text = stringResource(Res.string.feature_dashboard_latest_captures),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
-                    TooltipAnchorPosition.Above
-                ),
-                tooltip = { PlainTooltip { Text("Recently added cards across all categories") } },
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(stringResource(Res.string.feature_dashboard_recently_added)) } },
                 state = rememberTooltipState(),
             ) {
                 Icon(
                     imageVector = Icons.Filled.Info,
-                    contentDescription = "Info",
+                    contentDescription = null,
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
@@ -876,7 +842,7 @@ fun LatestCapturesTitleRow(
             contentPadding = PaddingValues(0.dp)
         ) {
             Text(
-                text = "View All",
+                text = stringResource(Res.string.feature_dashboard_view_all),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.primary
@@ -885,10 +851,6 @@ fun LatestCapturesTitleRow(
     }
 }
 
-/**
- * 单张 Latest Capture 卡片（左侧类型色条 + CardComponent），用于瀑布流一项
- * 设计稿：单一边框，hover 时变色（border-slate-800/50 → hover:border-primary），避免光圈与固有边框双线
- */
 @Composable
 fun LatestCaptureCardItem(
     card: Card,
@@ -905,15 +867,17 @@ fun LatestCaptureCardItem(
         animationSpec = tween(durationMillis = 200),
         label = "capture_lift"
     )
-    // 始终一层边框：未 hover = 灰（设计稿 border-slate-800/50），hover = primary，避免双光圈
+
+    val cardShape = RoundedCornerShape(CardStyles.CornerRadius)
+    val borderWidth = if (captureHovered) 2.dp else 1.dp
     val borderColor = if (captureHovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
     else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .graphicsLayer { translationY = captureLiftY.value }
-            .border(2.dp, borderColor, RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+            .border(borderWidth, borderColor, cardShape)
+            .clip(cardShape)
             .hoverable(captureInteractionSource)
     ) {
         Box(
@@ -922,7 +886,7 @@ fun LatestCaptureCardItem(
                 .fillMaxHeight()
                 .background(
                     accentColor,
-                    RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
+                    RoundedCornerShape(topStart = CardStyles.CornerRadius, bottomStart = CardStyles.CornerRadius)
                 )
         )
         CardComponent(
@@ -931,74 +895,86 @@ fun LatestCaptureCardItem(
             onFavorite = { onFavorite() },
             onCardClick = { onCardClick() },
             modifier = Modifier.weight(1f),
-            suppressDefaultBorder = true
+            suppressDefaultBorder = true // 由外层 Row 统一绘制边框，避免双线
         )
     }
 }
 
-/**
- * New Capture 占位符卡片
- * 根据设计稿实现：虚线边框 + 加号图标 + "New Capture" 文本
- */
 @Composable
 fun NewCaptureCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(CardStyles.CornerRadius)
+    val newCaptureInteractionSource = remember { MutableInteractionSource() }
+    val newCaptureHovered by newCaptureInteractionSource.collectIsHoveredAsState()
     Card(
         modifier = modifier
-            .height(200.dp) // min-h-[200px]
+            .height(200.dp)
+            .clip(shape)
+            .cardInteraction(newCaptureInteractionSource, onClick)
             .drawBehind {
+                val strokeWidthPx = 2.dp.toPx()
+                val inset = strokeWidthPx / 2f
+                val insetCornerRadius = (CardStyles.CornerRadius.toPx() - inset).coerceAtLeast(0f)
+                // Stroke 居中于 path，内缩半线宽使虚线外缘贴齐卡片边缘，消除 gap
                 drawRoundRect(
                     color = borderColor,
                     style = Stroke(
-                        width = 2.dp.toPx(),
+                        width = strokeWidthPx,
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(8.dp.toPx(), 8.dp.toPx()))
                     ),
-                    cornerRadius = CornerRadius(16.dp.toPx())
+                    topLeft = Offset(inset, inset),
+                    size = Size(size.width - 2 * inset, size.height - 2 * inset),
+                    cornerRadius = CornerRadius(insetCornerRadius)
                 )
-            }
-            .clickable(onClick = onClick),
+            },
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
         shape = shape,
         border = null
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp), // p-6 = 24.dp
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .then(
+                    if (newCaptureHovered) Modifier.background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape
+                    ) else Modifier
+                )
         ) {
-            // 加号图标
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(DashboardLayout.SectionTitleSpacing),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "New Capture",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    modifier = Modifier.size(24.dp)
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "New Capture",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(Res.string.feature_dashboard_new_capture),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             }
-
-            Spacer(modifier = Modifier.height(12.dp)) // gap-3 = 12.dp
-
-            // "New Capture" 文本
-            Text(
-                text = "New Capture",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
         }
     }
 }

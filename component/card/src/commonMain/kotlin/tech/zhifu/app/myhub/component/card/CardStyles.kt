@@ -16,10 +16,9 @@ import androidx.compose.ui.unit.dp
  */
 object CardStyles {
     /**
-     * 卡片圆角
-     * Material 3 规范：小卡片使用 12dp 圆角
+     * 卡片圆角，与设计稿 rounded-2xl (16dp) 一致
      */
-    val CornerRadius = 12.dp
+    val CornerRadius = 16.dp
     val Shape = RoundedCornerShape(CornerRadius)
 
     /**
