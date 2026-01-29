@@ -152,6 +152,7 @@ fun DashboardScreen(
     // 从 state 中获取数据（用于 AppBar 显示）
     val contentState = uiState as? DashboardUiState.Content
     val isRefreshing = contentState?.isRefreshing ?: false
+    val showAppBarReviewEntrance = (contentState?.reviewProgress?.total ?: 0) > 0
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -186,28 +187,31 @@ fun DashboardScreen(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Text(
-                            text = "•",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                        TextButton(
-                            onClick = { viewModel.startReview() },
-                            contentPadding = PaddingValues(0.dp),
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
+
+                        if (showAppBarReviewEntrance) {
                             Text(
-                                text = "Focus & Review",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
+                                text = "•",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            TextButton(
+                                onClick = { viewModel.startReview() },
+                                contentPadding = PaddingValues(0.dp),
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    text = "Focus & Review",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
                         }
                     }
                 },
