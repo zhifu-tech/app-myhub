@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.api
+package tech.zhifu.app.myhub.api.auth
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.path
@@ -8,7 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.serialization.Serializable
-import tech.zhifu.app.myhub.auth.TokenService
+import org.koin.ktor.ext.get
 import tech.zhifu.app.myhub.datastore.model.dto.ErrorDetail
 import tech.zhifu.app.myhub.datastore.model.dto.ErrorResponse
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
@@ -18,32 +18,24 @@ import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.service.UserService
+import tech.zhifu.app.myhub.auth.TokenService
 import kotlin.time.Clock
 
 /**
- * 认证 API 路由
+ * 认证 API 路由（领域：auth）
  *
  * POST /api/auth/login - 登录并获取 token（支持自动注册）
  * POST /api/auth/refresh - 刷新 access token
  */
-fun Route.authApi(
-    tokenService: TokenService,
-    userService: UserService,
-    userRepository: UserRepository
-) {
+fun Route.authApi() {
     route("/api/auth") {
-        // POST /api/auth/login - 登录（支持自动注册）
         post("login") {
+            val tokenService = call.application.get<TokenService>()
+            val userService = call.application.get<UserService>()
+            val userRepository = call.application.get<UserRepository>()
             try {
                 val request = call.receive<LoginRequest>()
-
-                // 验证请求
-                require(request.userId.isNotBlank()) {
-                    "User ID is required"
-                }
-
-                // 获取或创建用户（自动注册）
-                // 如果客户端提供了用户信息，使用客户端数据（以客户端为准）
+                require(request.userId.isNotBlank()) { "User ID is required" }
                 val user = userService.createUserIfNotExists(
                     userId = request.userId,
                     username = request.username,
@@ -51,17 +43,12 @@ fun Route.authApi(
                     avatarUrl = request.avatarUrl,
                     avatarText = request.avatarText
                 )
-
-                // 更新最后登录时间（在事务中确保原子性）
                 val updatedUser = user.copy(
                     lastLoginAt = Clock.System.now(),
                     updatedAt = Clock.System.now()
                 )
                 userRepository.upsertUser(updatedUser)
-
-                // 生成 token pair（access token + refresh token）
                 val tokenPair = tokenService.generateTokens(updatedUser)
-
                 call.respond(
                     HttpStatusCode.OK,
                     LoginResponse(
@@ -74,7 +61,6 @@ fun Route.authApi(
                     )
                 )
             } catch (e: ValidationException) {
-                // 验证错误，返回 400
                 call.respond(
                     HttpStatusCode.BadRequest,
                     ErrorResponse(
@@ -86,7 +72,6 @@ fun Route.authApi(
                     )
                 )
             } catch (e: IllegalArgumentException) {
-                // 参数错误，返回 400
                 logger.warn(e) { "Invalid login request: ${e.message}" }
                 call.respond(
                     HttpStatusCode.BadRequest,
@@ -99,7 +84,6 @@ fun Route.authApi(
                     )
                 )
             } catch (e: IllegalStateException) {
-                // 状态错误（如并发创建后的状态不一致），返回 409
                 logger.warn(e) { "User creation state error: ${e.message}" }
                 call.respond(
                     HttpStatusCode.Conflict,
@@ -112,7 +96,6 @@ fun Route.authApi(
                     )
                 )
             } catch (e: Exception) {
-                // 其他错误，记录详细日志，返回通用错误（避免信息泄露）
                 logger.error(e) { "Login failed: ${e.message}" }
                 call.respond(
                     HttpStatusCode.InternalServerError,
@@ -127,19 +110,12 @@ fun Route.authApi(
             }
         }
 
-        // POST /api/auth/refresh - 刷新 access token
         post("refresh") {
+            val tokenService = call.application.get<TokenService>()
             try {
                 val request = call.receive<RefreshTokenRequest>()
-
-                // 验证请求
-                require(request.refreshToken.isNotBlank()) {
-                    "Refresh token is required"
-                }
-
-                // 使用 refresh token 刷新 access token
+                require(request.refreshToken.isNotBlank()) { "Refresh token is required" }
                 val tokenPair = tokenService.refreshAccessToken(request.refreshToken)
-
                 call.respond(
                     HttpStatusCode.OK,
                     RefreshTokenResponse(
@@ -159,46 +135,31 @@ fun Route.authApi(
     }
 }
 
-/**
- * 登录请求
- * 支持客户端提供用户信息（本地匿名用户已有）
- */
 @Serializable
 data class LoginRequest(
     val userId: String,
-    val username: String? = null, // 可选：客户端提供的用户名
-    val displayName: String? = null, // 可选：客户端提供的显示名称
-    val avatarUrl: String? = null, // 可选：客户端提供的头像URL
-    val avatarText: String? = null // 可选：客户端提供的头像文本
+    val username: String? = null,
+    val displayName: String? = null,
+    val avatarUrl: String? = null,
+    val avatarText: String? = null
 )
 
-/**
- * 登录响应
- */
 @Serializable
 data class LoginResponse(
     val accessToken: String,
     val refreshToken: String,
-    val expiresIn: Long, // 秒
+    val expiresIn: Long,
     val tokenType: String,
     val userId: String,
     val username: String
 )
 
-/**
- * 刷新 Token 请求
- */
 @Serializable
-data class RefreshTokenRequest(
-    val refreshToken: String
-)
+data class RefreshTokenRequest(val refreshToken: String)
 
-/**
- * 刷新 Token 响应
- */
 @Serializable
 data class RefreshTokenResponse(
     val accessToken: String,
-    val expiresIn: Long, // 秒
+    val expiresIn: Long,
     val tokenType: String
 )

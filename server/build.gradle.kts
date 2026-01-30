@@ -30,6 +30,7 @@ dependencies {
     implementation(projects.datastore.datasourceLocal)
 
     implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.http)
     implementation(libs.ktor.serverCore)

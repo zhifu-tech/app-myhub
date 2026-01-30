@@ -10,42 +10,37 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    API Layer                            │
+│                    API Layer（按领域分包）                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │   Cards API  │  │   Tags API   │  │ Statistics   │  │
-│  │   Routes     │  │   Routes     │  │   Routes     │  │
+│  │   Cards API  │  │   Tags API   │  │ Collections  │  │
+│  │  (api.card)  │  │  (api.tag)   │  │  (api.*)     │  │
 │  └──────────────┘  └──────────────┘  └──────────────┘  │
-│  ┌──────────────┐  ┌──────────────┐                    │
-│  │ Templates    │  │   Users API  │                    │
-│  │   Routes     │  │   Routes     │                    │
-│  └──────────────┘  └──────────────┘                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ CardTemplates│  │   Users API  │  │  Auth / Sync │  │
+│  │(api.template)│  │  (api.user)  │  │ (api.auth等) │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
 └───────────────────────┬───────────────────────────────────┘
                         │
 ┌───────────────────────▼───────────────────────────────────┐
-│              Service Layer                               │
+│              Service Layer（server 内）                    │
 │  ┌─────────────────────────────────────────────────────┐  │
-│  │  CardService | TagService | TemplateService         │  │
-│  │  UserService | StatisticsService                    │  │
-│  │  - 业务逻辑处理                                        │  │
-│  │  - 数据验证和转换                                      │  │
-│  │  - 异常处理                                           │  │
+│  │  CardService | TagService | CardTemplateService     │  │
+│  │  UserService | CollectionService | SyncService      │  │
+│  │  - 业务逻辑处理、数据验证和转换、异常处理                 │  │
 │  └─────────────────────────────────────────────────────┘  │
 └───────────────────────┬───────────────────────────────────┘
                         │
 ┌───────────────────────▼───────────────────────────────────┐
-│              Data Layer                                  │
+│              Data Layer（datastore 模块）                   │
 │  ┌─────────────────────────────────────────────────────┐  │
-│  │  Repository Pattern                                 │  │
-│  │  - CardRepository                                   │  │
-│  │  - TagRepository                                    │  │
-│  │  - TemplateRepository                               │  │
-│  │  - UserRepository                                   │  │
-│  │  - StatisticsRepository                             │  │
+│  │  Repository（repository-server-api + repository-server）│
+│  │  - CardRepository | TagRepository | CardTemplateRepository│
+│  │  - UserRepository | CollectionRepository | SyncRepository│
 │  └─────────────────────────────────────────────────────┘  │
 │  ┌─────────────────────────────────────────────────────┐  │
 │  │  Data Source                                        │  │
-│  │  - Database (SQLDelight / PostgreSQL)              │  │
-│  │  - Cache (Redis - 可选)                             │  │
+│  │  - database-server（SQLDelight / SQLite 或 PostgreSQL）│  │
+│  │  - datasource-local                                 │  │
 │  └─────────────────────────────────────────────────────┘  │
 └───────────────────────────────────────────────────────────┘
 ```
@@ -125,11 +120,14 @@ GET    /api/users/current     # 获取当前用户
 PUT    /api/users/current     # 更新当前用户
 ```
 
-#### 统计 API
+#### 同步 API
 
 ```
-GET    /api/statistics        # 获取统计信息
+POST   /api/sync              # 推送同步数据
+GET    /api/sync/changes      # 获取同步变更（需 userId、entityType 等参数）
 ```
+
+> **说明**：统计 API（Statistics）当前未实现；模板相关 API 命名为 **CardTemplates**（/api/templates 路由由 CardTemplatesApi 提供）。
 
 ### 请求/响应格式
 
@@ -140,16 +138,19 @@ POST /api/cards
 Content-Type: application/json
 
 {
-  "type": "QUOTE",
-  "title": "Inspirational Quote",
-  "content": "The only way to do great work is to love what you do.",
-  "author": "Steve Jobs",
-  "tags": ["inspiration", "motivation"],
-  "isFavorite": false,
-  "metadata": {
-    "quoteAuthor": "Steve Jobs",
-    "quoteCategory": "Motivation"
-  }
+    "type": "QUOTE",
+    "title": "Inspirational Quote",
+    "content": "The only way to do great work is to love what you do.",
+    "author": "Steve Jobs",
+    "tags": [
+        "inspiration",
+        "motivation"
+    ],
+    "isFavorite": false,
+    "metadata": {
+       "quoteAuthor": "Steve Jobs",
+       "quoteCategory": "Motivation"
+    }
 }
 ```
 
@@ -162,7 +163,10 @@ Content-Type: application/json
   "title": "Inspirational Quote",
   "content": "The only way to do great work is to love what you do.",
   "author": "Steve Jobs",
-  "tags": ["inspiration", "motivation"],
+  "tags": [
+    "inspiration",
+    "motivation"
+  ],
   "isFavorite": false,
   "createdAt": "2024-01-01T00:00:00Z",
   "updatedAt": "2024-01-01T00:00:00Z",
@@ -219,46 +223,36 @@ Content-Type: application/json
 
 ## 📦 模块结构
 
-### 当前结构
+### 当前结构（与实现一致）
+
+**server 模块**（API、Service、Auth、DI、异常配置均在 server 内）：
 
 ```
 server/
 ├── src/main/kotlin/tech/zhifu/app/myhub/
-│   └── Application.kt          # 应用入口和路由配置
-└── src/main/resources/
-    └── logback.xml             # 日志配置
-```
-
-### 推荐结构（待实现）
-
-```
-server/
-├── src/main/kotlin/tech/zhifu/app/myhub/
-│   ├── Application.kt          # 应用入口
-│   ├── api/                    # API 路由
-│   │   ├── CardsApi.kt
-│   │   ├── TagsApi.kt
-│   │   ├── TemplatesApi.kt
-│   │   ├── UsersApi.kt
-│   │   └── StatisticsApi.kt
-│   ├── service/                 # 业务逻辑层
-│   │   ├── CardService.kt
-│   │   ├── TagService.kt
-│   │   └── ...
-│   ├── repository/              # 数据访问层
-│   │   ├── CardRepository.kt
-│   │   └── ...
-│   ├── model/                   # 数据模型
-│   │   └── ...
-│   ├── dto/                     # 数据传输对象
-│   │   └── ...
-│   ├── exception/               # 异常处理
-│   │   └── ApiException.kt
-│   └── config/                  # 配置
-│       └── DatabaseConfig.kt
+│   ├── Application.kt              # 应用入口 + Ktor 插件 + 路由挂载
+│   ├── api/                         # API 层（按领域分包）
+│   │   ├── auth/   AuthApi.kt       # 认证（login、refresh）
+│   │   ├── card/   CardsApi.kt
+│   │   ├── collection/ CollectionsApi.kt
+│   │   ├── sync/   SyncApi.kt
+│   │   ├── tag/    TagsApi.kt
+│   │   ├── template/ CardTemplatesApi.kt   # 卡片模板（/api/templates）
+│   │   └── user/   UsersApi.kt
+│   ├── auth/                        # JWT 认证
+│   ├── di/   Koin.kt                 # Koin 模块组装
+│   ├── exception/                   # StatusPages 统一异常处理
+│   └── service/                     # 业务逻辑层（CardService、UserService 等）
 └── src/main/resources/
     └── logback.xml
 ```
+
+**数据层**（在 datastore 中，非 server 内）：
+
+- **repository-server-api**：服务端 Repository 接口定义（server 依赖接口）
+- **repository-server**：服务端 Repository 实现（依赖 database-server、datasource-local）
+- **database-server**：服务端数据库驱动与配置（SQLite/PostgreSQL）
+- **model、model-dto**：领域模型与 DTO、异常类（client/server 共用）
 
 ## 🔌 Ktor 插件配置
 

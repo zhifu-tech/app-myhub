@@ -1,28 +1,29 @@
 # MyHub Server
 
-MyHub 服务器模块，基于 Ktor 框架实现的 RESTful API 服务器，为 MyHub 客户端应用提供数据同步和业务逻辑服务。
+MyHub 服务器模块，基于 Ktor 实现的 RESTful API 服务，为 MyHub 客户端提供数据同步与业务能力。
 
 ## 📋 概述
 
-Server 模块是 MyHub 项目的后端服务，负责：
+Server 模块是 MyHub 的后端服务，主要职责：
 
-- 提供 RESTful API 接口
-- 管理卡片、标签、模板、用户等数据
-- 处理数据同步和统计信息
-- 支持多客户端（Android、iOS、Desktop、Web）的数据访问
+- 提供 RESTful API（卡片、标签、卡集、模板、用户、认证、同步）
+- 管理业务数据（依赖 datastore 的 repository-server、database-server）
+- JWT 认证与统一异常处理（StatusPages）
+- 支持多端（Android、iOS、Desktop、Web）访问
 
 ## 🛠️ 技术栈
 
 - **Ktor** - Kotlin 异步 Web 框架
-- **Netty** - 高性能网络服务器引擎
-- **Logback** - 日志框架
-- **Kotlin** - 编程语言（JVM 17+）
+- **Netty** - 服务器引擎
+- **Koin** - 依赖注入（Ktor 插件，Route 内按需 `get<>()`）
+- **Kotlin** - 编程语言（JVM 21）
+- **Logback** - 日志
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- **JDK 17+**
+- **JDK 21+**
 - **Gradle 8.0+**
 
 ### 运行服务器
@@ -240,10 +241,10 @@ docker inspect myhub-server | grep -A 10 Health
 
 ### 默认配置
 
-- **端口**: 8083（定义在 `core:platform` 模块的 `Constants.kt`）
+- **端口**: 8083（`Application.kt` 中 `SERVER_PORT`）
 - **主机**: 0.0.0.0（监听所有网络接口）
-- **数据库**: SQLite（默认，文件路径：`.myhub/myhub.db`）
-- **开发模式**: 支持热重载和详细日志
+- **数据库**: SQLite（默认，路径见环境变量 `DB_PATH` 或文档）
+- **开发模式**: 支持 Ktor development 模式
 
 ### 数据库配置
 
@@ -280,14 +281,26 @@ Server 支持 SQLite 和 PostgreSQL 两种数据库。详细配置说明请参�
 - `PUT /api/templates/{id}` - 更新模板
 - `DELETE /api/templates/{id}` - 删除模板
 
-### 用户 API (`/api/users`)
+### 用户 API (`/api/users`)（需认证）
 
-- `GET /api/users/current` - 获取当前用户信息
-- `PUT /api/users/current` - 更新当前用户信息
+- `GET /api/users/{id}` - 获取指定用户
+- `POST /api/users` - 创建用户
+- `PUT /api/users/{id}` - 更新用户
+- `DELETE /api/users/{id}` - 删除用户
+- `GET /api/users/{id}/preferences` - 获取用户偏好
+- `PUT /api/users/{id}/preferences` - 更新用户偏好
 
-### 统计 API (`/api/statistics`)
+### 认证 API (`/api/auth`)（无需认证）
 
-- `GET /api/statistics` - 获取统计信息
+- `POST /api/auth/login` - 登录/自动注册，返回 accessToken、refreshToken
+- `POST /api/auth/refresh` - 使用 refreshToken 刷新 accessToken
+
+### 同步 API (`/api/sync`)
+
+- `POST /api/sync` - 推送同步数据
+- `GET /api/sync/changes` - 获取同步变更（需 query：userId、entityType 等）
+
+> **说明**：统计 API（`/api/statistics`）当前未实现。
 
 ## 🧪 测试
 
@@ -295,30 +308,46 @@ Server 支持 SQLite 和 PostgreSQL 两种数据库。详细配置说明请参�
 # 运行所有测试
 ./gradlew :server:test
 
-# 运行特定测试类
-./gradlew :server:test --tests "ApplicationTest"
+# 运行集成测试类
+./gradlew :server:test --tests "tech.zhifu.app.myhub.ApplicationTest"
 ```
+
+**测试覆盖**（`ApplicationTest`）：
+
+- `GET /health`、`GET /`：健康检查与根路径
+- `GET /api/cards` 无 Authorization：401
+- `POST /api/auth/login` 空 userId：400
+- `POST /api/auth/refresh` 空 token：401/400
+- `GET /api/sync/changes` 无必填参数：400
+- `GET` 未知路径：404
 
 ## 📦 项目结构
 
 ```
 server/
 ├── src/
-│   ├── main/
-│   │   ├── kotlin/
-│   │   │   └── tech/zhifu/app/myhub/
-│   │   │       └── Application.kt          # 主应用入口
-│   │   └── resources/
-│   │       └── logback.xml                 # 日志配置
-│   └── test/
-│       └── kotlin/
-│           └── tech/zhifu/app/myhub/
-│               └── ApplicationTest.kt      # 测试代码
-├── build.gradle.kts                        # 构建配置
-├── README.md                                # 本文档
+│   ├── main/kotlin/tech/zhifu/app/myhub/
+│   │   ├── Application.kt              # 入口 + Koin/路由挂载
+│   │   ├── api/                          # API 按领域分包
+│   │   │   ├── auth/   AuthApi.kt
+│   │   │   ├── card/   CardsApi.kt
+│   │   │   ├── collection/ CollectionsApi.kt
+│   │   │   ├── sync/   SyncApi.kt
+│   │   │   ├── tag/    TagsApi.kt
+│   │   │   ├── template/ CardTemplatesApi.kt
+│   │   │   └── user/   UsersApi.kt
+│   │   ├── auth/                        # JWT 认证
+│   │   ├── di/   Koin.kt                 # Koin 模块
+│   │   ├── exception/                   # StatusPages
+│   │   └── service/                     # 业务逻辑层
+│   └── test/kotlin/tech/zhifu/app/myhub/
+│       └── ApplicationTest.kt           # 集成测试
+├── build.gradle.kts
+├── README.md
 └── docs/
-    ├── architecture.md                      # 架构设计文档
-    └── todos.md                             # 待办事项文档
+    ├── architecture.md
+    ├── server-module-review.md
+    └── ...
 ```
 
 ## 🔗 相关文档
@@ -333,7 +362,13 @@ server/
 
 Server 模块依赖：
 
-- `core:platform` - 平台抽象层（获取 SERVER_PORT 等常量）
+- `core:logger` - 日志
+- `datastore:model`、`datastore:model-dto` - 领域模型与 DTO、异常
+- `datastore:sync` - 同步模型
+- `datastore:repository-server-api` - 服务端 Repository 接口
+- `datastore:repository-server` - 服务端 Repository 实现
+- `datastore:database-server` - 服务端数据库驱动与配置
+- `datastore:datasource-local` - 本地数据源
 
 ### 日志配置
 
@@ -355,7 +390,7 @@ Server 模块依赖：
 
 ### 端口配置
 
-服务器端口定义在 `core:platform` 模块的 `Constants.kt` 中：
+服务器端口定义在 `Application.kt` 中：
 
 ```kotlin
 const val SERVER_PORT = 8083

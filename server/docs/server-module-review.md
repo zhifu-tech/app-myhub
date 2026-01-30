@@ -1,6 +1,10 @@
-# Server 模块梳理与架构评审
+# Server 模块梳理与架构评审（整合版）
 
-> 从资深工程师视角对 server 相关模块的现状、模块划分、层级划分进行梳理与总结。
+> 从资深工程师视角对 server 相关模块的现状、模块划分、层级划分进行梳理与总结；文末整合外部资深 Backend 工程师点评与落地执行要点，便于按优先级执行。
+
+**文档版本**：v1.1 整合版  
+**编写/整合日期**：2026-01-29  
+**适用范围**：Server 及 datastore 中与 server 相关的模块（repository-server-api、repository-server、database-server）。
 
 ---
 
@@ -160,15 +164,24 @@ database-server / datasource-local
 - **模块划分**：datastore 侧模块划分合理；server 单体在当前规模下可接受，仅需清理历史遗留（TemplatesApi）并同步文档。
 - **层级划分**：依赖方向正确，API → Service → Repository → DataSource/DB 清晰；主要改进点在于「路由层如何拿到依赖」（推荐 Koin 集成或 Facade 注入），而非拆更多层。
 
-### 4.2 建议优先级
+**外部评审结论（资深 Backend 工程师）**：上述结论站得住脚；文档结构清晰、信息有用、建议可执行。骨架和分层健康，无显著架构性错误，按 P1→P2 落地即可，不必提前拆模块。
 
-| 优先级 | 建议 | 说明 |
-|--------|------|------|
-| P1 | 删除或明确废弃 `TemplatesApi.kt` | 避免与 CardTemplatesApi 混淆，保持代码库干净 |
-| P1 | 更新 `server/docs/architecture.md` | 与当前实现一致：Repository 在 datastore、CardTemplates、无 Statistics 等 |
-| P2 | 路由层依赖注入方式 | 用 Koin 插件或 Facade 替代 Application 内大量 `GlobalContext.get().get<>()` |
-| P2 | 为 server 补充基础测试 | 至少覆盖 1～2 个 API 的集成测试或关键 Service 的单元测试，便于后续重构 |
-| P3 | 若未来有多入口/多团队需求 | 再评估 server 按领域拆子模块；当前不必提前拆 |
+### 4.2 建议优先级与落地执行要点
+
+| 优先级 | 建议 | 说明 | 落地执行要点 / 验收标准 |
+|--------|------|------|-------------------------|
+| **P1** | 删除或明确废弃 `TemplatesApi.kt` | 避免与 CardTemplatesApi 混淆，保持代码库干净 | 删除文件，或保留文件并加 `@Deprecated` 及注释说明废弃原因；全局搜索无引用后合入 |
+| **P1** | 更新 `server/docs/architecture.md` | 与当前实现一致 | 文中：Repository 写为在 datastore（repository-server-api / repository-server）；API/Service 命名为 CardTemplates；删除或标注 Statistics 为未实现；推荐结构图与目录一致 |
+| **P2** | 路由层依赖注入方式 | 用 Koin 插件或 Facade 替代 Application 内大量 `GlobalContext.get().get<>()` | 在 Route 内按需 `get<>()`，或引入 ApiDependencies/Facade 由 Koin 注入；Application.module() 中不再手写一长串 get<>() |
+| **P2** | 为 server 补充基础测试 | 便于后续重构与回归 | **至少 1 条「HTTP → Service/Repository」的集成测试或契约测试**作为回归底线；可选：1～2 个关键 Service 的单元测试 |
+| **P3** | 若未来有多入口/多团队需求 | 再评估 server 按领域拆子模块 | 当前不执行；仅在有明确多入口/多团队需求时再评估 |
+
+**落地执行顺序**：先完成 P1（清理遗留 + 文档同步），再推进 P2（依赖注入 + 测试）；P3 暂不执行。
+
+**补充（评审中建议纳入）**：
+
+- **入参校验归属**：在架构或本评审中明确「请求体验证」放在哪一层（API / Service / DTO 注解），便于后续统一。
+- **异常与可观测性**：若后续做监控/告警，建议在 model-dto 或异常设计上区分「业务异常 vs 系统异常」或稳定错误码，便于日志与指标聚合；当前可只做约定，不做实现。
 
 ### 4.3 与「关注度」的呼应
 
@@ -182,6 +195,18 @@ database-server / datasource-local
 
 ---
 
-**文档版本**：v1.0  
-**编写日期**：2026-01-29  
+## 五、后续可选深化方向（非本次落地范围）
+
+以下维度本次评审未深入，可在 v1.1 或单独文档中按需补充：
+
+| 维度 | 说明 |
+|------|------|
+| **安全与认证** | JWT 签发/刷新/撤销、过期与黑名单、敏感接口限流/防刷等策略级结论与实现 |
+| **可观测性** | 除 `/health` 外：日志规范（requestId、userId、错误码）、指标（QPS、延迟、错误率）、tracing 预留 |
+| **API 契约与演进** | 版本策略（路径/头/查询参数）、向后兼容原则；对外或多端共用时建议单独成文 |
+
+---
+
+**文档版本**：v1.1 整合版  
+**编写/整合日期**：2026-01-29  
 **适用范围**：Server 及 datastore 中与 server 相关的模块（repository-server-api、repository-server、database-server）。
