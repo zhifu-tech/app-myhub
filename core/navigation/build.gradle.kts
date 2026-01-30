@@ -30,6 +30,8 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(libs.jb.androidx.navigation3.navigation3Ui)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
 
