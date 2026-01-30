@@ -18,7 +18,7 @@ class LoggerConfigTest {
 
         // Then
         assertEquals("TestApp", config.appName)
-        assertTrue(config.useAndroidLogger) // 默认值为 true
+        assertFalse(config.useAndroidLogger) // 默认值为 false
     }
 
     @Test
