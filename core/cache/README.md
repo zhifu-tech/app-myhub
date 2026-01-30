@@ -52,6 +52,19 @@ cache.put("key", "value")
 val value = cache.get("key")
 ```
 
+## 测试
+
+本模块提供 `commonTest` 单元测试，覆盖 `CacheConfig` 与 `Cache` 行为：
+
+- **CacheConfigTest**：默认值、自定义值、相等性/拷贝、`maximumSize` 必须为正数的校验。
+- **CacheTest**：通过 `cache()` 创建的默认实现，测试 `get`/`put`/`getOrPut`/`invalidate`/`invalidateAll` 及 `maximumSize` 驱逐策略。
+
+运行测试：
+
+```bash
+./gradlew :core:cache:allTests
+```
+
 ## 文档
 
 - [MyHub 缓存模块方案设计](./docs/myhub-cache-infra-v1.0.md)
