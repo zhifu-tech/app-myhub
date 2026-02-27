@@ -1,12 +1,15 @@
 package tech.zhifu.app.myhub.feature.settings.settings
 
+import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingImpl
-import tech.zhifu.app.myhub.settings.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.data.store.StringSettingSerializer
 import tech.zhifu.app.myhub.feature.settings.domain.Setting
 import tech.zhifu.app.myhub.feature.settings.domain.SettingScope
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
+import tech.zhifu.app.myhub.language.AppLocale
+import tech.zhifu.app.myhub.language.normalizeLanguageTag
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 
 private const val LANGUAGE_SETTING_KEY = "language.code"
 
@@ -28,7 +31,7 @@ class LanguageSetting(
     override val key = LANGUAGE_SETTING_KEY
     override val scope = SettingScope.USER
 
-    override val defaultValue = "en"
+    override val defaultValue = AppLocale.DEFAULT
 
     private val setting = SettingImpl(
         key = key,
@@ -38,18 +41,20 @@ class LanguageSetting(
         userRepository = userRepository,
         serializer = StringSettingSerializer(),
         userPreferenceExtractor = { prefs ->
-            prefs.language.takeIf { it.isNotBlank() }
+            prefs.language
+                .takeIf { it.isNotBlank() }
+                ?.let(::normalizeLanguageTag)
         },
         userPreferenceUpdater = { prefs, value ->
-            prefs.takeIf { it.language != value }?.apply {
-                userRepository?.updateUserPreferencesLanguage(prefs.userId, value)
+            val normalized = normalizeLanguageTag(value)
+            prefs.takeIf { normalizeLanguageTag(it.language) != normalized }?.apply {
+                userRepository?.updateUserPreferencesLanguage(prefs.userId, normalized)
             }
         }
     )
 
-    override fun observe() = setting.observe()
-    override suspend fun get() = setting.get()
-    override suspend fun set(value: String) = setting.set(value)
+    override fun observe() = setting.observe().map(::normalizeLanguageTag)
+    override suspend fun get() = normalizeLanguageTag(setting.get())
+    override suspend fun set(value: String) = setting.set(normalizeLanguageTag(value))
     override suspend fun reset() = setting.reset()
 }
-

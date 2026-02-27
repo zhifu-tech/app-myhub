@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.feature.settings.settings.languageSetting
 import tech.zhifu.app.myhub.feature.settings.settings.themeSetting
+import tech.zhifu.app.myhub.language.AppLocale
 import tech.zhifu.app.myhub.navigation.AppNavigationState
 import tech.zhifu.app.myhub.navigation.navAppKeySet
 import tech.zhifu.app.myhub.navigation.navAppStartKey
@@ -36,7 +37,7 @@ fun rememberAppState(
         settingsRepository.themeSetting.observe().stateIn(
             scope = stableScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = true,
+            initialValue = false,
         )
     }
 
@@ -44,7 +45,7 @@ fun rememberAppState(
         settingsRepository.languageSetting.observe().stateIn(
             scope = stableScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = "zh",
+            initialValue = AppLocale.DEFAULT,
         )
     }
 

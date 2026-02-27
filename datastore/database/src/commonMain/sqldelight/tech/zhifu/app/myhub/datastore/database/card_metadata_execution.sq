@@ -1,0 +1,16 @@
+-- type=do 时的状态/优先级/截止/步骤
+CREATE TABLE card_metadata_execution (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    status TEXT,
+    priority TEXT,
+    due_at TEXT,
+    completed_at TEXT,
+    steps TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_card_metadata_execution_card_id ON card_metadata_execution(card_id);
+
+insertCardMetadataExecution:
+INSERT OR REPLACE INTO card_metadata_execution (card_id, status, priority, due_at, completed_at, steps)
+VALUES (?, ?, ?, ?, ?, ?);

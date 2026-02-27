@@ -19,7 +19,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.model.domain.User
-import tech.zhifu.app.myhub.datastore.model.domain.isFavorite
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.card.CardStoreData
 import tech.zhifu.app.myhub.datastore.repository.card.cards
@@ -140,7 +139,7 @@ class DashboardViewModel(
             .sortedByDescending { it.updatedAt }
             .take(pageSize)
 
-        val favoriteCards = cards.filter { it.isFavorite }
+        val favoriteCards = cards.filter { false /*FIXME*/ }
 
         val currentState = _uiState.value
         val hasMoreCards = cards.size > pageSize

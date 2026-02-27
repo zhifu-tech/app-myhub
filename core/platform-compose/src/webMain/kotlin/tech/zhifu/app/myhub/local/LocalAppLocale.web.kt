@@ -4,26 +4,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.intl.Locale
+import tech.zhifu.app.myhub.language.normalizeLanguageTag
 
 external object window {
     var __customLocale: String?
 }
 
 actual object LocalAppLocale {
-    private val LocalAppLocale = staticCompositionLocalOf { Locale.current }
+    private val LocalAppLocale = staticCompositionLocalOf {
+        normalizeLanguageTag(Locale.current.toString())
+    }
     actual val current: String
-        @Composable get() = LocalAppLocale.current.toString()
+        @Composable get() = LocalAppLocale.current
 
     @Composable
     actual infix fun provides(value: String?): ProvidedValue<*> {
-        value?.let {
-            println("MYHUB: LocalAppLocale.provides: $value")
-        }
-        window.__customLocale = value?.replace('_', '-')
-        println("MYHUB: window.__customLocale: $window.__customLocale")
-        println("MYHUB: Locale.current: ${Locale.current}")
-        println("MYHUB: LocalAppLocale.current: ${LocalAppLocale.current}")
-        return LocalAppLocale.provides(Locale.current)
+        val normalized = value?.let(::normalizeLanguageTag)
+        window.__customLocale = normalized
+        return LocalAppLocale.provides(normalized ?: normalizeLanguageTag(Locale.current.toString()))
     }
 }
-

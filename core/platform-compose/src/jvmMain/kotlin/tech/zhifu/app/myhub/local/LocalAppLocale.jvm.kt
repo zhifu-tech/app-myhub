@@ -3,11 +3,14 @@ package tech.zhifu.app.myhub.local
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import java.util.Locale
+import tech.zhifu.app.myhub.language.normalizeLanguageTag
+import java.util.*
 
 actual object LocalAppLocale {
     private var default: Locale? = null
-    private val LocalAppLocale = staticCompositionLocalOf { Locale.getDefault().toString() }
+    private val LocalAppLocale = staticCompositionLocalOf {
+        normalizeLanguageTag(Locale.getDefault().toLanguageTag())
+    }
 
     actual val current: String
         @Composable get() = LocalAppLocale.current
@@ -17,12 +20,10 @@ actual object LocalAppLocale {
         if (default == null) {
             default = Locale.getDefault()
         }
-        val new = when (value) {
-            null -> default!!
-            else -> Locale.forLanguageTag(value)
-        }
+        val source = value ?: default!!.toLanguageTag()
+        val normalizedTag = normalizeLanguageTag(source)
+        val new = Locale.forLanguageTag(normalizedTag)
         Locale.setDefault(new)
-        return LocalAppLocale.provides(new.toString())
+        return LocalAppLocale.provides(normalizedTag)
     }
 }
-

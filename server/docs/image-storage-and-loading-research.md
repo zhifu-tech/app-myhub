@@ -68,7 +68,7 @@
 结合你们已有的 **Sync + LocalDataSource + 卡片/用户元数据**：
 
 1. **元数据里只存 URL**  
-   保持现状：`cover_image_url`、`avatar_url`、`video_url`/`thumbnail_url` 等均为「最终可访问的 URL」。服务端负责生成/更新这些 URL（上传成功后写入或通过 CDN 规则生成）。
+   保持现状：`cover_image_url`、`avatar_url`、`url`/`thumbnail_url` 等均为「最终可访问的 URL」。服务端负责生成/更新这些 URL（上传成功后写入或通过 CDN 规则生成）。
 
 2. **加载策略：本地优先**
     - **有本地文件时**：若实现了「图片落盘」，则用 `file://` 或本地 Path 加载。
@@ -138,7 +138,7 @@
 ## 五、与本项目现状的对应关系
 
 - **已有数据模型**
-    - `CardMetadataArticle.coverImageUrl`、`user.avatar_url`、Video 的 `video_url`/`thumbnail_url` 已具备「存 URL」的形态；无需改表结构即可接入「服务端存对象存储 + 返回 URL」的方案。
+    - `CardMetadataArticle.coverImageUrl`、`user.avatar_url`、Video 的 `url`/`thumbnail_url` 已具备「存 URL」的形态；无需改表结构即可接入「服务端存对象存储 + 返回 URL」的方案。
 
 - **Server**
     - 当前无「图片上传/存储」API；后续可新增：

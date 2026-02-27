@@ -37,6 +37,8 @@ fun WindowSizeClass.isWidthAtLeastExpanded() = minWidthDp >= WIDTH_DP_EXPANDED_L
 
 fun WindowSizeClass.isWidthLarge() = minWidthDp == WIDTH_DP_LARGE_LOWER_BOUND
 
+fun WindowSizeClass.isWidthAtLeastLarge() = minWidthDp >= WIDTH_DP_LARGE_LOWER_BOUND
+
 fun WindowSizeClass.isWidthExtraLarge() = minWidthDp == WIDTH_DP_EXTRA_LARGE_LOWER_BOUND
 
 fun WindowSizeClass.isHeightCompact() = minHeightDp == 0

@@ -1,33 +1,19 @@
--- 标签表，用户私有的语义标签
+-- 标签表（用户维度）
 CREATE TABLE tag (
     id TEXT PRIMARY KEY NOT NULL,
-
-    name TEXT NOT NULL,
-    color TEXT,
-    description TEXT,
-
     user_id TEXT NOT NULL,
-
+    name TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-
-    card_count INTEGER NOT NULL DEFAULT 0,
-
-    UNIQUE(name, user_id)
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- 索引
 CREATE INDEX idx_tag_user_id ON tag(user_id);
-CREATE INDEX idx_tag_name ON tag(name);
-CREATE INDEX idx_tag_user_name ON tag(user_id, name);
-CREATE INDEX idx_tag_card_count ON tag(card_count);
-CREATE INDEX idx_tag_updated_at ON tag(updated_at);
+CREATE UNIQUE INDEX idx_tag_user_id_name ON tag(user_id, name);
 
--- CRUD 操作
 selectTagsByUserId:
 SELECT * FROM tag
 WHERE user_id = ?
-ORDER BY card_count DESC, name ASC;
+ORDER BY name ASC;
 
 selectTagById:
 SELECT * FROM tag
@@ -38,16 +24,12 @@ SELECT * FROM tag
 WHERE name = ? AND user_id = ?;
 
 insertTag:
-INSERT OR REPLACE INTO tag (id, name, color, description, user_id, created_at, updated_at, card_count)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO tag (id, user_id, name, created_at)
+VALUES (?, ?, ?, ?);
 
 updateTag:
 UPDATE tag
-SET name = ?,
-    color = ?,
-    description = ?,
-    updated_at = ?,
-    card_count = ?
+SET name = ?
 WHERE id = ? AND user_id = ?;
 
 deleteTag:

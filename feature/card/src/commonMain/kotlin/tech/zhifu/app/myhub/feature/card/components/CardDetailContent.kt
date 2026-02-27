@@ -17,9 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.component.card.CardComponent
-import tech.zhifu.app.myhub.component.card.displayTitle
+import tech.zhifu.app.myhub.component.card.CardPreview
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.content
 
 /**
  * 卡片内容展示区
@@ -40,7 +40,7 @@ fun CardDetailContent(
         modifier = modifier.fillMaxWidth()
     ) {
         // 标题显示在圆角背景之上，带过渡动画
-        val cardTitle = card.displayTitle
+        val cardTitle = card.metadata.content?.title ?: card.type.wire
         AnimatedContent(
             targetState = cardTitle,
             transitionSpec = {
@@ -69,11 +69,11 @@ fun CardDetailContent(
 
         // 使用统一的 CardComponent 渲染卡片
         // CardComponent 本身有圆角背景，不需要额外的背景容器
-        CardComponent(
+        CardPreview(
             card = card,
             modifier = Modifier.fillMaxWidth(),
             // 详情页模式下，可以禁用某些交互
-            onCardClick = {}  // 详情页中点击卡片不跳转
+            onClick = {}  // 详情页中点击卡片不跳转
         )
     }
 }

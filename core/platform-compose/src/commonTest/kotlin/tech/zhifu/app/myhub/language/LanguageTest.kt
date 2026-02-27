@@ -64,12 +64,32 @@ class LanguageTest {
     }
 
     @Test
-    fun `test toLanguage with empty string returns English`() {
+    fun `test normalizeLanguageTag with zh`() {
+        assertEquals(AppLocale.ZH_CN, normalizeLanguageTag("zh"))
+    }
+
+    @Test
+    fun `test normalizeLanguageTag with zh-rCN legacy tag`() {
+        assertEquals(AppLocale.ZH_CN, normalizeLanguageTag("zh-rCN"))
+    }
+
+    @Test
+    fun `test normalizeLanguageTag with underscore`() {
+        assertEquals(AppLocale.ZH_CN, normalizeLanguageTag("zh_CN"))
+    }
+
+    @Test
+    fun `test normalizeLanguageTag with null uses default`() {
+        assertEquals(AppLocale.DEFAULT, normalizeLanguageTag(null))
+    }
+
+    @Test
+    fun `test toLanguage with empty string returns app default`() {
         // When
         val result = "".toLanguage()
 
         // Then
-        assertEquals(Language.English, result)
+        assertEquals(Language.SimplifiedChinese, result)
     }
 
     @Test
@@ -95,4 +115,3 @@ class LanguageTest {
         assertEquals(null, Language.Japanese.region)
     }
 }
-

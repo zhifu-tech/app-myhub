@@ -26,7 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
 import org.koin.compose.koinInject
+import io.github.vinceglb.filekit.coil.addPlatformFileSupport
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.LocalAnalyticsService
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
@@ -92,6 +95,14 @@ private fun AppContent(
 ) {
     logger.debug { "AppContent函数调用" }
     TrackAppStartedEvent()
+
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .components {
+                addPlatformFileSupport()
+            }
+            .build()
+    }
 
     AppTheme(darkTheme = isDarkTheme) {
         val navigator = AppNavigator(appState.navigationState)

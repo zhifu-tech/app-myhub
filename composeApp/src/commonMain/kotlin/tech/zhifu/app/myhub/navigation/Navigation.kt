@@ -7,6 +7,8 @@ import androidx.navigation3.runtime.entryProvider
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import tech.zhifu.app.myhub.feature.capture.api.navigation.CaptureNavKey
+import tech.zhifu.app.myhub.feature.capture.navigation.captureEntry
 import tech.zhifu.app.myhub.feature.card.api.CardNavKey
 import tech.zhifu.app.myhub.feature.card.navigation.cardEntry
 import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavItem
@@ -39,6 +41,7 @@ fun navKeySerializerModule() = SerializersModule {
         subclass(ExploreNavKey::class)
         subclass(FavoritesNavKey::class)
         subclass(ProfileNavKey::class)
+        subclass(CaptureNavKey::class)
         subclass(CardNavKey::class)
     }
 }
@@ -51,5 +54,6 @@ fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvide
     entry<ExploreNavKey> { PlaceholderScreen("Explore") }
     entry<FavoritesNavKey> { PlaceholderScreen("Favorites") }
     profileEntry(this@navEntryProvider)
+    captureEntry(this@navEntryProvider)
     cardEntry(this@navEntryProvider)
 }

@@ -27,8 +27,6 @@ class LocalCollectionDataSourceImpl(
             database.collectionQueries.insertCollection(
                 id = collection.id,
                 name = collection.name,
-                topic = collection.topic,
-                description = collection.description,
                 user_id = collection.userId,
                 created_at = collection.createdAt.toString(),
                 updated_at = collection.updatedAt.toString()
@@ -37,7 +35,8 @@ class LocalCollectionDataSourceImpl(
                 user_id = collection.userId,
                 collection_id = collection.id,
                 role = "owner",
-                created_at = collection.createdAt.toString()
+                created_at = collection.createdAt.toString(),
+                updated_at = collection.updatedAt.toString()
             )
         }
     }
@@ -45,8 +44,6 @@ class LocalCollectionDataSourceImpl(
     override suspend fun updateCollection(collection: Collection) {
         database.collectionQueries.updateCollection(
             name = collection.name,
-            topic = collection.topic,
-            description = collection.description,
             updated_at = collection.updatedAt.toString(),
             id = collection.id
         )
@@ -178,6 +175,7 @@ class LocalCollectionDataSourceImpl(
         database.collection_cardQueries.insertCollectionCard(
             collection_id = collectionId,
             card_id = cardId,
+            sort_order = null,
             created_at = createdAt.toString()
         )
     }

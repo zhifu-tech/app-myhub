@@ -14,6 +14,11 @@ import tech.zhifu.app.myhub.service.CollectionService
 import tech.zhifu.app.myhub.service.SyncService
 import tech.zhifu.app.myhub.service.TagService
 import tech.zhifu.app.myhub.service.UserService
+import tech.zhifu.app.myhub.service.media.CaptureAnalysisService
+import tech.zhifu.app.myhub.service.media.MediaUploadService
+import tech.zhifu.app.myhub.service.media.analysis.AnalysisProvider
+import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderConfig
+import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderFactory
 
 val serviceModule = module {
     factory<CardService> {
@@ -58,5 +63,29 @@ val serviceModule = module {
             templateRepository = get<CardTemplateRepository>()
         )
     }
-}
 
+    single<MediaUploadService> {
+        MediaUploadService()
+    }
+
+    single<AnalysisProviderConfig> {
+        AnalysisProviderConfig.fromEnv()
+    }
+
+    single<AnalysisProviderFactory> {
+        AnalysisProviderFactory(
+            config = get<AnalysisProviderConfig>()
+        )
+    }
+
+    single<AnalysisProvider> {
+        get<AnalysisProviderFactory>().create()
+    }
+
+    single<CaptureAnalysisService> {
+        CaptureAnalysisService(
+            mediaUploadService = get<MediaUploadService>(),
+            analysisProvider = get<AnalysisProvider>()
+        )
+    }
+}

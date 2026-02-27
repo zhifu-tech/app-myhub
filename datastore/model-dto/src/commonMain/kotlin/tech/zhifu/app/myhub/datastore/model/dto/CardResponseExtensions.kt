@@ -1,18 +1,21 @@
 package tech.zhifu.app.myhub.datastore.model.dto
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.CardSource
+import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import kotlin.time.Instant
 
 /**
- * 扩展函数：Card 转 CardResponse
+ * 扩展函数：Card 转 CardResponse（title/content 来自 metadata 中的 CardMetadataContent）
  */
 fun Card.toResponse(): CardResponse {
     return CardResponse(
         id = id,
-        type = type,
-        title = title,
-        content = content,
+        type = type.wire,
+        title = "fixmetitle",//title,
+        content = "fixmecontent",//content,
         userId = userId,
         tags = tags.map { it.toResponse() },
         createdAt = createdAt.toString(),
@@ -21,15 +24,25 @@ fun Card.toResponse(): CardResponse {
 }
 
 /**
- * 扩展函数：CardResponse 转 Card
+ * 扩展函数：CardResponse 转 Card（title/summary/content 放入 metadata）
  */
 fun CardResponse.toDomain(): Card {
+    val contentMetadata = if (title != null || content != null) {
+        listOf(
+            CardMetadata.Content(
+                title = title,
+                summary = null,
+                content = content
+            )
+        )
+    } else emptyList()
     return Card(
         id = id,
-        type = type,
-        title = title,
-        content = content,
+        type = CardType.fromWire(type),
+        source = CardSource.Own,
+        carriers = "[\"text\"]",
         userId = userId,
+        metadata = contentMetadata,
         tags = tags.map { it.toDomain() },
         createdAt = Instant.parse(createdAt),
         updatedAt = Instant.parse(updatedAt)

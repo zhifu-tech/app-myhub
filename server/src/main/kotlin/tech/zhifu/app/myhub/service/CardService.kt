@@ -1,6 +1,8 @@
 package tech.zhifu.app.myhub.service
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.CardSource
+import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.model.dto.CardResponse
 import tech.zhifu.app.myhub.datastore.model.dto.CreateCardRequest
@@ -48,7 +50,7 @@ class CardService(
             type = type,
             isFavorite = isFavorite
         )
-        
+
         // 如果未指定分页，返回所有数据（total = cards.size）
         val actualPage = page ?: 1
         val actualLimit = limit ?: cards.size
@@ -102,9 +104,9 @@ class CardService(
         // 创建卡片
         val card = Card(
             id = generateCardId(),
-            type = request.type,
-            title = request.title,
-            content = request.content,
+            type = CardType.fromWire(request.type),
+            source = CardSource.Own,
+            carriers = "[\"text\"]",
             userId = userId,
             createdAt = Clock.System.now(),
             updatedAt = Clock.System.now(),
@@ -140,9 +142,7 @@ class CardService(
 
         // 更新卡片
         val updated = existing.copy(
-            type = request.type,
-            title = request.title,
-            content = request.content,
+            type = CardType.fromWire(request.type),
             updatedAt = Clock.System.now(),
             tags = tags
         )
@@ -178,9 +178,7 @@ class CardService(
 
         // 部分更新
         val updated = existing.copy(
-            type = request.type ?: existing.type,
-            title = request.title ?: existing.title,
-            content = request.content ?: existing.content,
+            type = request.type?.let(CardType::fromWire) ?: existing.type,
             updatedAt = Clock.System.now(),
             tags = tags
         )

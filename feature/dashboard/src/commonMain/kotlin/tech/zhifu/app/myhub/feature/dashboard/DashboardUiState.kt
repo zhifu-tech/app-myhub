@@ -13,23 +13,6 @@ data class Statistics(
     val lastSyncTime: Long? = null
 )
 
-/**
- * 视图类型枚举
- */
-enum class ViewType {
-    GRID,   // 瀑布流视图
-    LIST    // 列表视图
-}
-
-/**
- * Dashboard UI状态
- *
- * 使用 sealed class 表示不同的状态，确保状态互斥和类型安全
- *
- * 设计说明：
- * - InitialLoading: 首次加载，无数据可显示
- * - Content: 有数据的状态，可以同时显示数据和加载状态（刷新时）
- */
 sealed class DashboardUiState {
     /**
      * 初始加载状态
@@ -49,7 +32,6 @@ sealed class DashboardUiState {
         val recentCards: List<Card>,
         val favoriteCards: List<Card>,
         val lastSyncTime: Long?,
-        val viewType: ViewType = ViewType.GRID,
         val isRefreshing: Boolean = false,  // 刷新时仍显示数据
         val error: String? = null,         // 错误时仍显示数据
         val reviewProgress: ReviewProgress = ReviewProgress(), // 复习进度

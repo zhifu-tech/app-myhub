@@ -1,0 +1,11 @@
+<resources>
+  <string name="capture">Capture</string>
+  <string name="capture_ready_title">Ready to Capture</string>
+  <string name="capture_ready_subtitle">Content will appear here for review.</string>
+  <string name="capture_input_placeholder">What would you like to capture? Paste link or drop files</string>
+  <string name="capture_add_media">Add Media</string>
+  <string name="capture_processing">Processing...</string>
+  <string name="capture_ai_analyzing">AI is analyzing your intent</string>
+  <string name="capture_ai_analyzing_subtitle">and structuring the asset...</string>
+  <string name="capture_generating_asset">Generating structured asset...</string>
+</resources>

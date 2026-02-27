@@ -6,10 +6,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import platform.Foundation.NSLocale
 import platform.Foundation.NSUserDefaults
 import platform.Foundation.preferredLanguages
+import tech.zhifu.app.myhub.language.normalizeLanguageTag
 
 actual object LocalAppLocale {
     private const val LANG_KEY = "AppleLanguages"
-    private val default = NSLocale.preferredLanguages.first() as String
+    private val default = normalizeLanguageTag(NSLocale.preferredLanguages.first() as String)
     private val LocalAppLocale = staticCompositionLocalOf { default }
 
     actual val current: String
@@ -17,7 +18,7 @@ actual object LocalAppLocale {
 
     @Composable
     actual infix fun provides(value: String?): ProvidedValue<*> {
-        val new = value ?: default
+        val new = normalizeLanguageTag(value ?: default)
         if (value == null) {
             NSUserDefaults.standardUserDefaults.removeObjectForKey(LANG_KEY)
         } else {
@@ -26,4 +27,3 @@ actual object LocalAppLocale {
         return LocalAppLocale.provides(new)
     }
 }
-

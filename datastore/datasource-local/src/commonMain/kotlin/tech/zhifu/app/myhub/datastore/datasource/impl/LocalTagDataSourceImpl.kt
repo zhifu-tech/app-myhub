@@ -53,23 +53,15 @@ class LocalTagDataSourceImpl(
     override suspend fun insertTag(tag: Tag) {
         database.tagQueries.insertTag(
             id = tag.id,
-            name = tag.name,
-            color = tag.color,
-            description = tag.description,
             user_id = tag.userId,
-            created_at = tag.createdAt.toString(),
-            updated_at = tag.updatedAt.toString(),
-            card_count = tag.cardCount.toLong()
+            name = tag.name,
+            created_at = tag.createdAt.toString()
         )
     }
 
     override suspend fun updateTag(tag: Tag) {
         database.tagQueries.updateTag(
             name = tag.name,
-            color = tag.color,
-            description = tag.description,
-            updated_at = tag.updatedAt.toString(),
-            card_count = tag.cardCount.toLong(),
             id = tag.id,
             user_id = tag.userId
         )

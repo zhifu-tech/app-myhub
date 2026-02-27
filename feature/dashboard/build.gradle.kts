@@ -29,6 +29,7 @@ kotlin {
             implementation(projects.component.card)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.captureApi)
             implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboardApi)
 

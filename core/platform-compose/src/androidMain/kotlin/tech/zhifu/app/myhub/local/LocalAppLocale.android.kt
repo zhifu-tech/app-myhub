@@ -5,12 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidedValue
 import androidx.compose.ui.platform.LocalConfiguration
 import java.util.Locale
+import tech.zhifu.app.myhub.language.normalizeLanguageTag
 
 actual object LocalAppLocale {
     private var default: Locale? = null
 
     actual val current: String
-        @Composable get() = Locale.getDefault().toLanguageTag()
+        @Composable get() = normalizeLanguageTag(Locale.getDefault().toLanguageTag())
 
     @Composable
     actual infix fun provides(value: String?): ProvidedValue<*> {
@@ -18,10 +19,9 @@ actual object LocalAppLocale {
             default = Locale.getDefault()
         }
 
-        val new = when (value) {
-            null -> default!!
-            else -> Locale.forLanguageTag(value) // 使用标准 API 替换手动 split
-        }
+        val source = value ?: default!!.toLanguageTag()
+        val normalizedTag = normalizeLanguageTag(source)
+        val new = Locale.forLanguageTag(normalizedTag)
 
         // 同步 JVM 默认区域，影响后续的日期格式化等非 UI 逻辑
         Locale.setDefault(new)
@@ -41,4 +41,3 @@ actual object LocalAppLocale {
         return LocalConfiguration.provides(newConfig)
     }
 }
-

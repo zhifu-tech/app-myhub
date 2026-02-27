@@ -27,6 +27,8 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 
 ## [Compose UI 平台抽象模块方案设计](../core/platform-compose/docs/myhub-platform-compose-infra-v1.0.md)
 
+## [媒体组件方案设计](../component/media/docs/myhub-media-infra-v1.0.md)
+
 ## [网络层模块方案设计](../core/network/docs/myhub-network-infra-v1.0.md)
 
 ## [统计框架模块方案设计](../core/analytics/docs/myhub-analytics-infra-v1.0.md)

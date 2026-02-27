@@ -11,19 +11,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
-import tech.zhifu.app.myhub.datastore.model.domain.articleMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.codeMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.ideaMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.quoteMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.todoMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.videoMetadata
-import tech.zhifu.app.myhub.datastore.model.domain.wordMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.attribution
+import tech.zhifu.app.myhub.datastore.model.domain.carrierImage
+import tech.zhifu.app.myhub.datastore.model.domain.carrierVideo
+import tech.zhifu.app.myhub.datastore.model.domain.content
+import tech.zhifu.app.myhub.datastore.model.domain.execution
+import tech.zhifu.app.myhub.datastore.model.domain.lexicon
+import tech.zhifu.app.myhub.datastore.model.domain.link
+import tech.zhifu.app.myhub.datastore.model.domain.code
+import tech.zhifu.app.myhub.datastore.model.domain.site
 
 class LocalCardDataSourceImpl(
     private val database: MyHubDatabase
@@ -33,13 +36,87 @@ class LocalCardDataSourceImpl(
         database.transaction {
             database.cardQueries.insertCard(
                 id = card.id,
-                type = card.type,
-                title = card.title,
-                content = card.content,
+                type = card.type.wire,
+                source = card.source.wire,
+                carriers = card.carriers,
                 user_id = card.userId,
                 created_at = card.createdAt.toString(),
                 updated_at = card.updatedAt.toString()
             )
+
+            card.metadata.content?.let {
+                database.card_metadata_contentQueries.insertCardMetadataContent(
+                    card_id = card.id,
+                    title = it.title,
+                    summary = it.summary,
+                    content = it.content
+                )
+            }
+            card.metadata.attribution?.let {
+                database.card_metadata_attributionQueries.insertCardMetadataAttribution(
+                    card_id = card.id,
+                    author = it.author,
+                    origin = it.origin,
+                    language = it.language,
+                    style_key = it.styleKey,
+                    style_color = it.styleColor
+                )
+            }
+            card.metadata.carrierImage?.let {
+                database.card_metadata_carrier_imageQueries.insertCardMetadataCarrierImage(
+                    card_id = card.id,
+                    url = it.url,
+                    thumbnail_url = it.thumbnailUrl
+                )
+            }
+            card.metadata.carrierVideo?.let {
+                database.card_metadata_carrier_videoQueries.insertCardMetadataCarrierVideo(
+                    card_id = card.id,
+                    url = it.videoUrl,
+                    duration = it.durationSeconds,
+                    platform = it.platform,
+                    cover_image_url = it.coverImageUrl
+                )
+            }
+            card.metadata.execution?.let {
+                database.card_metadata_executionQueries.insertCardMetadataExecution(
+                    card_id = card.id,
+                    status = it.status,
+                    priority = it.priority,
+                    due_at = it.dueAt?.toString(),
+                    completed_at = it.completedAt?.toString(),
+                    steps = it.steps
+                )
+            }
+            card.metadata.lexicon?.let {
+                database.card_metadata_lexiconQueries.insertCardMetadataLexicon(
+                    card_id = card.id,
+                    pronunciation = it.pronunciation,
+                    definition = it.definition,
+                    example = it.example
+                )
+            }
+            card.metadata.link?.let {
+                database.card_metadata_linkQueries.insertCardMetadataLink(
+                    card_id = card.id,
+                    url = it.url
+                )
+            }
+            card.metadata.code?.let {
+                database.card_metadata_codeQueries.insertCardMetadataCode(
+                    card_id = card.id,
+                    language = it.language,
+                    snippet = it.snippet
+                )
+            }
+            card.metadata.site?.let {
+                database.card_metadata_siteQueries.insertCardMetadataSite(
+                    card_id = card.id,
+                    id = it.id,
+                    name = it.name,
+                    fav_icon = it.favIcon
+                )
+            }
 
             database.card_tagQueries.deleteCardTagsByCardId(card.id)
             card.tags.forEach { tag ->
@@ -58,71 +135,6 @@ class LocalCardDataSourceImpl(
                 created_at = card.createdAt.toString(),
                 updated_at = card.updatedAt.toString()
             )
-
-            card.articleMetadata?.let { metadata ->
-                database.card_metadata_articleQueries.insertCardMetadataArticle(
-                    card_id = card.id,
-                    url = metadata.url,
-                    summary = metadata.summary,
-                    cover_image_url = metadata.coverImageUrl,
-                    author = metadata.author
-                )
-            }
-
-            card.codeMetadata?.let { metadata ->
-                database.card_metadata_codeQueries.insertCardMetadataCode(
-                    card_id = card.id,
-                    language = metadata.language,
-                    snippet = metadata.snippet,
-                    description = metadata.description
-                )
-            }
-
-            card.ideaMetadata?.let { metadata ->
-                database.card_metadata_ideaQueries.insertCardMetadataIdea(
-                    card_id = card.id,
-                    priority = metadata.priority,
-                    status = metadata.status
-                )
-            }
-
-            card.quoteMetadata?.let { metadata ->
-                database.card_metadata_quoteQueries.insertCardMetadataQuote(
-                    card_id = card.id,
-                    author = metadata.author,
-                    category = metadata.category,
-                    source = metadata.source
-                )
-            }
-
-            card.todoMetadata?.let { metadata ->
-                database.card_metadata_todoQueries.insertCardMetadataTodo(
-                    card_id = card.id,
-                    status = metadata.status,
-                    priority = metadata.priority,
-                    due_at = metadata.dueAt?.toString(),
-                    completed_at = metadata.completedAt?.toString()
-                )
-            }
-
-            card.wordMetadata?.let { metadata ->
-                database.card_metadata_wordQueries.insertCardMetadataWord(
-                    card_id = card.id,
-                    pronunciation = metadata.pronunciation,
-                    definition = metadata.definition,
-                    example = metadata.example
-                )
-            }
-
-            card.videoMetadata?.let { metadata ->
-                database.card_metadata_videoQueries.insertVideoMetadata(
-                    card_id = card.id,
-                    video_url = metadata.videoUrl,
-                    thumbnail_url = metadata.thumbnailUrl,
-                    duration_seconds = metadata.durationSeconds?.toLong(),
-                    platform = metadata.platform
-                )
-            }
         }
     }
 
@@ -139,6 +151,7 @@ class LocalCardDataSourceImpl(
         return card.toDomain(tags)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCard(cardId: String): Flow<Card> {
         val cardFlow = database.card_with_metadataQueries
             .selectCardWithMetadataByCardId(cardId)
@@ -150,10 +163,13 @@ class LocalCardDataSourceImpl(
             .mapToList(Dispatchers.Default)
             .map { rows -> rows.map { it.toDomain() } }
         return combine(cardFlow, tagsFlow) { card, tags ->
-            card.toDomain(tags)
+            Pair(card, tags)
+        }.flatMapLatest { (card, tags) ->
+            flow {
+                emit(card.toDomain(tags))
+            }
         }
     }
-
 
     override suspend fun getCards(
         userId: String,
@@ -231,8 +247,13 @@ class LocalCardDataSourceImpl(
                     .mapValues { entry -> entry.value.map { it.toDomain() } }
             }
         return combine(cardsFlow, tagsFlow) { cards, tagsByCardId ->
-            cards.map { card ->
-                card.toDomain(tagsByCardId[card.card_id].orEmpty())
+            Pair(cards, tagsByCardId)
+        }.flatMapLatest { (cards, tagsByCardId) ->
+            flow {
+                val list = cards.map { card ->
+                    card.toDomain(tagsByCardId[card.card_id].orEmpty())
+                }
+                emit(list)
             }
         }
     }
@@ -246,7 +267,6 @@ class LocalCardDataSourceImpl(
     }
 
     override suspend fun getUnreviewedCards(userId: String): List<Card> {
-        // selectUnreviewedCards 返回的是 Card 行，需要转换为完整的 Card 对象
         val cardRows = database.user_cardQueries
             .selectUnreviewedCards(userId)
             .awaitAsList()
@@ -257,7 +277,6 @@ class LocalCardDataSourceImpl(
 
         val cardIds = cardRows.map { it.id }
 
-        // 从 card_with_metadata 获取完整卡片信息
         val cards = cardIds.mapNotNull { cardId ->
             val cardRow = database.card_with_metadataQueries
                 .selectCardWithMetadataByCardId(cardId)
@@ -269,7 +288,6 @@ class LocalCardDataSourceImpl(
                 .selectTagsByCardId(cardId)
                 .awaitAsList()
                 .map { it.toDomain() }
-
             cardRow.toDomain(tags)
         }
 

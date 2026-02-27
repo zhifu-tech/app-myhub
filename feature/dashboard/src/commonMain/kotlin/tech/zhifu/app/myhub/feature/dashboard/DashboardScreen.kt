@@ -10,7 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -99,10 +98,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.component.card.CardComponent
+import tech.zhifu.app.myhub.component.card.CardPreview
 import tech.zhifu.app.myhub.component.card.CardStyles
 import tech.zhifu.app.myhub.component.card.getContentPreview
-import tech.zhifu.app.myhub.component.card.typeIconColor
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
@@ -136,6 +134,7 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = koinInject<DashboardViewModel>(),
     onNavigateToCardDetail: (String) -> Unit,
+    onNavigateToCapture: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -315,14 +314,13 @@ fun DashboardScreen(
                                     LatestCaptureCardItem(
                                         card = card,
                                         onCardClick = { onNavigateToCardDetail(card.id) },
-                                        onEdit = { viewModel.editCard(card.id) },
-                                        onFavorite = { viewModel.toggleFavorite(card.id) }
+                                        onEdit = { viewModel.editCard(card.id) }
                                     )
                                 }
 
                                 item(span = StaggeredGridItemSpan.SingleLane) {
                                     NewCaptureCard(
-                                        onClick = { /* TODO: 导航到新建卡片页面 */ },
+                                        onClick = onNavigateToCapture,
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -719,7 +717,7 @@ fun CollectionCard(
                     .fillMaxWidth()
                     .aspectRatio(4f / 3f)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFF1E1F23))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(12.dp)
             ) {
                 val line0 = collection.cards.getOrNull(0)?.getContentPreview(80).orEmpty()
@@ -880,48 +878,14 @@ fun LatestCaptureCardItem(
     card: Card,
     onCardClick: () -> Unit,
     onEdit: () -> Unit,
-    onFavorite: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val accentColor = card.typeIconColor
-    val captureInteractionSource = remember { MutableInteractionSource() }
-    val captureHovered by captureInteractionSource.collectIsHoveredAsState()
-    val captureLiftY = animateFloatAsState(
-        targetValue = if (captureHovered) -4f else 0f,
-        animationSpec = tween(durationMillis = 200),
-        label = "capture_lift"
+    CardPreview(
+        card = card,
+        modifier = modifier.fillMaxWidth(),
+        onClick = { onCardClick() },
+        onEdit = { onEdit() }
     )
-
-    val cardShape = RoundedCornerShape(CardStyles.CornerRadius)
-    val borderWidth = if (captureHovered) 2.dp else 1.dp
-    val borderColor = if (captureHovered) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-    else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .graphicsLayer { translationY = captureLiftY.value }
-            .border(borderWidth, borderColor, cardShape)
-            .clip(cardShape)
-            .hoverable(captureInteractionSource)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .fillMaxHeight()
-                .background(
-                    accentColor,
-                    RoundedCornerShape(topStart = CardStyles.CornerRadius, bottomStart = CardStyles.CornerRadius)
-                )
-        )
-        CardComponent(
-            card = card,
-            onEdit = { onEdit() },
-            onFavorite = { onFavorite() },
-            onCardClick = { onCardClick() },
-            modifier = Modifier.weight(1f),
-            suppressDefaultBorder = true // 由外层 Row 统一绘制边框，避免双线
-        )
-    }
 }
 
 @Composable

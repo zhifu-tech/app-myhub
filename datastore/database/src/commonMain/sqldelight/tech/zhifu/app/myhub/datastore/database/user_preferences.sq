@@ -3,7 +3,7 @@ CREATE TABLE user_preferences (
     user_id TEXT NOT NULL,
 
     theme TEXT NOT NULL DEFAULT 'dark',           -- light / dark / system
-    language TEXT NOT NULL DEFAULT 'en',          -- UI language (ISO-639-1)
+    language TEXT NOT NULL DEFAULT 'zh-CN',       -- UI language (BCP-47)
 
     default_card_type TEXT,                       -- 默认创建的卡片类型
 

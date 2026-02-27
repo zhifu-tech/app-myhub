@@ -13,7 +13,7 @@ object ApiConfig {
     // 基础URL - 可以通过 setBaseUrl 动态设置
     private const val DEFAULT_PORT = 8083
 
-    private const val DEFAULT_REMOTE_IP = "192.168.1.3"
+    private const val DEFAULT_REMOTE_IP = "192.168.0.129"
 
     @Volatile
     private var _baseUrl: String? = null

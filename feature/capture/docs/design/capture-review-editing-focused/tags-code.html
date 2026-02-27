@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MyHub - Refined Capture Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#B4A3FF", 
+                        onPrimary: "#131316",
+                        background: "#131316",
+                        surface: "#1C1B1F",
+                        surfaceVariant: "#2D2E33",
+                        onSurface: "#E6E1E5",
+                        onSurfaceVariant: "#CAC4D0",
+                        secondaryContainer: "#4A4458",
+                        onSecondaryContainer: "#E8DEF8",
+                        outline: "#938F99",
+                        error: "#F2B8B5",
+                        onError: "#601410",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --primary-accent: #B4A3FF;
+            --surface-color: #1C1B1F;
+            --outline-color: #938F99;
+            --background-color: #131316;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(147, 143, 153, 0.3);
+            border-radius: 20px;
+        }
+        .material-symbols-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .code-syntax-keyword { color: #B4A3FF; }
+        .code-syntax-func { color: #AECBFA; }
+        .code-syntax-string { color: #6DD58C; }
+        .code-syntax-number { color: #E5A9A0; }
+        .code-syntax-comment { color: #938F99; }
+        .code-syntax-variable { color: #E8DEF8; }
+    </style>
+</head>
+<body class="bg-background text-onSurface font-sans h-screen flex overflow-hidden selection:bg-primary selection:text-onPrimary">
+<div class="flex-1 flex overflow-hidden relative">
+<main class="flex-1 h-full overflow-y-auto scroll-smooth">
+<header class="flex justify-between items-center px-4 lg:px-6 py-3 border-b border-outline/20 bg-background sticky top-0 z-30">
+<button class="p-2 -ml-2 text-onSurfaceVariant hover:bg-surfaceVariant/50 rounded-full transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<div class="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center">
+<div class="inline-flex bg-secondaryContainer border border-outline/30 rounded-full p-1 gap-1 items-center">
+<button class="h-8 px-4 rounded-full bg-primary text-onPrimary flex items-center justify-center gap-2 transition-all font-semibold text-xs shadow-lg">
+<span class="material-symbols-outlined text-[18px] material-symbols-filled">visibility</span>
+<span class="hidden sm:inline uppercase tracking-wider">Review</span>
+</button>
+<button class="w-8 h-8 rounded-full text-onSecondaryContainer hover:bg-white/10 transition-colors flex items-center justify-center" title="Do">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+</button>
+<button class="w-8 h-8 rounded-full text-onSecondaryContainer hover:bg-white/10 transition-colors flex items-center justify-center" title="Material">
+<span class="material-symbols-outlined text-[18px]">extension</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-5 py-2 text-xs font-bold uppercase tracking-widest bg-primary text-onPrimary shadow-lg shadow-primary/20 rounded-full transition-all flex items-center gap-2 hover:opacity-90">
+<span class="material-symbols-outlined text-lg font-bold">check</span>
+<span class="hidden sm:inline">Capture</span>
+</button>
+</div>
+</header>
+<div class="p-6 lg:p-10 space-y-8 max-w-4xl mx-auto pb-24">
+<div class="flex items-center justify-between">
+<label class="text-[10px] font-bold text-onSurfaceVariant uppercase tracking-widest">Source</label>
+<div class="flex items-center gap-1 bg-surface border border-outline/30 rounded-full p-1">
+<button class="h-8 w-8 rounded-full text-onSurfaceVariant hover:text-onSurface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">link</span>
+</button>
+<button class="h-8 px-4 rounded-full bg-primary text-onPrimary shadow-sm flex items-center gap-1.5 transition-all">
+<span class="material-symbols-outlined text-[18px]">content_cut</span>
+<span class="text-xs font-bold uppercase">Extract</span>
+</button>
+<button class="h-8 w-8 rounded-full text-onSurfaceVariant hover:text-onSurface transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+</button>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-surface rounded-xl border-2 border-primary overflow-hidden shadow-xl flex flex-col min-h-[160px] relative">
+<div class="flex items-center justify-between px-3 py-2 bg-background/40 border-b border-outline/20">
+<div class="flex items-center gap-1">
+<button class="p-1.5 text-onSurfaceVariant hover:text-onSurface rounded transition-colors"><span class="material-symbols-outlined text-[20px] font-bold">format_bold</span></button>
+<button class="p-1.5 text-onSurfaceVariant hover:text-onSurface rounded transition-colors"><span class="material-symbols-outlined text-[20px] italic">format_italic</span></button>
+<div class="w-px h-5 bg-outline/20 mx-1"></div>
+<button class="p-1.5 text-onSurfaceVariant hover:text-onSurface rounded transition-colors"><span class="material-symbols-outlined text-[20px]">format_align_left</span></button>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-onPrimary shadow-sm">
+<span class="material-symbols-outlined text-[16px] material-symbols-filled">star</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Primary</span>
+</button>
+</div>
+<div class="flex-1 p-6 font-serif text-xl leading-relaxed text-onSurface italic outline-none">
+                        "The details are not the details. They make the design."
+                    </div>
+</div>
+<div class="bg-surface rounded-xl border border-outline/30 overflow-hidden flex flex-col relative group">
+<div class="flex items-center justify-between px-4 py-2 bg-background/30 border-b border-outline/20">
+<div class="flex items-center bg-secondaryContainer rounded px-3 py-1 text-[10px] font-bold text-onSecondaryContainer border border-outline/20 cursor-pointer uppercase tracking-tight">
+                            JavaScript
+                            <span class="material-symbols-outlined text-xs ml-1">expand_more</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-onSurfaceVariant hover:text-primary transition-colors" title="Format"><span class="material-symbols-outlined text-[18px]">auto_fix_high</span></button>
+<button class="text-onSurfaceVariant hover:text-primary transition-colors" title="Copy"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
+<button class="text-onSurfaceVariant hover:text-primary transition-colors" title="Expand"><span class="material-symbols-outlined text-[18px]">open_in_full</span></button>
+</div>
+</div>
+<div class="flex p-4 font-mono text-sm overflow-x-auto bg-[#0A0A0C]">
+<div class="pr-4 text-onSurfaceVariant/40 border-r border-outline/10 select-none text-right min-w-[30px]">
+                            01<br/>02<br/>03<br/>04<br/>05
+                        </div>
+<div class="pl-4 whitespace-pre text-onSurfaceVariant leading-6">
+<span class="code-syntax-keyword">function</span> <span class="code-syntax-func">bubbleSort</span>(arr) {
+  <span class="code-syntax-keyword">const</span> <span class="code-syntax-variable">len</span> = arr.length;
+  <span class="code-syntax-keyword">for</span> (<span class="code-syntax-keyword">let</span> i = <span class="code-syntax-number">0</span>; i &lt; len; i++) {
+    <span class="code-syntax-comment">// Sorting logic...</span>
+  }
+}</div>
+</div>
+</div>
+<div class="bg-surface rounded-xl border border-outline/30 overflow-hidden flex flex-col md:flex-row relative">
+<div class="relative w-full md:w-1/2 bg-background flex items-center justify-center border-b md:border-b-0 md:border-r border-outline/20 min-h-[200px]">
+<img alt="Source Image" class="max-w-[70%] max-h-[70%] object-contain rounded opacity-90 shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSPsjFP1yizlIh4EceehSvDvi8P9AEtshV7XUxeGriI8mL5KZtjAL_-ALWb0_Mn2CJY6jEOlxVdMvcqnidsWIBWwfYOKkCr0VP2rlQ5lIYnvjPfwBYGHTCGwRsyXsg3fqsJQB4tT-T59KCcEwFGYbWE2XWiWg0gFVF34ntnfsvWzjXBBTQ_AcC2aktZ7jwVSChBOUVwteF2Zymv_Jlov8qHpHCIhEG_0Yh5LjMuwm0rhCEvuUSBHD1q-drgL7x280kOQrWsHJpFzQ"/>
+<div class="absolute bottom-3 left-4 text-[9px] font-mono text-onSurfaceVariant/60 uppercase tracking-widest">IMG_2023.jpg</div>
+</div>
+<div class="flex-1 flex flex-col bg-surface">
+<div class="flex items-center justify-between px-4 py-3 border-b border-outline/10 bg-background/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">view_in_ar</span>
+<span class="text-[10px] font-bold text-onSurface uppercase tracking-widest">OCR Extraction</span>
+</div>
+</div>
+<div class="flex-1 p-5 font-mono text-xs leading-relaxed text-onSurfaceVariant overflow-y-auto min-h-[120px]">
+                            Brutalist Architecture: A study in raw concrete and geometric forms. This style emerged during the 1950s in the United Kingdom.
+                        </div>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<label class="block text-[10px] font-bold text-onSurfaceVariant mb-2 uppercase tracking-widest">Title</label>
+<div class="bg-surface border border-outline/30 rounded-xl px-4 py-1 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<input class="w-full bg-transparent border-none p-0 py-2.5 text-onSurface placeholder-onSurfaceVariant/40 focus:ring-0 text-xl font-medium font-serif" placeholder="Enter title..." type="text" value="Design Philosophy Quote"/>
+</div>
+</div>
+<div class="pt-4">
+<label class="block text-[10px] font-bold text-onSurfaceVariant mb-4 uppercase tracking-widest uppercase">Style</label>
+<div class="flex flex-wrap gap-6 items-center">
+<button class="w-12 h-12 rounded-full bg-[#E5A9A0] hover:scale-110 transition-transform shadow-lg"></button>
+<button class="w-12 h-12 rounded-full bg-[#E6C975] hover:scale-110 transition-transform shadow-lg"></button>
+<div class="relative w-12 h-12 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-2 border-primary scale-125"></div>
+<button class="relative w-full h-full rounded-full bg-[#B4A3FF] flex items-center justify-center border-4 border-background shadow-2xl">
+<span class="material-symbols-outlined text-onPrimary text-xl font-bold">check</span>
+</button>
+</div>
+<button class="w-12 h-12 rounded-full bg-[#AECBFA] hover:scale-110 transition-transform shadow-lg"></button>
+<button class="w-12 h-12 rounded-full bg-[#6DD58C] hover:scale-110 transition-transform shadow-lg"></button>
+<button class="w-12 h-12 rounded-full bg-[#E6D6F5] hover:scale-110 transition-transform shadow-lg"></button>
+</div>
+</div>
+<div class="pt-4 pb-12">
+<label class="block text-[10px] font-bold text-onSurfaceVariant mb-3 uppercase tracking-widest">Tags</label>
+<div class="flex flex-wrap gap-3 items-start">
+<div class="flex items-center gap-1.5 pl-4 pr-2 py-2 rounded-2xl bg-surface border border-outline/30 text-onSurface text-sm font-medium hover:border-primary transition-colors group">
+                        #Design
+                        <button class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-outline/20 text-onSurfaceVariant group-hover:text-onSurface transition-colors">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="flex items-center gap-1.5 pl-4 pr-2 py-2 rounded-2xl bg-surface border border-outline/30 text-onSurface text-sm font-medium hover:border-primary transition-colors group">
+                        #Architecture
+                        <button class="flex items-center justify-center w-5 h-5 rounded-full hover:bg-outline/20 text-onSurfaceVariant group-hover:text-onSurface transition-colors">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<div class="relative min-w-[160px]">
+<div class="flex items-center gap-2 pl-4 pr-1.5 py-1.5 rounded-2xl bg-background border border-primary text-onSurface text-sm font-medium ring-1 ring-primary">
+<span class="text-primary/70">#</span>
+<input autofocus="" class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm font-medium" type="text" value="Arch"/>
+<div class="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-error/10 border border-error/20">
+<span class="material-symbols-outlined text-[14px] text-error material-symbols-filled">warning</span>
+<span class="text-[9px] font-bold text-error uppercase tracking-tighter">Duplicate</span>
+</div>
+</div>
+<div class="absolute top-full left-0 mt-2 w-full bg-surface border border-outline/30 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1">
+<div class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary cursor-pointer hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-[18px]">tag</span>
+<span class="text-sm font-medium">#Architecture</span>
+</div>
+<div class="flex items-center gap-3 px-4 py-3 text-onSurfaceVariant cursor-pointer hover:bg-surfaceVariant/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="text-sm font-medium italic">Create "#Arch"</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<aside class="w-[450px] bg-surfaceVariant border-l border-outline/30 hidden xl:flex flex-col shadow-2xl z-20 h-full overflow-hidden">
+<div class="flex-1 flex items-center justify-center p-10 bg-[#131316]/20">
+<div class="w-full bg-primary rounded-3xl border border-white/10 overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 max-w-sm">
+<div class="p-8 flex flex-col gap-5">
+<div class="flex items-center justify-between w-full text-[10px] text-onPrimary/60 font-bold uppercase tracking-widest">
+<span>Design Philosophy</span>
+<span>Oct 24</span>
+</div>
+<div class="font-serif text-[24px] font-medium text-onPrimary leading-tight italic">
+                        "The details are not the details. They make the design."
+                    </div>
+<div class="bg-black/90 rounded-xl p-4 font-mono text-[10px] leading-relaxed border border-white/5 shadow-inner">
+<div><span class="code-syntax-keyword">function</span> <span class="code-syntax-func">bubbleSort</span>(arr) {</div>
+<div class="pl-3"><span class="code-syntax-keyword">const</span> <span class="code-syntax-variable">len</span> = arr.length;</div>
+<div>}</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex items-center gap-3 py-2 border-y border-black/5">
+<div class="w-10 h-10 rounded-lg bg-black/30 flex items-center justify-center overflow-hidden shrink-0 border border-white/10">
+<img alt="reference" class="w-full h-full object-cover opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSPsjFP1yizlIh4EceehSvDvi8P9AEtshV7XUxeGriI8mL5KZtjAL_-ALWb0_Mn2CJY6jEOlxVdMvcqnidsWIBWwfYOKkCr0VP2rlQ5lIYnvjPfwBYGHTCGwRsyXsg3fqsJQB4tT-T59KCcEwFGYbWE2XWiWg0gFVF34ntnfsvWzjXBBTQ_AcC2aktZ7jwVSChBOUVwteF2Zymv_Jlov8qHpHCIhEG_0Yh5LjMuwm0rhCEvuUSBHD1q-drgL7x280kOQrWsHJpFzQ"/>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-[11px] text-onPrimary font-bold truncate">Brutalist Study</span>
+<span class="text-[9px] text-onPrimary/60 font-mono tracking-tighter uppercase">IMG_2023.jpg</span>
+</div>
+</div>
+<div class="flex items-center gap-3 py-2 border-y border-black/5">
+<div class="w-10 h-10 rounded-lg bg-black/30 flex items-center justify-center overflow-hidden shrink-0 border border-white/10 relative">
+<img alt="video thumb" class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJmUIMijo9bpYvFqQN50SzLzNwwvDrVLaTP6Po3OX3knrvXxjYKwOryJQutRkDF08qQl_cXiMTWMG8OFvtRPHrWuMdHpGxMydZSGbP5Mfa-1EVDKdxpFwKRC47kYmgKoRtG9ln4aU62H7Hr3FHF1nMoLbTFvtSgomik7-anZ8J1P0kjrJ2OcBGdIa1TKD6wtpFeZgs8j3EN_RXfyWODOfp7OTV_1tTWThg6XkJ9P2Ynys7l1ldA-mQXXul1BhMrauhql4tku8Y_lE"/>
+<span class="material-symbols-outlined text-white text-[14px] absolute material-symbols-filled">play_circle</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-[11px] text-onPrimary font-bold truncate">Theory (15:40)</span>
+<span class="text-[9px] text-onPrimary/60 truncate uppercase tracking-tighter">Design Theory</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 pt-4 mt-2 border-t border-black/10">
+<div class="flex items-center gap-1 pl-3 pr-1 py-1.5 rounded-lg bg-black/10 text-onPrimary/80 border border-black/5">
+<span class="text-[9px] font-bold uppercase tracking-widest">#DESIGN</span>
+<span class="material-symbols-outlined text-[14px] opacity-40">close</span>
+</div>
+<div class="flex items-center gap-1 pl-3 pr-1 py-1.5 rounded-lg bg-black/10 text-onPrimary/80 border border-black/5">
+<span class="text-[9px] font-bold uppercase tracking-widest">#ARCHITECTURE</span>
+<span class="material-symbols-outlined text-[14px] opacity-40">close</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+
+</body></html>

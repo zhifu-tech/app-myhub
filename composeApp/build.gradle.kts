@@ -113,14 +113,14 @@ kotlin {
             implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.dashboardApi)
+            implementation(projects.feature.capture)
+            implementation(projects.feature.captureApi)
             implementation(projects.feature.favorite)
             implementation(projects.feature.favoriteApi)
+            implementation(projects.component.media)
             implementation(projects.feature.profile)
             implementation(projects.feature.profileApi)
             implementation(projects.feature.settings)
-
-            implementation(projects.component.card)
-            implementation(projects.component.mixed)
 
             implementation(projects.core.analytics)
             implementation(projects.core.appBuildConfig)
@@ -147,6 +147,9 @@ kotlin {
             implementation(libs.jb.compose.material3.material3)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
+
+            implementation(libs.filekit.coil)
+            implementation(libs.coil.compose)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)

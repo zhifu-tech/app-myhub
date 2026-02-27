@@ -1,0 +1,15 @@
+-- 以视频为主：URL、时长、平台
+CREATE TABLE card_metadata_carrier_video (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    url TEXT,
+    duration INTEGER,
+    platform TEXT,
+    cover_image_url TEXT,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_card_metadata_carrier_video_card_id ON card_metadata_carrier_video(card_id);
+
+insertCardMetadataCarrierVideo:
+INSERT OR REPLACE INTO card_metadata_carrier_video (card_id, url, duration, platform, cover_image_url)
+VALUES (?, ?, ?, ?, ?);

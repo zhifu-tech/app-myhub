@@ -27,6 +27,7 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://jogamp.org/deployment/maven/")
     }
 }
 
@@ -207,6 +208,7 @@ include(":datastore:sync")
 // 组件模块
 // ============================================================================
 include(":component:card")
+include(":component:media")
 include(":component:mixed")
 
 // ============================================================================
@@ -222,6 +224,8 @@ include(":feature:favorite-api")
 include(":feature:favorite")
 include(":feature:dashboard-api")
 include(":feature:dashboard")
+include(":feature:capture-api")
+include(":feature:capture")
 
 // ============================================================================
 // 应用模块

@@ -65,6 +65,7 @@ yarn-error.log*
 .env.*.local
 server/.env
 server/.env.local
+.cursor
 
 # ============================================================================
 # System Files

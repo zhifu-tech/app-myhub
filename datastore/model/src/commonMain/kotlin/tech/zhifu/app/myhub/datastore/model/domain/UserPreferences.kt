@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class UserPreferences(
     val userId: String,
     val theme: String = "dark",
-    val language: String = "en",
+    val language: String = "zh-CN",
     val defaultCardType: String? = null,
     val autoSync: Boolean = true,
     val syncInterval: Long = 3600000L

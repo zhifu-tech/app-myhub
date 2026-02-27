@@ -6,9 +6,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import io.github.vinceglb.filekit.FileKit
 import tech.zhifu.app.myhub.di.initKoin
 
 fun main() = application {
+    FileKit.init(appId = "tech.zhifu.app.myhub")
     // 初始化 Koin 依赖注入
     initKoin()
 

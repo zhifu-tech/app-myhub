@@ -1,7 +1,7 @@
 {
   "userId": "user-001",
   "theme": "dark",
-  "language": "zh",
+  "language": "zh-CN",
   "defaultCardType": "quote",
   "autoSync": true,
   "syncInterval": 3600000

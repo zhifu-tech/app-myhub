@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.datastore.database
 import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import org.w3c.dom.Worker
-
 /**
  * JavaScript 平台测试数据库创建实现
  *

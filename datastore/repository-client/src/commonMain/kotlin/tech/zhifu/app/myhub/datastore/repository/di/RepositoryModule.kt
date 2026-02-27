@@ -6,6 +6,8 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.datasource.di.remoteDataSourceModule
+import tech.zhifu.app.myhub.datastore.repository.auth.di.authModule
+import tech.zhifu.app.myhub.datastore.repository.capture.di.captureRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.card.di.repositoryCardModule
 import tech.zhifu.app.myhub.datastore.repository.collection.di.collectionRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
@@ -13,7 +15,6 @@ import tech.zhifu.app.myhub.datastore.repository.store.DatabaseBookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.sync.di.syncRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.tag.di.tagRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.template.di.templateRepositoryModule
-import tech.zhifu.app.myhub.datastore.repository.auth.di.authModule
 import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
 
 /**
@@ -24,24 +25,18 @@ import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
  */
 @ExperimentalStoreApi
 val repositoryModule = module {
-    includes(
-        databaseModule,
-        localDataSourceModule,
-        remoteDataSourceModule,
-    )
-
     // Bookkeeper 存储（数据库实现 - 持久化）
     single<BookkeeperStorage> {
         DatabaseBookkeeperStorage(
             database = get<MyHubDatabase>()
         )
     }
-
-    // 认证模块
-    includes(authModule)
-
-    // 各个 Repository 模块
     includes(
+        databaseModule,
+        localDataSourceModule,
+        remoteDataSourceModule,
+        authModule,
+        captureRepositoryModule,
         repositoryCardModule(),
         tagRepositoryModule(),
         collectionRepositoryModule(),

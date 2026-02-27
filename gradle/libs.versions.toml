@@ -33,6 +33,10 @@ sqldelight = "2.2.1"
 uiTooling = "1.10.1"
 umeng-asms = "1.8.7.2"
 umeng-common = "9.8.9"
+filekit = "0.12.0"
+coil = "3.1.0"
+cmpMediaPlayer = "1.0.53"
+richeditor = "1.0.0-rc13"
 
 [libraries]
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -71,6 +75,13 @@ kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+richeditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richeditor" }
+compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "cmpMediaPlayer" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }

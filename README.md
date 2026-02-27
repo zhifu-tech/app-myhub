@@ -267,7 +267,6 @@ app-myhub/
 - [数据模块迁移](docs/DATA_MODULE_MIGRATION.md) - 数据模块迁移指南
 - [多语言支持](docs/I18N_MULTILINGUAL_SUPPORT.md) - 多语言支持说明
 - [统计框架设计](core/analytics/docs/ANALYTICS_FRAMEWORK_DESIGN.md) - 统计框架设计方案
-- [Dashboard 迁移](docs/DASHBOARD_MIGRATION.md) - Dashboard 模块迁移说明
 
 ## 📄 许可证
 

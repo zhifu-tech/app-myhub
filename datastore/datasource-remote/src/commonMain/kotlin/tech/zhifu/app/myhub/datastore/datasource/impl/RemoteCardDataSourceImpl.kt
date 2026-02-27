@@ -15,6 +15,7 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLPath
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.content
 import tech.zhifu.app.myhub.datastore.model.dto.CardResponse
 import tech.zhifu.app.myhub.datastore.model.dto.CreateCardRequest
 import tech.zhifu.app.myhub.datastore.model.dto.PaginatedResponse
@@ -86,9 +87,9 @@ class RemoteCardDataSourceImpl(
 
     override suspend fun createCard(card: Card): Card = try {
         val request = CreateCardRequest(
-            type = card.type,
-            title = card.title,
-            content = card.content,
+            type = card.type.wire,
+            title = card.metadata.content?.title,
+            content = card.metadata.content?.content.orEmpty(),
             tagIds = card.tags.map { it.id }
         )
         val response: HttpResponse = httpClient.post("${ApiConfig.BASE_URL}${ApiConfig.CARDS_PATH}") {
@@ -110,9 +111,9 @@ class RemoteCardDataSourceImpl(
 
     override suspend fun updateCard(card: Card): Card = try {
         val request = UpdateCardRequest(
-            type = card.type,
-            title = card.title,
-            content = card.content,
+            type = card.type.wire,
+            title = card.metadata.content?.title,
+            content = card.metadata.content?.content.orEmpty(),
             tagIds = card.tags.map { it.id }
         )
         val response: HttpResponse = httpClient.put("${ApiConfig.BASE_URL}${ApiConfig.CARDS_PATH}/${card.id}") {
@@ -134,9 +135,9 @@ class RemoteCardDataSourceImpl(
 
     override suspend fun partialUpdateCard(card: Card): Card = try {
         val request = PartialUpdateCardRequest(
-            type = card.type,
-            title = card.title,
-            content = card.content,
+            type = card.type.wire,
+            title = card.metadata.content?.title,
+            content = card.metadata.content?.content.orEmpty(),
             tagIds = card.tags.map { it.id }
         )
         val response: HttpResponse = httpClient.patch("${ApiConfig.BASE_URL}${ApiConfig.CARDS_PATH}/${card.id}") {

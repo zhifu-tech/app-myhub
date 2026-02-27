@@ -1,0 +1,11 @@
+<resources>
+  <string name="capture">捕获</string>
+  <string name="capture_ready_title">准备捕获</string>
+  <string name="capture_ready_subtitle">内容将在此处显示以供审核。</string>
+  <string name="capture_input_placeholder">您想捕获什么？粘贴链接或拖放文件</string>
+  <string name="capture_add_media">添加媒体</string>
+  <string name="capture_processing">处理中…</string>
+  <string name="capture_ai_analyzing">AI 正在分析您的意图</string>
+  <string name="capture_ai_analyzing_subtitle">并构建资产…</string>
+  <string name="capture_generating_asset">正在生成结构化资产…</string>
+</resources>

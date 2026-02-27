@@ -1,0 +1,24 @@
+-- 建议复看方式（分析产出）
+CREATE TABLE card_review (
+    card_id TEXT PRIMARY KEY NOT NULL,
+    kind TEXT NOT NULL,
+    value INTEGER,
+    label TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_card_review_card_id ON card_review(card_id);
+
+insertCardReview:
+INSERT OR REPLACE INTO card_review (card_id, kind, value, label, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectCardReviewByCardId:
+SELECT * FROM card_review
+WHERE card_id = ?;
+
+deleteCardReview:
+DELETE FROM card_review
+WHERE card_id = ?;

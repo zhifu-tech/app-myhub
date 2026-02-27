@@ -18,14 +18,46 @@ enum class Language(val code: String, val region: String?) {
     Japanese("ja", null)
 }
 
+object AppLocale {
+    const val EN = "en"
+    const val ZH_CN = "zh-CN"
+    const val ZH_TW = "zh-TW"
+    const val JA = "ja"
+
+    // App-level default locale when no user/system preference is available.
+    const val DEFAULT = ZH_CN
+}
+
+fun normalizeLanguageTag(tag: String?): String {
+    val normalized = tag
+        ?.trim()
+        ?.replace('_', '-')
+        ?.takeIf { it.isNotEmpty() }
+        ?: return AppLocale.DEFAULT
+
+    return when (val lower = normalized.lowercase()) {
+        "en", "en-us", "en-gb" -> AppLocale.EN
+        "ja", "ja-jp" -> AppLocale.JA
+        "zh", "zh-cn", "zh-hans", "zh-sg" -> AppLocale.ZH_CN
+        "zh-tw", "zh-hk", "zh-mo", "zh-hant" -> AppLocale.ZH_TW
+        else -> when (lower.substringBefore('-')) {
+            "en" -> AppLocale.EN
+            "ja" -> AppLocale.JA
+            "zh" -> AppLocale.ZH_CN
+            else -> AppLocale.EN
+        }
+    }
+}
+
 /**
  * 将语言代码字符串转换为 Language 枚举
  *
  * @return 匹配的 Language，如果未找到则返回 English
  */
 fun String.toLanguage(): Language {
-    return Language.entries.find { it.code == this }
-        ?: Language.entries.find { this.startsWith(it.code.split("-")[0]) }
+    val normalized = normalizeLanguageTag(this)
+    return Language.entries.find { it.code == normalized }
+        ?: Language.entries.find { normalized.startsWith(it.code.split("-")[0]) }
         ?: Language.English
 }
 
@@ -50,4 +82,3 @@ fun Language.getLocalizedLabel(): String {
         Language.Japanese -> stringResource(Res.string.platform_language_japanese)
     }
 }
-

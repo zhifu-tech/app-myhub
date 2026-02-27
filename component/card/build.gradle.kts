@@ -32,11 +32,11 @@ kotlin {
             implementation(libs.jb.compose.material3.material3)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
+            implementation(libs.coil.compose)
 
             implementation(libs.kotlinx.datetime)
 
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.core)
 
             if (project.isDev()) {
                 implementation(libs.jb.compose.ui.uiToolingPreview)
@@ -59,4 +59,3 @@ kotlin {
 dependencies {
     "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }
-

@@ -11,13 +11,14 @@ import org.koin.dsl.module
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
-import tech.zhifu.app.myhub.component.card.di.cardModule
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
 import tech.zhifu.app.myhub.datastore.bootstrap.di.bootstrapModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
+import tech.zhifu.app.myhub.feature.capture.di.captureModule
 import tech.zhifu.app.myhub.feature.card.di.cardDetailModule
 import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
+import tech.zhifu.app.myhub.component.media.di.mediaModule
 import tech.zhifu.app.myhub.feature.profile.di.profileModule
 import tech.zhifu.app.myhub.feature.settings.di.settingsModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
@@ -58,9 +59,9 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             settingsModule(),
             dashboardModule(),
             profileModule(),
+            mediaModule(),
+            captureModule(),
             cardDetailModule(),
-            // Component modules
-            cardModule,
             // Analytics module
             analyticsModule(),
             // App module
@@ -76,6 +77,7 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
         )
     }
 
+    // 无用户时执行 bootstrap；observeUser 使用 mapToOneOrNull 避免 0 行时抛错
     appScope.launch {
         try {
             val userRepository = koinApplication.koin.get<UserRepository>()
@@ -86,7 +88,6 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             }
         } catch (e: Exception) {
             logger.error(e) { "Bootstrap initialization failed" }
-            // 可以选择继续启动或抛出异常
         }
     }
 

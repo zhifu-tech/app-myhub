@@ -65,8 +65,8 @@ class LocalUserDataSourceImpl(
         return database.userQueries
             .selectCurrentUser()
             .asFlow()
-            .mapToOne(Dispatchers.Default)
-            .map(DbCurrentUser::toDomain)
+            .mapToOneOrNull(Dispatchers.Default)
+            .map { it?.toDomain() }
     }
 
     override suspend fun deleteUser(userId: String) {

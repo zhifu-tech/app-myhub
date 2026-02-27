@@ -1,9 +1,0 @@
-{
-    "timestamp": 1767865510211,
-    "type": "event",
-    "eventName": "app_started",
-    "parameters": {
-        "environment": "dev",
-        "version_type": "free"
-    }
-}

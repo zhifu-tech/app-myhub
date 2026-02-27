@@ -1,31 +1,27 @@
--- 卡片表，内容本体（不包含任何用户主观状态）
+-- 卡片表（壳：身份、type、source、carriers、归属、时间）
+-- type/source 语义由 datastore.model.domain.CardType/CardSource 定义，DB 存 wire string
+-- carriers: JSON array, ordered, first = primary carrier
 CREATE TABLE card (
     id TEXT PRIMARY KEY NOT NULL,
-
-    type TEXT NOT NULL,                         -- text / video / product / ...
-    title TEXT,
-    content TEXT NOT NULL,
-
+    type TEXT NOT NULL,
+    source TEXT NOT NULL,
+    carriers TEXT NOT NULL,
     user_id TEXT NOT NULL,
-
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- 索引
-CREATE INDEX idx_card_type ON card(type);
 CREATE INDEX idx_card_user_id ON card(user_id);
+CREATE INDEX idx_card_type ON card(type);
+CREATE INDEX idx_card_source ON card(source);
 CREATE INDEX idx_card_created_at ON card(created_at);
 CREATE INDEX idx_card_updated_at ON card(updated_at);
--- 复合索引：优化按用户和类型筛选的查询
 CREATE INDEX idx_card_user_id_type ON card(user_id, type);
--- 复合索引：优化按用户和更新时间排序的查询
 CREATE INDEX idx_card_user_id_updated_at ON card(user_id, updated_at);
 
 insertCard:
-INSERT OR REPLACE INTO card (id, type, title, content, user_id, created_at, updated_at)
+INSERT OR REPLACE INTO card (id, type, source, carriers, user_id, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteCard:
@@ -39,3 +35,12 @@ WHERE id IN ?;
 deleteCardsByUserId:
 DELETE FROM card
 WHERE user_id = ?;
+
+selectCardById:
+SELECT * FROM card
+WHERE id = ?;
+
+selectCardsByUserId:
+SELECT * FROM card
+WHERE user_id = ?
+ORDER BY updated_at DESC;
