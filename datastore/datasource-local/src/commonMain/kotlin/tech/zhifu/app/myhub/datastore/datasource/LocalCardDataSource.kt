@@ -4,6 +4,11 @@ import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
+enum class CardSort {
+    NEWEST,
+    OLDEST,
+}
+
 interface LocalCardDataSource {
 
     suspend fun insertCard(card: Card)
@@ -27,6 +32,13 @@ interface LocalCardDataSource {
     ): Long
 
     fun observeCards(userId: String): Flow<List<Card>>
+
+    fun observeCardsPage(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: CardSort? = null,
+    ): Flow<List<Card>>
 
     suspend fun deleteCard(cardId: String)
 

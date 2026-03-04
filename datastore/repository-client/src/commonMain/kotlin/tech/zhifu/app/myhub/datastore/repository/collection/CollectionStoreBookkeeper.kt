@@ -9,27 +9,26 @@ fun createCollectionStoreBookkeeper(
     bookkeeperStorage: BookkeeperStorage
 ): CollectionStoreBookkeeper = Bookkeeper.by(
     getLastFailedSync = { key ->
-        val keyString = when (key) {
-            is CollectionStoreKey.ById -> "collection:${key.id}"
-            is CollectionStoreKey.ByUser -> "collections:${key.userId}"
-        }
+        val keyString = key.toBookkeeperKey()
         bookkeeperStorage.getLastFailedSync(keyString)
     },
     setLastFailedSync = { key, timestamp ->
-        val keyString = when (key) {
-            is CollectionStoreKey.ById -> "collection:${key.id}"
-            is CollectionStoreKey.ByUser -> "collections:${key.userId}"
-        }
+        val keyString = key.toBookkeeperKey()
         bookkeeperStorage.setLastFailedSync(keyString, timestamp)
     },
     clear = { key ->
-        val keyString = when (key) {
-            is CollectionStoreKey.ById -> "collection:${key.id}"
-            is CollectionStoreKey.ByUser -> "collections:${key.userId}"
-        }
+        val keyString = key.toBookkeeperKey()
         bookkeeperStorage.clearFailedSync(keyString)
     },
     clearAll = {
         bookkeeperStorage.clearAllFailedSyncs()
     }
 )
+
+private fun CollectionStoreKey<String>.toBookkeeperKey(): String = when (this) {
+    is CollectionStoreKey.ById -> "collection:$id"
+    is CollectionStoreKey.ByUser ->
+        "collections:$userId:$page:$size:sort=${sort?.name}:filters=${filters.hashToken()}"
+}
+
+private fun List<*>?.hashToken(): Int = this?.hashCode() ?: 0

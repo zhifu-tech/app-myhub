@@ -16,12 +16,12 @@ import org.mobilenativefoundation.store.store5.Updater
 import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfig
 import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfigs
 
-typealias CollectionStore = MutableStore<CollectionStoreKey, CollectionStoreData>
-typealias CollectionStoreCache = StoreMultiCache<String, CollectionStoreKey, CollectionStoreData.Single, CollectionStoreData.Items, CollectionStoreData>
-typealias CollectionStoreSourceOfTruth = SourceOfTruth<CollectionStoreKey, CollectionStoreData, CollectionStoreData>
-typealias CollectionStoreBookkeeper = Bookkeeper<CollectionStoreKey>
-typealias CollectionStoreUpdater = Updater<CollectionStoreKey, CollectionStoreData, StoreWriteResponse>
-typealias CollectionStoreFetcher = Fetcher<CollectionStoreKey, CollectionStoreData>
+typealias CollectionStore = MutableStore<CollectionStoreKey<String>, CollectionStoreData>
+typealias CollectionStoreCache = StoreMultiCache<String, CollectionStoreKey<String>, CollectionStoreData.Single, CollectionStoreData.Items, CollectionStoreData>
+typealias CollectionStoreSourceOfTruth = SourceOfTruth<CollectionStoreKey<String>, CollectionStoreData, CollectionStoreData>
+typealias CollectionStoreBookkeeper = Bookkeeper<CollectionStoreKey<String>>
+typealias CollectionStoreUpdater = Updater<CollectionStoreKey<String>, CollectionStoreData, StoreWriteResponse>
+typealias CollectionStoreFetcher = Fetcher<CollectionStoreKey<String>, CollectionStoreData>
 
 @OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreCache(
@@ -39,7 +39,7 @@ fun createCollectionStoreCache(
         ): StoreKey.Collection<String> = CollectionStoreKey.ByUser(
             userId = value.collection.userId,
             page = 1,
-            pageSize = 10
+            size = 10
         )
     },
     singlesCache = CacheBuilder<StoreKey.Single<String>, CollectionStoreData.Single>()

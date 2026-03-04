@@ -112,7 +112,7 @@ internal fun ReviewText(
             .distinctUntilChanged()
             .onEach { markdown ->
                 logger.debug {
-                    "new rich text state222= $markdown"
+                    "new rich text state22= $markdown"
                 }
                 onTextChangeState(markdown)
             }

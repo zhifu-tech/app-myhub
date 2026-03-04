@@ -15,17 +15,18 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
+import tech.zhifu.app.myhub.datastore.datasource.CardSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.model.domain.attribution
 import tech.zhifu.app.myhub.datastore.model.domain.carrierImage
 import tech.zhifu.app.myhub.datastore.model.domain.carrierVideo
+import tech.zhifu.app.myhub.datastore.model.domain.code
 import tech.zhifu.app.myhub.datastore.model.domain.content
 import tech.zhifu.app.myhub.datastore.model.domain.execution
 import tech.zhifu.app.myhub.datastore.model.domain.lexicon
 import tech.zhifu.app.myhub.datastore.model.domain.link
-import tech.zhifu.app.myhub.datastore.model.domain.code
 import tech.zhifu.app.myhub.datastore.model.domain.site
 
 class LocalCardDataSourceImpl(
@@ -254,6 +255,63 @@ class LocalCardDataSourceImpl(
                     card.toDomain(tagsByCardId[card.card_id].orEmpty())
                 }
                 emit(list)
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeCardsPage(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: CardSort?,
+    ): Flow<List<Card>> {
+        val offset = (page - 1) * size
+        val query = when (sort ?: CardSort.NEWEST) {
+            CardSort.NEWEST -> database.card_with_metadataQueries
+                .selectCardWithMetadataByUserIdWithFilters(
+                    userId = userId,
+                    type = null,
+                    isFavorite = null,
+                    limit = size.toLong(),
+                    offset = offset.toLong()
+                )
+
+            CardSort.OLDEST -> database.card_with_metadataQueries
+                .selectCardWithMetadataByUserIdWithFiltersOldest(
+                    userId = userId,
+                    type = null,
+                    isFavorite = null,
+                    limit = size.toLong(),
+                    offset = offset.toLong()
+                )
+        }
+
+        val cardsFlow = query
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+
+        val tagsFlow = cardsFlow
+            .map { cards -> cards.map { it.card_id } }
+            .distinctUntilChanged()
+            .flatMapLatest { cardIds ->
+                if (cardIds.isEmpty()) {
+                    flowOf(emptyMap())
+                } else {
+                    database.card_tagQueries
+                        .selectTagsByCardIds(cardIds)
+                        .asFlow()
+                        .mapToList(Dispatchers.Default)
+                        .map { rows ->
+                            rows.groupBy { it.card_id }
+                                .mapValues { entry -> entry.value.map { it.toDomain() } }
+                        }
+                }
+            }
+
+        return combine(cardsFlow, tagsFlow) { cards, tagsByCardId ->
+            cards.map { card ->
+                card.toDomain(tagsByCardId[card.card_id].orEmpty())
             }
         }
     }

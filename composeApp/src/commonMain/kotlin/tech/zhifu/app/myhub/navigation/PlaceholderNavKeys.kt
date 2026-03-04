@@ -23,6 +23,10 @@ object ExploreNavKey : NavKey
 @Serializable
 object FavoritesNavKey : NavKey
 
+/** 全局会话过期后的登录入口占位 */
+@Serializable
+object LoginNavKey : NavKey
+
 @Composable
 fun ExploreNavItem() = object : NavItem {
     override val selectedIcon: ImageVector = Icons.Outlined.Explore

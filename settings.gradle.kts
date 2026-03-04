@@ -211,6 +211,8 @@ include(":component:card")
 include(":component:media")
 include(":component:mixed")
 
+include(":ui:design")
+
 // ============================================================================
 // 功能模块
 // ============================================================================
@@ -220,6 +222,8 @@ include(":feature:profile-api")
 include(":feature:profile")
 include(":feature:card-api")
 include(":feature:card")
+include(":feature:auth-api")
+include(":feature:auth")
 include(":feature:favorite-api")
 include(":feature:favorite")
 include(":feature:dashboard-api")

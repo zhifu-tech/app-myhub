@@ -3,7 +3,9 @@ package tech.zhifu.app.myhub.datastore.repository.card
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
+import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.SourceOfTruth
+import tech.zhifu.app.myhub.datastore.datasource.CardSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
@@ -14,10 +16,6 @@ internal fun createCardStoreSourceOfTruth(
     logger: Logger,
 ): CardStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
-        logger.debug {
-            "reader called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is CardStoreKey.ById -> flow {
                 localCardDataSource.observeCard(key.id).collect { card ->
@@ -38,12 +36,15 @@ internal fun createCardStoreSourceOfTruth(
                 )
             }
 
-            is CardStoreKey.ByUser -> localCardDataSource.observeCards(key.userId)
-                .map { fullList ->
-                    val pagedCards = fullList.drop((key.page - 1) * key.pageSize).take(key.pageSize)
-                    if (pagedCards.isEmpty()) null
-                    else CardStoreData.Collection.fromCards(pagedCards, key.userId)
-                }
+            is CardStoreKey.ByUser -> localCardDataSource.observeCardsPage(
+                userId = key.userId,
+                page = key.page,
+                size = key.size,
+                sort = key.sort.toCardSort(),
+            ).map { pageItems ->
+                if (pageItems.isEmpty()) null
+                else CardStoreData.Collection.fromCards(pageItems, key.userId)
+            }
         }
     },
     writer = { key, data ->
@@ -80,3 +81,10 @@ internal fun createCardStoreSourceOfTruth(
     },
     deleteAll = { }
 )
+
+@OptIn(ExperimentalStoreApi::class)
+private fun StoreKey.Sort?.toCardSort(): CardSort? = when (this) {
+    StoreKey.Sort.NEWEST -> CardSort.NEWEST
+    StoreKey.Sort.OLDEST -> CardSort.OLDEST
+    else -> null
+}

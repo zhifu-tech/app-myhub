@@ -5,16 +5,18 @@ import org.mobilenativefoundation.store.core5.InsertionStrategy
 import org.mobilenativefoundation.store.core5.StoreKey
 
 @OptIn(ExperimentalStoreApi::class)
-sealed class CollectionStoreKey : StoreKey<String> {
+sealed interface CollectionStoreKey<out Id : Any> : StoreKey<Id> {
 
     data class ById(
         override val id: String,
-    ) : CollectionStoreKey(), StoreKey.Single<String>
+    ) : CollectionStoreKey<String>, StoreKey.Single<String>
 
     data class ByUser(
         val userId: String,
-        val page: Int = 1,
-        val pageSize: Int = 10,
+        override val page: Int = 1,
+        override val size: Int = 10,
+        override val sort: StoreKey.Sort? = null,
+        override val filters: List<StoreKey.Filter<*>>? = null,
         override val insertionStrategy: InsertionStrategy = InsertionStrategy.REPLACE
-    ) : CollectionStoreKey(), StoreKey.Collection<String>
+    ) : CollectionStoreKey<Nothing>, StoreKey.Collection.Page
 }

@@ -19,6 +19,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -28,17 +29,20 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.window.core.layout.WindowSizeClass
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
-import org.koin.compose.koinInject
 import io.github.vinceglb.filekit.coil.addPlatformFileSupport
+import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.LocalAnalyticsService
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
+import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionCoordinator
+import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionEvent
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.local.LocalAppLocale
 import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.navigation.LoginNavKey
 import tech.zhifu.app.myhub.navigation.NavItem
 import tech.zhifu.app.myhub.navigation.navAppKeyItemMap
 import tech.zhifu.app.myhub.navigation.navEntryProvider
@@ -54,7 +58,7 @@ import tech.zhifu.app.myhub.ui.rememberWindowSizeClass
 fun App(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
 ) {
-    logger.debug { "App函数调用, 防止调用裂化" }
+//    logger.debug { "App函数调用, 防止调用裂化" } fixme
     val windowSizeClass = rememberWindowSizeClass(windowAdaptiveInfo)
     CompositionLocalProvider(
         LocalWindowSizeClass provides windowSizeClass
@@ -69,7 +73,7 @@ private fun AppEnvironment(
     analyticsService: AnalyticsService = koinInject(),
     settingsRepository: SettingsRepository = koinInject(),
 ) {
-    logger.debug { "AppEnvironment函数调用, 防止调用裂化" }
+//    logger.debug { "AppEnvironment函数调用, 防止调用裂化" } fixme
     val appState = rememberAppState(settingsRepository)
     val isDarkTheme by appState.isDarkTheme.collectAsState()
     val locale by appState.locale.collectAsState()
@@ -92,6 +96,7 @@ private fun AppContent(
     appState: AppState,
     isDarkTheme: Boolean,
     windowSizeClass: WindowSizeClass,
+    authSessionCoordinator: AuthSessionCoordinator = koinInject(),
 ) {
     logger.debug { "AppContent函数调用" }
     TrackAppStartedEvent()
@@ -106,6 +111,13 @@ private fun AppContent(
 
     AppTheme(darkTheme = isDarkTheme) {
         val navigator = AppNavigator(appState.navigationState)
+        LaunchedEffect(authSessionCoordinator, navigator) {
+            authSessionCoordinator.events.collect { event ->
+                if (event is AuthSessionEvent.Expired) {
+                    navigator.redirectToLogin(LoginNavKey)
+                }
+            }
+        }
         val entries = appState.navigationState.toEntries(navigator.navEntryProvider())
         val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
         val navSuitState = rememberNavigationSuiteScaffoldState()
@@ -144,9 +156,17 @@ private fun AppContent(
     }
 }
 
+private fun AppNavigator.redirectToLogin(loginNavKey: NavKey) {
+    state.currentSubStack.run {
+        clear()
+        add(state.currentAppKey)
+        add(loginNavKey)
+    }
+}
+
 @Composable
 private fun PrimaryActionContent() {
-    Column (Modifier.padding(start = 20.dp)) {
+    Column(Modifier.padding(start = 20.dp)) {
         FloatingActionButton(
             onClick = { /* Logo，可扩展为回到首页等 */ },
             modifier = Modifier.size(48.dp)

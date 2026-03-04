@@ -17,6 +17,7 @@ import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.capture.di.captureModule
 import tech.zhifu.app.myhub.feature.card.di.cardDetailModule
+import tech.zhifu.app.myhub.feature.auth.di.authModule
 import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.component.media.di.mediaModule
 import tech.zhifu.app.myhub.feature.profile.di.profileModule
@@ -56,6 +57,7 @@ fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
             platformModule(),
             repositoryModule,
             bootstrapModule,
+            authModule(),
             settingsModule(),
             dashboardModule(),
             profileModule(),

@@ -32,6 +32,8 @@ kotlin {
             implementation(projects.feature.captureApi)
             implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboardApi)
+            implementation(projects.feature.authApi)
+            implementation(projects.ui.design)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)
@@ -42,6 +44,9 @@ kotlin {
             implementation(libs.jb.androidx.window.windowCore)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.orbit.core)
+            implementation(libs.orbit.compose)
+            implementation(libs.orbit.viewmodel)
 
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
@@ -58,4 +63,3 @@ dependencies {
         "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
     }
 }
-

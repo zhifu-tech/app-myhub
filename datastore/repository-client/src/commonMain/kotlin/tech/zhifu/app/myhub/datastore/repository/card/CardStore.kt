@@ -16,12 +16,12 @@ import org.mobilenativefoundation.store.store5.Updater
 import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfig
 import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfigs
 
-typealias CardStore = MutableStore<CardStoreKey, CardStoreData>
-typealias CardStoreCache = StoreMultiCache<String, CardStoreKey, CardStoreData.Single, CardStoreData.Collection, CardStoreData>
-typealias CardStoreSourceOfTruth = SourceOfTruth<CardStoreKey, CardStoreData, CardStoreData>
-typealias CardStoreBookkeeper = Bookkeeper<CardStoreKey>
-typealias CardStoreUpdater = Updater<CardStoreKey, CardStoreData, StoreWriteResponse>
-typealias CardStoreFetcher = Fetcher<CardStoreKey, CardStoreData>
+typealias CardStore = MutableStore<CardStoreKey<String>, CardStoreData>
+typealias CardStoreCache = StoreMultiCache<String, CardStoreKey<String>, CardStoreData.Single, CardStoreData.Collection, CardStoreData>
+typealias CardStoreSourceOfTruth = SourceOfTruth<CardStoreKey<String>, CardStoreData, CardStoreData>
+typealias CardStoreBookkeeper = Bookkeeper<CardStoreKey<String>>
+typealias CardStoreUpdater = Updater<CardStoreKey<String>, CardStoreData, StoreWriteResponse>
+typealias CardStoreFetcher = Fetcher<CardStoreKey<String>, CardStoreData>
 
 @OptIn(ExperimentalStoreApi::class)
 fun createCardStoreCache(
@@ -39,7 +39,7 @@ fun createCardStoreCache(
         ): StoreKey.Collection<String> = CardStoreKey.ByUser(
             userId = value.card.userId,
             page = 1,
-            pageSize = 20
+            size = 20
         )
     },
     singlesCache = CacheBuilder<StoreKey.Single<String>, CardStoreData.Single>()

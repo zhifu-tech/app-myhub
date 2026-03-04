@@ -111,6 +111,8 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.feature.card)
             implementation(projects.feature.cardApi)
+            implementation(projects.feature.auth)
+            implementation(projects.feature.authApi)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.capture)

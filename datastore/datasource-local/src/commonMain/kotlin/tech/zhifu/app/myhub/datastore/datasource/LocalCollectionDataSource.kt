@@ -5,6 +5,13 @@ import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import kotlin.time.Instant
 
+enum class CollectionSort {
+    NEWEST,
+    OLDEST,
+}
+
+typealias CollectionListFilter = (List<Collection>) -> List<Collection>
+
 interface LocalCollectionDataSource {
     suspend fun insertCollection(collection: Collection)
 
@@ -17,6 +24,14 @@ interface LocalCollectionDataSource {
     suspend fun getCollections(userId: String, page: Int = 1, pageSize: Int = 10): List<Collection>
 
     fun observeCollections(userId: String): Flow<List<Collection>>
+
+    fun observeCollectionsPage(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: CollectionSort? = null,
+        filters: List<CollectionListFilter>? = null
+    ): Flow<List<Collection>>
 
     suspend fun deleteCollection(collectionId: String)
 

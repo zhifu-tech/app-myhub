@@ -41,6 +41,7 @@ fun navKeySerializerModule() = SerializersModule {
         subclass(ExploreNavKey::class)
         subclass(FavoritesNavKey::class)
         subclass(ProfileNavKey::class)
+        subclass(LoginNavKey::class)
         subclass(CaptureNavKey::class)
         subclass(CardNavKey::class)
     }
@@ -48,11 +49,10 @@ fun navKeySerializerModule() = SerializersModule {
 
 @Composable
 fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvider {
-    dashboardEntry(this@navEntryProvider) {
-        this@navEntryProvider.navigate(ProfileNavKey)
-    }
+    dashboardEntry(this@navEntryProvider)
     entry<ExploreNavKey> { PlaceholderScreen("Explore") }
     entry<FavoritesNavKey> { PlaceholderScreen("Favorites") }
+    entry<LoginNavKey> { PlaceholderScreen("Login Required") }
     profileEntry(this@navEntryProvider)
     captureEntry(this@navEntryProvider)
     cardEntry(this@navEntryProvider)

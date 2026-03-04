@@ -14,7 +14,7 @@ import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
 
 @OptIn(ExperimentalStoreApi::class)
-fun <K : StoreKey<String>, D : StoreData<String>> createMutableStore(
+fun <K : StoreKey<*>, D : StoreData<String>> createMutableStore(
     cache: Cache<K, D>,
     sourceOfTruth: SourceOfTruth<K, D, D>,
     bookkeeper: Bookkeeper<K>,

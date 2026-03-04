@@ -1,54 +1,68 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
-import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
+import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
+import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
+import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewState
+import tech.zhifu.app.myhub.ui.UiContext
+import tech.zhifu.app.myhub.ui.UiMode
+import tech.zhifu.app.myhub.ui.UiModule
+import tech.zhifu.app.myhub.ui.UiPhase
 
-/**
- * 统计信息
- */
-data class Statistics(
-    val totalCards: Int = 0,
-    val favoriteCards: Int = 0,
-    val recentEdits: Int = 0,
-    val lastSyncTime: Long? = null
+data class DashboardUiState(
+    val state: DashboardState,
+    val payload: DashboardPayload? = null,
 )
 
-sealed class DashboardUiState {
-    /**
-     * 初始加载状态
-     * 应用正在初始化或首次加载数据，无数据可显示
-     */
-    data class InitialLoading(
-        val lastSyncTime: Long? = null
-    ) : DashboardUiState()
-
-    /**
-     * 内容状态（有数据）
-     * 应用已加载完成，可以正常显示数据
-     * 支持同时显示数据和加载状态（如刷新时）
-     */
-    data class Content(
-        val statistics: Statistics = Statistics(),
-        val recentCards: List<Card>,
-        val favoriteCards: List<Card>,
-        val lastSyncTime: Long?,
-        val isRefreshing: Boolean = false,  // 刷新时仍显示数据
-        val error: String? = null,         // 错误时仍显示数据
-        val reviewProgress: ReviewProgress = ReviewProgress(), // 复习进度
-        val showFocusReview: Boolean = true, // 是否显示 Focus & Review 模块
-        // 新增字段
-        val collections: List<tech.zhifu.app.myhub.datastore.model.domain.Collection> = emptyList(),
-        val collectionCardCounts: Map<String, Int> = emptyMap(), // collectionId -> cardCount
-        val reviewCardsCount: Int = 0, // 待复习卡片数量
-        // 分页相关字段
-        val hasMoreCards: Boolean = false,
-        val isLoadingMoreCards: Boolean = false,
-        val cardsPage: Int = 1,
-        val cardsPageSize: Int = 20,
-        val hasMoreCollections: Boolean = false,
-        val isLoadingMoreCollections: Boolean = false,
-        val collectionsPage: Int = 1,
-        val collectionsPageSize: Int = 10
-    ) : DashboardUiState()
+enum class DashboardState(
+    val module: UiModule = UiModule.DASHBOARD,
+    val phase: UiPhase,
+    val context: UiContext,
+    val mode: UiMode,
+) {
+    DASHBOARD_INIT_GLOBAL_PENDING(
+        phase = UiPhase.INIT,
+        context = UiContext.GLOBAL,
+        mode = UiMode.PENDING
+    ),
+    DASHBOARD_RESULT_ERROR_DISABLED(
+        phase = UiPhase.RESULT,
+        context = UiContext.ERROR,
+        mode = UiMode.DISABLED
+    ),
+    DASHBOARD_RESULT_AUTH_EXPIRED(
+        phase = UiPhase.RESULT,
+        context = UiContext.AUTH,
+        mode = UiMode.EXPIRED
+    ),
+    DASHBOARD_RESULT_OUTPUT_COMPLETED(
+        phase = UiPhase.RESULT,
+        context = UiContext.OUTPUT,
+        mode = UiMode.COMPLETED
+    )
 }
 
+sealed interface DashboardPayload {
+    data class ResultErrorDisabledPayload(
+        val message: String = "",
+        val canRetry: Boolean = true,
+    ) : DashboardPayload
+
+    data class ResultOutputCompletedPayload(
+        val isRefreshing: Boolean = false,
+        val reviewState: ReviewState? = null,
+        val collectionSectionState: CollectionSectionState,
+        val cardSectionState: CardSectionState,
+    ) : DashboardPayload
+}
+
+sealed class DashboardSideEffect {
+    object NavigateToAuth : DashboardSideEffect()
+    data class NavigateToCardDetail(val cardId: String) : DashboardSideEffect()
+    object NavigateToCapture : DashboardSideEffect()
+}
+
+val DashboardUiState.resultCompletedPayload
+    get() = payload as? DashboardPayload.ResultOutputCompletedPayload
+
+val DashboardUiState.resultErrorPayload
+    get() = payload as? DashboardPayload.ResultErrorDisabledPayload

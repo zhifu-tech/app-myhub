@@ -9,7 +9,7 @@ interface LocalTagDataSource {
 
     suspend fun getTags(userId: String): List<Tag>
     fun observeTags(userId: String): Flow<List<Tag>>
-    
+
     suspend fun getTagByName(name: String, userId: String): Tag?
 
     suspend fun insertTag(tag: Tag)

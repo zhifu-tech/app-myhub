@@ -42,7 +42,7 @@ class LocalTagDataSourceImpl(
             .mapToList(Dispatchers.Default)
             .map { tags -> tags.map(DbTag::toDomain) }
     }
-    
+
     override suspend fun getTagByName(name: String, userId: String): Tag? {
         return database.tagQueries
             .selectTagByName(name, userId)

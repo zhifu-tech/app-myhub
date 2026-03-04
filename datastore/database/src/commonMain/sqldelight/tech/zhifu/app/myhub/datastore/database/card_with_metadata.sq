@@ -79,6 +79,15 @@ WHERE v.card_user_id = :userId
 ORDER BY v.card_updated_at DESC
 LIMIT :limit OFFSET :offset;
 
+selectCardWithMetadataByUserIdWithFiltersOldest:
+SELECT v.*
+FROM card_with_metadata_view v
+WHERE v.card_user_id = :userId
+  AND (:type IS NULL OR v.card_type = :type)
+  AND (:isFavorite IS NULL OR v.user_card_is_favorite = :isFavorite)
+ORDER BY v.card_updated_at ASC
+LIMIT :limit OFFSET :offset;
+
 countCardWithMetadataByUserIdWithFilters:
 SELECT COUNT(*)
 FROM card_with_metadata_view v

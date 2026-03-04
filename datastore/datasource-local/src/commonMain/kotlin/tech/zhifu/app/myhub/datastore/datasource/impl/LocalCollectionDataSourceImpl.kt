@@ -7,12 +7,14 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
-import tech.zhifu.app.myhub.datastore.database.Collection as DbCollection
+import tech.zhifu.app.myhub.datastore.datasource.CollectionListFilter
+import tech.zhifu.app.myhub.datastore.datasource.CollectionSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
@@ -123,6 +125,63 @@ class LocalCollectionDataSourceImpl(
             }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeCollectionsPage(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: CollectionSort?,
+        filters: List<CollectionListFilter>?
+    ): Flow<List<Collection>> {
+        val offset = (page - 1) * size
+        if (!filters.isNullOrEmpty()) {
+            return observeCollections(userId).map { allItems ->
+                val sorted = applyCollectionSort(allItems, sort)
+                val filtered = applyCollectionFilters(sorted, filters)
+                filtered.drop(offset).take(size)
+            }
+        }
+
+        val query = when (sort ?: CollectionSort.NEWEST) {
+            CollectionSort.NEWEST -> database.collectionQueries.selectCollectionsByUserIdPaged(
+                user_id = userId,
+                limit = size.toLong(),
+                offset = offset.toLong()
+            )
+
+            CollectionSort.OLDEST -> database.collectionQueries.selectCollectionsByUserIdPagedOldest(
+                user_id = userId,
+                limit = size.toLong(),
+                offset = offset.toLong()
+            )
+        }
+        return query
+            .asFlow()
+            .mapToList(Dispatchers.Default)
+            .map { dbCollections -> dbCollections.map { it.toDomain() } }
+            .flatMapLatest { collections ->
+                flow {
+                    if (collections.isEmpty()) {
+                        emit(emptyList())
+                        return@flow
+                    }
+                    val collectionIds = collections.map { it.id }
+                    val cardCounts = getCollectionCardCounts(collectionIds)
+                    val previewCardsMap = collectionIds.associateWith { id -> getCollectionPreviewCards(id) }
+                    var pageItems = collections.map { c ->
+                        c.copy(
+                            cardCount = cardCounts[c.id] ?: 0,
+                            cards = previewCardsMap[c.id] ?: emptyList()
+                        )
+                    }
+                    pageItems = applyCollectionFilters(pageItems, filters)
+                    emit(
+                        pageItems
+                    )
+                }
+            }
+    }
+
     override suspend fun deleteCollection(collectionId: String) {
         database.collectionQueries.deleteCollection(collectionId)
     }
@@ -178,5 +237,25 @@ class LocalCollectionDataSourceImpl(
             sort_order = null,
             created_at = createdAt.toString()
         )
+    }
+
+    private fun applyCollectionFilters(
+        items: List<Collection>,
+        filters: List<CollectionListFilter>?
+    ): List<Collection> {
+        if (filters.isNullOrEmpty()) return items
+        var result = items
+        filters.forEach { filter ->
+            result = filter(result)
+        }
+        return result
+    }
+
+    private fun applyCollectionSort(
+        items: List<Collection>,
+        sort: CollectionSort?
+    ): List<Collection> = when (sort ?: CollectionSort.NEWEST) {
+        CollectionSort.NEWEST -> items.sortedByDescending { it.updatedAt }
+        CollectionSort.OLDEST -> items.sortedBy { it.updatedAt }
     }
 }

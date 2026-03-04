@@ -3,7 +3,9 @@ package tech.zhifu.app.myhub.datastore.repository.collection
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
+import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.SourceOfTruth
+import tech.zhifu.app.myhub.datastore.datasource.CollectionSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
@@ -25,12 +27,15 @@ fun createCollectionStoreSourceOfTruth(
                 }
             }
 
-            is CollectionStoreKey.ByUser -> localCollectionDataSource.observeCollections(key.userId)
-                .map { fullList ->
-                    val pagedCollections = fullList.drop((key.page - 1) * key.pageSize).take(key.pageSize)
-                    if (pagedCollections.isEmpty()) null
-                    else CollectionStoreData.Items.fromCollections(pagedCollections, key.userId)
-                }
+            is CollectionStoreKey.ByUser -> localCollectionDataSource.observeCollectionsPage(
+                userId = key.userId,
+                page = key.page,
+                size = key.size,
+                sort = key.sort.toCollectionSort(),
+            ).map { pageItems ->
+                if (pageItems.isEmpty()) null
+                else CollectionStoreData.Items.fromCollections(pageItems, key.userId)
+            }
         }
     },
     writer = { key, data ->
@@ -60,3 +65,10 @@ fun createCollectionStoreSourceOfTruth(
     },
     deleteAll = { }
 )
+
+@OptIn(ExperimentalStoreApi::class)
+private fun StoreKey.Sort?.toCollectionSort(): CollectionSort? = when (this) {
+    StoreKey.Sort.NEWEST -> CollectionSort.NEWEST
+    StoreKey.Sort.OLDEST -> CollectionSort.OLDEST
+    else -> null
+}

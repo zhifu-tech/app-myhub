@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.collection
 
 import kotlinx.coroutines.flow.Flow
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
+import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
@@ -14,7 +15,6 @@ import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
@@ -26,7 +26,10 @@ class CollectionRepositoryImpl(
     private val logger: Logger = logger("CollectionRepo")
 ) : CollectionRepository {
 
-    override suspend fun insertCollection(collection: Collection, needSync: Boolean) {
+    override suspend fun insertCollection(
+        collection: Collection,
+        needSync: Boolean
+    ) {
         store.write(
             StoreWriteRequest.of(
                 key = CollectionStoreKey.ById(collection.id),
@@ -44,45 +47,58 @@ class CollectionRepositoryImpl(
         }
     }
 
-    override suspend fun getCollection(collectionId: String): CollectionStoreData? =
-        runCatching {
-            store.get<CollectionStoreKey, CollectionStoreData, StoreWriteResponse>(
-                key = CollectionStoreKey.ById(collectionId)
-            )
-        }.onFailure {
-            logger.error(it) { "get collection for {collection:$collectionId} from store failed" }
-        }.getOrNull()
+    override suspend fun getCollection(
+        collectionId: String
+    ): CollectionStoreData = store.get<CollectionStoreKey<String>, CollectionStoreData, StoreWriteResponse>(
+        key = CollectionStoreKey.ById(collectionId)
+    )
 
-    override suspend fun getCollections(userId: String, page: Int, pageSize: Int): CollectionStoreData? {
-        return runCatching {
-            store.get<CollectionStoreKey, CollectionStoreData, StoreWriteResponse>(
-                key = CollectionStoreKey.ByUser(userId, page, pageSize)
-            )
-        }.onFailure {
-            logger.error(it) { "get collections for {user:$userId} from store failed" }
-        }.getOrNull()
-    }
+    override suspend fun getCollections(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: StoreKey.Sort?,
+    ): CollectionStoreData = store.get<CollectionStoreKey<String>, CollectionStoreData, StoreWriteResponse>(
+        key = CollectionStoreKey.ByUser(
+            userId = userId,
+            page = page,
+            size = size,
+            sort = sort,
+        )
+    )
 
     override fun streamCollection(
         collectionId: String,
         refresh: Boolean
+    ): Flow<StoreReadResponse<CollectionStoreData>> = store.stream<StoreWriteResponse>(
+        request = StoreReadRequest.cached(
+            key = CollectionStoreKey.ById(collectionId),
+            refresh = refresh
+        )
+    )
+
+    override fun streamCollections(
+        userId: String,
+        page: Int,
+        size: Int,
+        sort: StoreKey.Sort?,
+        refresh: Boolean
     ): Flow<StoreReadResponse<CollectionStoreData>> =
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.cached(
-                key = CollectionStoreKey.ById(collectionId),
+                key = CollectionStoreKey.ByUser(
+                    userId = userId,
+                    page = page,
+                    size = size,
+                    sort = sort,
+                ),
                 refresh = refresh
             )
         )
 
-    override fun streamCollections(userId: String, refresh: Boolean): Flow<StoreReadResponse<CollectionStoreData>> =
-        store.stream<StoreWriteResponse>(
-            request = StoreReadRequest.cached(
-                key = CollectionStoreKey.ByUser(userId, page = 1, pageSize = 10),
-                refresh = refresh
-            )
-        )
-
-    override suspend fun clearCollection(collectionId: String) {
+    override suspend fun clearCollection(
+        collectionId: String
+    ) {
         val collection = getCollection(collectionId)?.collection ?: return
         store.clear(key = CollectionStoreKey.ById(collectionId))
 
@@ -94,7 +110,9 @@ class CollectionRepositoryImpl(
         )
     }
 
-    override suspend fun insertCollectionCard(collectionCard: CollectionCard) {
+    override suspend fun insertCollectionCard(
+        collectionCard: CollectionCard
+    ) {
         localCollectionDataSource.insertCollectionCard(
             collectionId = collectionCard.collectionId,
             cardId = collectionCard.cardId,

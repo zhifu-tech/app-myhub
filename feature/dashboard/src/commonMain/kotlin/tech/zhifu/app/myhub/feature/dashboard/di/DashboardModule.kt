@@ -10,9 +10,7 @@ fun dashboardModule() = module {
             cardRepository = get(),
             collectionRepository = get(),
             userRepository = get(),
-            coroutineScope = get(),
+            authSessionCoordinator = get(),
         )
     }
 }
-
-

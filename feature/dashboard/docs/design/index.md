@@ -1,7 +1,22 @@
-# Dashboard Flow UI Spec（Single Document）
+# Dashboard Flow UI Spec
 
-> 本文档基于 [UI-Design-Analysis-Rulebook-v1.0](../../../../docs/design/spec/%20UI-Design-Analysis-Rulebook-v1.0.md)，用于定义 Dashboard 模块的状态划分、状态边界与流转关系。
+> 本文档基于 [UI-Design-Analysis-Rulebook-v1.0](../../../../docs/design/spec/UI-Design-Analysis-Rulebook-v1.0.md)，用于定义 Dashboard 模块的状态划分、状态边界与流转关系。
 > 本文档以 `feature/capture/docs/design/index.md` 为标杆，面向产品级交付与后续迭代上线。
+
+---
+
+## 0. App-level Phase Mapping（应用级阶段映射）
+
+| Dashboard State                             | App-level Phase    | Description  |
+|---------------------------------------------|--------------------|--------------|
+| `DASHBOARD_INIT_LOADING_BLOCKING`           | System Processing  | 首次加载/初始化阶段   |
+| `DASHBOARD_INIT_FAILED_RETRYABLE`           | System Processing  | 初始化失败，等待用户重试 |
+| `DASHBOARD_CONTENT_EMPTY_READY`             | Pre-Interaction    | 上下文就绪，等待用户操作 |
+| `DASHBOARD_CONTENT_READY_STABLE`            | Active Interaction | 主业务交互阶段      |
+| `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING` | Active Interaction | 后台刷新，用户可继续操作 |
+| `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`     | Active Interaction | 部分失败，仍可交互    |
+| `DASHBOARD_CONTENT_PAGING_*_LOADING_MORE`   | Active Interaction | 分页加载中，用户可浏览  |
+| `DASHBOARD_AUTH_EXPIRED_REDIRECTING`        | System Processing  | 会话过期，跳转登录    |
 
 ---
 
@@ -11,29 +26,30 @@
 - [3. 状态规范（完整合并）](#3-状态规范完整合并)
 - [4. 全局约束（Dashboard 模块）](#4-全局约束dashboard-模块)
 - [5. 文档与代码一致性](#5-文档与代码一致性)
-- 3.1 `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
-- 3.2 `DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`
+- 3.1 `DASHBOARD_INIT_LOADING_BLOCKING`
+- 3.2 `DASHBOARD_INIT_FAILED_RETRYABLE`
 - 3.3 `DASHBOARD_CONTENT_EMPTY_READY`
 - 3.4 `DASHBOARD_CONTENT_READY_STABLE`
 - 3.5 `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`
 - 3.6 `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
 - 3.7 `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`
 - 3.8 `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`
-- 3.9 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
+- 3.9 `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`
+- 3.10 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 
 ## 2. 状态流转图（规范版）
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DASHBOARD_BOOTSTRAP_LOADING_BLOCKING
+    [*] --> DASHBOARD_INIT_LOADING_BLOCKING
 
-    DASHBOARD_BOOTSTRAP_LOADING_BLOCKING --> DASHBOARD_CONTENT_EMPTY_READY: User ready + data empty
-    DASHBOARD_BOOTSTRAP_LOADING_BLOCKING --> DASHBOARD_CONTENT_READY_STABLE: User ready + data available
-    DASHBOARD_BOOTSTRAP_LOADING_BLOCKING --> DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE: Bootstrap/load failed
-    DASHBOARD_BOOTSTRAP_LOADING_BLOCKING --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
+    DASHBOARD_INIT_LOADING_BLOCKING --> DASHBOARD_CONTENT_EMPTY_READY: User ready + data empty
+    DASHBOARD_INIT_LOADING_BLOCKING --> DASHBOARD_CONTENT_READY_STABLE: User ready + data available
+    DASHBOARD_INIT_LOADING_BLOCKING --> DASHBOARD_INIT_FAILED_RETRYABLE: Bootstrap/load failed
+    DASHBOARD_INIT_LOADING_BLOCKING --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
 
-    DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE --> DASHBOARD_BOOTSTRAP_LOADING_BLOCKING: Retry
-    DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
+    DASHBOARD_INIT_FAILED_RETRYABLE --> DASHBOARD_INIT_LOADING_BLOCKING: Retry
+    DASHBOARD_INIT_FAILED_RETRYABLE --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
 
     DASHBOARD_CONTENT_EMPTY_READY --> DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING: Pull-to-refresh / manual refresh
     DASHBOARD_CONTENT_EMPTY_READY --> DASHBOARD_CONTENT_READY_STABLE: New data arrives
@@ -43,6 +59,7 @@ stateDiagram-v2
     DASHBOARD_CONTENT_READY_STABLE --> DASHBOARD_CONTENT_PARTIAL_ERROR_STALE: Refresh failed but cached data exists
     DASHBOARD_CONTENT_READY_STABLE --> DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE: Need more cards
     DASHBOARD_CONTENT_READY_STABLE --> DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE: Need more collections
+    DASHBOARD_CONTENT_READY_STABLE --> DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE: Need more cards + collections
     DASHBOARD_CONTENT_READY_STABLE --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
 
     DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING --> DASHBOARD_CONTENT_READY_STABLE: Refresh success
@@ -54,23 +71,30 @@ stateDiagram-v2
     DASHBOARD_CONTENT_PARTIAL_ERROR_STALE --> DASHBOARD_AUTH_EXPIRED_REDIRECTING: 401 unauthorized
 
     DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE --> DASHBOARD_CONTENT_READY_STABLE: Page loaded
+    DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE --> DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE: Collections paging also started
     DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE --> DASHBOARD_CONTENT_PARTIAL_ERROR_STALE: Page failed
 
     DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE --> DASHBOARD_CONTENT_READY_STABLE: Page loaded
+    DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE --> DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE: Cards paging also started
     DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE --> DASHBOARD_CONTENT_PARTIAL_ERROR_STALE: Page failed
+
+    DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE --> DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE: Collections paging completed first
+    DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE --> DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE: Cards paging completed first
+    DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE --> DASHBOARD_CONTENT_READY_STABLE: Both paging completed
+    DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE --> DASHBOARD_CONTENT_PARTIAL_ERROR_STALE: Any paging failed
 
     DASHBOARD_AUTH_EXPIRED_REDIRECTING --> [*]: Navigate to Login
 ```
 
 ## 3. 状态规范（完整合并）
 
-### 3.1 DASHBOARD_BOOTSTRAP_LOADING_BLOCKING
+### 3.1 DASHBOARD_INIT_LOADING_BLOCKING
 
 > Dashboard 入口阻塞加载态：用户/基础数据上下文尚未就绪，页面主内容不可交互。
 
 #### 1. State Definition（状态定义）
 
-- State Name: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
+- State Name: `DASHBOARD_INIT_LOADING_BLOCKING`
 - Definition: 页面处于首次加载或关键上下文初始化阶段，尚不具备可渲染的业务内容。
 - Preconditions:
     - 进入 Dashboard 页面。
@@ -78,23 +102,23 @@ stateDiagram-v2
 - Exit Conditions:
     - 数据为空但上下文就绪，进入 `DASHBOARD_CONTENT_EMPTY_READY`。
     - 数据可用，进入 `DASHBOARD_CONTENT_READY_STABLE`。
-    - 初始化失败，进入 `DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`。
+    - 初始化失败，进入 `DASHBOARD_INIT_FAILED_RETRYABLE`。
     - 鉴权失败（401），进入 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`。
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
 - Previous: `Entry`
-- Current: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
-- Next: `DASHBOARD_CONTENT_EMPTY_READY`, `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
+- Current: `DASHBOARD_INIT_LOADING_BLOCKING`
+- Next: `DASHBOARD_CONTENT_EMPTY_READY`, `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_INIT_FAILED_RETRYABLE`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 - Skip Allowed: No
 - Rollback Allowed: No
 - Parallel: No
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: Dashboard 正在准备中，暂不可操作。
-- System Perspective: 建立 user/data 依赖链，等待首个可用视图快照。
-- Why Not Merge: 与 Empty/Content 合并会丢失“阻塞态”语义，导致空数据与加载中不可区分。
+- **User Perspective**: Dashboard 正在准备中，暂不可操作。
+- **System Perspective**: 建立 user/data 依赖链，等待首个可用视图快照。
+- **Why This State Cannot Be Merged**: 与 Empty/Content 合并会丢失"阻塞态"语义，导致空数据与加载中不可区分。
 
 #### 4. Layout Contract（结构约束）
 
@@ -131,37 +155,37 @@ stateDiagram-v2
 
 #### 10. One-line Definition（一句话定义）
 
-`DASHBOARD_BOOTSTRAP_LOADING_BLOCKING` 是 Dashboard 的入口阻塞初始化状态。
+`DASHBOARD_INIT_LOADING_BLOCKING` 是 Dashboard 的入口阻塞初始化状态。
 
-### 3.2 DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE
+### 3.2 DASHBOARD_INIT_FAILED_RETRYABLE
 
 > 启动失败可恢复态：首屏关键加载失败，允许用户重试。
 
 #### 1. State Definition（状态定义）
 
-- State Name: `DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`
+- State Name: `DASHBOARD_INIT_FAILED_RETRYABLE`
 - Definition: 首屏关键依赖加载失败，且当前不存在可展示的业务快照。
 - Preconditions:
     - 处于入口阻塞态。
     - 关键加载链路失败且不可降级展示。
 - Exit Conditions:
-    - 用户重试，回到 `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`。
+    - 用户重试，回到 `DASHBOARD_INIT_LOADING_BLOCKING`。
     - 401 鉴权失败，进入 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`。
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
-- Current: `DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`
-- Next: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
+- Previous: `DASHBOARD_INIT_LOADING_BLOCKING`
+- Current: `DASHBOARD_INIT_FAILED_RETRYABLE`
+- Next: `DASHBOARD_INIT_LOADING_BLOCKING`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 - Skip Allowed: No
 - Rollback Allowed: No
 - Parallel: No
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 当前不可用，但可以重试恢复。
-- System Perspective: 终止当前阻塞链路，等待显式重试事件。
-- Why Not Merge: 与 PartialError 合并会把“无数据失败”和“有缓存失败”混淆。
+- **User Perspective**: 当前不可用，但可以重试恢复。
+- **System Perspective**: 终止当前阻塞链路，等待显式重试事件。
+- **Why This State Cannot Be Merged**: 与 PartialError 合并会把"无数据失败"和"有缓存失败"混淆。
 
 #### 4. Layout Contract（结构约束）
 
@@ -195,7 +219,7 @@ stateDiagram-v2
 
 #### 10. One-line Definition（一句话定义）
 
-`DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE` 是首屏关键加载失败后的可重试状态。
+`DASHBOARD_INIT_FAILED_RETRYABLE` 是首屏关键加载失败后的可重试状态。
 
 ### 3.3 DASHBOARD_CONTENT_EMPTY_READY
 
@@ -215,7 +239,7 @@ stateDiagram-v2
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
+- Previous: `DASHBOARD_INIT_LOADING_BLOCKING`
 - Current: `DASHBOARD_CONTENT_EMPTY_READY`
 - Next: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 - Skip Allowed: Yes
@@ -224,9 +248,9 @@ stateDiagram-v2
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 页面可用了，但我还没有资产。
-- System Perspective: 保持完整操作入口，等待内容增长。
-- Why Not Merge: 与 ReadyStable 合并会导致空态 CTA 与内容模块规则冲突。
+- **User Perspective**: 页面可用了，但我还没有资产。
+- **System Perspective**: 保持完整操作入口，等待内容增长。
+- **Why This State Cannot Be Merged**: 与 ReadyStable 合并会导致空态 CTA 与内容模块规则冲突。
 
 #### 4. Layout Contract（结构约束）
 
@@ -277,23 +301,24 @@ stateDiagram-v2
     - 刷新触发进入 `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`。
     - 加载更多 cards 进入 `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`。
     - 加载更多 collections 进入 `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`。
+    - cards 与 collections 同时进入加载，进入 `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`。
     - 刷新失败且有缓存，进入 `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`。
     - 401 鉴权失败，进入 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`。
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`, `DASHBOARD_CONTENT_EMPTY_READY`, `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`
+- Previous: `DASHBOARD_INIT_LOADING_BLOCKING`, `DASHBOARD_CONTENT_EMPTY_READY`, `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`
 - Current: `DASHBOARD_CONTENT_READY_STABLE`
-- Next: `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
+- Next: `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 - Skip Allowed: Yes
 - Rollback Allowed: Yes（从分页/刷新子态回退）
 - Parallel: Yes（内容可见下允许非阻塞子任务）
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 我可以稳定浏览并操作内容。
-- System Perspective: 提供完整读操作与轻写操作入口。
-- Why Not Merge: 与 Refreshing/Paging 合并会导致“是否可触发重复动作”判定混乱。
+- **User Perspective**: 我可以稳定浏览并操作内容。
+- **System Perspective**: 提供完整读操作与轻写操作入口。
+- **Why This State Cannot Be Merged**: 与 Refreshing/Paging 合并会导致"是否可触发重复动作"判定混乱。
 
 #### 4. Layout Contract（结构约束）
 
@@ -356,9 +381,9 @@ stateDiagram-v2
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 数据在更新，但我不用等。
-- System Perspective: 后台拉取并回写，前台保持可用快照。
-- Why Not Merge: 与 Stable 合并会丢失刷新中禁用规则（例如刷新按钮禁用旋转）。
+- **User Perspective**: 数据在更新，但我不用等。
+- **System Perspective**: 后台拉取并回写，前台保持可用快照。
+- **Why This State Cannot Be Merged**: 与 Stable 合并会丢失刷新中禁用规则（例如刷新按钮禁用旋转）。
 
 #### 4. Layout Contract（结构约束）
 
@@ -413,7 +438,7 @@ stateDiagram-v2
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`
+- Previous: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`
 - Current: `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
 - Next: `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`, `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 - Skip Allowed: Yes
@@ -422,9 +447,9 @@ stateDiagram-v2
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 内容还能看，但刚刚更新失败了。
-- System Perspective: 保护可用性，避免失败导致全屏回退。
-- Why Not Merge: 与 BootstrapFailed 合并将损失“已有可用数据”的关键差异。
+- **User Perspective**: 内容还能看，但刚刚更新失败了。
+- **System Perspective**: 保护可用性，避免失败导致全屏回退。
+- **Why This State Cannot Be Merged**: 与 BootstrapFailed 合并将损失"已有可用数据"的关键差异。
 
 #### 4. Layout Contract（结构约束）
 
@@ -472,23 +497,24 @@ stateDiagram-v2
     - `hasMoreCards = true`
     - `isLoadingMoreCards = false` 且触发 loadMore。
 - Exit Conditions:
-    - 成功追加，回到 `DASHBOARD_CONTENT_READY_STABLE`。
+    - collections 分页也进入加载，转为 `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`。
+    - 仅 cards 完成时回到 `DASHBOARD_CONTENT_READY_STABLE`。
     - 失败，进入 `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`。
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_CONTENT_READY_STABLE`
+- Previous: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`（cards 已在加载，collections 先完成后回落）
 - Current: `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`
-- Next: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
+- Next: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
 - Skip Allowed: Yes
 - Rollback Allowed: Yes
 - Parallel: Yes（与浏览并行）
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 列表在继续加载更多条目。
-- System Perspective: 以增量方式扩展 `recentCards`，避免整页刷新。
-- Why Not Merge: 与 Ready 合并会造成“是否可再次触发 loadMore”不明确。
+- **User Perspective**: 列表在继续加载更多条目。
+- **System Perspective**: 以增量方式扩展 `recentCards`，避免整页刷新。
+- **Why This State Cannot Be Merged**: 与 Ready 或 BothPaging 合并会造成"当前仅哪一路在加载"不明确。
 
 #### 4. Layout Contract（结构约束）
 
@@ -534,23 +560,24 @@ stateDiagram-v2
     - `hasMoreCollections = true`
     - `isLoadingMoreCollections = false` 且触发 loadMore。
 - Exit Conditions:
-    - 成功追加，回到 `DASHBOARD_CONTENT_READY_STABLE`。
+    - cards 分页也进入加载，转为 `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`。
+    - 仅 collections 完成时回到 `DASHBOARD_CONTENT_READY_STABLE`。
     - 失败，进入 `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`。
 
 #### 2. State Position in Flow（状态在流程中的位置）
 
-- Previous: `DASHBOARD_CONTENT_READY_STABLE`
+- Previous: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`（collections 已在加载，cards 先完成后回落）
 - Current: `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`
-- Next: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
+- Next: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
 - Skip Allowed: Yes
 - Rollback Allowed: Yes
 - Parallel: Yes
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 资产集合正在追加加载。
-- System Perspective: 增量扩展 `collections`，维持主布局稳定。
-- Why Not Merge: 与 CardsPaging 合并会丢失双流分页的独立控制语义。
+- **User Perspective**: 资产集合正在追加加载。
+- **System Perspective**: 增量扩展 `collections`，维持主布局稳定。
+- **Why This State Cannot Be Merged**: 与 CardsPaging 或 BothPaging 合并会丢失"仅 collections 在加载"的语义。
 
 #### 4. Layout Contract（结构约束）
 
@@ -584,7 +611,72 @@ stateDiagram-v2
 
 `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE` 是集合增量分页加载状态。
 
-### 3.9 DASHBOARD_AUTH_EXPIRED_REDIRECTING
+### 3.9 DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE
+
+> 双流并行分页子态：cards 与 collections 同时追加加载，两个区域各自显示 loading 反馈。
+
+#### 1. State Definition（状态定义）
+
+- State Name: `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`
+- Definition: `isLoadingMoreCards=true` 且 `isLoadingMoreCollections=true`，两条分页链路并行执行。
+- Preconditions:
+    - 已进入任一单流分页态，另一条分页在进行中被触发；或两条分页在同一轮事件中被触发。
+- Exit Conditions:
+    - cards 先完成，回落到 `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`。
+    - collections 先完成，回落到 `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`。
+    - 两条都完成，回到 `DASHBOARD_CONTENT_READY_STABLE`。
+    - 任一路失败，进入 `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`。
+
+#### 2. State Position in Flow（状态在流程中的位置）
+
+- Previous: `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`
+- Current: `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`
+- Next: `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`, `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`, `DASHBOARD_CONTENT_READY_STABLE`, `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`
+- Skip Allowed: Yes
+- Rollback Allowed: Yes
+- Parallel: Yes
+
+#### 3. Core Semantics（核心语义）
+
+- **User Perspective**: 两个模块都在"加载更多"，且互不阻塞。
+- **System Perspective**: 双分页请求并行进行，分别维护各自完成/失败回调。
+- **Why This State Cannot Be Merged**: 该状态对应独立 UI 反馈（双 loading footer），无法由单流分页态准确表达。
+
+#### 4. Layout Contract（结构约束）
+
+- Main Region: Cards 区域底部与 Collections 区域尾部同时显示 loading 占位。
+
+#### 5. Interaction Rules（交互规则）
+
+- 两个分页入口都必须防重入。
+- 允许浏览已加载内容，不阻断详情跳转。
+
+#### 6. Visual Rules（视觉规则）
+
+- 两个分页反馈同时可见，且互不覆盖。
+- 不允许出现全屏 loading 或整页闪烁。
+
+#### 7. Motion Contract（动效约束）
+
+- 允许：两个局部 loading 动效并行运行。
+- 禁止：主内容区域发生跳变重排。
+
+#### 8. Negative Requirements（明确禁止）
+
+- 不串行化为单流加载（除非明确策略要求）。
+- 不因一侧完成而提前隐藏另一侧 loading。
+
+#### 9. Validation Checklist（验收清单）
+
+- `isLoadingMoreCards && isLoadingMoreCollections` 时必须进入该态。
+- 任一路先完成时，准确回落到另一单流分页态。
+- 两路都完成后，状态回到 `DASHBOARD_CONTENT_READY_STABLE`。
+
+#### 10. One-line Definition（一句话定义）
+
+`DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE` 是 Dashboard 的双流并行分页状态。
+
+### 3.10 DASHBOARD_AUTH_EXPIRED_REDIRECTING
 
 > 会话过期跳转态：检测到 401，执行一次性登录跳转。
 
@@ -608,9 +700,9 @@ stateDiagram-v2
 
 #### 3. Core Semantics（核心语义）
 
-- User Perspective: 登录过期，需要重新登录。
-- System Perspective: 统一收敛到鉴权恢复链路，避免继续读写。
-- Why Not Merge: 与错误态合并会导致 401 与一般网络错误处理不一致。
+- **User Perspective**: 登录过期，需要重新登录。
+- **System Perspective**: 统一收敛到鉴权恢复链路，避免继续读写。
+- **Why This State Cannot Be Merged**: 与错误态合并会导致 401 与一般网络错误处理不一致。
 
 #### 4. Layout Contract（结构约束）
 
@@ -649,7 +741,7 @@ stateDiagram-v2
 
 - 状态机必须显式区分：`阻塞加载`、`可交互空态`、`内容稳态`、`非阻塞刷新`、`局部分页`、`会话过期`。
 - `error` 不能直接替代状态；错误是状态的属性，不能成为隐式状态机。
-- 分页状态必须拆分为 cards 与 collections 两条独立子流，避免互锁。
+- 分页状态必须拆分为 cards 与 collections 两条独立子流，并显式支持 `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE` 组合态。
 - 所有加载行为必须防重入（refresh/loadMore）。
 - 任何 401 错误优先收敛到 `DASHBOARD_AUTH_EXPIRED_REDIRECTING`。
 
@@ -658,22 +750,23 @@ stateDiagram-v2
 ### 5.1 当前实现映射（as-is）
 
 - `DashboardUiState.InitialLoading` 覆盖：
-    - `DASHBOARD_BOOTSTRAP_LOADING_BLOCKING`
-    - （缺失）`DASHBOARD_BOOTSTRAP_FAILED_RETRYABLE`
+    - `DASHBOARD_INIT_LOADING_BLOCKING`
+    - （缺失）`DASHBOARD_INIT_FAILED_RETRYABLE`
 - `DashboardUiState.Content` + 字段组合覆盖：
     - `DASHBOARD_CONTENT_EMPTY_READY`（`recentCards.isEmpty && collections.isEmpty && error==null`）
     - `DASHBOARD_CONTENT_READY_STABLE`（`!isRefreshing && !isLoadingMore* && error==null`）
     - `DASHBOARD_CONTENT_REFRESHING_NON_BLOCKING`（`isRefreshing==true`）
     - `DASHBOARD_CONTENT_PARTIAL_ERROR_STALE`（`error!=null` 且仍有内容）
-    - `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`（`isLoadingMoreCards==true`）
-    - `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`（`isLoadingMoreCollections==true`）
+    - `DASHBOARD_CONTENT_PAGING_BOTH_LOADING_MORE`（`isLoadingMoreCards==true && isLoadingMoreCollections==true`，优先级高于单流分页态）
+    - `DASHBOARD_CONTENT_PAGING_CARDS_LOADING_MORE`（`isLoadingMoreCards==true && isLoadingMoreCollections==false`）
+    - `DASHBOARD_CONTENT_PAGING_COLLECTIONS_LOADING_MORE`（`isLoadingMoreCollections==true && isLoadingMoreCards==false`）
 - `navigateToLogin` SharedFlow 覆盖：
     - `DASHBOARD_AUTH_EXPIRED_REDIRECTING`
 
 ### 5.2 产品级重构建议（to-be）
 
 - 将 `DashboardUiState` 从“单一 Content + flags”升级为显式层级状态：
-    - `Bootstrapping`、`BootstrapFailed`、`Ready.Empty`、`Ready.Stable`、`Ready.Refreshing`、`Ready.PartialError`、`Ready.Paging(cards|collections)`、`AuthExpiredRedirecting`。
+    - `Bootstrapping`、`BootstrapFailed`、`Ready.Empty`、`Ready.Stable`、`Ready.Refreshing`、`Ready.PartialError`、`Ready.Paging(cards|collections|both)`、`AuthExpiredRedirecting`。
 - 把刷新与分页并发控制集中到 reducer/event 层，避免在多个函数中直接 `copy` 导致状态竞争。
 - 在 `DashboardScreen` 增加明确空态布局分支，避免“空数据但展示普通内容骨架”的语义漂移。
 
@@ -684,4 +777,3 @@ stateDiagram-v2
     - 用户能做什么？
     - 下一步会去哪里？
 - 状态切换可通过日志或测试复现，不依赖人工观察猜测。
-
