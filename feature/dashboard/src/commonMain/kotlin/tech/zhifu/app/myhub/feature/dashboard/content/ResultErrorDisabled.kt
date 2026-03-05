@@ -15,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.resultErrorPayload
 
 @Composable
 fun ResultErrorDisabledRoute(
@@ -24,7 +24,7 @@ fun ResultErrorDisabledRoute(
     viewModel: DashboardViewModel
 ) {
     val payload = viewModel.collectFieldAsState { uiState ->
-        uiState.resultErrorPayload
+        uiState as? DashboardUiState.ResultErrorDisabled
     }.value ?: return
 
     ResultErrorDisabled(

@@ -10,10 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionRoute
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewSectionRoute
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 
@@ -23,7 +23,7 @@ fun ResultOutputCompletedRoute(
     innerPadding: PaddingValues,
 ) {
     val isRefreshing = viewModel.collectFieldAsState { uiState ->
-        uiState.resultCompletedPayload?.isRefreshing
+        (uiState as? DashboardUiState.ResultOutputCompleted)?.isRefreshing
     }.value ?: return
 
     ResultOutputCompleted(

@@ -36,10 +36,7 @@ class DashboardViewModel(
 ) : ContainerHost<DashboardUiState, DashboardSideEffect>, ViewModel() {
 
     override val container: Container<DashboardUiState, DashboardSideEffect> = container(
-        initialState = DashboardUiState(
-            state = DashboardState.DASHBOARD_INIT_GLOBAL_PENDING,
-            payload = null,
-        )
+        initialState = DashboardUiState.InitGlobalPending
     ) {
         initInternal()
     }
@@ -53,18 +50,68 @@ class DashboardViewModel(
         .distinctUntilChanged()
         .collectAsState(initial = selector(uiState))
 
+    fun retry() {
+        viewModelScope.launch {
+            logger.debug { "Retrying dashboard" }
+            initInternal()
+        }
+    }
+
+    fun refresh() {
+        logger.debug { "Refreshing dashboard" }
+        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+            ?.takeUnless { it.isRefreshing }
+            ?: return
+        viewModelScope.launch {
+            refreshInternal()
+        }
+    }
+
+    fun dismissFocusReview() = intent {
+        reduce {
+            state/*.copy(showFocusReview = false)*/
+        }
+    }
+
+    fun startReview() {
+        logger.debug { "Start review flow" }
+        // TODO: 导航到复习页面
+    }
+
+    fun loadMoreCards() {
+        logger.debug { "Dashboard load more cards" }
+        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+            ?.takeUnless { it.isRefreshing }
+            ?.cardSectionState
+            ?.takeUnless { it.isLoading || !it.hasMore }
+            ?: return
+        viewModelScope.launch {
+            loadMoreCardsInternal()
+        }
+    }
+
+    fun loadMoreCollections() {
+        logger.debug { "Dashboard load more collections" }
+
+        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+            ?.takeUnless { it.isRefreshing }
+            ?.collectionSectionState
+            ?.takeUnless { it.isLoading || !it.hasMore }
+            ?: return
+
+        viewModelScope.launch {
+            loadMoreCollectionsInternal()
+        }
+    }
+
     private suspend fun initInternal() {
-        logger.debug { "Init dashboard" }
         val userId = userRepository.getUserOrNull()?.id ?: run {
             navigateToAuth()
             return
         }
         intent {
             reduce {
-                state.copy(
-                    state = DashboardState.DASHBOARD_INIT_GLOBAL_PENDING,
-                    payload = null,
-                )
+                DashboardUiState.InitGlobalPending
             }
         }
         try {
@@ -79,240 +126,180 @@ class DashboardViewModel(
             }
             intent {
                 reduce {
-                    state.copy(
-                        state = DashboardState.DASHBOARD_RESULT_OUTPUT_COMPLETED,
-                        payload = DashboardPayload.ResultOutputCompletedPayload(
-                            collectionSectionState = collectionSectionState,
-                            cardSectionState = cardSectionState,
-                        )
+                    DashboardUiState.ResultOutputCompleted(
+                        cardSectionState = cardSectionState,
+                        collectionSectionState = collectionSectionState,
                     )
                 }
             }
         } catch (e: Exception) {
             logger.error(e) { "Failed to initialize dashboard" }
             intent {
+                if (isUnauthorizedError(e)) {
+                    navigateToAuth()
+                }
                 reduce {
-                    state.copy(
-                        state = DashboardState.DASHBOARD_RESULT_ERROR_DISABLED,
-                        payload = DashboardPayload.ResultErrorDisabledPayload(
-                            message = e.message ?: "初始化失败，请重试",
-                            canRetry = true,
-                        )
+                    DashboardUiState.ResultErrorDisabled(
+                        message = e.message ?: "初始化失败，请重试",
+                        canRetry = true,
                     )
                 }
             }
         }
     }
 
-    fun retry() {
-        viewModelScope.launch {
-            logger.debug { "Retrying dashboard" }
-            initInternal()
-        }
-    }
-
-    fun refresh() {
-        logger.debug { "Refreshing dashboard" }
-        val payload = uiState.resultCompletedPayload ?: run {
-            retry()
+    private suspend fun refreshInternal() {
+        val userId = userRepository.getUserOrNull()?.id ?: run {
+            navigateToAuth()
             return
         }
-        if (payload.isRefreshing) return
-        viewModelScope.launch {
-            val userId = userRepository.getUserOrNull()?.id ?: run {
-                navigateToAuth()
-                return@launch
+        intent {
+            reduce {
+                val state = state as? DashboardUiState.ResultOutputCompleted
+                    ?: return@reduce state
+                state.copy(
+                    isRefreshing = true
+                )
             }
+        }
+        try {
+            val (cardSectionState, collectionSectionState) = coroutineScope {
+                val cardsDeferred = async {
+                    loadCards(userId = userId)
+                }
+                val collectionsDeferred = async {
+                    loadCollections(userId = userId)
+                }
+                cardsDeferred.await() to collectionsDeferred.await()
+            }
+
             intent {
                 reduce {
-                    val currentPayload = state.resultCompletedPayload
+                    val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
-                        payload = currentPayload.copy(
-                            isRefreshing = true
-                        )
+                        isRefreshing = false,
+                        cardSectionState = cardSectionState,
+                        collectionSectionState = collectionSectionState,
                     )
                 }
             }
-            try {
-                val (cardSectionState, collectionSectionState) = coroutineScope {
-                    val cardsDeferred = async {
-                        loadCards(userId = userId)
-                    }
-                    val collectionsDeferred = async {
-                        loadCollections(userId = userId)
-                    }
-                    cardsDeferred.await() to collectionsDeferred.await()
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to refresh dashboard" }
+            intent {
+                if (isUnauthorizedError(e)) {
+                    navigateToAuth()
                 }
-
-                intent {
-                    reduce {
-                        val currentPayload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = currentPayload.copy(
-                                isRefreshing = false,
-                                cardSectionState = cardSectionState,
-                                collectionSectionState = collectionSectionState,
-                            )
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                logger.error(e) { "Failed to refresh dashboard" }
-                intent {
-                    reduce {
-                        val currentPayload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = currentPayload.copy(
-                                isRefreshing = false
-                            )
-                        )
-                    }
+                reduce {
+                    val state = state as? DashboardUiState.ResultOutputCompleted
+                        ?: return@reduce state
+                    state.copy(
+                        isRefreshing = false
+                    )
                 }
             }
         }
     }
 
-    fun navigateToAuth() = intent {
-        postSideEffect(DashboardSideEffect.NavigateToAuth)
-    }
-
-    fun navigateToCardDetail(cardId: String) = intent {
-        postSideEffect(DashboardSideEffect.NavigateToCardDetail(cardId))
-    }
-
-    fun navigateToCapture() = intent {
-        postSideEffect(DashboardSideEffect.NavigateToCapture)
-    }
-
-    fun dismissFocusReview() = intent {
-        reduce {
-            state/*.copy(showFocusReview = false)*/
+    private suspend fun loadMoreCardsInternal() {
+        val userId = userRepository.getUserOrNull()?.id ?: run {
+            navigateToAuth()
+            return
         }
-    }
-
-    fun startReview() {
-        logger.debug { "Start review flow" }
-        // TODO: 导航到复习页面
-    }
-
-    fun editCard(cardId: String) {
-        logger.debug { "Edit card: $cardId" }
-    }
-
-    fun loadMoreCards() {
-        logger.debug { "Dashboard load more cards" }
-
-        uiState.resultCompletedPayload
-            ?.takeUnless { it.isRefreshing }
-            ?.cardSectionState
-            ?.takeUnless { it.isLoading || !it.hasMore }
-            ?: return
-
-        viewModelScope.launch {
-            val userId = userRepository.getUserOrNull()?.id ?: return@launch
+        intent {
+            reduce {
+                val state = state as? DashboardUiState.ResultOutputCompleted
+                    ?: return@reduce state
+                state.copy(
+                    cardSectionState = state.cardSectionState.copy(
+                        isLoading = true
+                    )
+                )
+            }
+        }
+        try {
+            val newCardState = loadCards(
+                userId = userId,
+                state = (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
+            )
             intent {
                 reduce {
-                    val payload = state.resultCompletedPayload ?: return@reduce state
+                    val state = state as? DashboardUiState.ResultOutputCompleted
+                        ?: return@reduce state
                     state.copy(
-                        payload = payload.copy(
-                            cardSectionState = payload.cardSectionState.copy(
-                                isLoading = true
-                            )
-                        )
+                        cardSectionState = newCardState,
                     )
                 }
             }
-            try {
-                val newCardState = loadCards(
-                    userId = userId,
-                    state = uiState.resultCompletedPayload?.cardSectionState
-                )
-                intent {
-                    reduce {
-                        val currentPayload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = currentPayload.copy(
-                                cardSectionState = newCardState,
-                            )
-                        )
-                    }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to load more cards" }
+            intent {
+                if (isUnauthorizedError(e)) {
+                    navigateToAuth()
                 }
-            } catch (e: Exception) {
-                logger.error(e) { "Failed to load more cards" }
-                intent {
-                    reduce {
-                        val currentPayload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = currentPayload.copy(
-                                cardSectionState = currentPayload.cardSectionState.copy(
-                                    isLoading = false
-                                )
-                            )
+                reduce {
+                    val state = state as? DashboardUiState.ResultOutputCompleted
+                        ?: return@reduce state
+                    state.copy(
+                        cardSectionState = state.cardSectionState.copy(
+                            isLoading = false
                         )
-                    }
+                    )
                 }
             }
         }
     }
 
-    fun loadMoreCollections() {
-        logger.debug { "Dashboard load more collections" }
-
-        uiState.resultCompletedPayload
-            ?.takeUnless { it.isRefreshing }
-            ?.collectionSectionState
-            ?.takeUnless { it.isLoading || !it.hasMore }
-            ?: return
-
-        viewModelScope.launch {
-            val userId = userRepository.getUserOrNull()?.id ?: run {
-                navigateToAuth()
-                return@launch
+    private suspend fun loadMoreCollectionsInternal() {
+        val userId = userRepository.getUserOrNull()?.id ?: run {
+            navigateToAuth()
+            return
+        }
+        intent {
+            reduce {
+                val state = state as? DashboardUiState.ResultOutputCompleted
+                    ?: return@reduce state
+                state.copy(
+                    collectionSectionState = state.collectionSectionState.copy(
+                        isLoading = true
+                    )
+                )
             }
+        }
+        try {
+            val newCollectionState = loadCollections(
+                userId = userId,
+                state = (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
+            )
             intent {
                 reduce {
-                    val currentPayload = state.resultCompletedPayload ?: return@reduce state
+                    val state = state as? DashboardUiState.ResultOutputCompleted
+                        ?: return@reduce state
                     state.copy(
-                        payload = currentPayload.copy(
-                            collectionSectionState = currentPayload.collectionSectionState.copy(
-                                isLoading = true
-                            )
+                        collectionSectionState = newCollectionState
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to load more collections" }
+            intent {
+                if (isUnauthorizedError(e)) {
+                    navigateToAuth()
+                }
+                reduce {
+                    val state = state as? DashboardUiState.ResultOutputCompleted
+                        ?: return@reduce state
+                    state.copy(
+                        collectionSectionState = state.collectionSectionState.copy(
+                            isLoading = false
                         )
                     )
                 }
             }
-            try {
-                val newCollectionState = loadCollections(
-                    userId = userId,
-                    state = uiState.resultCompletedPayload?.collectionSectionState
-                )
-                intent {
-                    reduce {
-                        val payload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = payload.copy(
-                                collectionSectionState = newCollectionState
-                            )
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                logger.error(e) { "Failed to load more collections" }
-                intent {
-                    reduce {
-                        val payload = state.resultCompletedPayload ?: return@reduce state
-                        state.copy(
-                            payload = payload.copy(
-                                collectionSectionState = payload.collectionSectionState.copy(
-                                    isLoading = false,
-                                    errorMessage = ""
-                                )
-                            )
-                        )
-                    }
-                }
-            }
         }
     }
+
+    private fun isUnauthorizedError(e: Exception): Boolean = e.message?.let {
+        it.contains("401") || it.contains("Unauthorized", ignoreCase = true)
+    } ?: false
 }

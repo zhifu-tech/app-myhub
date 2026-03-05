@@ -25,10 +25,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.component.card.CardPreview
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.card.LatestCapturesTitleRow
 import tech.zhifu.app.myhub.feature.dashboard.content.card.NewCaptureCard
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCapture
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCardDetail
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCardEdit
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
@@ -55,7 +58,7 @@ fun DashboardGridContentRoute(
     }
 
     val state = viewModel.collectFieldAsState { uiState ->
-        uiState.resultCompletedPayload?.cardSectionState
+        (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
     }.value ?: return
 
     val gridState = rememberLazyStaggeredGridState()
@@ -72,7 +75,7 @@ fun DashboardGridContentRoute(
         cards = state.cards,
         hasMoreCards = state.hasMore,
         isLoadingMoreCards = state.isLoading,
-        onEditCard = viewModel::editCard,
+        onNavigateToCardEdit = viewModel::navigateToCardEdit,
         onNavigateToCardDetail = viewModel::navigateToCardDetail,
         onNavigateToCapture = viewModel::navigateToCapture,
     )
@@ -87,7 +90,7 @@ private fun DashboardGridContent(
     cards: List<Card>,
     hasMoreCards: Boolean,
     isLoadingMoreCards: Boolean,
-    onEditCard: (String) -> Unit,
+    onNavigateToCardEdit: (String) -> Unit,
     onNavigateToCardDetail: (String) -> Unit,
     onNavigateToCapture: () -> Unit,
 ) {
@@ -133,7 +136,7 @@ private fun DashboardGridContent(
                 card = card,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { onNavigateToCardDetail(card.id) },
-                onEdit = { onEditCard(card.id) }
+                onEdit = { onNavigateToCardEdit(card.id) }
             )
         }
         if (hasMoreCards && isLoadingMoreCards) {

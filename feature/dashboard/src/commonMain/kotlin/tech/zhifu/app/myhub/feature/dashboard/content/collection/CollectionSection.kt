@@ -40,12 +40,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_asset_collections
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_curated_library
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_view_all
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 
@@ -55,7 +55,7 @@ fun CollectionSectionRoute(
     viewModel: DashboardViewModel,
 ) {
     val payload = viewModel.collectFieldAsState { uiState ->
-        uiState.resultCompletedPayload?.collectionSectionState
+        (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
     }.value ?: return
 
     logger.debug { "AssetCollectionsModule + ${payload.hashCode()}" }

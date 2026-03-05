@@ -8,10 +8,10 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,7 +20,7 @@ internal fun TopBarRoute(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val topBarState = viewModel.collectFieldAsState { uiState ->
-        uiState.resultCompletedPayload?.let {
+        (uiState as? DashboardUiState.ResultOutputCompleted)?.let {
             TopBarState(
                 isRefreshing = it.isRefreshing,
                 reviewCardsCount = it.reviewState?.reviewCardsCount ?: 0,

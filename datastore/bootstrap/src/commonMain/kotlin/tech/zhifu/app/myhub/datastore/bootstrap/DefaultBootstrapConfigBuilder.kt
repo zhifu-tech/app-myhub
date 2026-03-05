@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.bootstrap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -13,8 +14,11 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import tech.zhifu.app.myhub.datastore.bootstrap.resources.Res
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
+import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTag
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
+import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
@@ -62,10 +66,13 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
         val cardTemplates = readResource("template.json", localeDir)
             .let { json.decodeFromString<List<CardTemplate>>(it) }
 
+        val strictJson = Json(json) {
+            ignoreUnknownKeys = false
+        }
         val cards = readResource("card.json", localeDir)
-            .let { json.decodeFromString<List<Card>>(it) }
+            .let { strictJson.decodeFromString<List<BootstrapCard>>(it) }
             .map { card ->
-                card.copy(
+                card.toDomain(
                     userId = userId,
                     tags = tagIdsByCardId[card.id]
                         .orEmpty()
@@ -112,4 +119,57 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
             return Instant.parse(decoder.decodeString())
         }
     }
+}
+
+@Serializable
+private data class BootstrapCard(
+    val id: String,
+    val type: CardType,
+    val source: CardSource,
+    val carriers: String,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+    val metadata: BootstrapCardMetadata,
+)
+
+@Serializable
+private data class BootstrapCardMetadata(
+    val content: CardMetadata.Content? = null,
+    val attribution: CardMetadata.Attribution? = null,
+    val carrierImage: CardMetadata.CarrierImage? = null,
+    val carrierVideo: CardMetadata.CarrierVideo? = null,
+    val execution: CardMetadata.Execution? = null,
+    val lexicon: CardMetadata.Lexicon? = null,
+    val link: CardMetadata.Link? = null,
+    val code: CardMetadata.Code? = null,
+    val site: CardMetadata.Site? = null,
+)
+
+private fun BootstrapCard.toDomain(
+    userId: String,
+    tags: List<Tag>,
+): Card {
+    val metadataEntries = buildList {
+        metadata.content?.let(::add)
+        metadata.attribution?.let(::add)
+        metadata.carrierImage?.let(::add)
+        metadata.carrierVideo?.let(::add)
+        metadata.execution?.let(::add)
+        metadata.lexicon?.let(::add)
+        metadata.link?.let(::add)
+        metadata.code?.let(::add)
+        metadata.site?.let(::add)
+    }
+
+    return Card(
+        id = id,
+        type = type,
+        source = source,
+        carriers = carriers,
+        userId = userId,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        metadata = metadataEntries,
+        tags = tags,
+    )
 }

@@ -15,6 +15,9 @@ fun EntryProviderScope<NavKey>.dashboardEntry(
 ) {
     entry<DashboardNavKey> {
         DashboardRoute(
+            onNavigateToCardEdit = {
+                logger.warn { "navigate to edit called from Dashboard" }
+            },
             onNavigateToCardDetail = navigator::navigateToCardDetail,
             onNavigateToCapture = navigator::navigateToCapture,
             onNavigateToAuth = {

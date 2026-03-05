@@ -3,8 +3,8 @@ package tech.zhifu.app.myhub.feature.dashboard.content.card
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import tech.zhifu.app.myhub.datastore.repository.card.cards
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 import tech.zhifu.app.myhub.logger.error
 
 suspend fun DashboardViewModel.loadCards(
@@ -29,7 +29,7 @@ private suspend fun DashboardViewModel.loadCards(
         size = pageSize,
         sort = StoreKey.Sort.NEWEST,
     )
-    val state = uiState.resultCompletedPayload?.cardSectionState
+    val state = (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
         ?: CardSectionState()
     return state.copy(
         cards = (storeData.cards + state.cards).distinctBy { it.id },

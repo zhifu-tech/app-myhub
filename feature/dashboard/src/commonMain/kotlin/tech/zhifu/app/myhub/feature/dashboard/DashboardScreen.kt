@@ -22,6 +22,7 @@ import tech.zhifu.app.myhub.logger.logger
 fun DashboardRoute(
     viewModel: DashboardViewModel = koinInject<DashboardViewModel>(),
     onNavigateToCardDetail: (String) -> Unit,
+    onNavigateToCardEdit: (String) -> Unit,
     onNavigateToCapture: () -> Unit,
     onNavigateToAuth: () -> Unit,
 ) {
@@ -33,11 +34,12 @@ fun DashboardRoute(
                 is DashboardSideEffect.NavigateToAuth -> onNavigateToAuth()
                 is DashboardSideEffect.NavigateToCapture -> onNavigateToCapture()
                 is DashboardSideEffect.NavigateToCardDetail -> onNavigateToCardDetail(effect.cardId)
+                is DashboardSideEffect.NavigateToCardEdit -> onNavigateToCardEdit(effect.cardId)
             }
         }
     }
     val canShowTopBar by viewModel.collectFieldAsState {
-        it.state == DashboardState.DASHBOARD_RESULT_OUTPUT_COMPLETED
+        it.state == DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED
     }
     DashboardScreen(
         topBar = {

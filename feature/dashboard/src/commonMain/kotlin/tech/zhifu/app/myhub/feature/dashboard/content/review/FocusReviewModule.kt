@@ -41,8 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 
 @Composable
 fun ReviewSectionRoute(
@@ -50,7 +50,7 @@ fun ReviewSectionRoute(
     modifier: Modifier = Modifier,
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        uiState.resultCompletedPayload?.reviewState
+        (uiState as? DashboardUiState.ResultOutputCompleted)?.reviewState
     }.value ?: return
 
     if (state.showFocusReview && state.reviewCardsCount > 0) {

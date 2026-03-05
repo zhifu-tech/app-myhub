@@ -3,8 +3,8 @@ package tech.zhifu.app.myhub.feature.dashboard.content.collection
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import tech.zhifu.app.myhub.datastore.repository.collection.collections
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.resultCompletedPayload
 import tech.zhifu.app.myhub.logger.error
 
 suspend fun DashboardViewModel.loadCollections(
@@ -29,7 +29,7 @@ internal suspend fun DashboardViewModel.loadCollections(
         size = pageSize,
         sort = StoreKey.Sort.NEWEST,
     )
-    val state = uiState.resultCompletedPayload?.collectionSectionState
+    val state = (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
         ?: CollectionSectionState()
     return state.copy(
         collections = (storeData.collections + state.collections).distinctBy { it.id },
