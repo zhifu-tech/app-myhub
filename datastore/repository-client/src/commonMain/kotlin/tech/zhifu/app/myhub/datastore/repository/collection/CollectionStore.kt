@@ -1,10 +1,8 @@
-@file:OptIn(ExperimentalStoreApi::class)
 
 package tech.zhifu.app.myhub.datastore.repository.collection
 
 import org.mobilenativefoundation.store.cache5.CacheBuilder
 import org.mobilenativefoundation.store.cache5.StoreMultiCache
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.KeyProvider
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Bookkeeper
@@ -23,7 +21,6 @@ typealias CollectionStoreBookkeeper = Bookkeeper<CollectionStoreKey<String>>
 typealias CollectionStoreUpdater = Updater<CollectionStoreKey<String>, CollectionStoreData, StoreWriteResponse>
 typealias CollectionStoreFetcher = Fetcher<CollectionStoreKey<String>, CollectionStoreData>
 
-@OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.COLLECTION
 ): CollectionStoreCache = StoreMultiCache(

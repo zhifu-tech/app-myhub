@@ -35,3 +35,13 @@ configure<KotlinMultiplatformExtension> {
         }
     }
 }
+
+kotlin {
+    compilerOptions {
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
+        optIn.add("org.mobilenativefoundation.store.core5.ExperimentalStoreApi")
+        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
+        optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
+        optIn.add("androidx.compose.ui.ExperimentalComposeUiApi")
+    }
+}

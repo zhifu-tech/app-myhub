@@ -1,10 +1,8 @@
-@file:OptIn(ExperimentalStoreApi::class)
 
 package tech.zhifu.app.myhub.datastore.repository.template
 
 import org.mobilenativefoundation.store.cache5.CacheBuilder
 import org.mobilenativefoundation.store.cache5.StoreMultiCache
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.KeyProvider
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Bookkeeper
@@ -23,7 +21,6 @@ typealias TemplateStoreBookkeeper = Bookkeeper<TemplateStoreKey>
 typealias TemplateStoreUpdater = Updater<TemplateStoreKey, TemplateStoreData, StoreWriteResponse>
 typealias TemplateStoreFetcher = Fetcher<TemplateStoreKey, TemplateStoreData>
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTemplateStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.TEMPLATE
 ): TemplateStoreCache = StoreMultiCache(

@@ -1,13 +1,11 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
 import kotlinx.coroutines.flow.Flow
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
-@OptIn(ExperimentalStoreApi::class)
 interface CardRepository {
 
     suspend fun insertCard(

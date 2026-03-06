@@ -1,11 +1,9 @@
 package tech.zhifu.app.myhub.datastore.repository.template
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardTemplateDataSource
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTemplateStoreFetcher(
     remoteCardTemplateDataSource: RemoteCardTemplateDataSource
 ): TemplateStoreFetcher = Fetcher.ofResult { key ->

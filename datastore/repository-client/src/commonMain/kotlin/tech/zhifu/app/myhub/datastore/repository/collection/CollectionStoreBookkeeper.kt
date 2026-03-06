@@ -1,10 +1,8 @@
 package tech.zhifu.app.myhub.datastore.repository.collection
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 
-@OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreBookkeeper(
     bookkeeperStorage: BookkeeperStorage
 ): CollectionStoreBookkeeper = Bookkeeper.by(
@@ -25,7 +23,6 @@ fun createCollectionStoreBookkeeper(
     }
 )
 
-@OptIn(ExperimentalStoreApi::class)
 private fun CollectionStoreKey<String>.toBookkeeperKey(): String = when (this) {
     is CollectionStoreKey.ById -> "collection:$id"
     is CollectionStoreKey.ByUser ->

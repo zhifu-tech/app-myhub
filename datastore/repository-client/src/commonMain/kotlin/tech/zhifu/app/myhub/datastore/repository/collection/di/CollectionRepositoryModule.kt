@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.datastore.repository.collection.di
 
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionSyncChangeApplier
@@ -16,7 +15,6 @@ import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
-@OptIn(ExperimentalStoreApi::class)
 fun collectionRepositoryModule() = module {
     single<CollectionRepository> {
         val logger = logger("collection-repo")

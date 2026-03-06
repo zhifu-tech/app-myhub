@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.datastore.repository.card
 
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.CardSort
@@ -10,7 +9,6 @@ import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 
-@OptIn(ExperimentalStoreApi::class)
 internal fun createCardStoreSourceOfTruth(
     localCardDataSource: LocalCardDataSource,
     logger: Logger,
@@ -82,7 +80,6 @@ internal fun createCardStoreSourceOfTruth(
     deleteAll = { }
 )
 
-@OptIn(ExperimentalStoreApi::class)
 private fun StoreKey.Sort?.toCardSort(): CardSort? = when (this) {
     StoreKey.Sort.NEWEST -> CardSort.NEWEST
     StoreKey.Sort.OLDEST -> CardSort.OLDEST

@@ -1,12 +1,10 @@
 package tech.zhifu.app.myhub.datastore.repository.template
 
 import kotlinx.coroutines.flow.map
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTemplateStoreSourceOfTruth(
     localCardTemplateDataSource: LocalCardTemplateDataSource,
     logger: Logger,

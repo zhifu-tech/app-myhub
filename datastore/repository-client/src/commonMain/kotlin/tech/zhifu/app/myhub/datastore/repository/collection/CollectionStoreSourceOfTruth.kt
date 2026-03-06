@@ -2,14 +2,12 @@ package tech.zhifu.app.myhub.datastore.repository.collection
 
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.CollectionSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreSourceOfTruth(
     localCollectionDataSource: LocalCollectionDataSource,
     logger: Logger,
@@ -57,7 +55,6 @@ fun createCollectionStoreSourceOfTruth(
     deleteAll = { }
 )
 
-@OptIn(ExperimentalStoreApi::class)
 private fun StoreKey.Sort?.toCollectionSort(): CollectionSort? = when (this) {
     StoreKey.Sort.NEWEST -> CollectionSort.NEWEST
     StoreKey.Sort.OLDEST -> CollectionSort.OLDEST

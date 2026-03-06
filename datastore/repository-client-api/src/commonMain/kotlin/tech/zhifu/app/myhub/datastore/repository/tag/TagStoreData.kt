@@ -1,11 +1,9 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.InsertionStrategy
 import org.mobilenativefoundation.store.core5.StoreData
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 
-@OptIn(ExperimentalStoreApi::class)
 sealed class TagStoreData : StoreData<String> {
 
     data class Single(

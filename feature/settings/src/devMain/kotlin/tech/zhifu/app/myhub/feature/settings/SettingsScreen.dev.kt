@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.feature.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,7 +21,6 @@ import tech.zhifu.app.myhub.theme.AppTheme
 /**
  * Preview 函数 - SettingsScreen 浅色主题
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun SettingsScreenLightPreview() {
@@ -75,7 +73,6 @@ private fun SettingsScreenLightPreview() {
 /**
  * Preview 函数 - SettingsScreen 深色主题
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun SettingsScreenDarkPreview() {

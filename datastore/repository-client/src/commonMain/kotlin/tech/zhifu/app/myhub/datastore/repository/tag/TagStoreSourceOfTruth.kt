@@ -1,12 +1,10 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
 import kotlinx.coroutines.flow.flow
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTagStoreSourceOfTruth(
     localTagDataSource: LocalTagDataSource,
     logger: Logger,

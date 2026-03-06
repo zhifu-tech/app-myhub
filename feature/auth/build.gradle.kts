@@ -16,7 +16,6 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.logger)
             implementation(projects.feature.authApi)
-            implementation(projects.ui.design)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)

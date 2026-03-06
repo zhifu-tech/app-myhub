@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
 import kotlinx.coroutines.flow.Flow
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
@@ -19,7 +18,6 @@ import tech.zhifu.app.myhub.sync.SyncEntityType
 import kotlin.random.Random
 import kotlin.time.Clock
 
-@OptIn(ExperimentalStoreApi::class)
 class TagRepositoryImpl(
     private val store: TagStore,
     private val syncRepository: SyncRepository,

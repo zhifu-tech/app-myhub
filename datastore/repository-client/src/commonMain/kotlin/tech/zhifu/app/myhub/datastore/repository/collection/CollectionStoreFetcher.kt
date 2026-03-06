@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.datastore.repository.collection
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
@@ -8,7 +7,6 @@ import tech.zhifu.app.myhub.datastore.datasource.RemoteCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreFetcher(
     remoteCollectionDataSource: RemoteCollectionDataSource,
     logger: Logger
@@ -31,7 +29,6 @@ fun createCollectionStoreFetcher(
     }
 }
 
-@OptIn(ExperimentalStoreApi::class)
 @Suppress("UNCHECKED_CAST")
 private fun applyCollectionFilters(
     items: List<Collection>,
@@ -46,7 +43,6 @@ private fun applyCollectionFilters(
     return result
 }
 
-@OptIn(ExperimentalStoreApi::class)
 private fun applyCollectionSort(
     items: List<Collection>,
     sort: StoreKey.Sort?

@@ -1,11 +1,9 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.InsertionStrategy
 import org.mobilenativefoundation.store.core5.StoreData
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
-@OptIn(ExperimentalStoreApi::class)
 sealed class CardStoreData : StoreData<String> {
 
     data class Single(

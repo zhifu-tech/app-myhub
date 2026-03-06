@@ -1,13 +1,11 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
 import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTagStoreFetcher(
     remoteTagDataSource: RemoteTagDataSource,
     logger: Logger

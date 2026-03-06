@@ -46,7 +46,7 @@ fun ResultOutputCompletedRoute(
 }
 
 @Composable
-private fun ResultOutputCompleted(
+internal fun ResultOutputCompleted(
     innerPadding: PaddingValues,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,

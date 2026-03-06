@@ -73,10 +73,10 @@ private fun AppEnvironment(
     analyticsService: AnalyticsService = koinInject(),
     settingsRepository: SettingsRepository = koinInject(),
 ) {
-//    logger.debug { "AppEnvironment函数调用, 防止调用裂化" } fixme
     val appState = rememberAppState(settingsRepository)
     val isDarkTheme by appState.isDarkTheme.collectAsState()
     val locale by appState.locale.collectAsState()
+    logger.debug { "AppEnvironment函数调用, 防止调用裂化 isDarkTheme=$isDarkTheme , local=$locale" }
 
     CompositionLocalProvider(
         LocalAnalyticsService provides analyticsService,

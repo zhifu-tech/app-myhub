@@ -62,7 +62,7 @@ fun CollectionSectionRoute(
 }
 
 @Composable
-private fun CollectionSection(
+internal fun CollectionSection(
     listState: LazyListState,
     collections: List<Collection>,
     onCollectionClick: (String) -> Unit,

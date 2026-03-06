@@ -1,10 +1,8 @@
 package tech.zhifu.app.myhub.datastore.repository.template
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.InsertionStrategy
 import org.mobilenativefoundation.store.core5.StoreKey
 
-@OptIn(ExperimentalStoreApi::class)
 sealed class TemplateStoreKey : StoreKey<String> {
 
     data class ById(

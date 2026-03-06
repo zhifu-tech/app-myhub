@@ -17,7 +17,11 @@ fun logger(vararg tags: String): Logger {
     } else {
         (listOf(loggerConfig.appName) + tags).joinToString(":")
     }
-    return LoggerImpl(KotlinLogging.logger(name))
+    return runCatching {
+        LoggerImpl(KotlinLogging.logger(name))
+    }.getOrElse {
+        ConsoleFallbackLogger(name)
+    }
 }
 
 /**
@@ -25,7 +29,7 @@ fun logger(vararg tags: String): Logger {
  */
 private val loggerConfig by lazy {
     val config = runCatching { getKoin().getOrNull<LoggerConfig>() }.getOrNull()
-        ?: LoggerConfig("ZhifuTech")
+        ?: LoggerConfig("MyHub")
 
     config.apply { configPlatform() }
 }

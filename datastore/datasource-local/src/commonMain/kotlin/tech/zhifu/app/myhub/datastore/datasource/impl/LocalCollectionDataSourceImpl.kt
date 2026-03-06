@@ -7,7 +7,6 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -125,7 +124,6 @@ class LocalCollectionDataSourceImpl(
             }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCollectionsPage(
         userId: String,
         page: Int,

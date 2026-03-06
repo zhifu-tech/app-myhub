@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.collection
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import tech.zhifu.app.myhub.datastore.repository.collection.collections
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
@@ -17,7 +16,6 @@ suspend fun DashboardViewModel.loadCollections(
     pageSize = state?.pageSize ?: defaultPageSize,
 )
 
-@OptIn(ExperimentalStoreApi::class)
 internal suspend fun DashboardViewModel.loadCollections(
     userId: String,
     pageIndex: Int,

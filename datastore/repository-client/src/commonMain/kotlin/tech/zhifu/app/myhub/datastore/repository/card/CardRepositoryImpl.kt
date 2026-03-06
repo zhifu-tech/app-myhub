@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
 import kotlinx.coroutines.flow.Flow
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
@@ -20,7 +19,6 @@ import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
-@OptIn(ExperimentalStoreApi::class)
 class CardRepositoryImpl(
     private val store: CardStore,
     private val syncRepository: SyncRepository,

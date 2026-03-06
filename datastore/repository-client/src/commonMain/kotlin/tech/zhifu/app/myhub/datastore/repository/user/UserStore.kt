@@ -1,10 +1,8 @@
-@file:OptIn(ExperimentalStoreApi::class)
 
 package tech.zhifu.app.myhub.datastore.repository.user
 
 import org.mobilenativefoundation.store.cache5.Cache
 import org.mobilenativefoundation.store.cache5.CacheBuilder
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.MutableStore
@@ -21,7 +19,6 @@ typealias UserStoreBookkeeper = Bookkeeper<UserStoreKey>
 typealias UserStoreUpdater = Updater<UserStoreKey, UserStoreData, StoreWriteResponse>
 typealias UserStoreFetcher = Fetcher<UserStoreKey, UserStoreData>
 
-@OptIn(ExperimentalStoreApi::class)
 fun createUserStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.USER
 ): UserStoreCache = CacheBuilder<UserStoreKey, UserStoreData>()

@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.datastore.repository.tag.di
 
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.datastore.repository.store.createMutableStore
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
@@ -16,7 +15,6 @@ import tech.zhifu.app.myhub.datastore.repository.tag.createTagStoreUpdater
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
-@OptIn(ExperimentalStoreApi::class)
 fun tagRepositoryModule() = module {
     single<TagRepository> {
         val logger = logger("tag-repo")

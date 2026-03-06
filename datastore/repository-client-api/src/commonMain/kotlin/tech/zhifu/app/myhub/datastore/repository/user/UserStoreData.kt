@@ -1,11 +1,9 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreData
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 
-@OptIn(ExperimentalStoreApi::class)
 sealed class UserStoreData : StoreData<String> {
 
     data class UserData(

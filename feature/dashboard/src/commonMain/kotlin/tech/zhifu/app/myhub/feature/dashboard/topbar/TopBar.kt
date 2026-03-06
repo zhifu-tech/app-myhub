@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.dashboard.topbar
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Text
@@ -14,7 +13,6 @@ import tech.zhifu.app.myhub.feature.dashboard.navigateToReview
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TopBarRoute(
     viewModel: DashboardViewModel,
@@ -38,7 +36,7 @@ internal fun TopBarRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior,

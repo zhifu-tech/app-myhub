@@ -23,20 +23,20 @@ fun ResultErrorDisabledRoute(
     innerPadding: PaddingValues,
     viewModel: DashboardViewModel
 ) {
-    val payload = viewModel.collectFieldAsState { uiState ->
+    val state = viewModel.collectFieldAsState { uiState ->
         uiState as? DashboardUiState.ResultErrorDisabled
     }.value ?: return
 
     ResultErrorDisabled(
         innerPadding = innerPadding,
-        message = payload.message,
-        canRetry = payload.canRetry,
+        message = state.message,
+        canRetry = state.canRetry,
         onRetry = viewModel::retry,
     )
 }
 
 @Composable
-private fun ResultErrorDisabled(
+internal fun ResultErrorDisabled(
     innerPadding: PaddingValues,
     message: String,
     canRetry: Boolean,

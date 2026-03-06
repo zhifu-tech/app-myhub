@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.analytics.provider
 
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,7 +31,6 @@ import tech.zhifu.app.myhub.logger.warn
  *
  * 注意：使用 cinterop 生成的绑定来调用 Umeng SDK，提供类型安全的 API 调用
  */
-@OptIn(ExperimentalForeignApi::class)
 class UmengProvider(
     override val name: String,
     override val supportedPlatforms: Set<Platform>,

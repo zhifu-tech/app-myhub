@@ -1,10 +1,8 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.InsertionStrategy
 import org.mobilenativefoundation.store.core5.StoreKey
 
-@OptIn(ExperimentalStoreApi::class)
 sealed interface CardStoreKey<out Id : Any> : StoreKey<Id> {
 
     data class ById(

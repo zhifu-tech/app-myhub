@@ -1,13 +1,11 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
-@OptIn(ExperimentalStoreApi::class)
 internal fun createCardStoreFetcher(
     remoteCardDataSource: RemoteCardDataSource
 ): CardStoreFetcher = Fetcher.ofResult { key ->
@@ -43,7 +41,6 @@ internal fun createCardStoreFetcher(
     }
 }
 
-@OptIn(ExperimentalStoreApi::class)
 @Suppress("UNCHECKED_CAST")
 private fun applyCardFilters(
     items: List<Card>,
@@ -58,7 +55,6 @@ private fun applyCardFilters(
     return result
 }
 
-@OptIn(ExperimentalStoreApi::class)
 private fun applyCardSort(
     items: List<Card>,
     sort: StoreKey.Sort?

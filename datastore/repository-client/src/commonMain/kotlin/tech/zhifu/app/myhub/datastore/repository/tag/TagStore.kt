@@ -1,10 +1,8 @@
-@file:OptIn(ExperimentalStoreApi::class)
 
 package tech.zhifu.app.myhub.datastore.repository.tag
 
 import org.mobilenativefoundation.store.cache5.CacheBuilder
 import org.mobilenativefoundation.store.cache5.StoreMultiCache
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.KeyProvider
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Bookkeeper
@@ -23,7 +21,6 @@ typealias TagStoreBookkeeper = Bookkeeper<TagStoreKey>
 typealias TagStoreUpdater = Updater<TagStoreKey, TagStoreData, StoreWriteResponse>
 typealias TagStoreFetcher = Fetcher<TagStoreKey, TagStoreData>
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTagStoreCache(
     config: StoreCacheConfig = StoreCacheConfigs.TAG
 ): TagStoreCache = StoreMultiCache(

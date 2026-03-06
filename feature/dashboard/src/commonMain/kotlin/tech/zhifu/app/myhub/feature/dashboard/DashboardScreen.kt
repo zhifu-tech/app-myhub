@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -10,66 +9,93 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.orbitmvi.orbit.compose.collectSideEffect
 import tech.zhifu.app.myhub.feature.capture.api.navigation.navigateToCapture
 import tech.zhifu.app.myhub.feature.card.api.navigateToCardDetail
-import tech.zhifu.app.myhub.feature.dashboard.content.ContentRoute
+import tech.zhifu.app.myhub.feature.dashboard.content.InitGlobalPending
+import tech.zhifu.app.myhub.feature.dashboard.content.ResultErrorDisabledRoute
+import tech.zhifu.app.myhub.feature.dashboard.content.ResultOutputCompletedRoute
 import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBarRoute
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.ui.State
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardRoute(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinInject<DashboardViewModel>(),
 ) {
-    logger.debug("Dashboard Screen") { "DashboardScreen" }
-    CollectSideEffect(
-        navigator = navigator,
-        viewModel = viewModel,
-    )
-    val canShowTopBar by viewModel.collectFieldAsState {
-        it.state == DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED
+    logger.debug("Dashboard Screen") { "DashboardRoute" }
+
+    CollectSideEffect(navigator = navigator, viewModel = viewModel)
+    val state by viewModel.collectFieldAsState {
+        it.state
     }
     DashboardScreen(
+        state = state,
         topBar = {
-            if (canShowTopBar) {
-                TopBarRoute(
-                    viewModel = viewModel,
-                    scrollBehavior = it,
-                )
-            }
-        },
-        content = { innerPadding ->
-            ContentRoute(
+            TopBarRoute(
                 viewModel = viewModel,
-                innerPadding = innerPadding,
+                scrollBehavior = it,
             )
-        }
+        },
+        initGlobalPendingContent = {
+            InitGlobalPending(innerPadding = it)
+        },
+        errorDisabledContent = {
+            ResultErrorDisabledRoute(
+                innerPadding = it,
+                viewModel = viewModel,
+            )
+        },
+        resultOutputCompletedContent = {
+            ResultOutputCompletedRoute(
+                innerPadding = it,
+                viewModel = viewModel,
+            )
+        },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(
+internal fun DashboardScreen(
+    state: State,
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit,
-    content: @Composable (PaddingValues) -> Unit,
+    initGlobalPendingContent: @Composable (PaddingValues) -> Unit,
+    errorDisabledContent: @Composable (PaddingValues) -> Unit,
+    resultOutputCompletedContent: @Composable (PaddingValues) -> Unit,
 ) {
+    logger.debug("Dashboard Screen") { "DashboardScreen $state" }
+    val canShowTopBar = state == DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            topBar(scrollBehavior)
+            if (canShowTopBar) {
+                topBar(scrollBehavior)
+            }
         },
     ) { innerPadding ->
-        content(innerPadding)
+        when (state) {
+            DashboardUiState.DASHBOARD_INIT_GLOBAL_PENDING -> {
+                initGlobalPendingContent(innerPadding)
+            }
+
+            DashboardUiState.DASHBOARD_RESULT_ERROR_DISABLED -> {
+                errorDisabledContent(innerPadding)
+            }
+
+            DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED -> {
+                resultOutputCompletedContent(innerPadding)
+            }
+
+            else -> Unit
+        }
     }
 }
 
@@ -114,10 +140,4 @@ private fun CollectSideEffect(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun DashboardScreenPreview() {
-
 }

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -65,7 +64,6 @@ import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_settings
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_title
 import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_version
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,

@@ -1,11 +1,9 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createTagStoreBookkeeper(
     bookkeeperStorage: BookkeeperStorage,
     logger: Logger,

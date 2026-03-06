@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.card
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import tech.zhifu.app.myhub.datastore.repository.card.cards
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
@@ -17,7 +16,6 @@ suspend fun DashboardViewModel.loadCards(
     pageSize = state?.pageSize ?: defaultPageSize,
 )
 
-@OptIn(ExperimentalStoreApi::class)
 private suspend fun DashboardViewModel.loadCards(
     userId: String,
     pageIndex: Int,

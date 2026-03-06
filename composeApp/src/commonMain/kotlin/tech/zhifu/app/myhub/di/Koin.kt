@@ -8,7 +8,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
@@ -29,7 +28,6 @@ import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import kotlin.coroutines.CoroutineContext
 
-@OptIn(ExperimentalStoreApi::class)
 fun initKoin(platformSpecificConfig: (KoinApplication.() -> Unit)? = null) {
     /**
      * 应用级 CoroutineScope

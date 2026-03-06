@@ -6,7 +6,6 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -152,7 +151,6 @@ class LocalCardDataSourceImpl(
         return card.toDomain(tags)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCard(cardId: String): Flow<Card> {
         val cardFlow = database.card_with_metadataQueries
             .selectCardWithMetadataByCardId(cardId)
@@ -224,7 +222,6 @@ class LocalCardDataSourceImpl(
             .awaitAsOne()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCards(userId: String): Flow<List<Card>> {
         val cardsFlow = database.card_with_metadataQueries
             .selectCardWithMetadataByUserId(userId)
@@ -259,7 +256,6 @@ class LocalCardDataSourceImpl(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeCardsPage(
         userId: String,
         page: Int,

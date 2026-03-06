@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.di
 
 import org.koin.dsl.module
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
@@ -23,7 +22,6 @@ import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
  * 提供所有 Repository 的实现
  * 包含本地和远程数据源模块（localDataSourceModule, remoteDataSourceModule）
  */
-@ExperimentalStoreApi
 val repositoryModule = module {
     // Bookkeeper 存储（数据库实现 - 持久化）
     single<BookkeeperStorage> {
@@ -31,6 +29,7 @@ val repositoryModule = module {
             database = get<MyHubDatabase>()
         )
     }
+
     includes(
         databaseModule,
         localDataSourceModule,

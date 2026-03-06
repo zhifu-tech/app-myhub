@@ -1,13 +1,11 @@
 package tech.zhifu.app.myhub.datastore.repository.collection
 
 import kotlinx.coroutines.flow.Flow
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 
-@OptIn(ExperimentalStoreApi::class)
 interface CollectionRepository {
 
     suspend fun insertCollection(

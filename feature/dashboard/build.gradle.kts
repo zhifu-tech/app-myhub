@@ -33,7 +33,6 @@ kotlin {
             implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.authApi)
-            implementation(projects.ui.design)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)

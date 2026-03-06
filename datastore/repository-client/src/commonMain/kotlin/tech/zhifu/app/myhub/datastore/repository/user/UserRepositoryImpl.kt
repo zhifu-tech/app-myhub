@@ -1,10 +1,8 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
@@ -18,7 +16,6 @@ import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
-@OptIn(ExperimentalStoreApi::class)
 class UserRepositoryImpl(
     private val logger: Logger,
     private val syncRepository: SyncRepository,
@@ -71,7 +68,6 @@ class UserRepositoryImpl(
             )
         )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun streamUser(): Flow<User?> =
         store.stream<StoreWriteResponse>(
             request = StoreReadRequest.localOnly(

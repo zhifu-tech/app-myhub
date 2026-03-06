@@ -2,12 +2,10 @@ package tech.zhifu.app.myhub.datastore.repository.user
 
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
-@OptIn(ExperimentalStoreApi::class)
 fun createUserStoreSourceOfTruth(
     localUserDataSource: LocalUserDataSource,
     logger: Logger,

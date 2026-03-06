@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
-import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 
@@ -24,7 +23,6 @@ internal fun createCardStoreBookkeeper(
     }
 )
 
-@OptIn(ExperimentalStoreApi::class)
 private fun CardStoreKey<String>.toBookkeeperKey(): String = when (this) {
     is CardStoreKey.ById -> "card:$id"
     is CardStoreKey.ByIds -> "cards:ids:${ids.sorted().joinToString(",")}"

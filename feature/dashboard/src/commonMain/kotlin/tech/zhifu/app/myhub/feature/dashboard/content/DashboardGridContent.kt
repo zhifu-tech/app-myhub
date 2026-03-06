@@ -22,7 +22,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.component.card.CardPreview
 import tech.zhifu.app.myhub.datastore.model.domain.Card
@@ -81,9 +80,8 @@ fun DashboardGridContentRoute(
     )
 }
 
-
 @Composable
-private fun DashboardGridContent(
+internal fun DashboardGridContent(
     gridState: LazyStaggeredGridState,
     columns: Int,
     collectionSection: @Composable () -> Unit,
@@ -93,7 +91,7 @@ private fun DashboardGridContent(
     onNavigateToCardEdit: (String) -> Unit,
     onNavigateToCardDetail: (String) -> Unit,
     onNavigateToCapture: () -> Unit,
-    onNavigateToCardList: () -> Job,
+    onNavigateToCardList: () -> Unit,
 ) {
     LazyVerticalStaggeredGrid(
         state = gridState,

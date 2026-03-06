@@ -21,32 +21,34 @@ kotlin {
     }
 
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(libs.jb.androidx.window.windowCore)
-                implementation(libs.jb.compose.components.componentsResources)
-                implementation(libs.jb.compose.foundation.foundation)
-                implementation(libs.jb.compose.material3.adaptive.adaptive)
-                implementation(libs.jb.compose.material3.adaptive.navigationSuite)
-                implementation(libs.jb.compose.material3.material3)
-                implementation(libs.jb.compose.material3.material3WindowSizeClass)
-                implementation(libs.jb.compose.runtime.runtime)
-                implementation(libs.jb.compose.ui.ui)
+        commonMain.dependencies {
+            implementation(libs.jb.androidx.window.windowCore)
+            implementation(libs.jb.compose.components.componentsResources)
+            implementation(libs.jb.compose.foundation.foundation)
+            implementation(libs.jb.compose.material3.adaptive.adaptive)
+            implementation(libs.jb.compose.material3.adaptive.navigationSuite)
+            implementation(libs.jb.compose.material3.material3)
+            implementation(libs.jb.compose.material3.material3WindowSizeClass)
+            implementation(libs.jb.compose.runtime.runtime)
+            implementation(libs.jb.compose.ui.ui)
+
+            if (project.isDev()) {
+                implementation(libs.jb.compose.ui.uiToolingPreview)
             }
         }
 
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-                implementation(libs.jb.compose.ui.ui)
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.jb.compose.ui.ui)
         }
 
-        jvmTest {
-            dependencies {
-                implementation(libs.kotlin.testJunit)
-            }
+        jvmTest.dependencies {
+            implementation(libs.kotlin.testJunit)
         }
     }
+}
+
+dependencies {
+    "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }
 
