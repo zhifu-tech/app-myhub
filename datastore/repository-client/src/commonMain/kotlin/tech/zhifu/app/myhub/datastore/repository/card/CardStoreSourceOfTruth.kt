@@ -50,7 +50,7 @@ internal fun createCardStoreSourceOfTruth(
     writer = { key, data ->
         logger.debug {
             "writer called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
+                "instance=${key.hashCode()}"
         }
         when (key) {
             is CardStoreKey.ById if data is CardStoreData.Single -> {

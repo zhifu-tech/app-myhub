@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.koinInject
 import org.orbitmvi.orbit.compose.collectSideEffect
 import tech.zhifu.app.myhub.feature.capture.api.navigation.navigateToCapture
@@ -113,4 +114,10 @@ private fun CollectSideEffect(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun DashboardScreenPreview() {
+
 }

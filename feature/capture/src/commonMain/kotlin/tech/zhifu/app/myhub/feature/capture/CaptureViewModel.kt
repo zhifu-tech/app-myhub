@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.feature.capture
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import io.github.vinceglb.filekit.mimeType
-import io.github.vinceglb.filekit.path
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.component.media.MediaItem
+import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
@@ -609,13 +609,13 @@ class CaptureViewModel(
         }
         if (review.imageItem != null) {
             metadata += CardMetadata.CarrierImage(
-                url = review.imageItem.file.path,
-                thumbnailUrl = review.imageItem.file.path
+                url = review.imageItem.file.toPlayableUrl(),
+                thumbnailUrl = review.imageItem.file.toPlayableUrl()
             )
         }
         if (review.videoItem != null) {
             metadata += CardMetadata.CarrierVideo(
-                videoUrl = review.videoItem.file.path,
+                videoUrl = review.videoItem.file.toPlayableUrl(),
                 durationSeconds = null,
                 platform = "local",
                 coverImageUrl = null

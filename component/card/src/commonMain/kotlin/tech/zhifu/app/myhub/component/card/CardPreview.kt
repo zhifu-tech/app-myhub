@@ -380,7 +380,7 @@ private fun buildVideoSubtitle(platform: String?, durationSeconds: Long?): Strin
     val durationText = durationSeconds?.takeIf { it > 0 }?.let { seconds ->
         val minute = seconds / 60
         val second = seconds % 60
-        "%d:%02d".format(minute, second)
+        "$minute:${second.toString().padStart(2, '0')}"
     }
     return listOfNotNull(platformText, durationText)
         .joinToString(" • ")

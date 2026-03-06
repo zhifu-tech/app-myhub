@@ -21,7 +21,6 @@ kotlin {
 
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.krypto)
             api(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.logging)
@@ -48,13 +47,12 @@ kotlin {
             implementation(libs.ktor.client.darwin)
         }
 
-        jsMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
+//        jsMain.dependencies {
+//            implementation(libs.ktor.client.js)
+//        }
 
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
         }
     }
 }
-

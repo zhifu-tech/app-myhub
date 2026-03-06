@@ -1,4 +1,4 @@
-# Capture Flow UI Spec（Single Document）
+# Capture Flow UI Spec
 
 > 本文档基于 [UI-Design-Analysis-Rulebook-v1.0](../../../../docs/design/spec/%20UI-Design-Analysis-Rulebook-v1.0.md)，用于定义 Capture 模块的状态划分、状态边界与流转关系。
 > 本文档已合并原 8 个状态子文档，作为唯一导出文档。

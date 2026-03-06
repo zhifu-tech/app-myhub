@@ -15,7 +15,7 @@ internal fun createUserStoreUpdater(
     post = { key, data ->
         logger.debug("updater") {
             "post is called with key: $key (type=${key::class.qualifiedName}, " +
-                "data=$data, instance=${System.identityHashCode(key)}"
+                "data=$data, instance=${key.hashCode()}"
         }
         when (key) {
             is UserStoreKey.ById if data is UserStoreData.UserData -> remoteUserDataSource

@@ -3,8 +3,8 @@ package tech.zhifu.app.myhub.component.media.util
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.path
 import tech.zhifu.app.myhub.component.media.MediaItem
+import kotlin.time.Clock
 
 fun PlatformFile.toMediaItem(): MediaItem {
     val fileName = name.takeIf { it.isNotBlank() } ?: "media"
@@ -19,7 +19,7 @@ fun PlatformFile.toMediaItem(): MediaItem {
         "wmv"
     )
     return MediaItem(
-        id = "${fileName}_${System.currentTimeMillis()}",
+        id = "${fileName}_${Clock.System.now()}",
         file = this,
         name = fileName,
         isVideo = isVideo
@@ -27,7 +27,7 @@ fun PlatformFile.toMediaItem(): MediaItem {
 }
 
 fun PlatformFile.toPlayableUrl(): String {
-    val rawPath = path.trim()
+    val rawPath = toString().trim()
     if (rawPath.isBlank()) return ""
     return if (rawPath.startsWith("file://")) rawPath else "file://$rawPath"
 }

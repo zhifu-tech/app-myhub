@@ -100,11 +100,11 @@ kotlin {
             }
         }
 
-        jsMain.dependencies {
-            if (project.isChannelGooglePlay()) {
-                implementation(libs.firebase.analytics)
-            }
-        }
+//        jsMain.dependencies {
+//            if (project.isChannelGooglePlay()) {
+//                implementation(libs.firebase.analytics)
+//            }
+//        }
 
         jvmTest.dependencies {
             implementation(libs.kotlin.testJunit)

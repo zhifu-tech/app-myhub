@@ -14,7 +14,6 @@ import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import kotlin.random.Random
@@ -54,26 +53,10 @@ class TagRepositoryImpl(
             logger.error(it) { "get tag for {tag:$tagId} from store failed" }
         }.getOrNull()
 
-    override suspend fun getTags(userId: String): TagStoreData {
-        val storeInstance = System.identityHashCode(store)
-        val storeType = store::class.qualifiedName
-        val key = TagStoreKey.ByUser(userId)
-        val keyType = key::class.qualifiedName
-        val keyInstance = System.identityHashCode(key)
-
-        logger.info {
-            "TagRepository.getTags: " +
-                "store=$storeType@$storeInstance, " +
-                "key=$key (type=$keyType, instance=$keyInstance), " +
-                "userId=$userId"
-        }
-
-        return store.get<TagStoreKey, TagStoreData, StoreWriteResponse>(
-            key = key
-        ).also {
-            logger.info { "TagRepository.getTags: result=$it" }
-        }
-    }
+    override suspend fun getTags(userId: String): TagStoreData =
+        store.get<TagStoreKey, TagStoreData, StoreWriteResponse>(
+            key = TagStoreKey.ByUser(userId)
+        )
 
     override fun streamTag(tagId: String, refresh: Boolean): Flow<StoreReadResponse<TagStoreData>> =
         store.stream<StoreWriteResponse>(
@@ -102,7 +85,7 @@ class TagRepositoryImpl(
         logger.debug { "ensure tags: $tags" }
         if (tags.isEmpty()) return emptyList()
 
-        val existingTags = getTags(userId)?.tags ?: emptyList()
+        val existingTags = getTags(userId).tags
         val byId = existingTags.associateBy { it.id }
         val byName = existingTags.associateBy { it.name }
         logger.debug { "existing tags: $existingTags" }

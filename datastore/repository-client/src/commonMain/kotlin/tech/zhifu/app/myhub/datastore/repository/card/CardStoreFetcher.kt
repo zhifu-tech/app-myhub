@@ -43,6 +43,7 @@ internal fun createCardStoreFetcher(
     }
 }
 
+@OptIn(ExperimentalStoreApi::class)
 @Suppress("UNCHECKED_CAST")
 private fun applyCardFilters(
     items: List<Card>,
@@ -57,6 +58,7 @@ private fun applyCardFilters(
     return result
 }
 
+@OptIn(ExperimentalStoreApi::class)
 private fun applyCardSort(
     items: List<Card>,
     sort: StoreKey.Sort?

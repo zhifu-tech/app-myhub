@@ -18,7 +18,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.navigation)
-            
+
             implementation(libs.jb.androidx.navigation3.navigation3Ui)
             implementation(libs.jb.compose.material3.material3WindowSizeClass)
         }

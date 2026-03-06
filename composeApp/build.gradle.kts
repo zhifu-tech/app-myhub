@@ -86,15 +86,15 @@ kotlin {
         // Firebase pods 应该在 Podfile 中直接添加（见 iosApp/Podfile），这样可以在 Xcode 构建时正确链接
     }
 
-    js {
-        outputModuleName.set("composeApp")
-        browser {
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-            }
-        }
-        binaries.executable()
-    }
+//    js {
+//        outputModuleName.set("composeApp")
+//        browser {
+//            commonWebpackConfig {
+//                outputFileName = "composeApp.js"
+//            }
+//        }
+//        binaries.executable()
+//    }
 
     @Suppress("OPT_IN_USAGE")
     wasmJs {
@@ -179,11 +179,11 @@ kotlin {
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
         }
 
-        jsMain.dependencies {
-            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
-            implementation(npm("sql.js", "1.12.0"))
-            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-        }
+//        jsMain.dependencies {
+//            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
+//            implementation(npm("sql.js", "1.12.0"))
+//            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+//        }
     }
 }
 

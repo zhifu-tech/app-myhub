@@ -1,6 +1,6 @@
 # Dashboard Flow UI Spec
 
-> 本文档基于 [UI-Design-Analysis-Rulebook-v1.0](../../../../docs/design/spec/UI-Design-Analysis-Rulebook-v1.0.md) 与 [UI State Enumeration Dictionary v1.0](../../../../docs/design/spec/more/UI%20State%20Enumeration%20Dictionary%20v1.0.md)，定义 Dashboard 模块状态。
+> 本文档基于[ UI-Design-Analysis-Rulebook-v1.0.md](../../../docs/design/spec/%20UI-Design-Analysis-Rulebook-v1.0.md) 与 [UI State Enumeration Dictionary v1.0](../../../docs/design/spec/more/UI%20State%20Enumeration%20Dictionary%20v1.0.md)，定义 Dashboard 模块状态。
 > 本文档仅以 `DashboardUiState.kt` 为单一事实来源（SSOT）。
 
 ---

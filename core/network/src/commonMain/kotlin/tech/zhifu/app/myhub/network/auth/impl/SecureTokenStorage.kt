@@ -1,9 +1,9 @@
 package tech.zhifu.app.myhub.network.auth.impl
 
-import com.soywiz.krypto.encoding.Base64
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import tech.zhifu.app.myhub.network.auth.TokenStorage
 import tech.zhifu.app.myhub.settings.LocalSettingStore
+import kotlin.io.encoding.Base64
 
 /**
  * 加密 Token 存储实现

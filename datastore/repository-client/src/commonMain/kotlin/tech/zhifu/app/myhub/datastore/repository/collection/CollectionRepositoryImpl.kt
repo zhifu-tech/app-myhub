@@ -99,7 +99,7 @@ class CollectionRepositoryImpl(
     override suspend fun clearCollection(
         collectionId: String
     ) {
-        val collection = getCollection(collectionId)?.collection ?: return
+        val collection = getCollection(collectionId).collection ?: return
         store.clear(key = CollectionStoreKey.ById(collectionId))
 
         syncRepository.recordDeleteOperation(

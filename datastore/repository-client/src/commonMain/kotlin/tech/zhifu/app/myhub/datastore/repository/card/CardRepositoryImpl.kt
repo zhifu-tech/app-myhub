@@ -155,8 +155,6 @@ class CardRepositoryImpl(
     override suspend fun clearCards(
         userId: String
     ) {
-        val cardsData = getCards(userId, page = 1, size = 1)
-        cardsData?.cards ?: return
         store.clear(key = CardStoreKey.ByUser(userId = userId, page = 1, size = 1))
 
         syncRepository.recordDeleteOperation(

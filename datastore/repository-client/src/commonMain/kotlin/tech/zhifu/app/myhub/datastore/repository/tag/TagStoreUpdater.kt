@@ -15,7 +15,7 @@ internal fun createTagStoreUpdater(
     post = { key, data ->
         logger.debug("updater") {
             "post is called with key: $key (type=${key::class.qualifiedName}, " +
-                "data=$data, instance=${System.identityHashCode(key)}"
+                "data=$data, instance=${key.hashCode()}"
         }
         when (key) {
             is TagStoreKey.ById if data is TagStoreData.Single -> {

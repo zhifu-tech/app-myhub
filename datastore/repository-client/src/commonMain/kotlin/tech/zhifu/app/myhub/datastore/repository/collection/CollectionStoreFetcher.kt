@@ -31,6 +31,7 @@ fun createCollectionStoreFetcher(
     }
 }
 
+@OptIn(ExperimentalStoreApi::class)
 @Suppress("UNCHECKED_CAST")
 private fun applyCollectionFilters(
     items: List<Collection>,
@@ -45,6 +46,7 @@ private fun applyCollectionFilters(
     return result
 }
 
+@OptIn(ExperimentalStoreApi::class)
 private fun applyCollectionSort(
     items: List<Collection>,
     sort: StoreKey.Sort?

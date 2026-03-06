@@ -12,35 +12,55 @@ internal class LoggerImpl(
         marker: Any?,
         throwable: Throwable?,
         message: () -> Any?
-    ) = delegate.trace(throwable, marker?.asMarker(), message)
+    ) = delegate.trace(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
 
     override fun isDebugEnabled() = delegate.isDebugEnabled()
     override fun debug(
         marker: Any?,
         throwable: Throwable?,
         message: () -> Any?
-    ) = delegate.debug(throwable, marker?.asMarker(), message)
+    ) = delegate.debug(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
 
     override fun isInfoEnabled() = delegate.isInfoEnabled()
     override fun info(
         marker: Any?,
         throwable: Throwable?,
         message: () -> Any?
-    ) = delegate.info(throwable, marker?.asMarker(), message)
+    ) = delegate.info(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
 
     override fun isWarnEnabled() = delegate.isWarnEnabled()
     override fun warn(
         marker: Any?,
         throwable: Throwable?,
         message: () -> Any?
-    ) = delegate.warn(throwable, marker?.asMarker(), message)
+    ) = delegate.warn(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
 
     override fun isErrorEnabled() = delegate.isErrorEnabled()
     override fun error(
         marker: Any?,
         throwable: Throwable?,
         message: () -> Any?
-    ) = delegate.error(throwable, marker?.asMarker(), message)
+    ) = delegate.error(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
 }
 
 private fun Any?.asMarker(): Marker? = when (this) {

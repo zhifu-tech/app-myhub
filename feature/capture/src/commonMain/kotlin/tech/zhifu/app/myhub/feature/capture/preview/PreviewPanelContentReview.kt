@@ -6,8 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.mohamedrejeb.richeditor.model.RichTextState
-import io.github.vinceglb.filekit.path
 import tech.zhifu.app.myhub.component.card.CardPreview
+import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
@@ -77,16 +77,16 @@ private fun ReviewCtx.toPreviewCard(summaryText: String): Card {
             imageItem?.also { item ->
                 add(
                     CardMetadata.CarrierImage(
-                        url = item.file.path,
-                        thumbnailUrl = item.file.path
+                        url = item.file.toPlayableUrl(),
+                        thumbnailUrl = item.file.toPlayableUrl()
                     )
                 )
             }
             videoItem?.let { item ->
                 add(
                     CardMetadata.CarrierVideo(
-                        videoUrl = item.file.path,
-                        coverImageUrl = item.file.path,
+                        videoUrl = item.file.toPlayableUrl(),
+                        coverImageUrl = item.file.toPlayableUrl(),
                         platform = videoMetadataSummary?.takeIf { it.isNotBlank() } ?: "Video Metadata"
                     )
                 )

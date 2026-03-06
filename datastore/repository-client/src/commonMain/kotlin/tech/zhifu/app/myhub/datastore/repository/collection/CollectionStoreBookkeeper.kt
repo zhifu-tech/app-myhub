@@ -25,6 +25,7 @@ fun createCollectionStoreBookkeeper(
     }
 )
 
+@OptIn(ExperimentalStoreApi::class)
 private fun CollectionStoreKey<String>.toBookkeeperKey(): String = when (this) {
     is CollectionStoreKey.ById -> "collection:$id"
     is CollectionStoreKey.ByUser ->

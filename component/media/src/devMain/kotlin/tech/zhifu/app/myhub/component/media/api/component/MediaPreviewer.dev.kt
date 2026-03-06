@@ -29,16 +29,19 @@ private object PreviewMediaPreviewer : MediaPreviewer {
     override fun isSystemPlayerPreferred(): Boolean = false
 }
 
+private fun previewPlatformFile(): PlatformFile =
+    throw NotImplementedError("Preview-only placeholder PlatformFile")
+
 private fun sampleImageItem(): MediaItem = MediaItem(
     id = "preview-image",
-    file = PlatformFile("feature/capture/docs/design/capture-ready-input-idle/screen.png"),
+    file = previewPlatformFile(),
     name = "Preview Image",
     isVideo = false
 )
 
 private fun sampleVideoItem(): MediaItem = MediaItem(
     id = "preview-video",
-    file = PlatformFile("feature/capture/docs/design/capture-ready-input-idle/screen.png"),
+    file = previewPlatformFile(),
     name = "Preview Video",
     isVideo = true
 )
