@@ -6,7 +6,6 @@ import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createUserStoreSourceOfTruth(
@@ -14,10 +13,6 @@ fun createUserStoreSourceOfTruth(
     logger: Logger,
 ): UserStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
-        logger.debug {
-            "reader called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is UserStoreKey.ById -> if (key.id.isEmpty()) {
                 localUserDataSource.observeUser().map {
@@ -42,10 +37,6 @@ fun createUserStoreSourceOfTruth(
         }
     },
     writer = { key, data ->
-        logger.debug {
-            "writer called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is UserStoreKey.ById if data is UserStoreData.UserData -> {
                 data.user?.let {

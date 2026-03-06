@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.card
+package tech.zhifu.app.myhub.feature.dashboard.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,15 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_latest_captures
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recently_added
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_view_all
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LatestCapturesTitleRow(
+fun SectionHeader(
+    titleRes: StringResource,
+    tooltipRes: StringResource,
     onViewAllClick: () -> Unit = {},
     modifier: Modifier = Modifier.Companion
 ) {
@@ -44,14 +45,20 @@ fun LatestCapturesTitleRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(Res.string.feature_dashboard_latest_captures),
+                text = stringResource(titleRes),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = { PlainTooltip { Text(stringResource(Res.string.feature_dashboard_recently_added)) } },
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                    positioning = TooltipAnchorPosition.Above
+                ),
+                tooltip = {
+                    PlainTooltip {
+                        Text(stringResource(tooltipRes))
+                    }
+                },
                 state = rememberTooltipState(),
             ) {
                 Icon(

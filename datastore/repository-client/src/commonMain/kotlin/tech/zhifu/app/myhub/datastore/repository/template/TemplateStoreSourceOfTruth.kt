@@ -5,7 +5,6 @@ import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createTemplateStoreSourceOfTruth(
@@ -13,10 +12,6 @@ fun createTemplateStoreSourceOfTruth(
     logger: Logger,
 ): TemplateStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
-        logger.debug {
-            "reader called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is TemplateStoreKey.ById -> localCardTemplateDataSource.observeTemplates()
                 .map { templates ->
@@ -31,10 +26,6 @@ fun createTemplateStoreSourceOfTruth(
         }
     },
     writer = { key, data ->
-        logger.debug {
-            "writer called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is TemplateStoreKey.ById if data is TemplateStoreData.Single -> {
                 localCardTemplateDataSource.insertTemplate(data.template)

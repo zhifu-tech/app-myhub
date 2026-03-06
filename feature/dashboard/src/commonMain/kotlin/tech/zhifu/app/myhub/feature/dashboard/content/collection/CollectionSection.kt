@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,19 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,19 +22,17 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
-import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.content.SectionHeader
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCollectionDetail
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCollectionList
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_asset_collections
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_curated_library
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_view_all
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 
 
 @Composable
@@ -57,8 +42,6 @@ fun CollectionSectionRoute(
     val payload = viewModel.collectFieldAsState { uiState ->
         (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
     }.value ?: return
-
-    logger.debug { "AssetCollectionsModule + ${payload.hashCode()}" }
 
     val listState = rememberLazyListState()
     CollectionPagingLoadMoreEffect(
@@ -70,67 +53,31 @@ fun CollectionSectionRoute(
     CollectionSection(
         listState = listState,
         collections = payload.collections,
-        onCollectionClick = {/*TODO*/ },
-        onViewAllClick = { /*TODO*/ },
+        onCollectionClick = viewModel::navigateToCollectionDetail,
+        onViewAllClick = viewModel::navigateToCollectionList,
         isLoadingMore = payload.isLoading,
         hasMore = payload.hasMore,
         modifier = Modifier.fillMaxWidth().padding(bottom = 36.dp)
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CollectionSection(
     listState: LazyListState,
     collections: List<Collection>,
-    onCollectionClick: (Collection) -> Unit,
+    onCollectionClick: (String) -> Unit,
     onViewAllClick: () -> Unit,
     isLoadingMore: Boolean,
     hasMore: Boolean,
     modifier: Modifier = Modifier.Companion
 ) {
-    logger.debug { "Loading AssetCollectionsModule -- 2" }
     Column(modifier = modifier) {
-        Row(
+        SectionHeader(
+            titleRes = Res.string.feature_dashboard_asset_collections,
+            tooltipRes = Res.string.feature_dashboard_curated_library,
+            onViewAllClick = onViewAllClick,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(Res.string.feature_dashboard_asset_collections),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = { PlainTooltip { Text(stringResource(Res.string.feature_dashboard_curated_library)) } },
-                    state = rememberTooltipState(),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                }
-            }
-            TextButton(
-                onClick = onViewAllClick,
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.feature_dashboard_view_all),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
         val cardWidth = 280.dp
@@ -147,7 +94,7 @@ private fun CollectionSection(
             ) { collection ->
                 CollectionCard(
                     collection = collection,
-                    onClick = { onCollectionClick(collection) },
+                    onClick = { onCollectionClick(collection.id) },
                     modifier = Modifier.width(cardWidth)
                 )
             }

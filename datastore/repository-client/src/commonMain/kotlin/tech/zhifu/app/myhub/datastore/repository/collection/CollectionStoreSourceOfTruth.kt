@@ -8,7 +8,6 @@ import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.CollectionSort
 import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createCollectionStoreSourceOfTruth(
@@ -16,10 +15,6 @@ fun createCollectionStoreSourceOfTruth(
     logger: Logger,
 ): CollectionStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
-        logger.debug {
-            "reader called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is CollectionStoreKey.ById -> flow {
                 localCollectionDataSource.observeCollection(key.id).collect { collection ->
@@ -39,10 +34,6 @@ fun createCollectionStoreSourceOfTruth(
         }
     },
     writer = { key, data ->
-        logger.debug {
-            "writer called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is CollectionStoreKey.ById if data is CollectionStoreData.Single -> {
                 localCollectionDataSource.insertCollection(data.collection)

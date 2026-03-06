@@ -14,8 +14,6 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionRoute
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewSectionRoute
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 
 @Composable
 fun ResultOutputCompletedRoute(
@@ -55,9 +53,6 @@ private fun ResultOutputCompleted(
     gridContent: @Composable () -> Unit,
     reviewSection: @Composable (Modifier) -> Unit,
 ) {
-    logger.debug("ResultOutputCompleted") {
-        "ResultOutputCompleted --ResultOutputCompleted  2"
-    }
     PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
         isRefreshing = isRefreshing,

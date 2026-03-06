@@ -5,7 +5,6 @@ import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 
 @OptIn(ExperimentalStoreApi::class)
 fun createTagStoreSourceOfTruth(
@@ -13,10 +12,6 @@ fun createTagStoreSourceOfTruth(
     logger: Logger,
 ): TagStoreSourceOfTruth = SourceOfTruth.of(
     reader = { key ->
-        logger.debug {
-            "reader called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is TagStoreKey.ById -> flow {
                 localTagDataSource.observeTag(key.id).collect { tag ->
@@ -35,10 +30,6 @@ fun createTagStoreSourceOfTruth(
         }
     },
     writer = { key, data ->
-        logger.debug {
-            "writer called with key: $key (type=${key::class.qualifiedName}, " +
-                "instance=${System.identityHashCode(key)}"
-        }
         when (key) {
             is TagStoreKey.ById if data is TagStoreData.Single -> {
                 localTagDataSource.insertTag(data.tag)

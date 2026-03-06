@@ -22,18 +22,20 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.component.card.CardPreview
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.content.card.LatestCapturesTitleRow
 import tech.zhifu.app.myhub.feature.dashboard.content.card.NewCaptureCard
 import tech.zhifu.app.myhub.feature.dashboard.navigateToCapture
 import tech.zhifu.app.myhub.feature.dashboard.navigateToCardDetail
 import tech.zhifu.app.myhub.feature.dashboard.navigateToCardEdit
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.feature.dashboard.navigateToCardList
+import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_latest_captures
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recently_added
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthCompact
 import tech.zhifu.app.myhub.ui.isWidthExpanded
@@ -45,9 +47,6 @@ fun DashboardGridContentRoute(
     viewModel: DashboardViewModel,
     collectionSection: @Composable () -> Unit,
 ) {
-    logger.debug("ResultOutputCompleted") {
-        "ResultOutputCompleted -- DashboardGridContentRoute"
-    }
     val sizeClass = LocalWindowSizeClass.current
     val columns = when {
         sizeClass.isWidthCompact() -> 1
@@ -78,6 +77,7 @@ fun DashboardGridContentRoute(
         onNavigateToCardEdit = viewModel::navigateToCardEdit,
         onNavigateToCardDetail = viewModel::navigateToCardDetail,
         onNavigateToCapture = viewModel::navigateToCapture,
+        onNavigateToCardList = viewModel::navigateToCardList,
     )
 }
 
@@ -93,10 +93,8 @@ private fun DashboardGridContent(
     onNavigateToCardEdit: (String) -> Unit,
     onNavigateToCardDetail: (String) -> Unit,
     onNavigateToCapture: () -> Unit,
+    onNavigateToCardList: () -> Job,
 ) {
-    logger.debug("ResultOutputCompleted") {
-        "ResultOutputCompleted -- DashboardGridContent"
-    }
     LazyVerticalStaggeredGrid(
         state = gridState,
         columns = StaggeredGridCells.Fixed(columns),
@@ -122,8 +120,10 @@ private fun DashboardGridContent(
             contentType = "header_title",
             span = StaggeredGridItemSpan.FullLine
         ) {
-            LatestCapturesTitleRow(
-                onViewAllClick = { /* TODO */ },
+            SectionHeader(
+                titleRes = Res.string.feature_dashboard_latest_captures,
+                tooltipRes = Res.string.feature_dashboard_recently_added,
+                onViewAllClick = { onNavigateToCardList() },
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }

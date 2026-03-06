@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.navigateToReview
 
 @Composable
 fun ReviewSectionRoute(
@@ -56,7 +57,7 @@ fun ReviewSectionRoute(
     if (state.showFocusReview && state.reviewCardsCount > 0) {
         ReviewSection(
             reviewProgress = state.reviewProgress,
-            onStartReview = viewModel::startReview,
+            onStartReview = viewModel::navigateToReview,
             onDismiss = viewModel::dismissFocusReview,
             modifier = modifier,
         )

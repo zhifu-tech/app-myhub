@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.navigateToReview
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_good_evening
 
@@ -32,7 +33,7 @@ internal fun TopBarRoute(
     TopBar(
         topBarState = topBarState,
         scrollBehavior = scrollBehavior,
-        onStartReview = viewModel::startReview,
+        onStartReview = viewModel::navigateToReview,
         onRefresh = viewModel::refresh,
     )
 }

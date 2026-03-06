@@ -13,7 +13,7 @@ suspend fun DashboardViewModel.loadCards(
     defaultPageSize: Int = 20
 ) = loadCards(
     userId = userId,
-    pageIndex = state?.pageIndex ?: 1,
+    pageIndex = state?.pageIndex?.let { it + 1 } ?: 1,
     pageSize = state?.pageSize ?: defaultPageSize,
 )
 
@@ -32,7 +32,7 @@ private suspend fun DashboardViewModel.loadCards(
     val state = (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
         ?: CardSectionState()
     return state.copy(
-        cards = (storeData.cards + state.cards).distinctBy { it.id },
+        cards = (state.cards + storeData.cards).distinctBy { it.id },
         hasMore = storeData.cards.size == pageSize,
         isLoading = false,
         pageIndex = pageIndex,

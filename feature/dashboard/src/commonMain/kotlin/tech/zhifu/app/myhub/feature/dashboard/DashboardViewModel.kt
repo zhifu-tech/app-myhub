@@ -73,11 +73,6 @@ class DashboardViewModel(
         }
     }
 
-    fun startReview() {
-        logger.debug { "Start review flow" }
-        // TODO: 导航到复习页面
-    }
-
     fun loadMoreCards() {
         logger.debug { "Dashboard load more cards" }
         uiState.let { it as? DashboardUiState.ResultOutputCompleted }
@@ -127,6 +122,7 @@ class DashboardViewModel(
             intent {
                 reduce {
                     DashboardUiState.ResultOutputCompleted(
+                        source = "init",
                         cardSectionState = cardSectionState,
                         collectionSectionState = collectionSectionState,
                     )
@@ -158,6 +154,7 @@ class DashboardViewModel(
                 val state = state as? DashboardUiState.ResultOutputCompleted
                     ?: return@reduce state
                 state.copy(
+                    source = "refresh:pre",
                     isRefreshing = true
                 )
             }
@@ -178,6 +175,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "refresh",
                         isRefreshing = false,
                         cardSectionState = cardSectionState,
                         collectionSectionState = collectionSectionState,
@@ -194,6 +192,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "refresh:catch",
                         isRefreshing = false
                     )
                 }
@@ -211,6 +210,7 @@ class DashboardViewModel(
                 val state = state as? DashboardUiState.ResultOutputCompleted
                     ?: return@reduce state
                 state.copy(
+                    source = "loadMoreCards:pre",
                     cardSectionState = state.cardSectionState.copy(
                         isLoading = true
                     )
@@ -227,6 +227,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "loadMoreCards",
                         cardSectionState = newCardState,
                     )
                 }
@@ -241,6 +242,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "loadMoreCards:catch",
                         cardSectionState = state.cardSectionState.copy(
                             isLoading = false
                         )
@@ -260,6 +262,7 @@ class DashboardViewModel(
                 val state = state as? DashboardUiState.ResultOutputCompleted
                     ?: return@reduce state
                 state.copy(
+                    source = "loadMoreCollections:pre",
                     collectionSectionState = state.collectionSectionState.copy(
                         isLoading = true
                     )
@@ -276,6 +279,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "loadMoreCollections",
                         collectionSectionState = newCollectionState
                     )
                 }
@@ -290,6 +294,7 @@ class DashboardViewModel(
                     val state = state as? DashboardUiState.ResultOutputCompleted
                         ?: return@reduce state
                     state.copy(
+                        source = "loadMoreCollections:catch",
                         collectionSectionState = state.collectionSectionState.copy(
                             isLoading = false
                         )

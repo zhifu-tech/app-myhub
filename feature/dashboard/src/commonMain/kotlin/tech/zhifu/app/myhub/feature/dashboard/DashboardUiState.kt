@@ -13,6 +13,7 @@ sealed class DashboardUiState(
     )
 
     data class ResultOutputCompleted(
+        val source: String = "Unknown",
         val isRefreshing: Boolean = false,
         val reviewState: ReviewState? = null,
         val collectionSectionState: CollectionSectionState,
