@@ -9,6 +9,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
 import tech.zhifu.app.myhub.feature.settings.settings.languageSetting
 import tech.zhifu.app.myhub.feature.settings.settings.themeSetting
@@ -21,7 +22,7 @@ import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
 
 @Composable
 fun rememberAppState(
-    settingsRepository: SettingsRepository,
+    settingsRepository: SettingsRepository = koinInject(),
 ): AppState {
     val navigationState = rememberAppNavigationState(
         startKey = navAppStartKey(),

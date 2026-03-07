@@ -30,7 +30,7 @@ fun DashboardRoute(
 ) {
     logger.debug("Dashboard Screen") { "DashboardRoute" }
 
-    CollectSideEffect(navigator = navigator, viewModel = viewModel)
+    DashboardSideEffect(navigator = navigator, viewModel = viewModel)
     val state by viewModel.collectFieldAsState {
         it.state
     }
@@ -100,7 +100,7 @@ internal fun DashboardScreen(
 }
 
 @Composable
-private fun CollectSideEffect(
+private fun DashboardSideEffect(
     navigator: AppNavigator,
     viewModel: DashboardViewModel
 ) {
