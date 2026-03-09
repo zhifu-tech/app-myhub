@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.analytics.di
 
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import org.koin.dsl.bind
 import tech.zhifu.app.myhub.analytics.AnalyticsConsent
 import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
@@ -43,7 +44,7 @@ fun analyticsModule(): Module = module {
     }
     single<AnalyticsService> { get<AnalyticsManager>() }
 
-    factory<StartupTask> {
+    factory {
         AnalyticsStartupTask(get())
-    }
+    } bind StartupTask::class
 }

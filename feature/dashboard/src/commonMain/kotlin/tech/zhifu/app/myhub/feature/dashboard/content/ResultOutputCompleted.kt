@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard.content
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -18,14 +17,14 @@ import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewSectionRoute
 @Composable
 fun ResultOutputCompletedRoute(
     viewModel: DashboardViewModel,
-    innerPadding: PaddingValues,
+    modifier: Modifier,
 ) {
     val isRefreshing = viewModel.collectFieldAsState { uiState ->
         (uiState as? DashboardUiState.ResultOutputCompleted)?.isRefreshing
     }.value ?: return
 
     ResultOutputCompleted(
-        innerPadding = innerPadding,
+        modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = viewModel::refresh,
         gridContent = {
@@ -47,7 +46,7 @@ fun ResultOutputCompletedRoute(
 
 @Composable
 internal fun ResultOutputCompleted(
-    innerPadding: PaddingValues,
+    modifier: Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     gridContent: @Composable () -> Unit,
@@ -59,9 +58,7 @@ internal fun ResultOutputCompleted(
         onRefresh = onRefresh,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = modifier.fillMaxSize()
         ) {
             gridContent()
             reviewSection(

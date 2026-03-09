@@ -1,8 +1,7 @@
 package tech.zhifu.app.myhub.local
 
-import androidx.compose.runtime.*
-
-var customAppThemeIsDark by mutableStateOf(true)
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidedValue
 
 expect object LocalAppTheme {
     @get:Composable

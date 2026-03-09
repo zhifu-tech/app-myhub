@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Serializable
-class SettingsNavKey : NavKey
+object SettingsNavKey : NavKey
 
 fun AppNavigator.navigateToSettings() {
-    navigate(SettingsNavKey())
+    navigate(SettingsNavKey)
 }

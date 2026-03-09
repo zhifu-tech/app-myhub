@@ -1,124 +1,102 @@
 package tech.zhifu.app.myhub.feature.settings
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
+import tech.zhifu.app.myhub.feature.settings.content.InlineMessage
+import tech.zhifu.app.myhub.feature.settings.content.ResultOutputCompleted
+import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingItem
+import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingState
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItem
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
 import tech.zhifu.app.myhub.language.Language
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
+import tech.zhifu.app.myhub.ui.content.InitGlobalPending
+import tech.zhifu.app.myhub.ui.content.ResultErrorDisabled
 
-/**
- * Preview 函数 - SettingsScreen 浅色主题
- */
-@Preview
+@PreviewPhoneLightDark
 @Composable
-private fun SettingsScreenLightPreview() {
-    AppTheme(darkTheme = false) {
-        var isDarkMode by remember { mutableStateOf(false) }
-        var currentLanguage by remember { mutableStateOf(Language.English) }
-        var showLanguageDialog by remember { mutableStateOf(false) }
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Settings") }
+fun SettingsScreen_InitGlobalPending() {
+    AppTheme {
+        val uiState = SettingsUiState.InitGlobalPending
+        SettingsScreen(
+            state = uiState.state,
+            initGlobalPending = { modifier ->
+                InitGlobalPending(
+                    modifier = modifier.fillMaxSize()
                 )
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Appearance & Language",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                ThemeSettingItem(
-                    isDarkMode = isDarkMode,
-                    onThemeChanged = { isDarkMode = it }
-                )
-
-                LanguageSettingItem(
-                    currentLanguage = currentLanguage,
-                    onLanguageClick = { showLanguageDialog = true }
-                )
-            }
-        }
-
-        if (showLanguageDialog) {
-            LanguageSelectionDialog(
-                currentLanguage = currentLanguage,
-                onLanguageSelected = { currentLanguage = it },
-                onDismiss = { showLanguageDialog = false }
-            )
-        }
+            },
+            resultErrorDisabled = {},
+            resultOutputCompleted = {},
+        )
     }
 }
 
-/**
- * Preview 函数 - SettingsScreen 深色主题
- */
-@Preview
+@PreviewPhoneLightDark
 @Composable
-private fun SettingsScreenDarkPreview() {
-    AppTheme(darkTheme = true) {
-        var isDarkMode by remember { mutableStateOf(true) }
-        var currentLanguage by remember { mutableStateOf(Language.SimplifiedChinese) }
-        var showLanguageDialog by remember { mutableStateOf(false) }
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("设置") }
+fun SettingsScreen_ResultErrorDisabled() {
+    AppTheme {
+        val uiState = SettingsUiState.ResultErrorDisabled(
+            message = "未知错误，请稍后再试！",
+            canRetry = true,
+        )
+        SettingsScreen(
+            state = uiState.state,
+            initGlobalPending = {},
+            resultErrorDisabled = { modifier ->
+                ResultErrorDisabled(
+                    message = uiState.message,
+                    canRetry = uiState.canRetry,
+                    onRetry = {},
+                    modifier = modifier.fillMaxSize()
                 )
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "外观与语言",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                ThemeSettingItem(
-                    isDarkMode = isDarkMode,
-                    onThemeChanged = { isDarkMode = it }
-                )
-
-                LanguageSettingItem(
-                    currentLanguage = currentLanguage,
-                    onLanguageClick = { showLanguageDialog = true }
-                )
-            }
-        }
-
-        if (showLanguageDialog) {
-            LanguageSelectionDialog(
-                currentLanguage = currentLanguage,
-                onLanguageSelected = { currentLanguage = it },
-                onDismiss = { showLanguageDialog = false }
-            )
-        }
+            },
+            resultOutputCompleted = {},
+        )
     }
 }
 
+@PreviewPhoneLightDark
+@Composable
+fun SettingsScreen_ResultOutputCompleted() {
+    AppTheme {
+        val uiState = SettingsUiState.ResultOutputCompleted(
+            themeSettingState = ThemeSettingState(
+                isDarkMode = true
+            ),
+            languageSettingState = LanguageSettingState(
+                language = Language.SimplifiedChinese
+            )
+        )
+        SettingsScreen(
+            state = uiState.state,
+            initGlobalPending = {},
+            resultErrorDisabled = {},
+            resultOutputCompleted = { modifier ->
+                ResultOutputCompleted(
+                    modifier = modifier,
+                    themeSettingItem = {
+                        ThemeSettingItem(
+                            isDarkMode = uiState.themeSettingState.isDarkMode,
+                            enabled = true,
+                            onThemeChanged = {}
+                        )
+                    },
+                    languageSettingsItem = {
+                        LanguageSettingItem(
+                            language = uiState.languageSettingState.language,
+                            enabled = true,
+                            onLanguageClick = {}
+                        )
+                    },
+                    inlineMessage = {
+                        InlineMessage(
+                            message = "未知错误，请稍后再试！",
+                            onClick = {},
+                        )
+                    }
+                )
+            },
+        )
+    }
+}

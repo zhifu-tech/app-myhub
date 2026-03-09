@@ -4,8 +4,8 @@
   <string name="feature_settings_display_language">顯示語言</string>
   <string name="feature_settings_select_language">選擇語言</string>
   <string name="feature_settings_close">關閉</string>
+  <string name="feature_settings_retry">重試</string>
   <string name="feature_settings_on">開啟</string>
   <string name="feature_settings_off">關閉</string>
 </resources>
-
 

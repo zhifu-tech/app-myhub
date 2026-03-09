@@ -8,8 +8,8 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingsRepositoryImpl
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
-import tech.zhifu.app.myhub.feature.settings.settings.LanguageSetting
-import tech.zhifu.app.myhub.feature.settings.settings.ThemeSetting
+import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSetting
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSetting
 
 fun settingsModule() = module {
     // 包含 core/settings 模块（提供 LocalSettingStore）

@@ -1,12 +1,12 @@
-package tech.zhifu.app.myhub.feature.settings.settings
+package tech.zhifu.app.myhub.feature.settings.content.theme
 
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.settings.data.impl.SettingImpl
 import tech.zhifu.app.myhub.feature.settings.data.store.BooleanSettingSerializer
-import tech.zhifu.app.myhub.settings.LocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.domain.Setting
 import tech.zhifu.app.myhub.feature.settings.domain.SettingScope
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
+import tech.zhifu.app.myhub.settings.LocalSettingStore
 
 private const val THEME_SETTING_KEY = "theme.is_dark"
 
@@ -45,7 +45,10 @@ internal class ThemeSetting(
         userPreferenceUpdater = { prefs, value ->
             val targetTheme = if (value) "dark" else "light"
             prefs.takeIf { it.theme != targetTheme }?.apply {
-                userRepository?.updateUserPreferencesLanguage(prefs.userId, targetTheme)
+                userRepository?.updateUserPreferencesTheme(
+                    userId = prefs.userId,
+                    theme = targetTheme
+                )
             }
         }
     )

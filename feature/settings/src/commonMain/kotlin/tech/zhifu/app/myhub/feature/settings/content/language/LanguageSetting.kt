@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.settings.settings
+package tech.zhifu.app.myhub.feature.settings.content.language
 
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
@@ -22,7 +22,7 @@ val SettingsRepository.languageSetting: Setting<String>
  * 语言设置
  *
  * 作用域：USER（用户级设置）
- * 数据源优先级：用户偏好 > 本地存储 > 默认值（英语）
+ * 数据源优先级：用户偏好 > 本地存储 > 默认值
  */
 class LanguageSetting(
     localStore: LocalSettingStore,
@@ -30,7 +30,6 @@ class LanguageSetting(
 ) : Setting<String> {
     override val key = LANGUAGE_SETTING_KEY
     override val scope = SettingScope.USER
-
     override val defaultValue = AppLocale.DEFAULT
 
     private val setting = SettingImpl(
@@ -47,8 +46,13 @@ class LanguageSetting(
         },
         userPreferenceUpdater = { prefs, value ->
             val normalized = normalizeLanguageTag(value)
-            prefs.takeIf { normalizeLanguageTag(it.language) != normalized }?.apply {
-                userRepository?.updateUserPreferencesLanguage(prefs.userId, normalized)
+            prefs.takeIf {
+                normalizeLanguageTag(it.language) != normalized
+            }?.apply {
+                userRepository?.updateUserPreferencesLanguage(
+                    userId = prefs.userId,
+                    language = normalized
+                )
             }
         }
     )

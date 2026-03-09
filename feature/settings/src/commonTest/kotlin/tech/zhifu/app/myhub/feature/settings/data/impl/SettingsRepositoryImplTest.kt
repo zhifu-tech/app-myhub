@@ -69,7 +69,7 @@ class SettingsRepositoryImplTest {
             defaultValue = "default",
             localStore = mockLocalStore,
             userRepository = null,
-            serializer = tech.zhifu.app.myhub.settings.data.store.StringSettingSerializer()
+            serializer = tech.zhifu.app.myhub.feature.settings.data.store.StringSettingSerializer()
         )
 
         // When
@@ -107,7 +107,7 @@ class SettingsRepositoryImplTest {
             defaultValue = "default",
             localStore = mockLocalStore,
             userRepository = null,
-            serializer = tech.zhifu.app.myhub.settings.data.store.StringSettingSerializer()
+            serializer = tech.zhifu.app.myhub.feature.settings.data.store.StringSettingSerializer()
         )
 
         // When
@@ -154,4 +154,3 @@ class SettingsRepositoryImplTest {
         assertEquals(false, result.defaultValue) // Should be the second setting
     }
 }
-

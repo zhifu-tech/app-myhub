@@ -24,12 +24,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.logger)
+            implementation(projects.core.navigation)
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
             implementation(projects.core.settings)
-
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.settingsApi)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
@@ -40,6 +41,10 @@ kotlin {
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+
+            implementation(libs.orbit.core)
+            implementation(libs.orbit.compose)
+            implementation(libs.orbit.viewmodel)
 
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
@@ -52,6 +57,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.orbit.test)
         }
     }
 }

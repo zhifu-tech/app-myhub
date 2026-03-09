@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -13,7 +13,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.orbitmvi.orbit.compose.collectSideEffect
 import tech.zhifu.app.myhub.feature.capture.api.navigation.navigateToCapture
 import tech.zhifu.app.myhub.feature.card.api.navigateToCardDetail
-import tech.zhifu.app.myhub.feature.dashboard.content.InitGlobalPending
 import tech.zhifu.app.myhub.feature.dashboard.content.ResultErrorDisabledRoute
 import tech.zhifu.app.myhub.feature.dashboard.content.ResultOutputCompletedRoute
 import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBarRoute
@@ -22,6 +21,10 @@ import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.State
+import tech.zhifu.app.myhub.ui.content.InitGlobalPending
+import tech.zhifu.app.myhub.ui.isInitGlobalLoading
+import tech.zhifu.app.myhub.ui.isResultErrorDisabled
+import tech.zhifu.app.myhub.ui.isResultOutputCompleted
 
 @Composable
 fun DashboardRoute(
@@ -42,18 +45,18 @@ fun DashboardRoute(
                 scrollBehavior = it,
             )
         },
-        initGlobalPendingContent = {
-            InitGlobalPending(innerPadding = it)
+        initGlobalPending = { modifier ->
+            InitGlobalPending(modifier)
         },
-        errorDisabledContent = {
+        resultErrorDisabled = { modifier ->
             ResultErrorDisabledRoute(
-                innerPadding = it,
+                modifier = modifier,
                 viewModel = viewModel,
             )
         },
-        resultOutputCompletedContent = {
+        resultOutputCompleted = { modifier ->
             ResultOutputCompletedRoute(
-                innerPadding = it,
+                modifier = modifier,
                 viewModel = viewModel,
             )
         },
@@ -64,16 +67,21 @@ fun DashboardRoute(
 internal fun DashboardScreen(
     state: State,
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit,
-    initGlobalPendingContent: @Composable (PaddingValues) -> Unit,
-    errorDisabledContent: @Composable (PaddingValues) -> Unit,
-    resultOutputCompletedContent: @Composable (PaddingValues) -> Unit,
+    initGlobalPending: @Composable (Modifier) -> Unit,
+    resultErrorDisabled: @Composable (Modifier) -> Unit,
+    resultOutputCompleted: @Composable (Modifier) -> Unit,
 ) {
     logger.debug("Dashboard Screen") { "DashboardScreen $state" }
-    val canShowTopBar = state == DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED
+    val canShowTopBar = state.isResultOutputCompleted()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scaffoldModifier = if (canShowTopBar) {
+        Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    } else {
+        Modifier
+    }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = scaffoldModifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             if (canShowTopBar) {
@@ -81,18 +89,18 @@ internal fun DashboardScreen(
             }
         },
     ) { innerPadding ->
-        when (state) {
-            DashboardUiState.DASHBOARD_INIT_GLOBAL_PENDING -> {
-                initGlobalPendingContent(innerPadding)
-            }
+        when {
+            state.isInitGlobalLoading() -> initGlobalPending(
+                Modifier.padding(innerPadding)
+            )
 
-            DashboardUiState.DASHBOARD_RESULT_ERROR_DISABLED -> {
-                errorDisabledContent(innerPadding)
-            }
+            state.isResultErrorDisabled() -> resultErrorDisabled(
+                Modifier.padding(innerPadding)
+            )
 
-            DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED -> {
-                resultOutputCompletedContent(innerPadding)
-            }
+            state.isResultOutputCompleted() -> resultOutputCompleted(
+                Modifier.padding(innerPadding)
+            )
 
             else -> Unit
         }

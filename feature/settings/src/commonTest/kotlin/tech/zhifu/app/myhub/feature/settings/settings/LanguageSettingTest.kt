@@ -1,6 +1,8 @@
 package tech.zhifu.app.myhub.feature.settings.settings
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSetting
 import tech.zhifu.app.myhub.feature.settings.test.MockLocalSettingStore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,7 +13,7 @@ import kotlin.test.assertEquals
 class LanguageSettingTest {
 
     @Test
-    fun `test default value is en`() = runTest {
+    fun `test default value is zh-CN`() = runTest {
         // Given
         val mockLocalStore = MockLocalSettingStore()
         val setting = LanguageSetting(mockLocalStore, null)
@@ -20,7 +22,7 @@ class LanguageSettingTest {
         val result = setting.get()
 
         // Then
-        assertEquals("en", result)
+        assertEquals("zh-CN", result)
     }
 
     @Test
@@ -120,7 +122,7 @@ class LanguageSettingTest {
         setting.reset()
 
         // Then
-        assertEquals("en", setting.get())
+        assertEquals("zh-CN", setting.get())
     }
 
     @Test
@@ -131,10 +133,9 @@ class LanguageSettingTest {
 
         // When
         val flow = setting.observe()
-        val value = flow.value
+        val value = flow.first()
 
         // Then
-        assertEquals("en", value)
+        assertEquals("zh-CN", value)
     }
 }
-

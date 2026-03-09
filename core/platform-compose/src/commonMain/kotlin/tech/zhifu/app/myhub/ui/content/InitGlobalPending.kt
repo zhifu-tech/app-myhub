@@ -1,10 +1,9 @@
-package tech.zhifu.app.myhub.feature.dashboard.content
+package tech.zhifu.app.myhub.ui.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,14 +12,14 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun InitGlobalPending(
-    innerPadding: PaddingValues
+    modifier: Modifier
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
-            .padding(paddingValues = innerPadding),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        CircularProgressIndicator()
         Text(
             text = "Loading...",
             style = MaterialTheme.typography.bodyLarge,

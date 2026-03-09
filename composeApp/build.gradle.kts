@@ -109,6 +109,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.component.media)
+            implementation(projects.core.analytics)
+            implementation(projects.core.appBuildConfig)
+            implementation(projects.core.logger)
+            implementation(projects.core.navigation)
+            implementation(projects.core.platform)
+            implementation(projects.core.platformCompose)
+            implementation(projects.core.startup)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.bootstrap)
+            implementation(projects.datastore.repositoryClient)
+            implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.card)
             implementation(projects.feature.cardApi)
             implementation(projects.feature.auth)
@@ -119,23 +131,10 @@ kotlin {
             implementation(projects.feature.captureApi)
             implementation(projects.feature.favorite)
             implementation(projects.feature.favoriteApi)
-            implementation(projects.component.media)
             implementation(projects.feature.profile)
             implementation(projects.feature.profileApi)
             implementation(projects.feature.settings)
-
-            implementation(projects.core.analytics)
-            implementation(projects.core.appBuildConfig)
-            implementation(projects.core.logger)
-            implementation(projects.core.navigation)
-            implementation(projects.core.platform)
-            implementation(projects.core.platformCompose)
-            implementation(projects.core.startup)
-
-            implementation(projects.datastore.model)
-            implementation(projects.datastore.bootstrap)
-            implementation(projects.datastore.repositoryClient)
-            implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.settingsApi)
 
             implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
             implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)

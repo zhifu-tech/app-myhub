@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.feature.dashboard.content
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,7 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
 @Composable
 fun ResultErrorDisabledRoute(
-    innerPadding: PaddingValues,
+    modifier: Modifier,
     viewModel: DashboardViewModel
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
@@ -28,7 +27,7 @@ fun ResultErrorDisabledRoute(
     }.value ?: return
 
     ResultErrorDisabled(
-        innerPadding = innerPadding,
+        modifier = modifier,
         message = state.message,
         canRetry = state.canRetry,
         onRetry = viewModel::retry,
@@ -37,14 +36,13 @@ fun ResultErrorDisabledRoute(
 
 @Composable
 internal fun ResultErrorDisabled(
-    innerPadding: PaddingValues,
+    modifier: Modifier,
     message: String,
     canRetry: Boolean,
     onRetry: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
-            .padding(paddingValues = innerPadding)
+        modifier = modifier.fillMaxSize()
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

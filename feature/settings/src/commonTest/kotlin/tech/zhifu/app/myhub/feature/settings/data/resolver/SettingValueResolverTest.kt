@@ -1,13 +1,12 @@
 package tech.zhifu.app.myhub.feature.settings.data.resolver
 
 import kotlinx.coroutines.test.runTest
-import tech.zhifu.app.myhub.datastore.model.UserPreferences
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.feature.settings.data.store.BooleanSettingSerializer
 import tech.zhifu.app.myhub.feature.settings.data.store.StringSettingSerializer
 import tech.zhifu.app.myhub.feature.settings.domain.SettingScope
 import tech.zhifu.app.myhub.feature.settings.test.MockLocalSettingStore
 import tech.zhifu.app.myhub.feature.settings.test.MockUserRepository
-import tech.zhifu.app.myhub.feature.settings.test.createTestUser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,9 +20,7 @@ class SettingValueResolverTest {
         // Given
         val mockLocalStore = MockLocalSettingStore()
         val mockUserRepository = MockUserRepository(
-            user = createTestUser(
-                preferences = UserPreferences(theme = "dark", language = "zh")
-            )
+            preferences = UserPreferences(userId = "u1", theme = "dark", language = "zh")
         )
         val resolver = SettingValueResolver(
             key = "theme.is_dark",
@@ -49,7 +46,9 @@ class SettingValueResolverTest {
         // Given
         val mockLocalStore = MockLocalSettingStore()
         mockLocalStore.set("theme.is_dark", "true")
-        val mockUserRepository = MockUserRepository(user = null)
+        val mockUserRepository = MockUserRepository(
+            preferences = UserPreferences(userId = "u1", theme = "dark", language = "zh")
+        )
         val resolver = SettingValueResolver(
             key = "theme.is_dark",
             scope = SettingScope.USER,
@@ -71,7 +70,9 @@ class SettingValueResolverTest {
     fun `test USER scope - resolve default value when no source available`() = runTest {
         // Given
         val mockLocalStore = MockLocalSettingStore()
-        val mockUserRepository = MockUserRepository(user = null)
+        val mockUserRepository = MockUserRepository(
+            preferences = UserPreferences(userId = "u1", theme = "dark", language = "zh")
+        )
         val resolver = SettingValueResolver(
             key = "theme.is_dark",
             scope = SettingScope.USER,
@@ -211,5 +212,3 @@ class SettingValueResolverTest {
         assertEquals(null, mockLocalStore.get("session.setting"))
     }
 }
-
-

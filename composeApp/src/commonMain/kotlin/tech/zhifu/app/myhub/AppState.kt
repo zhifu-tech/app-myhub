@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
-import tech.zhifu.app.myhub.feature.settings.settings.languageSetting
-import tech.zhifu.app.myhub.feature.settings.settings.themeSetting
+import tech.zhifu.app.myhub.feature.settings.content.language.languageSetting
+import tech.zhifu.app.myhub.feature.settings.content.theme.themeSetting
 import tech.zhifu.app.myhub.language.AppLocale
 import tech.zhifu.app.myhub.navigation.AppNavigationState
 import tech.zhifu.app.myhub.navigation.navAppKeySet

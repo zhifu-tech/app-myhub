@@ -7,6 +7,7 @@ import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
+import kotlin.concurrent.Volatile
 
 /**
  * 统计管理器

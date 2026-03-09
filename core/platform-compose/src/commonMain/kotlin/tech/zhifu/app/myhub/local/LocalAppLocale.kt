@@ -7,8 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 // https://kotlinlang.org/docs/multiplatform/compose-resource-environment.html#locale
-var customAppLocale by mutableStateOf<String?>(null)
-
 expect object LocalAppLocale {
     @get:Composable
     val current: String

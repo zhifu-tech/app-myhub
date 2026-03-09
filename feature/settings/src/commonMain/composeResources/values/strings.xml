@@ -4,8 +4,8 @@
   <string name="feature_settings_display_language">Display Language</string>
   <string name="feature_settings_select_language">Select Language</string>
   <string name="feature_settings_close">Close</string>
+  <string name="feature_settings_retry">Retry</string>
   <string name="feature_settings_on">On</string>
   <string name="feature_settings_off">Off</string>
 </resources>
-
 

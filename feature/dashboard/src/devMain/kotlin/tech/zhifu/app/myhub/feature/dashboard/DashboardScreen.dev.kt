@@ -5,31 +5,34 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import tech.zhifu.app.myhub.feature.dashboard.content.DashboardGridContent
-import tech.zhifu.app.myhub.feature.dashboard.content.InitGlobalPending
 import tech.zhifu.app.myhub.feature.dashboard.content.ResultErrorDisabled
 import tech.zhifu.app.myhub.feature.dashboard.content.ResultOutputCompleted
+import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSection
+import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBar
 import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBarState
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.PreviewDesktopLightDark
 import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
 import tech.zhifu.app.myhub.ui.PreviewTabletLightDark
+import tech.zhifu.app.myhub.ui.content.InitGlobalPending
 
 @PreviewPhoneLightDark
 @PreviewTabletLightDark
 @PreviewDesktopLightDark
 @Composable
-fun DashboardScreenInitGlobalPending() {
+fun DashboardScreen_InitGlobalPending() {
     AppTheme {
+        val uiState = DashboardUiState.InitGlobalPending
         DashboardScreen(
-            state = DashboardUiState.DASHBOARD_INIT_GLOBAL_PENDING,
+            state = uiState.state,
             topBar = {},
-            initGlobalPendingContent = {
-                InitGlobalPending(innerPadding = it)
+            initGlobalPending = { modifier ->
+                InitGlobalPending(modifier = modifier)
             },
-            errorDisabledContent = {},
-            resultOutputCompletedContent = {},
+            resultErrorDisabled = {},
+            resultOutputCompleted = {},
         )
     }
 }
@@ -40,19 +43,23 @@ fun DashboardScreenInitGlobalPending() {
 @Composable
 fun DashboardScreenResultErrorDisabled() {
     AppTheme {
+        val uiState = DashboardUiState.ResultErrorDisabled(
+            message = "未知错误，请稍后再试！",
+            canRetry = true,
+        )
         DashboardScreen(
-            state = DashboardUiState.DASHBOARD_RESULT_ERROR_DISABLED,
+            state = uiState.state,
             topBar = {},
-            initGlobalPendingContent = {},
-            errorDisabledContent = {
+            initGlobalPending = {},
+            resultErrorDisabled = { modifier ->
                 ResultErrorDisabled(
-                    innerPadding = it,
-                    message = "未知错误，请稍后再试！",
-                    canRetry = true,
+                    modifier = modifier,
+                    message = uiState.message,
+                    canRetry = uiState.canRetry,
                     onRetry = {}
                 )
             },
-            resultOutputCompletedContent = {},
+            resultOutputCompleted = {},
         )
     }
 }
@@ -61,13 +68,22 @@ fun DashboardScreenResultErrorDisabled() {
 @Composable
 fun DashboardScreenResultOutputCompleted() {
     AppTheme {
+        val uiState = DashboardUiState.ResultOutputCompleted(
+            isRefreshing = false,
+            collectionSectionState = CollectionSectionState(
+                collections = collectionList,
+            ),
+            cardSectionState = CardSectionState(
+                cards = cardList,
+            )
+        )
         DashboardScreen(
-            state = DashboardUiState.DASHBOARD_RESULT_OUTPUT_COMPLETED,
+            state = uiState.state,
             topBar = {
                 TopBar(
                     scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
                     topBarState = TopBarState(
-                        isRefreshing = false,
+                        isRefreshing = uiState.isRefreshing,
                         reviewCardsCount = 0,
                         showReviewEntrance = false,
                     ),
@@ -75,12 +91,12 @@ fun DashboardScreenResultOutputCompleted() {
                     onRefresh = {},
                 )
             },
-            initGlobalPendingContent = {},
-            errorDisabledContent = {},
-            resultOutputCompletedContent = {
+            initGlobalPending = {},
+            resultErrorDisabled = {},
+            resultOutputCompleted = { modifier ->
                 ResultOutputCompleted(
-                    innerPadding = it,
-                    isRefreshing = false,
+                    modifier = modifier,
+                    isRefreshing = uiState.isRefreshing,
                     onRefresh = {},
                     gridContent = {
                         DashboardGridContent(
@@ -89,16 +105,16 @@ fun DashboardScreenResultOutputCompleted() {
                             collectionSection = {
                                 CollectionSection(
                                     listState = rememberLazyListState(),
-                                    collections = collectionList,
+                                    collections = uiState.collectionSectionState.collections,
                                     onCollectionClick = {},
                                     onViewAllClick = {},
-                                    isLoadingMore = false,
-                                    hasMore = false,
+                                    isLoadingMore = uiState.collectionSectionState.isLoading,
+                                    hasMore = uiState.collectionSectionState.hasMore,
                                 )
                             },
-                            cards = cardList,
-                            hasMoreCards = false,
-                            isLoadingMoreCards = false,
+                            cards = uiState.cardSectionState.cards,
+                            hasMoreCards = uiState.cardSectionState.hasMore,
+                            isLoadingMoreCards = uiState.cardSectionState.isLoading,
                             onNavigateToCardEdit = {},
                             onNavigateToCardDetail = {},
                             onNavigateToCapture = {},

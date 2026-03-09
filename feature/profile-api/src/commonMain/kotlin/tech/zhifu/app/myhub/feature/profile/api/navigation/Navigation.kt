@@ -16,7 +16,7 @@ import tech.zhifu.app.myhub.navigation.NavItem
 object ProfileNavKey : NavKey
 
 @Composable
-fun ProfileNavItem() = object : NavItem {
+fun profileNavItem() = object : NavItem {
     override val selectedIcon: ImageVector = Icons.Default.Person
     override val unselectedIcon: ImageVector = Icons.Outlined.PersonOutline
     override val iconText: String = stringResource(Res.string.profile)

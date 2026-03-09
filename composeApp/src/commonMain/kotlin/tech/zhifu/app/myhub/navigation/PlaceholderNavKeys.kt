@@ -1,16 +1,16 @@
 package tech.zhifu.app.myhub.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
@@ -28,7 +28,7 @@ object FavoritesNavKey : NavKey
 object LoginNavKey : NavKey
 
 @Composable
-fun ExploreNavItem() = object : NavItem {
+fun exploreNavItem() = object : NavItem {
     override val selectedIcon: ImageVector = Icons.Outlined.Explore
     override val unselectedIcon: ImageVector = Icons.Outlined.Explore
     override val iconText: String = "Explore"
@@ -36,7 +36,7 @@ fun ExploreNavItem() = object : NavItem {
 }
 
 @Composable
-fun FavoritesNavItem() = object : NavItem {
+fun favoritesNavItem() = object : NavItem {
     override val selectedIcon: ImageVector = Icons.Filled.Star
     override val unselectedIcon: ImageVector = Icons.Outlined.Star
     override val iconText: String = "Favorites"

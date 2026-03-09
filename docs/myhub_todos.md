@@ -33,6 +33,8 @@
   - [ ] Template 管理界面
   - [ ] 搜索和筛选界面
   - [ ] 用户设置界面
+- [] **Markdown支持**
+  - https://github.com/mikepenz/multiplatform-markdown-renderer
 
 ### 功能完善
 

@@ -1,117 +1,80 @@
 package tech.zhifu.app.myhub.feature.settings
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
+import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingState
+import tech.zhifu.app.myhub.feature.settings.content.language.languageSetting
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
+import tech.zhifu.app.myhub.feature.settings.content.theme.themeSetting
 import tech.zhifu.app.myhub.feature.settings.domain.SettingsRepository
-import tech.zhifu.app.myhub.feature.settings.settings.languageSetting
-import tech.zhifu.app.myhub.feature.settings.settings.themeSetting
 import tech.zhifu.app.myhub.language.Language
 import tech.zhifu.app.myhub.language.toLanguage
-import tech.zhifu.app.myhub.local.customAppLocale
-import tech.zhifu.app.myhub.local.customAppThemeIsDark
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 
-/**
- * Settings ViewModel
- *
- * 管理 Settings 页面的状态和业务逻辑
- * 使用新的设置架构（Setting 接口）
- */
 class SettingsViewModel(
-    private val settingsRepository: SettingsRepository
-) : ViewModel() {
+    settingsRepository: SettingsRepository
+) : ContainerHost<SettingsUiState, SettingsSideEffect>, ViewModel() {
     private val logger = logger("Settings")
 
     private val themeSetting = settingsRepository.themeSetting
     private val languageSetting = settingsRepository.languageSetting
-    private val _showLanguageDialog = MutableStateFlow(false)
 
-    /**
-     * UI 状态（响应式）
-     * 自动从设置项 Flow 中组合生成
-     */
-    val uiState: StateFlow<SettingsUiState> = combine(
-        themeSetting.observe(),
-        languageSetting.observe(),
-        _showLanguageDialog
-    ) { isDark, languageCode, showDialog ->
-        val currentLanguage = languageCode.toLanguage()
+    override val container: Container<SettingsUiState, SettingsSideEffect> = container(
+        initialState = SettingsUiState.InitGlobalPending
+    ) {
+        initInternal()
+    }
 
-        // 同步到全局状态
-        customAppLocale = languageCode
-        customAppThemeIsDark = isDark
+    val uiState: SettingsUiState
+        get() = container.stateFlow.value
 
-        SettingsUiState(
-            currentLanguage = currentLanguage,
-            isDarkMode = isDark,
-            isLoading = false,
-            error = null,
-            showLanguageDialog = showDialog
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SettingsUiState()
-    )
+    @Composable
+    fun <R> collectFieldAsState(selector: (SettingsUiState) -> R): State<R> {
+        return container.stateFlow
+            .map(selector)
+            .distinctUntilChanged()
+            .collectAsState(initial = selector(uiState))
+    }
 
-    init {
-        // 初始化时加载设置值
+    fun retry() {
+        val state = uiState as? SettingsUiState.ResultErrorDisabled ?: return
+        if (!state.canRetry) return
         viewModelScope.launch {
-            try {
-                logger.info { "Loading settings" }
-                themeSetting.get()
-                languageSetting.get()
-                logger.info { "Settings loaded successfully" }
-            } catch (e: Exception) {
-                logger.error(e) {
-                    "Failed to load settings: ${e.message}"
-                }
+            initInternal()
+        }
+    }
+
+    fun update(language: Language) {
+        val state = (uiState as? SettingsUiState.ResultOutputCompleted)
+            ?.languageSettingState
+            ?.takeIf { it.isSubmitting.not() }
+            ?: return
+        if (state.language != language) {
+            viewModelScope.launch {
+                updateLanguageInternal(language)
             }
         }
     }
 
-    /**
-     * 更新语言设置
-     */
-    fun updateLanguage(language: Language) {
-        logger.info { "Updating language to ${language.code}" }
-
-        viewModelScope.launch {
-            try {
-                languageSetting.set(language.code)
-                // 同步更新全局状态
-                customAppLocale = language.code
-                logger.info { "Language updated successfully" }
-            } catch (e: Exception) {
-                logger.error(e) {
-                    "Failed to update language: ${e.message}"
-                }
-            }
-        }
-    }
-
-    /**
-     * 更新主题设置
-     */
     fun updateTheme(isDarkMode: Boolean) {
-        logger.info { "Updating theme to darkMode=$isDarkMode" }
-
-        viewModelScope.launch {
-            try {
-                themeSetting.set(isDarkMode)
-                logger.info { "Theme updated successfully" }
-            } catch (e: Exception) {
-                logger.error(e) {
-                    "Failed to update theme: ${e.message}"
-                }
+        val state = (uiState as? SettingsUiState.ResultOutputCompleted)
+            ?.themeSettingState
+            ?.takeIf { it.isSubmitting.not() }
+            ?: return
+        if (state.isDarkMode != isDarkMode) {
+            viewModelScope.launch {
+                updateThemeInternal(isDarkMode)
             }
         }
     }
@@ -119,21 +82,177 @@ class SettingsViewModel(
     /**
      * 显示语言选择对话框
      */
-    fun showLanguageDialog() {
-        _showLanguageDialog.value = true
+    fun showLanguageDialog() = intent {
+        reduce {
+            val state = (state as? SettingsUiState.ResultOutputCompleted)
+                ?: return@reduce state
+            state.copy(
+                languageSettingState = state.languageSettingState.copy(
+                    showLanguageDialog = true
+                )
+            )
+        }
     }
 
     /**
      * 隐藏语言选择对话框
      */
-    fun hideLanguageDialog() {
-        _showLanguageDialog.value = false
+    fun hideLanguageDialog() = intent {
+        reduce {
+            val state = (state as? SettingsUiState.ResultOutputCompleted)
+                ?: return@reduce state
+            state.copy(
+                languageSettingState = state.languageSettingState.copy(
+                    showLanguageDialog = false
+                )
+            )
+        }
     }
 
     /**
-     * 清除错误状态
+     * 清除完成态内联错误
      */
-    fun clearError() {
-        // 错误状态现在由 UI State 管理，如果需要可以添加
+    fun clearError() = intent {
+        reduce {
+            val state = (state as? SettingsUiState.ResultOutputCompleted)
+                ?: return@reduce state
+            state.copy(
+                inlineMessage = ""
+            )
+        }
+    }
+
+    private suspend fun initInternal() {
+        intent {
+            reduce {
+                SettingsUiState.InitGlobalPending
+            }
+        }
+        runCatching {
+            SettingsUiState.ResultOutputCompleted(
+                themeSettingState = ThemeSettingState(
+                    isDarkMode = themeSetting.get(),
+                ),
+                languageSettingState = LanguageSettingState(
+                    language = languageSetting.get().toLanguage()
+                ),
+            )
+        }.onSuccess { loadedState ->
+            intent {
+                reduce {
+                    loadedState
+                }
+            }
+        }.onFailure { throwable ->
+            logger.error(throwable) {
+                "Failed to load settings: ${throwable.message}"
+            }
+            intent {
+                reduce {
+                    SettingsUiState.ResultErrorDisabled(
+                        message = throwable.message ?: "Failed to load settings",
+                        canRetry = true
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun updateLanguageInternal(language: Language) {
+        intent {
+            reduce {
+                val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    ?: return@reduce state
+                state.copy(
+                    languageSettingState = state.languageSettingState.copy(
+                        isSubmitting = true,
+                    ),
+                    inlineMessage = "",
+                )
+            }
+        }
+        runCatching {
+            languageSetting.set(language.code)
+        }.onSuccess {
+            intent {
+                reduce {
+                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                        ?: return@reduce state
+                    state.copy(
+                        languageSettingState = state.languageSettingState.copy(
+                            language = language,
+                            isSubmitting = false,
+                        ),
+                        inlineMessage = "",
+                    )
+                }
+            }
+        }.onFailure { throwable ->
+            logger.error(throwable) {
+                "Failed to update language: ${throwable.message}"
+            }
+            intent {
+                reduce {
+                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                        ?: return@reduce state
+                    state.copy(
+                        languageSettingState = state.languageSettingState.copy(
+                            isSubmitting = false
+                        ),
+                        inlineMessage = throwable.message ?: "Failed to update language"
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun updateThemeInternal(isDarkMode: Boolean) {
+        intent {
+            reduce {
+                val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    ?: return@reduce state
+                state.copy(
+                    themeSettingState = state.themeSettingState.copy(
+                        isSubmitting = true
+                    ),
+                    inlineMessage = ""
+                )
+            }
+        }
+
+        runCatching {
+            themeSetting.set(isDarkMode)
+        }.onSuccess {
+            logger.info { "Theme updated successfully" }
+            intent {
+                reduce {
+                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                        ?: return@reduce state
+                    state.copy(
+                        themeSettingState = state.themeSettingState.copy(
+                            isDarkMode = isDarkMode,
+                            isSubmitting = false,
+                        ),
+                        inlineMessage = "",
+                    )
+                }
+            }
+        }.onFailure { throwable ->
+            logger.error(throwable) {
+                "Failed to update theme: ${throwable.message}"
+            }
+            intent {
+                reduce {
+                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                        ?: return@reduce state
+                    state.copy(
+                        themeSettingState = state.themeSettingState.copy(
+                            isSubmitting = false,
+                        ),
+                        inlineMessage = throwable.message ?: "Failed to update theme"
+                    )
+                }
+            }
+        }
     }
 }

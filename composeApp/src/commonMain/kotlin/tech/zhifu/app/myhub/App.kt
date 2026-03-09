@@ -33,6 +33,7 @@ import tech.zhifu.app.myhub.analytics.LocalAnalyticsService
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
 import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionCoordinator
 import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionEvent
+import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.local.LocalAppLocale
 import tech.zhifu.app.myhub.local.LocalAppTheme
 import tech.zhifu.app.myhub.logger.debug
@@ -143,7 +144,7 @@ private fun AppContent(
             primaryActionContent = {
                 Column(Modifier.padding(start = 20.dp)) {
                     FloatingActionButton(
-                        onClick = { /* Logo，可扩展为回到首页等 */ },
+                        onClick = { navigator.navigateToSettings() },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(

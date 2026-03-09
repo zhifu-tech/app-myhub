@@ -4,8 +4,8 @@
   <string name="feature_settings_display_language">表示言語</string>
   <string name="feature_settings_select_language">言語を選択</string>
   <string name="feature_settings_close">閉じる</string>
+  <string name="feature_settings_retry">再試行</string>
   <string name="feature_settings_on">オン</string>
   <string name="feature_settings_off">オフ</string>
 </resources>
-
 

@@ -1,6 +1,8 @@
 package tech.zhifu.app.myhub.feature.settings.settings
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSetting
 import tech.zhifu.app.myhub.feature.settings.test.MockLocalSettingStore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -142,10 +144,9 @@ class ThemeSettingTest {
 
         // When
         val flow = setting.observe()
-        val value = flow.value
+        val value = flow.first()
 
         // Then
         assertEquals(true, value)
     }
 }
-
