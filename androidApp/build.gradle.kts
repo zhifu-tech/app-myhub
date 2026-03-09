@@ -44,6 +44,7 @@ android {
 dependencies {
     implementation(projects.composeApp)
     implementation(projects.core.platform)
+    implementation(projects.core.startup)
 
     implementation(libs.koin.android)
 
