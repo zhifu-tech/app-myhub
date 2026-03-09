@@ -7,7 +7,9 @@ import tech.zhifu.app.myhub.analytics.AnalyticsManager
 import tech.zhifu.app.myhub.analytics.AnalyticsProviderFactory
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.DefaultAnalyticsConsent
+import tech.zhifu.app.myhub.analytics.startup.AnalyticsStartupTask
 import tech.zhifu.app.myhub.config.AppBuildConfig
+import tech.zhifu.app.myhub.startup.StartupTask
 
 internal fun AppBuildConfig.isGooglePlay() = appChannel == "googlePlay"
 
@@ -40,4 +42,8 @@ fun analyticsModule(): Module = module {
         )
     }
     single<AnalyticsService> { get<AnalyticsManager>() }
+
+    factory<StartupTask> {
+        AnalyticsStartupTask(get())
+    }
 }

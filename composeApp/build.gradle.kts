@@ -130,6 +130,7 @@ kotlin {
             implementation(projects.core.navigation)
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
+            implementation(projects.core.startup)
 
             implementation(projects.datastore.model)
             implementation(projects.datastore.bootstrap)

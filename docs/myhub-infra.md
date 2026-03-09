@@ -65,3 +65,5 @@ MyHub 基础设施（Infra）模块为 MyHub 应用提供底层支撑，包括**
 ## [匿名身份与免登录标识方案设计](./myhub-anonymous-identity-infra-v1.0.md)
 
 ## [首次安装数据初始化方案设计](./myhub-bootstrap-infra-v1.0.md)
+
+## [KMP 启动初始化方案设计](../core/startup/docs/myhub-startup-initialization-infra-v1.0.md)

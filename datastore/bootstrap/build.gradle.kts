@@ -24,6 +24,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.logger)
+            implementation(projects.core.startup)
             implementation(projects.datastore.model)
             implementation(projects.datastore.database)
             implementation(projects.datastore.repositoryClientApi)

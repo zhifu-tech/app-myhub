@@ -164,6 +164,7 @@ include(":core:platform")
 include(":core:platform-compose")
 include(":core:navigation")
 include(":core:settings")
+include(":core:startup")
 
 // 网络模块
 include(":core:network")

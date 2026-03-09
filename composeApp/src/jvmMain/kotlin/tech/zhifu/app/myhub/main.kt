@@ -8,11 +8,13 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import io.github.vinceglb.filekit.FileKit
 import tech.zhifu.app.myhub.di.initKoin
+import tech.zhifu.app.myhub.startup.StartupOrchestrator
 
 fun main() = application {
     FileKit.init(appId = "tech.zhifu.app.myhub")
     // 初始化 Koin 依赖注入
-    initKoin()
+    val koinApplication = initKoin()
+    koinApplication.koin.get<StartupOrchestrator>().start()
 
     val windowState = remember { WindowState(size = DpSize(1280.dp, 800.dp)) }
 

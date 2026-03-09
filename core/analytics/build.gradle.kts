@@ -67,6 +67,7 @@ kotlin {
             implementation(projects.core.platform)
             implementation(projects.core.logger)
             implementation(projects.core.appBuildConfig)
+            implementation(projects.core.startup)
 
             implementation(libs.kotlinx.coroutines.core)
 

@@ -1,5 +1,7 @@
 package tech.zhifu.app.myhub.analytics
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
@@ -18,49 +20,60 @@ class AnalyticsManager(
 ) : AnalyticsService {
 
     private val providers = mutableListOf<AnalyticsProvider>()
+    private val initializeMutex = Mutex()
+
+    @Volatile
+    private var initialized = false
 
     /**
      * 初始化所有启用的提供商
      */
     suspend fun initialize() {
-        if (!config.enabled) {
-            logger.info { "Analytics is disabled" }
-            return
-        }
+        if (initialized) return
+        initializeMutex.withLock {
+            if (initialized) return
 
-        // 检查隐私合规
-        if (!consent.isAnalyticsAllowed()) {
-            logger.info { "Analytics is not allowed by user consent" }
-            return
-        }
-
-        // Debug 模式下自动注入 ConsoleProvider（如果未配置）
-        if (config.debugMode && config.providers.none { it.type == ProviderType.CONSOLE }) {
-            try {
-                val consoleProvider = providerFactory.create(
-                    ProviderConfig(type = ProviderType.CONSOLE, enabled = true)
-                )
-                consoleProvider.initialize(ProviderConfig(type = ProviderType.CONSOLE))
-                providers.add(consoleProvider)
-                logger.info { "Debug mode: ConsoleProvider auto-injected" }
-            } catch (e: Exception) {
-                logger.warn(e) { "Failed to auto-inject ConsoleProvider in debug mode" }
+            if (!config.enabled) {
+                logger.info { "Analytics is disabled" }
+                return
             }
-        }
 
-        config.providers.filter { it.enabled }.forEach { providerConfig ->
-            try {
-                val provider = providerFactory.create(providerConfig)
-                if (provider.supportedRegions.contains(config.region)) {
-                    provider.initialize(providerConfig)
-                    providers.add(provider)
-                    logger.info { "Analytics provider initialized: ${provider.name}" }
-                } else {
-                    logger.warn { "Provider ${provider.name} does not support region ${config.region}" }
+            // 检查隐私合规
+            if (!consent.isAnalyticsAllowed()) {
+                logger.info { "Analytics is not allowed by user consent" }
+                return
+            }
+
+            // Debug 模式下自动注入 ConsoleProvider（如果未配置）
+            if (config.debugMode && config.providers.none { it.type == ProviderType.CONSOLE }) {
+                try {
+                    val consoleProvider = providerFactory.create(
+                        ProviderConfig(type = ProviderType.CONSOLE, enabled = true)
+                    )
+                    consoleProvider.initialize(ProviderConfig(type = ProviderType.CONSOLE))
+                    providers.add(consoleProvider)
+                    logger.info { "Debug mode: ConsoleProvider auto-injected" }
+                } catch (e: Exception) {
+                    logger.warn(e) { "Failed to auto-inject ConsoleProvider in debug mode" }
                 }
-            } catch (e: Exception) {
-                logger.error(e) { "Failed to initialize provider: ${providerConfig.type}" }
             }
+
+            config.providers.filter { it.enabled }.forEach { providerConfig ->
+                try {
+                    val provider = providerFactory.create(providerConfig)
+                    if (provider.supportedRegions.contains(config.region)) {
+                        provider.initialize(providerConfig)
+                        providers.add(provider)
+                        logger.info { "Analytics provider initialized: ${provider.name}" }
+                    } else {
+                        logger.warn { "Provider ${provider.name} does not support region ${config.region}" }
+                    }
+                } catch (e: Exception) {
+                    logger.error(e) { "Failed to initialize provider: ${providerConfig.type}" }
+                }
+            }
+
+            initialized = true
         }
     }
 
@@ -140,5 +153,6 @@ class AnalyticsManager(
             }
         }
         providers.clear()
+        initialized = false
     }
 }
