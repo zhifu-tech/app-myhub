@@ -37,6 +37,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPicker
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
@@ -54,7 +55,7 @@ import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
 @Composable
 fun CaptureScreen(
     modifier: Modifier = Modifier,
-    viewModel: CaptureViewModel = koinInject(),
+    viewModel: CaptureViewModel = koinViewModel(),
     onClose: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

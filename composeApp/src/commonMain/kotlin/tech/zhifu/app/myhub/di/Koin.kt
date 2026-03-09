@@ -1,10 +1,7 @@
 package tech.zhifu.app.myhub.di
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.media.di.mediaModule
 import tech.zhifu.app.myhub.datastore.bootstrap.di.bootstrapModule
@@ -27,10 +24,7 @@ fun initKoin(
 
     modules(
         loggerModule {
-            LoggerConfig(
-                appName = "Myhub",
-                useAndroidLogger = true,
-            )
+            LoggerConfig(appName = "Myhub")
         },
         platformModule(),
         repositoryModule,
@@ -44,14 +38,6 @@ fun initKoin(
         cardDetailModule(),
         // Analytics module
         analyticsModule(),
-        startupModule(),
-        // App module
-        module {
-            // 提供 ViewModel 使用的 CoroutineScope
-            // 使用 Dispatchers.Default 作为默认调度器
-            factory<CoroutineScope> {
-                CoroutineScope(Dispatchers.Default)
-            }
-        }
+        startupModule()
     )
 }

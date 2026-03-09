@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.orbitmvi.orbit.compose.collectSideEffect
 import tech.zhifu.app.myhub.feature.capture.api.navigation.navigateToCapture
 import tech.zhifu.app.myhub.feature.card.api.navigateToCardDetail
@@ -26,7 +26,7 @@ import tech.zhifu.app.myhub.ui.State
 @Composable
 fun DashboardRoute(
     navigator: AppNavigator,
-    viewModel: DashboardViewModel = koinInject<DashboardViewModel>(),
+    viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
     logger.debug("Dashboard Screen") { "DashboardRoute" }
 

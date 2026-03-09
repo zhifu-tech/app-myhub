@@ -27,13 +27,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import org.koin.compose.koinInject
-import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import tech.zhifu.app.myhub.feature.card.components.CardDetailActions
 import tech.zhifu.app.myhub.feature.card.components.CardDetailContent
 import tech.zhifu.app.myhub.feature.card.components.CardDetailHeader
@@ -49,7 +47,7 @@ fun CardDetailScreen(
     cardId: String,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CardDetailViewModel = rememberCardDetailViewModel(cardId)
+    viewModel: CardDetailViewModel = koinViewModel(parameters = { parametersOf(cardId) })
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val showDeleteConfirm by viewModel.showDeleteConfirm.collectAsState()
@@ -317,24 +315,6 @@ fun CardDetailScreen(
                     Text(text = "Cancel")
                 }
             }
-        )
-    }
-}
-
-/**
- * 记住 CardDetailViewModel 实例
- * 使用 cardId 作为 key，确保相同 cardId 使用同一个 ViewModel 实例
- */
-@Composable
-private fun rememberCardDetailViewModel(cardId: String): CardDetailViewModel {
-    val cardRepository: CardRepository = koinInject()
-    val coroutineScope: CoroutineScope = koinInject()
-
-    return remember(cardId) {
-        CardDetailViewModel(
-            cardId = cardId,
-            cardRepository = cardRepository,
-            coroutineScope = coroutineScope
         )
     }
 }

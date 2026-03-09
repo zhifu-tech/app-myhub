@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearance_language
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
@@ -47,7 +47,7 @@ import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = koinInject<SettingsViewModel>()
+    viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -192,4 +192,3 @@ internal fun LanguageSelectionDialog(
         }
     )
 }
-

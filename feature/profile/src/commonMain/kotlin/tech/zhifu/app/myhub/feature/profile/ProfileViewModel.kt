@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.feature.profile
 
+import androidx.lifecycle.ViewModel
 //import tech.zhifu.app.myhub.datastore.repository.ReactiveStatisticsRepository
 //import tech.zhifu.app.myhub.datastore.repository.ReactiveUserRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,10 +15,9 @@ import tech.zhifu.app.myhub.logger.logger
  * 管理 Profile 页面的状态和业务逻辑
  */
 class ProfileViewModel(
-    private val coroutineScope: CoroutineScope,
 //    private val userRepository: ReactiveUserRepository,
 //    private val statisticsRepository: ReactiveStatisticsRepository
-) {
+) : ViewModel() {
     private val logger = logger("Profile")
 
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -157,4 +156,3 @@ class ProfileViewModel(
         _uiState.value = _uiState.value.copy(error = null)
     }
 }
-

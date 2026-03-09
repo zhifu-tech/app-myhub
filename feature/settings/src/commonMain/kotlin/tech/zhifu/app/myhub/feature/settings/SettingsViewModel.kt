@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.settings
 
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,9 +26,8 @@ import tech.zhifu.app.myhub.logger.logger
  * 使用新的设置架构（Setting 接口）
  */
 class SettingsViewModel(
-    private val coroutineScope: CoroutineScope,
     private val settingsRepository: SettingsRepository
-) {
+) : ViewModel() {
     private val logger = logger("Settings")
 
     private val themeSetting = settingsRepository.themeSetting
@@ -57,14 +57,14 @@ class SettingsViewModel(
             showLanguageDialog = showDialog
         )
     }.stateIn(
-        scope = coroutineScope,
+        scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = SettingsUiState()
     )
 
     init {
         // 初始化时加载设置值
-        coroutineScope.launch {
+        viewModelScope.launch {
             try {
                 logger.info { "Loading settings" }
                 themeSetting.get()
@@ -84,7 +84,7 @@ class SettingsViewModel(
     fun updateLanguage(language: Language) {
         logger.info { "Updating language to ${language.code}" }
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             try {
                 languageSetting.set(language.code)
                 // 同步更新全局状态
@@ -104,7 +104,7 @@ class SettingsViewModel(
     fun updateTheme(isDarkMode: Boolean) {
         logger.info { "Updating theme to darkMode=$isDarkMode" }
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             try {
                 themeSetting.set(isDarkMode)
                 logger.info { "Theme updated successfully" }
@@ -137,4 +137,3 @@ class SettingsViewModel(
         // 错误状态现在由 UI State 管理，如果需要可以添加
     }
 }
-

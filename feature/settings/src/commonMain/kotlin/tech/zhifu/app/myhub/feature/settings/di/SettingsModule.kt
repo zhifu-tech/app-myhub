@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.settings.di
 
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.settings.di.coreSettingsModule
 import tech.zhifu.app.myhub.settings.LocalSettingStore
@@ -23,9 +24,8 @@ fun settingsModule() = module {
             register(LanguageSetting(localStore, userRepository))
         }
     }
-    factory {
+    viewModel {
         SettingsViewModel(
-            coroutineScope = get(),
             settingsRepository = get()
         )
     }

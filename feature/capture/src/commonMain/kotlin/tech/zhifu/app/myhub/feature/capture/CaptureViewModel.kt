@@ -2,9 +2,10 @@ package tech.zhifu.app.myhub.feature.capture
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.readBytes
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +35,10 @@ import kotlin.random.Random
 import kotlin.time.Clock
 
 class CaptureViewModel(
-    private val coroutineScope: CoroutineScope,
     private val captureRepository: CaptureRepository,
     private val cardRepository: CardRepository,
     private val userRepository: UserRepository
-) {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CaptureUiState.readyIdle())
     val uiState: StateFlow<CaptureUiState> = _uiState.asStateFlow()
@@ -171,7 +171,7 @@ class CaptureViewModel(
         }
 
         uniqueItems.forEach { item ->
-            coroutineScope.launch { uploadMedia(item) }
+            viewModelScope.launch { uploadMedia(item) }
         }
     }
 
@@ -265,7 +265,7 @@ class CaptureViewModel(
             return
         }
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             val processing = CaptureUiState.aiProcessing(
                 intent = start.intent,
                 input = start.input.copy(focused = false),
@@ -328,7 +328,7 @@ class CaptureViewModel(
         val review = current.review ?: return
         val intent = current.intent
 
-        coroutineScope.launch {
+        viewModelScope.launch {
             _uiState.value = CaptureUiState.postProcessing(
                 intent = intent,
                 review = review,

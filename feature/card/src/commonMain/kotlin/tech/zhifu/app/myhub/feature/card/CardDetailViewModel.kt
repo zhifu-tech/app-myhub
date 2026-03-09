@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.card
 
-import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,9 +23,8 @@ import tech.zhifu.app.myhub.datastore.repository.card.card
 @OptIn(FlowPreview::class)
 class CardDetailViewModel(
     private val cardId: String,
-    private val cardRepository: CardRepository,
-    private val coroutineScope: CoroutineScope
-) {
+    private val cardRepository: CardRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow<CardDetailUiState>(
         CardDetailUiState.Loading(cardId = cardId)
     )
@@ -43,7 +43,7 @@ class CardDetailViewModel(
             .distinctUntilChanged()
             .onEach { notes -> saveNotes(notes) }
             .catch { e -> updateError("Failed to save notes: ${e.message}") }
-            .launchIn(coroutineScope)
+            .launchIn(viewModelScope)
     }
 
     private fun observeCard() {
@@ -100,7 +100,7 @@ class CardDetailViewModel(
                     retryable = true
                 )
             }
-            .launchIn(coroutineScope)
+            .launchIn(viewModelScope)
     }
 
     fun showDeleteConfirm() {
@@ -112,7 +112,7 @@ class CardDetailViewModel(
     }
 
     fun confirmDelete() {
-        coroutineScope.launch {
+        viewModelScope.launch {
             try {
                 cardRepository.clearCard(
                     cardId = cardId
@@ -134,7 +134,7 @@ class CardDetailViewModel(
         val currentState = _uiState.value
         if (currentState is CardDetailUiState.Content) {
             _uiState.value = currentState.copy(isSharing = true)
-            coroutineScope.launch {
+            viewModelScope.launch {
                 delay(1000)
                 _uiState.value = currentState.copy(isSharing = false)
             }

@@ -44,7 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.component.mixed.Avatar
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.feature.profile.resources.Res
@@ -67,7 +67,7 @@ import tech.zhifu.app.myhub.feature.profile.resources.feature_profile_version
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = koinInject<ProfileViewModel>(),
+    viewModel: ProfileViewModel = koinViewModel<ProfileViewModel>(),
     onNavigateToSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -547,4 +547,3 @@ private fun formatDate(instant: kotlin.time.Instant): String {
     val monthName = if (month in 1..12) monthNames[month - 1] else "Jan"
     return "$monthName $year"
 }
-
