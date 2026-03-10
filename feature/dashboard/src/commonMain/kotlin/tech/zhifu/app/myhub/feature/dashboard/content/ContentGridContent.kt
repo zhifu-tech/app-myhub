@@ -42,7 +42,7 @@ import tech.zhifu.app.myhub.ui.isWidthLarge
 import tech.zhifu.app.myhub.ui.isWidthMedium
 
 @Composable
-fun DashboardGridContentRoute(
+fun ContentGridContentRoute(
     viewModel: DashboardViewModel,
     collectionSection: @Composable () -> Unit,
 ) {
@@ -56,7 +56,7 @@ fun DashboardGridContentRoute(
     }
 
     val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
+        (uiState as? DashboardUiState.Content)?.cardSectionState
     }.value ?: return
 
     val gridState = rememberLazyStaggeredGridState()
@@ -66,7 +66,7 @@ fun DashboardGridContentRoute(
         isLoadingMore = state.isLoading,
         onLoadMore = viewModel::loadMoreCards,
     )
-    DashboardGridContent(
+    ContentGridContent(
         gridState = gridState,
         columns = columns,
         collectionSection = collectionSection,
@@ -81,7 +81,7 @@ fun DashboardGridContentRoute(
 }
 
 @Composable
-internal fun DashboardGridContent(
+internal fun ContentGridContent(
     gridState: LazyStaggeredGridState,
     columns: Int,
     collectionSection: @Composable () -> Unit,

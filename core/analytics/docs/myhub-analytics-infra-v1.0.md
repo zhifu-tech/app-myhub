@@ -46,7 +46,7 @@
   - 🔒 已锁定：方案设计已确定，不允许随意修改
   - 📝 进行中：方案设计正在进行中，可以修改
   - ⏸️ 暂停：方案设计暂时停止，保留当前状态
-- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/myhub-infra-rules.md)
+- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
@@ -1211,8 +1211,8 @@ class AnalyticsManagerTest {
 
 ### 8.1 相关文档
 
-- [MyHub 基础设施文档](../../../docs/myhub-infra.md)
-- [MyHub 架构设计文档规范](../../../docs/myhub-infra-rules.md)
+- [MyHub 基础设施文档](../../../docs/infra/myhub-infra.md)
+- [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 - [渠道框架设计文档](CHANNEL_FRAMEWORK_DESIGN.md)
 - [Firebase Analytics 官方文档](https://firebase.google.com/docs/analytics)
 - [Umeng Analytics 官方文档](https://developer.umeng.com/docs/67966/detail/193837)

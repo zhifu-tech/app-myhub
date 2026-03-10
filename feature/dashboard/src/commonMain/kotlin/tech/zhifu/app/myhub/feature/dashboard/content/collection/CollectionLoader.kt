@@ -27,7 +27,7 @@ internal suspend fun DashboardViewModel.loadCollections(
         size = pageSize,
         sort = StoreKey.Sort.NEWEST,
     )
-    val state = (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
+    val state = (uiState as? DashboardUiState.Content)?.collectionSectionState
         ?: CollectionSectionState()
     return state.copy(
         collections = (storeData.collections + state.collections).distinctBy { it.id },

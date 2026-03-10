@@ -512,5 +512,5 @@ val hasPlatformConfig = hasPlatformPlugin || hasPlatformSourceSet
 
 ## 🔗 相关文档
 
-- [MyHub 基础设施规则](./myhub-infra-rules.md)
+- [MyHub 基础设施规则](./infra/myhub-infra-rules.md)
 - [项目 settings.gradle.kts](../settings.gradle.kts)

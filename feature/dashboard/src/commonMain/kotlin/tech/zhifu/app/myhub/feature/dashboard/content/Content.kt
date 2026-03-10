@@ -15,20 +15,20 @@ import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSecti
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewSectionRoute
 
 @Composable
-fun ResultOutputCompletedRoute(
+fun ContentRoute(
     viewModel: DashboardViewModel,
     modifier: Modifier,
 ) {
     val isRefreshing = viewModel.collectFieldAsState { uiState ->
-        (uiState as? DashboardUiState.ResultOutputCompleted)?.isRefreshing
+        (uiState as? DashboardUiState.Content)?.isRefreshing
     }.value ?: return
 
-    ResultOutputCompleted(
+    Content(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = viewModel::refresh,
         gridContent = {
-            DashboardGridContentRoute(
+            ContentGridContentRoute(
                 viewModel = viewModel,
                 collectionSection = {
                     CollectionSectionRoute(viewModel = viewModel)
@@ -45,7 +45,7 @@ fun ResultOutputCompletedRoute(
 }
 
 @Composable
-internal fun ResultOutputCompleted(
+internal fun Content(
     modifier: Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,

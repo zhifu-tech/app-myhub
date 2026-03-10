@@ -11,28 +11,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import org.koin.compose.viewmodel.koinViewModel
 import org.orbitmvi.orbit.compose.collectSideEffect
+import tech.zhifu.app.myhub.component.LoadingWheel
 import tech.zhifu.app.myhub.feature.capture.api.navigation.navigateToCapture
 import tech.zhifu.app.myhub.feature.card.api.navigateToCardDetail
-import tech.zhifu.app.myhub.feature.dashboard.content.ResultErrorDisabledRoute
-import tech.zhifu.app.myhub.feature.dashboard.content.ResultOutputCompletedRoute
+import tech.zhifu.app.myhub.feature.dashboard.content.ContentRoute
+import tech.zhifu.app.myhub.feature.dashboard.content.ErrorRoute
 import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBarRoute
-import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.State
-import tech.zhifu.app.myhub.ui.content.InitGlobalPending
-import tech.zhifu.app.myhub.ui.isInitGlobalLoading
-import tech.zhifu.app.myhub.ui.isResultErrorDisabled
-import tech.zhifu.app.myhub.ui.isResultOutputCompleted
 
 @Composable
 fun DashboardRoute(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
-    logger.debug("Dashboard Screen") { "DashboardRoute" }
-
     DashboardSideEffect(navigator = navigator, viewModel = viewModel)
     val state by viewModel.collectFieldAsState {
         it.state
@@ -45,17 +39,14 @@ fun DashboardRoute(
                 scrollBehavior = it,
             )
         },
-        initGlobalPending = { modifier ->
-            InitGlobalPending(modifier)
-        },
-        resultErrorDisabled = { modifier ->
-            ResultErrorDisabledRoute(
+        error = { modifier ->
+            ErrorRoute(
                 modifier = modifier,
                 viewModel = viewModel,
             )
         },
-        resultOutputCompleted = { modifier ->
-            ResultOutputCompletedRoute(
+        content = { modifier ->
+            ContentRoute(
                 modifier = modifier,
                 viewModel = viewModel,
             )
@@ -67,12 +58,10 @@ fun DashboardRoute(
 internal fun DashboardScreen(
     state: State,
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit,
-    initGlobalPending: @Composable (Modifier) -> Unit,
-    resultErrorDisabled: @Composable (Modifier) -> Unit,
-    resultOutputCompleted: @Composable (Modifier) -> Unit,
+    error: @Composable (Modifier) -> Unit,
+    content: @Composable (Modifier) -> Unit,
 ) {
-    logger.debug("Dashboard Screen") { "DashboardScreen $state" }
-    val canShowTopBar = state.isResultOutputCompleted()
+    val canShowTopBar = state == State.CONTENT
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val scaffoldModifier = if (canShowTopBar) {
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -89,16 +78,18 @@ internal fun DashboardScreen(
             }
         },
     ) { innerPadding ->
-        when {
-            state.isInitGlobalLoading() -> initGlobalPending(
+
+        when (state) {
+            State.LOADING -> LoadingWheel(
+                modifier = Modifier.padding(innerPadding),
+                contentDesc = "加载内容", // fixme 翻译
+            )
+
+            State.ERROR -> error(
                 Modifier.padding(innerPadding)
             )
 
-            state.isResultErrorDisabled() -> resultErrorDisabled(
-                Modifier.padding(innerPadding)
-            )
-
-            state.isResultOutputCompleted() -> resultOutputCompleted(
+            State.CONTENT -> content(
                 Modifier.padding(innerPadding)
             )
 

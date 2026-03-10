@@ -375,7 +375,7 @@ MVP 阶段仅使用默认配置，完全由资源文件定义内容。
 
 ### 8.1 相关文档
 
-- [MyHub 架构设计文档规范](./myhub-infra-rules.md)
+- [MyHub 架构设计文档规范](./infra/myhub-infra-rules.md)
 - [匿名身份与免登录标识方案设计](./myhub-anonymous-identity-infra-v1.0.md)
 
 ### 8.2 参考资料

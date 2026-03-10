@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.settings.SettingsUiState
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingItemRoute
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItemRoute
@@ -19,32 +18,26 @@ import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearance_language
 
 @Composable
-fun ResultOutputCompletedRoute(
+fun ContentRoute(
     viewModel: SettingsViewModel,
     modifier: Modifier,
 ) {
-    val isResultOutputCompleted = viewModel.collectFieldAsState { uiState ->
-        uiState is SettingsUiState.ResultOutputCompleted
-    }.value
-
-    if (isResultOutputCompleted) {
-        ResultOutputCompleted(
-            themeSettingItem = {
-                ThemeSettingItemRoute(viewModel = viewModel)
-            },
-            languageSettingsItem = {
-                LanguageSettingItemRoute(viewModel = viewModel)
-            },
-            inlineMessage = {
-                InlineMessageRoute(viewModel = viewModel)
-            },
-            modifier = modifier
-        )
-    }
+    Content(
+        themeSettingItem = {
+            ThemeSettingItemRoute(viewModel = viewModel)
+        },
+        languageSettingsItem = {
+            LanguageSettingItemRoute(viewModel = viewModel)
+        },
+        inlineMessage = {
+            InlineMessageRoute(viewModel = viewModel)
+        },
+        modifier = modifier
+    )
 }
 
 @Composable
-internal fun ResultOutputCompleted(
+internal fun Content(
     themeSettingItem: @Composable () -> Unit,
     languageSettingsItem: @Composable () -> Unit,
     inlineMessage: @Composable () -> Unit,

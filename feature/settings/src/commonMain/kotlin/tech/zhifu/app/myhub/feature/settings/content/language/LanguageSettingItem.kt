@@ -23,7 +23,7 @@ fun LanguageSettingItemRoute(
     viewModel: SettingsViewModel,
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? SettingsUiState.ResultOutputCompleted)?.languageSettingState
+        (uiState as? SettingsUiState.Content)?.languageSettingState
     }.value ?: return
 
     LanguageSettingItem(

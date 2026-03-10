@@ -217,7 +217,7 @@ val userId = UUID.randomUUID().toString()
 
 ### 8.1 相关文档
 
-- [MyHub 架构设计文档规范](./myhub-infra-rules.md)
+- [MyHub 架构设计文档规范](./infra/myhub-infra-rules.md)
 - [同步机制方案设计](./myhub-sync-infra-v1.0.md)
 
 ### 8.2 参考资料

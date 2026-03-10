@@ -36,7 +36,7 @@ class SettingsViewModelTest {
 
         viewModel.test(this) {
             runOnCreate()
-            val completed = awaitState() as SettingsUiState.ResultOutputCompleted
+            val completed = awaitState() as SettingsUiState.Content
             assertEquals(false, completed.themeSettingState.isDarkMode)
             assertEquals(Language.Japanese, completed.languageSettingState.language)
         }
@@ -65,17 +65,17 @@ class SettingsViewModelTest {
         viewModel.test(this) {
             runOnCreate()
 
-            val errorState = awaitState() as SettingsUiState.ResultErrorDisabled
+            val errorState = awaitState() as SettingsUiState.Error
             assertTrue(errorState.message.contains("theme load failed"))
 
             themeSetting.getError = null
             viewModel.retry()
 
             val loading = awaitState()
-            assertTrue(loading is SettingsUiState.InitGlobalPending)
+            assertTrue(loading is SettingsUiState.Loading)
 
             val completed = awaitState()
-            assertTrue(completed is SettingsUiState.ResultOutputCompleted)
+            assertTrue(completed is SettingsUiState.Content)
         }
     }
 
@@ -91,7 +91,7 @@ class SettingsViewModelTest {
             viewModel.update(Language.TraditionalChinese)
 
             awaitState() // isSubmittingLanguage=true
-            val updated = awaitState() as SettingsUiState.ResultOutputCompleted
+            val updated = awaitState() as SettingsUiState.Content
             assertEquals(
                 Language.TraditionalChinese,
                 updated.languageSettingState.language
@@ -114,12 +114,12 @@ class SettingsViewModelTest {
             viewModel.updateTheme(true)
             awaitState() // isSubmittingTheme=true
 
-            val failed = awaitState() as SettingsUiState.ResultOutputCompleted
+            val failed = awaitState() as SettingsUiState.Content
             assertTrue(failed.inlineMessage.contains("theme set failed"))
             assertEquals(1, repository.themeSetting.setCalls)
 
             viewModel.clearError()
-            val cleared = awaitState() as SettingsUiState.ResultOutputCompleted
+            val cleared = awaitState() as SettingsUiState.Content
             assertEquals("", cleared.inlineMessage)
         }
     }

@@ -1,4 +1,3 @@
-
 package tech.zhifu.app.myhub.feature.dashboard
 
 import androidx.compose.runtime.Composable
@@ -34,7 +33,7 @@ class DashboardViewModel(
 ) : ContainerHost<DashboardUiState, DashboardSideEffect>, ViewModel() {
 
     override val container: Container<DashboardUiState, DashboardSideEffect> = container(
-        initialState = DashboardUiState.InitGlobalPending
+        initialState = DashboardUiState.Loading
     ) {
         initInternal()
     }
@@ -57,7 +56,7 @@ class DashboardViewModel(
 
     fun refresh() {
         logger.debug { "Refreshing dashboard" }
-        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+        uiState.let { it as? DashboardUiState.Content }
             ?.takeUnless { it.isRefreshing }
             ?: return
         viewModelScope.launch {
@@ -73,7 +72,7 @@ class DashboardViewModel(
 
     fun loadMoreCards() {
         logger.debug { "Dashboard load more cards" }
-        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+        uiState.let { it as? DashboardUiState.Content }
             ?.takeUnless { it.isRefreshing }
             ?.cardSectionState
             ?.takeUnless { it.isLoading || !it.hasMore }
@@ -86,7 +85,7 @@ class DashboardViewModel(
     fun loadMoreCollections() {
         logger.debug { "Dashboard load more collections" }
 
-        uiState.let { it as? DashboardUiState.ResultOutputCompleted }
+        uiState.let { it as? DashboardUiState.Content }
             ?.takeUnless { it.isRefreshing }
             ?.collectionSectionState
             ?.takeUnless { it.isLoading || !it.hasMore }
@@ -104,11 +103,11 @@ class DashboardViewModel(
         }
         intent {
             reduce {
-                DashboardUiState.InitGlobalPending
+                DashboardUiState.Loading
             }
         }
-        try {
-            val (cardSectionState, collectionSectionState) = coroutineScope {
+        runCatching {
+            coroutineScope {
                 val cardsDeferred = async {
                     loadCards(userId = userId)
                 }
@@ -117,25 +116,25 @@ class DashboardViewModel(
                 }
                 cardsDeferred.await() to collectionsDeferred.await()
             }
+        }.onSuccess { (cardSectionState, collectionSectionState) ->
             intent {
                 reduce {
-                    DashboardUiState.ResultOutputCompleted(
+                    DashboardUiState.Content(
                         source = "init",
                         cardSectionState = cardSectionState,
                         collectionSectionState = collectionSectionState,
                     )
                 }
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.error(e) { "Failed to initialize dashboard" }
             intent {
                 if (isUnauthorizedError(e)) {
                     navigateToAuth()
                 }
                 reduce {
-                    DashboardUiState.ResultErrorDisabled(
+                    DashboardUiState.Error(
                         message = e.message ?: "初始化失败，请重试",
-                        canRetry = true,
                     )
                 }
             }
@@ -149,7 +148,7 @@ class DashboardViewModel(
         }
         intent {
             reduce {
-                val state = state as? DashboardUiState.ResultOutputCompleted
+                val state = state as? DashboardUiState.Content
                     ?: return@reduce state
                 state.copy(
                     source = "refresh:pre",
@@ -157,8 +156,8 @@ class DashboardViewModel(
                 )
             }
         }
-        try {
-            val (cardSectionState, collectionSectionState) = coroutineScope {
+        runCatching {
+            coroutineScope {
                 val cardsDeferred = async {
                     loadCards(userId = userId)
                 }
@@ -167,10 +166,10 @@ class DashboardViewModel(
                 }
                 cardsDeferred.await() to collectionsDeferred.await()
             }
-
+        }.onSuccess { (cardSectionState, collectionSectionState) ->
             intent {
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "refresh",
@@ -180,14 +179,14 @@ class DashboardViewModel(
                     )
                 }
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.error(e) { "Failed to refresh dashboard" }
             intent {
                 if (isUnauthorizedError(e)) {
                     navigateToAuth()
                 }
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "refresh:catch",
@@ -205,7 +204,7 @@ class DashboardViewModel(
         }
         intent {
             reduce {
-                val state = state as? DashboardUiState.ResultOutputCompleted
+                val state = state as? DashboardUiState.Content
                     ?: return@reduce state
                 state.copy(
                     source = "loadMoreCards:pre",
@@ -215,14 +214,15 @@ class DashboardViewModel(
                 )
             }
         }
-        try {
-            val newCardState = loadCards(
+        runCatching {
+            loadCards(
                 userId = userId,
-                state = (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
+                state = (uiState as? DashboardUiState.Content)?.cardSectionState
             )
+        }.onSuccess { newCardState ->
             intent {
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "loadMoreCards",
@@ -230,14 +230,14 @@ class DashboardViewModel(
                     )
                 }
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.error(e) { "Failed to load more cards" }
             intent {
                 if (isUnauthorizedError(e)) {
                     navigateToAuth()
                 }
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "loadMoreCards:catch",
@@ -257,7 +257,7 @@ class DashboardViewModel(
         }
         intent {
             reduce {
-                val state = state as? DashboardUiState.ResultOutputCompleted
+                val state = state as? DashboardUiState.Content
                     ?: return@reduce state
                 state.copy(
                     source = "loadMoreCollections:pre",
@@ -267,14 +267,15 @@ class DashboardViewModel(
                 )
             }
         }
-        try {
-            val newCollectionState = loadCollections(
+        runCatching {
+            loadCollections(
                 userId = userId,
-                state = (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
+                state = (uiState as? DashboardUiState.Content)?.collectionSectionState
             )
+        }.onSuccess { newCollectionState ->
             intent {
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "loadMoreCollections",
@@ -282,14 +283,14 @@ class DashboardViewModel(
                     )
                 }
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.error(e) { "Failed to load more collections" }
             intent {
                 if (isUnauthorizedError(e)) {
                     navigateToAuth()
                 }
                 reduce {
-                    val state = state as? DashboardUiState.ResultOutputCompleted
+                    val state = state as? DashboardUiState.Content
                         ?: return@reduce state
                     state.copy(
                         source = "loadMoreCollections:catch",
@@ -302,7 +303,7 @@ class DashboardViewModel(
         }
     }
 
-    private fun isUnauthorizedError(e: Exception): Boolean = e.message?.let {
+    private fun isUnauthorizedError(e: Throwable): Boolean = e.message?.let {
         it.contains("401") || it.contains("Unauthorized", ignoreCase = true)
     } ?: false
 }

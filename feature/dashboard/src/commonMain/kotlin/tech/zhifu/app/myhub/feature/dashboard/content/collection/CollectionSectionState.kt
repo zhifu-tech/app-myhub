@@ -8,6 +8,4 @@ data class CollectionSectionState(
     val isLoading: Boolean = false,
     val pageIndex: Int = 1,
     val pageSize: Int = 10,
-
-    val errorMessage: String? = null,
 )

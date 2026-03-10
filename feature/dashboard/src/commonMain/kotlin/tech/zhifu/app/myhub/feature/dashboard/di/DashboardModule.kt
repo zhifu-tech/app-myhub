@@ -5,7 +5,6 @@ import org.koin.dsl.module
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
 fun dashboardModule() = module {
-    // Dashboard ViewModel
     viewModel {
         DashboardViewModel(
             cardRepository = get(),

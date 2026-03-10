@@ -4,9 +4,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import tech.zhifu.app.myhub.feature.dashboard.content.DashboardGridContent
-import tech.zhifu.app.myhub.feature.dashboard.content.ResultErrorDisabled
-import tech.zhifu.app.myhub.feature.dashboard.content.ResultOutputCompleted
+import tech.zhifu.app.myhub.feature.dashboard.content.Content
+import tech.zhifu.app.myhub.feature.dashboard.content.ContentGridContent
+import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSection
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
@@ -16,23 +16,19 @@ import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.PreviewDesktopLightDark
 import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
 import tech.zhifu.app.myhub.ui.PreviewTabletLightDark
-import tech.zhifu.app.myhub.ui.content.InitGlobalPending
 
 @PreviewPhoneLightDark
 @PreviewTabletLightDark
 @PreviewDesktopLightDark
 @Composable
-fun DashboardScreen_InitGlobalPending() {
+fun DashboardScreen_Loading() {
     AppTheme {
-        val uiState = DashboardUiState.InitGlobalPending
+        val uiState = DashboardUiState.Loading
         DashboardScreen(
             state = uiState.state,
             topBar = {},
-            initGlobalPending = { modifier ->
-                InitGlobalPending(modifier = modifier)
-            },
-            resultErrorDisabled = {},
-            resultOutputCompleted = {},
+            error = {},
+            content = {},
         )
     }
 }
@@ -41,34 +37,31 @@ fun DashboardScreen_InitGlobalPending() {
 @PreviewTabletLightDark
 @PreviewDesktopLightDark
 @Composable
-fun DashboardScreenResultErrorDisabled() {
+fun DashboardScreen_Error() {
     AppTheme {
-        val uiState = DashboardUiState.ResultErrorDisabled(
+        val uiState = DashboardUiState.Error(
             message = "未知错误，请稍后再试！",
-            canRetry = true,
         )
         DashboardScreen(
             state = uiState.state,
             topBar = {},
-            initGlobalPending = {},
-            resultErrorDisabled = { modifier ->
-                ResultErrorDisabled(
+            error = { modifier ->
+                Error(
                     modifier = modifier,
                     message = uiState.message,
-                    canRetry = uiState.canRetry,
                     onRetry = {}
                 )
             },
-            resultOutputCompleted = {},
+            content = {},
         )
     }
 }
 
 @PreviewPhoneLightDark
 @Composable
-fun DashboardScreenResultOutputCompleted() {
+fun DashboardScreen_Content() {
     AppTheme {
-        val uiState = DashboardUiState.ResultOutputCompleted(
+        val uiState = DashboardUiState.Content(
             isRefreshing = false,
             collectionSectionState = CollectionSectionState(
                 collections = collectionList,
@@ -91,15 +84,14 @@ fun DashboardScreenResultOutputCompleted() {
                     onRefresh = {},
                 )
             },
-            initGlobalPending = {},
-            resultErrorDisabled = {},
-            resultOutputCompleted = { modifier ->
-                ResultOutputCompleted(
+            error = {},
+            content = { modifier ->
+                Content(
                     modifier = modifier,
                     isRefreshing = uiState.isRefreshing,
                     onRefresh = {},
                     gridContent = {
-                        DashboardGridContent(
+                        ContentGridContent(
                             gridState = rememberLazyStaggeredGridState(),
                             columns = 1,
                             collectionSection = {

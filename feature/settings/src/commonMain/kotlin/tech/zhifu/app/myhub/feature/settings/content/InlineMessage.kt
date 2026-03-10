@@ -10,13 +10,12 @@ import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
 
-
 @Composable
 fun InlineMessageRoute(
     viewModel: SettingsViewModel
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? SettingsUiState.ResultOutputCompleted)?.inlineMessage
+        (uiState as? SettingsUiState.Content)?.inlineMessage
     }.value ?: return
 
     InlineMessage(

@@ -19,7 +19,7 @@ internal fun TopBarRoute(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val topBarState = viewModel.collectFieldAsState { uiState ->
-        (uiState as? DashboardUiState.ResultOutputCompleted)?.let {
+        (uiState as? DashboardUiState.Content)?.let {
             TopBarState(
                 isRefreshing = it.isRefreshing,
                 reviewCardsCount = it.reviewState?.reviewCardsCount ?: 0,

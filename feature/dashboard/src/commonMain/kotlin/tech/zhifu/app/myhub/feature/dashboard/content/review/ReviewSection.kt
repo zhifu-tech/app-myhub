@@ -51,7 +51,7 @@ fun ReviewSectionRoute(
     modifier: Modifier = Modifier,
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? DashboardUiState.ResultOutputCompleted)?.reviewState
+        (uiState as? DashboardUiState.Content)?.reviewState
     }.value ?: return
 
     if (state.showFocusReview && state.reviewCardsCount > 0) {

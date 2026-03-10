@@ -24,7 +24,7 @@ fun ThemeSettingItemRoute(
     viewModel: SettingsViewModel
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? SettingsUiState.ResultOutputCompleted)?.themeSettingState
+        (uiState as? SettingsUiState.Content)?.themeSettingState
     }.value ?: return
 
     ThemeSettingItem(

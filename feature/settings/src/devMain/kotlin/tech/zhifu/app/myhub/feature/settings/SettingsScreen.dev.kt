@@ -2,8 +2,9 @@ package tech.zhifu.app.myhub.feature.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import tech.zhifu.app.myhub.feature.settings.content.Error
 import tech.zhifu.app.myhub.feature.settings.content.InlineMessage
-import tech.zhifu.app.myhub.feature.settings.content.ResultOutputCompleted
+import tech.zhifu.app.myhub.feature.settings.content.Content
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingItem
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingState
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItem
@@ -11,56 +12,48 @@ import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
 import tech.zhifu.app.myhub.language.Language
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
-import tech.zhifu.app.myhub.ui.content.InitGlobalPending
-import tech.zhifu.app.myhub.ui.content.ResultErrorDisabled
 
 @PreviewPhoneLightDark
 @Composable
-fun SettingsScreen_InitGlobalPending() {
+fun SettingsScreen_Loading() {
     AppTheme {
-        val uiState = SettingsUiState.InitGlobalPending
+        val uiState = SettingsUiState.Loading
         SettingsScreen(
             state = uiState.state,
-            initGlobalPending = { modifier ->
-                InitGlobalPending(
-                    modifier = modifier.fillMaxSize()
-                )
-            },
-            resultErrorDisabled = {},
-            resultOutputCompleted = {},
+            error = {},
+            content = {},
         )
     }
 }
 
 @PreviewPhoneLightDark
 @Composable
-fun SettingsScreen_ResultErrorDisabled() {
+fun SettingsScreen_Error() {
     AppTheme {
-        val uiState = SettingsUiState.ResultErrorDisabled(
+        val uiState = SettingsUiState.Error(
             message = "未知错误，请稍后再试！",
             canRetry = true,
         )
         SettingsScreen(
             state = uiState.state,
-            initGlobalPending = {},
-            resultErrorDisabled = { modifier ->
-                ResultErrorDisabled(
+            error = { modifier ->
+                Error(
                     message = uiState.message,
                     canRetry = uiState.canRetry,
                     onRetry = {},
                     modifier = modifier.fillMaxSize()
                 )
             },
-            resultOutputCompleted = {},
+            content = {},
         )
     }
 }
 
 @PreviewPhoneLightDark
 @Composable
-fun SettingsScreen_ResultOutputCompleted() {
+fun SettingsScreen_Content() {
     AppTheme {
-        val uiState = SettingsUiState.ResultOutputCompleted(
+        val uiState = SettingsUiState.Content(
             themeSettingState = ThemeSettingState(
                 isDarkMode = true
             ),
@@ -70,10 +63,9 @@ fun SettingsScreen_ResultOutputCompleted() {
         )
         SettingsScreen(
             state = uiState.state,
-            initGlobalPending = {},
-            resultErrorDisabled = {},
-            resultOutputCompleted = { modifier ->
-                ResultOutputCompleted(
+            error = {},
+            content = { modifier ->
+                Content(
                     modifier = modifier,
                     themeSettingItem = {
                         ThemeSettingItem(

@@ -31,7 +31,7 @@ class SettingsViewModel(
     private val languageSetting = settingsRepository.languageSetting
 
     override val container: Container<SettingsUiState, SettingsSideEffect> = container(
-        initialState = SettingsUiState.InitGlobalPending
+        initialState = SettingsUiState.Loading
     ) {
         initInternal()
     }
@@ -48,7 +48,7 @@ class SettingsViewModel(
     }
 
     fun retry() {
-        val state = uiState as? SettingsUiState.ResultErrorDisabled ?: return
+        val state = uiState as? SettingsUiState.Error ?: return
         if (!state.canRetry) return
         viewModelScope.launch {
             initInternal()
@@ -56,7 +56,7 @@ class SettingsViewModel(
     }
 
     fun update(language: Language) {
-        val state = (uiState as? SettingsUiState.ResultOutputCompleted)
+        val state = (uiState as? SettingsUiState.Content)
             ?.languageSettingState
             ?.takeIf { it.isSubmitting.not() }
             ?: return
@@ -68,7 +68,7 @@ class SettingsViewModel(
     }
 
     fun updateTheme(isDarkMode: Boolean) {
-        val state = (uiState as? SettingsUiState.ResultOutputCompleted)
+        val state = (uiState as? SettingsUiState.Content)
             ?.themeSettingState
             ?.takeIf { it.isSubmitting.not() }
             ?: return
@@ -84,7 +84,7 @@ class SettingsViewModel(
      */
     fun showLanguageDialog() = intent {
         reduce {
-            val state = (state as? SettingsUiState.ResultOutputCompleted)
+            val state = (state as? SettingsUiState.Content)
                 ?: return@reduce state
             state.copy(
                 languageSettingState = state.languageSettingState.copy(
@@ -99,7 +99,7 @@ class SettingsViewModel(
      */
     fun hideLanguageDialog() = intent {
         reduce {
-            val state = (state as? SettingsUiState.ResultOutputCompleted)
+            val state = (state as? SettingsUiState.Content)
                 ?: return@reduce state
             state.copy(
                 languageSettingState = state.languageSettingState.copy(
@@ -114,7 +114,7 @@ class SettingsViewModel(
      */
     fun clearError() = intent {
         reduce {
-            val state = (state as? SettingsUiState.ResultOutputCompleted)
+            val state = (state as? SettingsUiState.Content)
                 ?: return@reduce state
             state.copy(
                 inlineMessage = ""
@@ -125,11 +125,11 @@ class SettingsViewModel(
     private suspend fun initInternal() {
         intent {
             reduce {
-                SettingsUiState.InitGlobalPending
+                SettingsUiState.Loading
             }
         }
         runCatching {
-            SettingsUiState.ResultOutputCompleted(
+            SettingsUiState.Content(
                 themeSettingState = ThemeSettingState(
                     isDarkMode = themeSetting.get(),
                 ),
@@ -149,7 +149,7 @@ class SettingsViewModel(
             }
             intent {
                 reduce {
-                    SettingsUiState.ResultErrorDisabled(
+                    SettingsUiState.Error(
                         message = throwable.message ?: "Failed to load settings",
                         canRetry = true
                     )
@@ -161,7 +161,7 @@ class SettingsViewModel(
     private suspend fun updateLanguageInternal(language: Language) {
         intent {
             reduce {
-                val state = (state as? SettingsUiState.ResultOutputCompleted)
+                val state = (state as? SettingsUiState.Content)
                     ?: return@reduce state
                 state.copy(
                     languageSettingState = state.languageSettingState.copy(
@@ -176,7 +176,7 @@ class SettingsViewModel(
         }.onSuccess {
             intent {
                 reduce {
-                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    val state = (state as? SettingsUiState.Content)
                         ?: return@reduce state
                     state.copy(
                         languageSettingState = state.languageSettingState.copy(
@@ -193,7 +193,7 @@ class SettingsViewModel(
             }
             intent {
                 reduce {
-                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    val state = (state as? SettingsUiState.Content)
                         ?: return@reduce state
                     state.copy(
                         languageSettingState = state.languageSettingState.copy(
@@ -209,7 +209,7 @@ class SettingsViewModel(
     private suspend fun updateThemeInternal(isDarkMode: Boolean) {
         intent {
             reduce {
-                val state = (state as? SettingsUiState.ResultOutputCompleted)
+                val state = (state as? SettingsUiState.Content)
                     ?: return@reduce state
                 state.copy(
                     themeSettingState = state.themeSettingState.copy(
@@ -226,7 +226,7 @@ class SettingsViewModel(
             logger.info { "Theme updated successfully" }
             intent {
                 reduce {
-                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    val state = (state as? SettingsUiState.Content)
                         ?: return@reduce state
                     state.copy(
                         themeSettingState = state.themeSettingState.copy(
@@ -243,7 +243,7 @@ class SettingsViewModel(
             }
             intent {
                 reduce {
-                    val state = (state as? SettingsUiState.ResultOutputCompleted)
+                    val state = (state as? SettingsUiState.Content)
                         ?: return@reduce state
                     state.copy(
                         themeSettingState = state.themeSettingState.copy(

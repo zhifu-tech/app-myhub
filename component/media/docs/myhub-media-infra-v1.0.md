@@ -204,5 +204,5 @@ setSingletonImageLoaderFactory { context ->
 
 ## 10. 附录
 
-- 参考：`docs/myhub-infra.md`
-- 参考：`docs/myhub-infra-rules.md`
+- 参考：`docs/infra/myhub-infra.md`
+- 参考：`docs/infra/myhub-infra-rules.md`

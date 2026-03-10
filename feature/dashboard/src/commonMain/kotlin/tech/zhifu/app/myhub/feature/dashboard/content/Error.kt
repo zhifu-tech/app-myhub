@@ -18,27 +18,25 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
 @Composable
-fun ResultErrorDisabledRoute(
+fun ErrorRoute(
     modifier: Modifier,
     viewModel: DashboardViewModel
 ) {
     val state = viewModel.collectFieldAsState { uiState ->
-        uiState as? DashboardUiState.ResultErrorDisabled
+        uiState as? DashboardUiState.Error
     }.value ?: return
 
-    ResultErrorDisabled(
+    Error(
         modifier = modifier,
         message = state.message,
-        canRetry = state.canRetry,
         onRetry = viewModel::retry,
     )
 }
 
 @Composable
-internal fun ResultErrorDisabled(
+internal fun Error(
     modifier: Modifier,
     message: String,
-    canRetry: Boolean,
     onRetry: () -> Unit
 ) {
     Column(
@@ -56,7 +54,6 @@ internal fun ResultErrorDisabled(
         Spacer(Modifier.size(16.dp))
         TextButton(
             onClick = onRetry,
-            enabled = canRetry
         ) {
             Text("Retry")
         }

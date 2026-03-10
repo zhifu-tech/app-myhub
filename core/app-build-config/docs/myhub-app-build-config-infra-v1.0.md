@@ -45,7 +45,7 @@
   - 🔒 已锁定：方案设计已确定，不允许随意修改
   - 📝 进行中：方案设计正在进行中，可以修改
   - ⏸️ 暂停：方案设计暂时停止，保留当前状态
-- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/myhub-infra-rules.md)
+- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
@@ -832,8 +832,8 @@ appChannel=channel
 
 ### 8.1 相关文档
 
-- [MyHub 基础设施规则](../../../docs/myhub-infra-rules.md)
-- [MyHub 基础设施概览](../../../docs/myhub-infra.md)
+- [MyHub 基础设施规则](../../../docs/infra/myhub-infra-rules.md)
+- [MyHub 基础设施概览](../../../docs/infra/myhub-infra.md)
 - [App Build Config README](../README.md)
 - [Kotlin Multiplatform Source Sets 文档](https://kotlinlang.org/docs/multiplatform-discover-project.html#source-sets)
 

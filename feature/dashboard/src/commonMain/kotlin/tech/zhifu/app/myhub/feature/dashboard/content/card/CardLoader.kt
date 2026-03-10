@@ -27,7 +27,7 @@ private suspend fun DashboardViewModel.loadCards(
         size = pageSize,
         sort = StoreKey.Sort.NEWEST,
     )
-    val state = (uiState as? DashboardUiState.ResultOutputCompleted)?.cardSectionState
+    val state = (uiState as? DashboardUiState.Content)?.cardSectionState
         ?: CardSectionState()
     return state.copy(
         cards = (state.cards + storeData.cards).distinctBy { it.id },

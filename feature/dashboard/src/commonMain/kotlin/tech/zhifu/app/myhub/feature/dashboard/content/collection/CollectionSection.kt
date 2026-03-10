@@ -34,13 +34,12 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_asset_collections
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_curated_library
 
-
 @Composable
 fun CollectionSectionRoute(
     viewModel: DashboardViewModel,
 ) {
     val payload = viewModel.collectFieldAsState { uiState ->
-        (uiState as? DashboardUiState.ResultOutputCompleted)?.collectionSectionState
+        (uiState as? DashboardUiState.Content)?.collectionSectionState
     }.value ?: return
 
     val listState = rememberLazyListState()

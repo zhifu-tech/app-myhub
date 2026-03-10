@@ -46,7 +46,7 @@
     - 🔒 已锁定：方案设计已确定，不允许随意修改
     - 📝 进行中：方案设计正在进行中，可以修改
     - ⏸️ 暂停：方案设计暂时停止，保留当前状态
-- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/myhub-infra-rules.md)
+- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
@@ -947,7 +947,7 @@ val repositoryModule = module {
 - [数据仓库客户端模块方案设计](../datastore-repository-client/docs/myhub-datastore-repository-client-infra-v1.0.md)
 - [数据仓库服务端模块方案设计](../datastore-repository-server/docs/myhub-datastore-repository-server-infra-v1.0.md)
 - [Datastore README](../README.md)
-- [MyHub 架构设计文档规范](../../../docs/myhub-infra-rules.md)
+- [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ### 8.2 参考资料
 

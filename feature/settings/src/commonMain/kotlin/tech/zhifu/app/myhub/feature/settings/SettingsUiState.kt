@@ -4,31 +4,17 @@ import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingSta
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
 import tech.zhifu.app.myhub.ui.State
 
-sealed class SettingsUiState(
-    val state: State,
-) {
-    object InitGlobalPending : SettingsUiState(
-        state = State.initGlobalLoading(
-            module = State.Module.SETTINGS,
-        )
-    )
+sealed class SettingsUiState(val state: State) {
+    object Loading : SettingsUiState(state = State.LOADING)
 
-    data class ResultOutputCompleted(
+    data class Content(
         val themeSettingState: ThemeSettingState,
         val languageSettingState: LanguageSettingState,
         val inlineMessage: String = ""
-    ) : SettingsUiState(
-        state = State.resultOutputCompleted(
-            module = State.Module.SETTINGS,
-        )
-    )
+    ) : SettingsUiState(state = State.CONTENT)
 
-    data class ResultErrorDisabled(
+    data class Error(
         val message: String = "",
         val canRetry: Boolean = true,
-    ) : SettingsUiState(
-        state = State.resultErrorDisabled(
-            module = State.Module.SETTINGS,
-        )
-    )
+    ) : SettingsUiState(state = State.ERROR)
 }

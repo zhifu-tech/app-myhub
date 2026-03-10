@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.ui.content
+package tech.zhifu.app.myhub.feature.settings.content
 
 
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +12,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.settings.SettingsUiState
+import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 
 @Composable
-fun ResultErrorDisabled(
+fun ErrorRoute(
+    viewModel: SettingsViewModel,
+    modifier: Modifier = Modifier
+) {
+    val state = viewModel.collectFieldAsState { uiState ->
+        uiState as? SettingsUiState.Error
+    }.value ?: return
+
+    Error(
+        message = state.message,
+        canRetry = state.canRetry,
+        onRetry = viewModel::retry,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun Error(
     message: String,
     canRetry: Boolean,
     onRetry: () -> Unit,

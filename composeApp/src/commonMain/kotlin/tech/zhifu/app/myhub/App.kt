@@ -36,8 +36,6 @@ import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionEvent
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.local.LocalAppLocale
 import tech.zhifu.app.myhub.local.LocalAppTheme
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.navigation.LoginNavKey
 import tech.zhifu.app.myhub.navigation.navAppKeyItemMap
@@ -87,7 +85,6 @@ private fun AppContent(
     windowSizeClass: WindowSizeClass,
     authSessionCoordinator: AuthSessionCoordinator = koinInject(),
 ) {
-    logger.debug { "AppContent函数调用" }
     TrackAppStartedEvent()
 
     AppTheme(darkTheme = isDarkTheme) {
