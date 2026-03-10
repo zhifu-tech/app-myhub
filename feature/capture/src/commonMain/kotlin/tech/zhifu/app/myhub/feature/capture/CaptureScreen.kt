@@ -237,11 +237,13 @@ private fun CaptureScreenContent(
                 .padding(paddingValues = padding)
         ) {
             if (uiState.isInputPhase) {
+                val input = uiState.input ?: InputCtx()
+                val media = uiState.media ?: MediaCtx()
                 InputSection(
-                    state = uiState.state,
+                    state = uiState,
                     error = uiState.error,
-                    inputText = uiState.input.text,
-                    mediaItems = uiState.media.items,
+                    inputText = input.text,
+                    mediaItems = media.items,
                     canEditInput = uiState.canEditInput,
                     horizontalPadding = horizontalPadding,
                     onInputChange = onUpdateInput,
@@ -257,7 +259,7 @@ private fun CaptureScreenContent(
             if (uiState.isReviewPhase) {
                 uiState.review?.let { review ->
                     ReviewSection(
-                        state = uiState.state,
+                        state = uiState,
                         error = uiState.error,
                         review = review,
                         reviewRichTextState = reviewRichTextState,

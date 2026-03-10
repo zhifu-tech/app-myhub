@@ -12,11 +12,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.feature.capture.CaptureError
-import tech.zhifu.app.myhub.feature.capture.CaptureState
+import tech.zhifu.app.myhub.feature.capture.CaptureUiState
 
 @Composable
 internal fun InputSection(
-    state: CaptureState,
+    state: CaptureUiState,
     error: CaptureError?,
     inputText: String,
     mediaItems: List<MediaItem>,
@@ -31,7 +31,7 @@ internal fun InputSection(
     onEditInput: () -> Unit,
     onClearError: () -> Unit
 ) {
-    val shouldDim = state == CaptureState.AiProcessing
+    val shouldDim = state is CaptureUiState.Analyzing
     Column(
         modifier = Modifier.fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
@@ -58,8 +58,8 @@ internal fun InputSection(
         )
     }
     when (state) {
-        CaptureState.AiProcessing -> OverlayAiProcessing()
-        CaptureState.AiFailed -> {
+        is CaptureUiState.Analyzing -> OverlayAiProcessing()
+        is CaptureUiState.AnalyzeFailed -> {
             OverlayAiFailed(
                 message = (error as? CaptureError.AiFailed)?.message.orEmpty(),
                 onRetry = onRetry,
@@ -76,4 +76,3 @@ internal fun InputSection(
         else -> Unit
     }
 }
-

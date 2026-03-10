@@ -14,13 +14,13 @@ import com.mohamedrejeb.richeditor.model.RichTextState
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.feature.capture.CaptureError
-import tech.zhifu.app.myhub.feature.capture.CaptureState
+import tech.zhifu.app.myhub.feature.capture.CaptureUiState
 import tech.zhifu.app.myhub.feature.capture.ReviewContentType
 import tech.zhifu.app.myhub.feature.capture.ReviewCtx
 
 @Composable
 internal fun ReviewSection(
-    state: CaptureState,
+    state: CaptureUiState,
     error: CaptureError?,
     review: ReviewCtx,
     reviewRichTextState: RichTextState,
@@ -79,14 +79,14 @@ internal fun ReviewSection(
     }
 
     when (state) {
-        CaptureState.PostProcessing -> CapturePostWaitingOverlay()
-        CaptureState.PostFailed -> CapturePostFailedOverlay(
+        is CaptureUiState.Publishing -> CapturePostWaitingOverlay()
+        is CaptureUiState.PublishFailed -> CapturePostFailedOverlay(
             message = (error as? CaptureError.PostFailed)?.message.orEmpty(),
             onRetry = onRetry,
             onBackToReview = onBackToReview
         )
 
-        CaptureState.PostSuccess -> CapturePostSuccessOverlay()
+        is CaptureUiState.PublishSuccess -> CapturePostSuccessOverlay()
         else -> Unit
     }
 }

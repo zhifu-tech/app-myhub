@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.RichTextState
-import tech.zhifu.app.myhub.feature.capture.CaptureState
 import tech.zhifu.app.myhub.feature.capture.CaptureUiState
 
 @Composable
@@ -49,22 +48,31 @@ internal fun PreviewPanel(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            when (uiState.state) {
-                CaptureState.ReadyIdle,
-                CaptureState.ReadyFocused,
-                CaptureState.AiFailed -> PreviewPanelContentReady()
+            when (uiState) {
+                is CaptureUiState.Input,
+                is CaptureUiState.AnalyzeFailed -> PreviewPanelContentReady()
 
-                CaptureState.AiProcessing -> PreviewPanelContentProcessing()
+                is CaptureUiState.Analyzing -> PreviewPanelContentProcessing()
 
-                CaptureState.ReviewEditing,
-                CaptureState.PostProcessing,
-                CaptureState.PostSuccess,
-                CaptureState.PostFailed -> uiState.review?.let { review ->
-                    PreviewPanelContentReview(
-                        review = review,
-                        reviewRichTextState = reviewRichTextState
-                    )
-                } ?: PreviewPanelContentReady()
+                is CaptureUiState.ReviewEditing -> PreviewPanelContentReview(
+                    review = uiState.review,
+                    reviewRichTextState = reviewRichTextState
+                )
+
+                is CaptureUiState.Publishing -> PreviewPanelContentReview(
+                    review = uiState.review,
+                    reviewRichTextState = reviewRichTextState
+                )
+
+                is CaptureUiState.PublishSuccess -> PreviewPanelContentReview(
+                    review = uiState.review,
+                    reviewRichTextState = reviewRichTextState
+                )
+
+                is CaptureUiState.PublishFailed -> PreviewPanelContentReview(
+                    review = uiState.review,
+                    reviewRichTextState = reviewRichTextState
+                )
             }
         }
     }

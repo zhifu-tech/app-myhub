@@ -20,7 +20,6 @@ import tech.zhifu.app.myhub.feature.dashboard.topbar.TopBarRoute
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
-import tech.zhifu.app.myhub.ui.State
 
 @Composable
 fun DashboardRoute(
@@ -78,7 +77,6 @@ internal fun DashboardScreen(
             }
         },
     ) { innerPadding ->
-
         when (state) {
             State.LOADING -> LoadingWheel(
                 modifier = Modifier.padding(innerPadding),
@@ -92,8 +90,6 @@ internal fun DashboardScreen(
             State.CONTENT -> content(
                 Modifier.padding(innerPadding)
             )
-
-            else -> Unit
         }
     }
 }

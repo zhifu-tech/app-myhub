@@ -3,7 +3,10 @@ package tech.zhifu.app.myhub.feature.dashboard
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewState
-import tech.zhifu.app.myhub.ui.State
+
+enum class State {
+    LOADING, CONTENT, ERROR
+}
 
 sealed class DashboardUiState(
     val state: State,

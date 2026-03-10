@@ -2,7 +2,10 @@ package tech.zhifu.app.myhub.feature.settings
 
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingState
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
-import tech.zhifu.app.myhub.ui.State
+
+enum class State {
+    LOADING, CONTENT, ERROR
+}
 
 sealed class SettingsUiState(val state: State) {
     object Loading : SettingsUiState(state = State.LOADING)

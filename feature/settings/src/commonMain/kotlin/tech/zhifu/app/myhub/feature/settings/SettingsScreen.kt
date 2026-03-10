@@ -15,7 +15,6 @@ import tech.zhifu.app.myhub.feature.settings.content.ContentRoute
 import tech.zhifu.app.myhub.feature.settings.content.ErrorRoute
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.platform.resources.settings
-import tech.zhifu.app.myhub.ui.State
 import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
 
 @Composable
@@ -74,8 +73,6 @@ fun SettingsScreen(
                 Modifier.fillMaxSize()
                     .padding(paddingValues = padding)
             )
-
-            else -> Unit
         }
     }
 }
