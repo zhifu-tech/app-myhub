@@ -127,7 +127,6 @@ fun CaptureScreen(
 
 @Composable
 fun CaptureScreen(
-    state: CaptureUiState.State,
     viewModel: CaptureViewModel = koinViewModel(),
     onClose: () -> Unit
 ) {
