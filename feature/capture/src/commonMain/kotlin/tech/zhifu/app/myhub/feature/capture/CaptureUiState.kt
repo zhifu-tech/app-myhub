@@ -6,9 +6,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.repository.capture.AnalysisStatus
 
-enum class State {
-    INPUT, LOADING, EDITING, ERROR, READY
-}
 
 sealed class CaptureUiState(val state: State) {
     data class Input(
@@ -18,45 +15,27 @@ sealed class CaptureUiState(val state: State) {
         val error: CaptureError? = null
     ) : CaptureUiState(state = State.INPUT)
 
-    data class Analyzing(
+    data class Processing(
         val intent: CardType,
         val input: InputCtx,
         val media: MediaCtx,
         val analysis: AnalysisCtx = AnalysisCtx(status = AnalysisStatus.Queued, progress = 0)
-    ) : CaptureUiState(state = State.LOADING)
+    ) : CaptureUiState(state = State.PROCESSING)
 
-    data class AnalyzeFailed(
-        val intent: CardType,
-        val input: InputCtx,
-        val media: MediaCtx,
-        val message: String
-    ) : CaptureUiState(state = State.ERROR) {
-        val error: CaptureError = CaptureError.AiFailed(message)
-    }
-
-    data class ReviewEditing(
+    data class Review(
         val intent: CardType,
         val review: ReviewCtx,
         val error: CaptureError? = null
-    ) : CaptureUiState(state = State.EDITING)
+    ) : CaptureUiState(state = State.REVIEW)
 
     data class Publishing(
         val intent: CardType,
         val review: ReviewCtx
-    ) : CaptureUiState(state = State.LOADING)
+    ) : CaptureUiState(state = State.PUBLISHING)
 
-    data class PublishFailed(
-        val intent: CardType,
-        val review: ReviewCtx,
-        val message: String
-    ) : CaptureUiState(state = State.ERROR) {
-        val error: CaptureError = CaptureError.PostFailed(message)
+    enum class State {
+        INPUT, PROCESSING, REVIEW, PUBLISHING
     }
-
-    data class PublishSuccess(
-        val intent: CardType,
-        val review: ReviewCtx
-    ) : CaptureUiState(state = State.READY)
 }
 
 sealed interface CaptureError {
@@ -105,82 +84,67 @@ data class ReviewCtx(
 val CaptureUiState.intent: CardType
     get() = when (this) {
         is CaptureUiState.Input -> intent
-        is CaptureUiState.Analyzing -> intent
-        is CaptureUiState.AnalyzeFailed -> intent
-        is CaptureUiState.ReviewEditing -> intent
+        is CaptureUiState.Processing -> intent
+        is CaptureUiState.Review -> intent
         is CaptureUiState.Publishing -> intent
-        is CaptureUiState.PublishFailed -> intent
-        is CaptureUiState.PublishSuccess -> intent
     }
 
 val CaptureUiState.input: InputCtx?
     get() = when (this) {
         is CaptureUiState.Input -> input
-        is CaptureUiState.Analyzing -> input
-        is CaptureUiState.AnalyzeFailed -> input
+        is CaptureUiState.Processing -> input
         else -> null
     }
 
 val CaptureUiState.media: MediaCtx?
     get() = when (this) {
         is CaptureUiState.Input -> media
-        is CaptureUiState.Analyzing -> media
-        is CaptureUiState.AnalyzeFailed -> media
+        is CaptureUiState.Processing -> media
         else -> null
     }
 
 val CaptureUiState.review: ReviewCtx?
     get() = when (this) {
-        is CaptureUiState.ReviewEditing -> review
+        is CaptureUiState.Review -> review
         is CaptureUiState.Publishing -> review
-        is CaptureUiState.PublishFailed -> review
-        is CaptureUiState.PublishSuccess -> review
         else -> null
     }
 
 val CaptureUiState.error: CaptureError?
     get() = when (this) {
         is CaptureUiState.Input -> error
-        is CaptureUiState.AnalyzeFailed -> error
-        is CaptureUiState.ReviewEditing -> error
-        is CaptureUiState.PublishFailed -> error
+        is CaptureUiState.Review -> error
         else -> null
     }
 
 val CaptureUiState.isTopBarWaiting: Boolean
-    get() = this is CaptureUiState.Analyzing || this is CaptureUiState.Publishing
+    get() = this is CaptureUiState.Processing || this is CaptureUiState.Publishing
 
 val CaptureUiState.showIntentSelector: Boolean
     get() = isReviewPhase
 
 val CaptureUiState.isInputPhase: Boolean
-    get() = this is CaptureUiState.Input || this is CaptureUiState.Analyzing || this is CaptureUiState.AnalyzeFailed
+    get() = this is CaptureUiState.Input || this is CaptureUiState.Processing
 
 val CaptureUiState.isReviewPhase: Boolean
-    get() = this is CaptureUiState.ReviewEditing ||
-        this is CaptureUiState.Publishing ||
-        this is CaptureUiState.PublishSuccess ||
-        this is CaptureUiState.PublishFailed
+    get() = this is CaptureUiState.Review || this is CaptureUiState.Publishing
 
 val CaptureUiState.canCapture: Boolean
     get() = when (this) {
         is CaptureUiState.Input -> input.text.isNotBlank() || media.items.isNotEmpty()
-        is CaptureUiState.AnalyzeFailed -> input.text.isNotBlank() || media.items.isNotEmpty()
-        is CaptureUiState.ReviewEditing -> true
-        is CaptureUiState.PublishFailed -> true
-        is CaptureUiState.Analyzing,
-        is CaptureUiState.Publishing,
-        is CaptureUiState.PublishSuccess -> false
+        is CaptureUiState.Review -> true
+        is CaptureUiState.Processing,
+        is CaptureUiState.Publishing -> false
     }
 
 val CaptureUiState.hasUploadingMedia: Boolean
     get() = media?.uploadStates?.values?.any { it.state == MediaUploadLifecycle.Uploading } == true
 
 val CaptureUiState.canEditInput: Boolean
-    get() = this is CaptureUiState.Input || this is CaptureUiState.AnalyzeFailed
+    get() = this is CaptureUiState.Input
 
 val CaptureUiState.canEditReview: Boolean
-    get() = this is CaptureUiState.ReviewEditing
+    get() = this is CaptureUiState.Review
 
 data class CaptureMediaUploadState(
     val mediaItemId: String,

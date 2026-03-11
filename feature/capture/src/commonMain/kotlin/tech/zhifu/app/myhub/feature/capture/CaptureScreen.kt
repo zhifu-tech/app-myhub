@@ -19,7 +19,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +37,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.orbitmvi.orbit.compose.collectSideEffect
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPicker
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
@@ -49,16 +49,89 @@ import tech.zhifu.app.myhub.feature.capture.app.CaptureTopAppBar
 import tech.zhifu.app.myhub.feature.capture.input.InputSection
 import tech.zhifu.app.myhub.feature.capture.preview.PreviewPanel
 import tech.zhifu.app.myhub.feature.capture.review.ReviewSection
+import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.isWidthAtLeastExpanded
 
 @Composable
+fun CaptureRoute(
+    navigator: AppNavigator,
+    viewModel: CaptureViewModel = koinViewModel(),
+) {
+    CaptureSideEffect(navigator = navigator, viewModel = viewModel)
+    val state by viewModel.collectFieldAsState {
+        it.state
+    }
+}
+
+@Composable
 fun CaptureScreen(
-    modifier: Modifier = Modifier,
+    previewPanel: @Composable () -> Unit,
+    mainContent: @Composable () -> Unit
+) {
+    val windowSizeClass = LocalWindowSizeClass.current
+    val usePermanentDrawer = windowSizeClass.isWidthAtLeastExpanded()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+    // TRICKY: 使用 RTL 仅为了让 NavigationDrawer 的抽屉出现在右侧；主内容区再恢复 LTR，避免 AppBar 左右颠倒
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        if (usePermanentDrawer) {
+            PermanentNavigationDrawer(
+                modifier = Modifier.fillMaxSize(),
+                drawerContent = {
+                    PermanentDrawerSheet(
+                        modifier = Modifier.width(420.dp)
+                            .shadow(elevation = 24.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Ltr) {
+                            previewPanel()
+                        }
+                    }
+                }
+            ) {
+                CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    mainContent()
+                }
+            }
+        } else {
+            ModalNavigationDrawer(
+                modifier = Modifier.fillMaxSize(),
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet(
+                        modifier = Modifier.width(420.dp)
+                            .shadow(elevation = 24.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Ltr) {
+                            previewPanel()
+                        }
+                    }
+                }
+            ) {
+                CompositionLocalProvider(value = LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    mainContent()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CaptureScreen(
+    state: CaptureUiState.State,
     viewModel: CaptureViewModel = koinViewModel(),
     onClose: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.collectFieldAsState { it }
     val windowSizeClass = LocalWindowSizeClass.current
     val usePermanentDrawer = windowSizeClass.isWidthAtLeastExpanded()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
@@ -125,7 +198,7 @@ fun CaptureScreen(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         if (usePermanentDrawer) {
             PermanentNavigationDrawer(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 drawerContent = {
                     PermanentDrawerSheet(
                         modifier = Modifier.width(420.dp)
@@ -148,7 +221,7 @@ fun CaptureScreen(
             }
         } else {
             ModalNavigationDrawer(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 drawerState = drawerState,
                 drawerContent = {
                     ModalDrawerSheet(
@@ -289,5 +362,15 @@ private fun CaptureScreenContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CaptureSideEffect(
+    navigator: AppNavigator,
+    viewModel: CaptureViewModel,
+) {
+    viewModel.collectSideEffect { effect ->
+        // TODO
     }
 }

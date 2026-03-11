@@ -14,12 +14,9 @@
 - Replace `CaptureState` enum with a sealed `CaptureUiState` using `tech.zhifu.app.myhub.ui.State`.
 - Reduce to at most 7 states:
   - `Input`
-  - `Analyzing`
-  - `AnalyzeFailed`
-  - `ReviewEditing`
+  - `Processing`
+  - `Review`
   - `Publishing`
-  - `PublishFailed`
-  - `PublishSuccess`
 
 ## 3. Refactor Steps
 1. Define the Capture UI design spec in `feature/capture/docs/ui-desigin-spec.md`.

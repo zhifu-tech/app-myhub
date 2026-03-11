@@ -80,13 +80,15 @@ internal fun ReviewSection(
 
     when (state) {
         is CaptureUiState.Publishing -> CapturePostWaitingOverlay()
-        is CaptureUiState.PublishFailed -> CapturePostFailedOverlay(
-            message = (error as? CaptureError.PostFailed)?.message.orEmpty(),
-            onRetry = onRetry,
-            onBackToReview = onBackToReview
-        )
-
-        is CaptureUiState.PublishSuccess -> CapturePostSuccessOverlay()
+        is CaptureUiState.Review -> {
+            if (error is CaptureError.PostFailed) {
+                CapturePostFailedOverlay(
+                    message = error.message,
+                    onRetry = onRetry,
+                    onBackToReview = onBackToReview
+                )
+            }
+        }
         else -> Unit
     }
 }

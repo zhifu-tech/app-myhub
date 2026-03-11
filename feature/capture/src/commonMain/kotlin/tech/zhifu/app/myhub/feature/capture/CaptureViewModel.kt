@@ -1,5 +1,8 @@
 package tech.zhifu.app.myhub.feature.capture
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
@@ -8,12 +11,14 @@ import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
 import tech.zhifu.app.myhub.datastore.model.domain.Card
@@ -38,42 +43,43 @@ class CaptureViewModel(
     private val captureRepository: CaptureRepository,
     private val cardRepository: CardRepository,
     private val userRepository: UserRepository
-) : ViewModel() {
+) : ContainerHost<CaptureUiState, CaptureSideEffect>, ViewModel() {
 
-    private val _uiState = MutableStateFlow<CaptureUiState>(CaptureUiState.Input())
-    val uiState: StateFlow<CaptureUiState> = _uiState.asStateFlow()
+    private val logger = logger("Capture")
+
+    override val container: Container<CaptureUiState, CaptureSideEffect> = container(
+        initialState = CaptureUiState.Input()
+    )
+
+    val uiState: CaptureUiState
+        get() = container.stateFlow.value
+
+    @Composable
+    fun <R> collectFieldAsState(selector: (CaptureUiState) -> R): State<R> {
+        return container.stateFlow
+            .map(selector)
+            .distinctUntilChanged()
+            .collectAsState(initial = selector(uiState))
+    }
+
     private val _captureCompleted = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val captureCompleted: SharedFlow<Unit> = _captureCompleted.asSharedFlow()
 
-    fun updateInputText(text: String) {
-        val current = _uiState.value
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(input = current.input.copy(text = text))
-            is CaptureUiState.AnalyzeFailed -> CaptureUiState.Input(
-                intent = current.intent,
-                input = current.input.copy(text = text, focused = true),
-                media = current.media,
-                error = null
-            )
-            else -> current
+    fun updateInputText(text: String) = intent {
+        reduce {
+            when (val current = state) {
+                is CaptureUiState.Input -> current.copy(input = current.input.copy(text = text))
+                else -> current
+            }
         }
     }
 
-    fun onInputFocusChanged(focused: Boolean) {
-        val current = _uiState.value
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(input = current.input.copy(focused = focused))
-            is CaptureUiState.AnalyzeFailed -> if (focused) {
-                CaptureUiState.Input(
-                    intent = current.intent,
-                    input = current.input.copy(focused = true),
-                    media = current.media,
-                    error = null
-                )
-            } else {
-                current
+    fun onInputFocusChanged(focused: Boolean) = intent {
+        reduce {
+            when (val current = state) {
+                is CaptureUiState.Input -> current.copy(input = current.input.copy(focused = focused))
+                else -> current
             }
-            else -> current
         }
     }
 
@@ -84,21 +90,19 @@ class CaptureViewModel(
     fun updateReviewSourceForm(form: CardSource) = updateReview { it.copy(source = form) }
 
     fun updateReviewStyle(index: Int) {
-        val review = _uiState.value.review ?: return
+        val review = uiState.review ?: return
         if (index !in review.styleOptions.indices) return
         updateReview { it.copy(selectedStyleIndex = index) }
     }
 
-    fun updateIntent(intent: CardType) {
-        val current = _uiState.value
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(intent = intent)
-            is CaptureUiState.Analyzing -> current.copy(intent = intent)
-            is CaptureUiState.AnalyzeFailed -> current.copy(intent = intent)
-            is CaptureUiState.ReviewEditing -> current.copy(intent = intent)
-            is CaptureUiState.Publishing -> current.copy(intent = intent)
-            is CaptureUiState.PublishFailed -> current.copy(intent = intent)
-            is CaptureUiState.PublishSuccess -> current.copy(intent = intent)
+    fun updateIntent(intent: CardType) = intent {
+        reduce {
+            when (val current = state) {
+                is CaptureUiState.Input -> current.copy(intent = intent)
+                is CaptureUiState.Processing -> current.copy(intent = intent)
+                is CaptureUiState.Review -> current.copy(intent = intent)
+                is CaptureUiState.Publishing -> current.copy(intent = intent)
+            }
         }
     }
 
@@ -109,7 +113,7 @@ class CaptureViewModel(
     fun updateReviewTagQuery(query: String) = updateReview { it.copy(tagQuery = query) }
 
     fun addReviewTag(tag: String) {
-        val review = _uiState.value.review ?: return
+        val review = uiState.review ?: return
         val normalized = tag.trim().trimStart('#')
         if (normalized.isBlank()) return
         if (review.tags.any { it.equals(normalized, ignoreCase = true) }) return
@@ -124,12 +128,8 @@ class CaptureViewModel(
 
     fun addMediaItems(items: List<MediaItem>) {
         if (items.isEmpty()) return
-        val current = _uiState.value
-        val media = when (current) {
-            is CaptureUiState.Input -> current.media
-            is CaptureUiState.AnalyzeFailed -> current.media
-            else -> return
-        }
+        val current = uiState as? CaptureUiState.Input ?: return
+        val media = current.media
 
         val existingIds = media.items.map { it.id }.toHashSet()
         val uniqueItems = items.filterNot { existingIds.contains(it.id) }
@@ -142,14 +142,11 @@ class CaptureViewModel(
             }
         )
 
-        _uiState.value = when (current) {
-            is CaptureUiState.AnalyzeFailed -> CaptureUiState.Input(
-                intent = current.intent,
-                input = current.input.copy(focused = true),
-                media = updatedMedia,
-                error = null
-            )
-            is CaptureUiState.Input -> current.copy(media = updatedMedia)
+        intent {
+            reduce {
+                val state = state as? CaptureUiState.Input ?: return@reduce state
+                state.copy(media = updatedMedia)
+            }
         }
 
         uniqueItems.forEach { item ->
@@ -158,21 +155,24 @@ class CaptureViewModel(
     }
 
     fun removeMediaItem(id: String) {
-        val current = _uiState.value
+        val current = uiState
         val media = when (current) {
             is CaptureUiState.Input -> current.media
-            is CaptureUiState.Analyzing -> current.media
-            is CaptureUiState.AnalyzeFailed -> current.media
+            is CaptureUiState.Processing -> current.media
             else -> return
         }
         val updatedMedia = media.copy(
             items = media.items.filter { it.id != id },
             uploadStates = media.uploadStates - id
         )
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(media = updatedMedia)
-            is CaptureUiState.Analyzing -> current.copy(media = updatedMedia)
-            is CaptureUiState.AnalyzeFailed -> current.copy(media = updatedMedia)
+        intent {
+            reduce {
+                when (val state = state) {
+                    is CaptureUiState.Input -> state.copy(media = updatedMedia)
+                    is CaptureUiState.Processing -> state.copy(media = updatedMedia)
+                    else -> state
+                }
+            }
         }
     }
 
@@ -181,18 +181,19 @@ class CaptureViewModel(
     }
 
     fun retryAiCapture() {
-        if (_uiState.value !is CaptureUiState.AnalyzeFailed) return
+        val current = uiState as? CaptureUiState.Input ?: return
+        if (current.error !is CaptureError.AiFailed) return
         runCaptureFlow()
     }
 
-    fun backToInputFromAiFailed() {
-        val current = _uiState.value as? CaptureUiState.AnalyzeFailed ?: return
-        _uiState.value = CaptureUiState.Input(
-            intent = current.intent,
-            input = current.input.copy(focused = true),
-            media = current.media,
-            error = null
-        )
+    fun backToInputFromAiFailed() = intent {
+        reduce {
+            val current = state as? CaptureUiState.Input ?: return@reduce state
+            current.copy(
+                input = current.input.copy(focused = true),
+                error = null
+            )
+        }
     }
 
     fun completeCaptureAndExit() {
@@ -200,66 +201,64 @@ class CaptureViewModel(
     }
 
     fun retryPostPublish() {
-        if (_uiState.value !is CaptureUiState.PublishFailed) return
+        val current = uiState as? CaptureUiState.Review ?: return
+        if (current.error !is CaptureError.PostFailed) return
         runPublishFlow()
     }
 
-    fun backToReview() {
-        val current = _uiState.value as? CaptureUiState.PublishFailed ?: return
-        _uiState.value = CaptureUiState.ReviewEditing(
-            intent = current.intent,
-            review = current.review,
-            error = null
-        )
+    fun backToReview() = intent {
+        reduce {
+            val current = state as? CaptureUiState.Review ?: return@reduce state
+            current.copy(error = null)
+        }
     }
 
-    fun clearError() {
-        val current = _uiState.value
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(error = null)
-            is CaptureUiState.ReviewEditing -> current.copy(error = null)
-            else -> current
+    fun clearError() = intent {
+        reduce {
+            when (val current = state) {
+                is CaptureUiState.Input -> current.copy(error = null)
+                is CaptureUiState.Review -> current.copy(error = null)
+                else -> current
+            }
         }
     }
 
     private fun updateReview(transform: (ReviewCtx) -> ReviewCtx) {
-        val current = _uiState.value
-        if (current !is CaptureUiState.ReviewEditing) return
-        val review = current.review
-        val updatedReview = transform(review)
+        val current = uiState as? CaptureUiState.Review ?: return
+        val updatedReview = transform(current.review)
         logger.debug { "update review: $updatedReview" }
-        _uiState.value = current.copy(review = updatedReview)
+        intent {
+            reduce {
+                val state = state as? CaptureUiState.Review ?: return@reduce state
+                state.copy(review = updatedReview, error = null)
+            }
+        }
     }
 
     private fun runCaptureFlow() {
-        val current = _uiState.value
-        val start = when (current) {
-            is CaptureUiState.Input -> current
-            is CaptureUiState.AnalyzeFailed -> CaptureUiState.Input(
-                intent = current.intent,
-                input = current.input.copy(focused = true),
-                media = current.media,
-                error = null
-            )
-            else -> return
-        }
+        val start = uiState as? CaptureUiState.Input ?: return
 
         if (!start.canCapture) return
         if (start.hasUploadingMedia) {
-            _uiState.value = start.copy(
-                error = CaptureError.UploadFailed("Media upload in progress. Please wait before capture.")
-            )
+            intent {
+                reduce {
+                    val state = state as? CaptureUiState.Input ?: return@reduce state
+                    state.copy(error = CaptureError.UploadFailed("Media upload in progress. Please wait before capture."))
+                }
+            }
             return
         }
 
         viewModelScope.launch {
-            val processing = CaptureUiState.Analyzing(
+            val processing = CaptureUiState.Processing(
                 intent = start.intent,
                 input = start.input.copy(focused = false),
                 media = start.media,
                 analysis = AnalysisCtx(status = AnalysisStatus.Queued, progress = 0)
             )
-            _uiState.value = processing
+            intent {
+                reduce { processing }
+            }
 
             try {
                 val submitRequest = CaptureAnalysisSubmitRequest(
@@ -273,11 +272,15 @@ class CaptureViewModel(
 
                 if (submitResult != null) {
                     val review = hydrateReviewCtx(submitResult.toReviewCtx(), processing.media)
-                    _uiState.value = CaptureUiState.ReviewEditing(
-                        intent = processing.intent,
-                        review = review,
-                        error = null
-                    )
+                    intent {
+                        reduce {
+                            CaptureUiState.Review(
+                                intent = processing.intent,
+                                review = review,
+                                error = null
+                            )
+                        }
+                    }
                     return@launch
                 }
 
@@ -293,35 +296,42 @@ class CaptureViewModel(
                         progress = 5
                     )
                 )
-                _uiState.value = accepted
+                intent {
+                    reduce { accepted }
+                }
                 pollAnalysisResult(jobId = jobId, retryAfterMs = submit.retryAfterMs ?: 800, initialState = accepted)
             } catch (e: Exception) {
                 val message = e.message ?: "Failed to run capture analysis"
                 logger.debug { "startCapture failed: $message" }
-                val latest = _uiState.value as? CaptureUiState.Analyzing ?: processing
-                _uiState.value = CaptureUiState.AnalyzeFailed(
-                    intent = latest.intent,
-                    input = latest.input,
-                    media = latest.media,
-                    message = message
-                )
+                val latest = uiState as? CaptureUiState.Processing ?: processing
+                intent {
+                    reduce {
+                        CaptureUiState.Input(
+                            intent = latest.intent,
+                            input = latest.input.copy(focused = true),
+                            media = latest.media,
+                            error = CaptureError.AiFailed(message)
+                        )
+                    }
+                }
             }
         }
     }
 
     private fun runPublishFlow() {
-        val current = _uiState.value
-        val (intent, review) = when (current) {
-            is CaptureUiState.ReviewEditing -> current.intent to current.review
-            is CaptureUiState.PublishFailed -> current.intent to current.review
-            else -> return
-        }
+        val reviewState = uiState as? CaptureUiState.Review ?: return
+        val intent = reviewState.intent
+        val review = reviewState.review
 
         viewModelScope.launch {
-            _uiState.value = CaptureUiState.Publishing(
-                intent = intent,
-                review = review
-            )
+            intent {
+                reduce {
+                    CaptureUiState.Publishing(
+                        intent = intent,
+                        review = review
+                    )
+                }
+            }
 
             try {
                 val now = Clock.System.now()
@@ -340,19 +350,22 @@ class CaptureViewModel(
                 )
                 cardRepository.insertCard(card)
 
-                _uiState.value = CaptureUiState.PublishSuccess(
-                    intent = intent,
-                    review = review
-                )
                 delay(900)
                 _captureCompleted.tryEmit(Unit)
+                intent {
+                    reduce { CaptureUiState.Input() }
+                }
             } catch (e: Exception) {
                 val message = e.message ?: "Failed to save capture"
-                _uiState.value = CaptureUiState.PublishFailed(
-                    intent = intent,
-                    review = review,
-                    message = message
-                )
+                intent {
+                    reduce {
+                        CaptureUiState.Review(
+                            intent = intent,
+                            review = review,
+                            error = CaptureError.PostFailed(message)
+                        )
+                    }
+                }
             }
         }
     }
@@ -476,37 +489,45 @@ class CaptureViewModel(
         mediaItemId: String,
         transform: (CaptureMediaUploadState) -> CaptureMediaUploadState
     ) {
-        val current = _uiState.value
+        val current = uiState
         val media = when (current) {
             is CaptureUiState.Input -> current.media
-            is CaptureUiState.Analyzing -> current.media
-            is CaptureUiState.AnalyzeFailed -> current.media
+            is CaptureUiState.Processing -> current.media
             else -> return
         }
         val old = media.uploadStates[mediaItemId] ?: CaptureMediaUploadState(mediaItemId = mediaItemId)
         val updatedMedia = media.copy(uploadStates = media.uploadStates + (mediaItemId to transform(old)))
-        _uiState.value = when (current) {
-            is CaptureUiState.Input -> current.copy(media = updatedMedia)
-            is CaptureUiState.Analyzing -> current.copy(media = updatedMedia)
-            is CaptureUiState.AnalyzeFailed -> current.copy(media = updatedMedia)
+        intent {
+            reduce {
+                when (val state = state) {
+                    is CaptureUiState.Input -> state.copy(media = updatedMedia)
+                    is CaptureUiState.Processing -> state.copy(media = updatedMedia)
+                    else -> state
+                }
+            }
         }
     }
 
     private suspend fun pollAnalysisResult(
         jobId: String,
         retryAfterMs: Int,
-        initialState: CaptureUiState.Analyzing
+        initialState: CaptureUiState.Processing
     ) {
         repeat(120) {
             delay(retryAfterMs.toLong().coerceAtLeast(300L))
             val job = captureRepository.queryAnalysis(jobId)
-            val current = _uiState.value as? CaptureUiState.Analyzing ?: return
-            _uiState.value = current.copy(
-                analysis = current.analysis.copy(
-                    status = job.status,
-                    progress = job.progress
-                )
-            )
+            val current = uiState as? CaptureUiState.Processing ?: return
+            intent {
+                reduce {
+                    val state = state as? CaptureUiState.Processing ?: return@reduce state
+                    state.copy(
+                        analysis = state.analysis.copy(
+                            status = job.status,
+                            progress = job.progress
+                        )
+                    )
+                }
+            }
             when (job.status) {
                 AnalysisStatus.Queued,
                 AnalysisStatus.Running -> Unit
@@ -519,35 +540,47 @@ class CaptureViewModel(
                         ),
                         media = initialState.media
                     )
-                    _uiState.value = CaptureUiState.ReviewEditing(
-                        intent = current.intent,
-                        review = review,
-                        error = null
-                    )
+                    intent {
+                        reduce {
+                            CaptureUiState.Review(
+                                intent = current.intent,
+                                review = review,
+                                error = null
+                            )
+                        }
+                    }
                     return
                 }
 
                 AnalysisStatus.Failed -> {
                     val message = job.errorMessage ?: "Capture analysis failed"
-                    _uiState.value = CaptureUiState.AnalyzeFailed(
-                        intent = current.intent,
-                        input = current.input,
-                        media = current.media,
-                        message = message
-                    )
+                    intent {
+                        reduce {
+                            CaptureUiState.Input(
+                                intent = current.intent,
+                                input = current.input.copy(focused = true),
+                                media = current.media,
+                                error = CaptureError.AiFailed(message)
+                            )
+                        }
+                    }
                     return
                 }
             }
         }
 
-        val current = _uiState.value as? CaptureUiState.Analyzing ?: return
+        val current = uiState as? CaptureUiState.Processing ?: return
         val timeoutMessage = "Capture analysis timeout"
-        _uiState.value = CaptureUiState.AnalyzeFailed(
-            intent = current.intent,
-            input = current.input,
-            media = current.media,
-            message = timeoutMessage
-        )
+        intent {
+            reduce {
+                CaptureUiState.Input(
+                    intent = current.intent,
+                    input = current.input.copy(focused = true),
+                    media = current.media,
+                    error = CaptureError.AiFailed(timeoutMessage)
+                )
+            }
+        }
     }
 
     private fun buildAnalysisMediaRefs(media: MediaCtx): List<CaptureAnalysisMediaRef> {

@@ -4,10 +4,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewState
 
-enum class State {
-    LOADING, CONTENT, ERROR
-}
-
 sealed class DashboardUiState(
     val state: State,
 ) {
@@ -24,4 +20,8 @@ sealed class DashboardUiState(
     data class Error(
         val message: String = "",
     ) : DashboardUiState(state = State.ERROR)
+
+    enum class State {
+        LOADING, CONTENT, ERROR
+    }
 }

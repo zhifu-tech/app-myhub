@@ -55,12 +55,12 @@ fun DashboardRoute(
 
 @Composable
 internal fun DashboardScreen(
-    state: State,
+    state: DashboardUiState.State,
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit,
     error: @Composable (Modifier) -> Unit,
     content: @Composable (Modifier) -> Unit,
 ) {
-    val canShowTopBar = state == State.CONTENT
+    val canShowTopBar = state == DashboardUiState.State.CONTENT
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val scaffoldModifier = if (canShowTopBar) {
         Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -78,16 +78,16 @@ internal fun DashboardScreen(
         },
     ) { innerPadding ->
         when (state) {
-            State.LOADING -> LoadingWheel(
+            DashboardUiState.State.LOADING -> LoadingWheel(
                 modifier = Modifier.padding(innerPadding),
                 contentDesc = "加载内容", // fixme 翻译
             )
 
-            State.ERROR -> error(
+            DashboardUiState.State.ERROR -> error(
                 Modifier.padding(innerPadding)
             )
 
-            State.CONTENT -> content(
+            DashboardUiState.State.CONTENT -> content(
                 Modifier.padding(innerPadding)
             )
         }

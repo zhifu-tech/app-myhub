@@ -45,7 +45,7 @@ fun SettingsRoute(
 
 @Composable
 fun SettingsScreen(
-    state: State,
+    state: SettingsUiState.State,
     error: @Composable (Modifier) -> Unit,
     content: @Composable (Modifier) -> Unit,
 ) {
@@ -59,17 +59,17 @@ fun SettingsScreen(
         }
     ) { padding ->
         when (state) {
-            State.LOADING -> LoadingWheel(
+            SettingsUiState.State.LOADING -> LoadingWheel(
                 modifier = Modifier.padding(padding),
                 contentDesc = "加载内容", // fixme 翻译
             )
 
-            State.ERROR -> error(
+            SettingsUiState.State.ERROR -> error(
                 Modifier.fillMaxSize()
                     .padding(paddingValues = padding)
             )
 
-            State.CONTENT -> content(
+            SettingsUiState.State.CONTENT -> content(
                 Modifier.fillMaxSize()
                     .padding(paddingValues = padding)
             )

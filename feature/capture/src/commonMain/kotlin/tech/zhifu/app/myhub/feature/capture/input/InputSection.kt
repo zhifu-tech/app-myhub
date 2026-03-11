@@ -31,7 +31,7 @@ internal fun InputSection(
     onEditInput: () -> Unit,
     onClearError: () -> Unit
 ) {
-    val shouldDim = state is CaptureUiState.Analyzing
+    val shouldDim = state is CaptureUiState.Processing
     Column(
         modifier = Modifier.fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
@@ -58,13 +58,15 @@ internal fun InputSection(
         )
     }
     when (state) {
-        is CaptureUiState.Analyzing -> OverlayAiProcessing()
-        is CaptureUiState.AnalyzeFailed -> {
-            OverlayAiFailed(
-                message = (error as? CaptureError.AiFailed)?.message.orEmpty(),
-                onRetry = onRetry,
-                onEditInput = onEditInput
-            )
+        is CaptureUiState.Processing -> OverlayAiProcessing()
+        is CaptureUiState.Input -> {
+            if (error is CaptureError.AiFailed) {
+                OverlayAiFailed(
+                    message = error.message,
+                    onRetry = onRetry,
+                    onEditInput = onEditInput
+                )
+            }
             if (error is CaptureError.UploadFailed) {
                 CaptureInlineErrorBanner(
                     message = error.message,
@@ -72,7 +74,6 @@ internal fun InputSection(
                 )
             }
         }
-
         else -> Unit
     }
 }

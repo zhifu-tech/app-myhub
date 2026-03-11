@@ -17,6 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.RichTextState
 import tech.zhifu.app.myhub.feature.capture.CaptureUiState
+import tech.zhifu.app.myhub.feature.capture.CaptureViewModel
+
+@Composable
+fun PreviewPanelRoute(
+    viewModel: CaptureViewModel
+) {
+
+}
 
 @Composable
 internal fun PreviewPanel(
@@ -49,27 +57,14 @@ internal fun PreviewPanel(
             verticalArrangement = Arrangement.Center
         ) {
             when (uiState) {
-                is CaptureUiState.Input,
-                is CaptureUiState.AnalyzeFailed -> PreviewPanelContentReady()
-
-                is CaptureUiState.Analyzing -> PreviewPanelContentProcessing()
-
-                is CaptureUiState.ReviewEditing -> PreviewPanelContentReview(
+                is CaptureUiState.Input -> PreviewPanelContentReady()
+                is CaptureUiState.Processing -> PreviewPanelContentProcessing()
+                is CaptureUiState.Review -> PreviewPanelContentReview(
                     review = uiState.review,
                     reviewRichTextState = reviewRichTextState
                 )
 
                 is CaptureUiState.Publishing -> PreviewPanelContentReview(
-                    review = uiState.review,
-                    reviewRichTextState = reviewRichTextState
-                )
-
-                is CaptureUiState.PublishSuccess -> PreviewPanelContentReview(
-                    review = uiState.review,
-                    reviewRichTextState = reviewRichTextState
-                )
-
-                is CaptureUiState.PublishFailed -> PreviewPanelContentReview(
                     review = uiState.review,
                     reviewRichTextState = reviewRichTextState
                 )

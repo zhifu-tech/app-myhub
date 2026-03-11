@@ -13,12 +13,9 @@ Screen: Capture
 
 States:
  - Input
- - Analyzing
- - AnalyzeFailed
- - ReviewEditing
+ - Processing
+ - Review
  - Publishing
- - PublishFailed
- - PublishSuccess
 
 Layout:
  HeaderRegion
@@ -36,41 +33,28 @@ Components:
  AiFailedOverlay
  PublishProcessingOverlay
  PublishFailedOverlay
- PublishSuccessOverlay
  InlineErrorBanner
 
 Interactions:
  Input:
-  StartCapture -> Analyzing
+  StartCapture -> Processing
   AddMedia -> Input
   RemoveMedia -> Input
   UpdateInput -> Input
   UpdateIntent -> Input
 
- Analyzing:
-  AiSuccess -> ReviewEditing
-  AiFail -> AnalyzeFailed
+ Processing:
+  AiSuccess -> Review
+  AiFail -> Input
 
- AnalyzeFailed:
-  RetryAnalyze -> Analyzing
-  BackToInput -> Input
-  UpdateInput -> Input
-
- ReviewEditing:
-  UpdateReview -> ReviewEditing
+ Review:
+  UpdateReview -> Review
   Publish -> Publishing
-  UpdateIntent -> ReviewEditing
+  UpdateIntent -> Review
 
  Publishing:
-  PublishSuccess -> PublishSuccess
-  PublishFail -> PublishFailed
-
- PublishFailed:
-  RetryPublish -> Publishing
-  BackToReview -> ReviewEditing
-
- PublishSuccess:
-  Exit -> Input
+  PublishSuccess -> Exit
+  PublishFail -> Review
 ```
 
 ---
@@ -80,17 +64,12 @@ Interactions:
 ```mermaid
 stateDiagram-v2
     [*] --> Input
-    Input --> Analyzing: Start capture
-    Analyzing --> ReviewEditing: AI success
-    Analyzing --> AnalyzeFailed: AI failed
-    AnalyzeFailed --> Analyzing: Retry
-    AnalyzeFailed --> Input: Back to input
-    ReviewEditing --> Publishing: Publish
-    Publishing --> PublishSuccess: Publish success
-    Publishing --> PublishFailed: Publish failed
-    PublishFailed --> Publishing: Retry publish
-    PublishFailed --> ReviewEditing: Back to review
-    PublishSuccess --> Input: Exit
+    Input --> Processing: Start capture
+    Processing --> Review: AI success
+    Processing --> Input: AI failed
+    Review --> Publishing: Publish
+    Publishing --> Review: Publish failed
+    Publishing --> [*]: Publish success (Exit)
 ```
 
 # 3. 校验

@@ -3,10 +3,6 @@ package tech.zhifu.app.myhub.feature.settings
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingState
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
 
-enum class State {
-    LOADING, CONTENT, ERROR
-}
-
 sealed class SettingsUiState(val state: State) {
     object Loading : SettingsUiState(state = State.LOADING)
 
@@ -20,4 +16,8 @@ sealed class SettingsUiState(val state: State) {
         val message: String = "",
         val canRetry: Boolean = true,
     ) : SettingsUiState(state = State.ERROR)
+
+    enum class State {
+        LOADING, CONTENT, ERROR
+    }
 }
