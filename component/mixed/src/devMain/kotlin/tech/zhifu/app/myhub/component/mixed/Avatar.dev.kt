@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import tech.zhifu.app.myhub.component.mixed.Avatar
 import tech.zhifu.app.myhub.theme.AppTheme
 
 /**
