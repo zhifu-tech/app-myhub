@@ -36,6 +36,7 @@ coil = "3.4.0"
 cmpMediaPlayer = "1.0.53"
 richeditor = "1.0.0-rc13"
 orbit = "11.0.0"
+annotationJvm = "1.9.1"
 
 [libraries]
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -123,6 +124,7 @@ sqldelight-sqlite-dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect"
 sqldelight-web = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqldelight" }
 umeng-asms = { module = "com.umeng.umsdk:asms", version.ref = "umeng-asms" }
 umeng-common = { module = "com.umeng.umsdk:common", version.ref = "umeng-common" }
+androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
