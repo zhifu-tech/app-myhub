@@ -24,7 +24,6 @@ indent_style = space
 indent_size = 4
 max_line_length = 120
 ij_java_names_count_to_use_import_on_demand = 99
-ij_java_static_import_counts = 99
 
 # Gradle files
 [*.gradle]

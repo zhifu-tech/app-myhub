@@ -8,7 +8,7 @@ val Project.libsCatalog
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 
-fun KotlinMultiplatformExtension.iosTargets() = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+fun KotlinMultiplatformExtension.iosTargets() = listOf(iosArm64(), iosSimulatorArm64())
 
 fun Project.getVariantEnvironment(defaultEnv: String = "dev") = findProperty("appEnv")?.toString() ?: defaultEnv
 
