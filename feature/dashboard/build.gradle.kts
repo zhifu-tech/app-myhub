@@ -29,26 +29,23 @@ kotlin {
             implementation(projects.component.card)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
-            implementation(projects.feature.captureApi)
-            implementation(projects.feature.cardApi)
             implementation(projects.feature.dashboardApi)
-            implementation(projects.feature.authApi)
 
+            implementation(libs.chrisbanes.haze)
+            implementation(libs.chrisbanes.haze.materials)
+            implementation(libs.coil.compose)
+            implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)
             implementation(libs.jb.compose.material3.material3)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
-
-            implementation(libs.jb.androidx.window.windowCore)
-
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.orbit.core)
             implementation(libs.orbit.compose)
             implementation(libs.orbit.viewmodel)
-
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.core)
 
             if (project.isDev()) {
                 implementation(libs.jb.compose.ui.uiToolingPreview)

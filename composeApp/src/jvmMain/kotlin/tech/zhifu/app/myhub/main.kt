@@ -20,8 +20,9 @@ fun main() = application {
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "书斋 - Study Room",
-        state = windowState
+        title = "MyHub",
+        state = windowState,
+//        icon = painterResource(Res.drawable)
     ) {
         // 传递当前窗口大小，以便 App 内部能正确计算 WindowSizeClass
         App()

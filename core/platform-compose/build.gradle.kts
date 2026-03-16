@@ -32,6 +32,10 @@ kotlin {
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
 
+            implementation(libs.orbit.core)
+            implementation(libs.orbit.compose)
+            implementation(libs.orbit.viewmodel)
+
             if (project.isDev()) {
                 implementation(libs.jb.compose.ui.uiToolingPreview)
             }

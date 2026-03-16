@@ -215,20 +215,8 @@ include(":component:mixed")
 // ============================================================================
 // 功能模块
 // ============================================================================
-include(":feature:settings-api")
-include(":feature:settings")
-include(":feature:profile-api")
-include(":feature:profile")
-include(":feature:card-api")
-include(":feature:card")
-include(":feature:auth-api")
-include(":feature:auth")
-include(":feature:favorite-api")
-include(":feature:favorite")
 include(":feature:dashboard-api")
 include(":feature:dashboard")
-include(":feature:capture-api")
-include(":feature:capture")
 
 // ============================================================================
 // 应用模块

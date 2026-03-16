@@ -2,7 +2,9 @@
 
 ## 关于 logo
 
-![logo](./logo/assets/myhub-minimal-tech-logo-mark.svg)
+![myhub-logo-kinetic-flow.svg](logo/myhub-logo-kinetic-flow.svg)
+
+流畅的渐变“M”形符号。代表连接性、运动性和无缝的用户体验。
 
 ## [UI 架构规范文档](./spec/ui-architecture-rulebook.md)
 

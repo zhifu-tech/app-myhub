@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MyHub - Kinetic Flow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4A6CF7",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#101322"
+                    },
+                    fontFamily: {
+                        display: "Inter"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.375rem",
+                        lg: "0.75rem",
+                        xl: "1.25rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style type="text/tailwindcss">
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-32">
+<header class="sticky top-0 z-50 glass-effect border-b border-slate-200/10 dark:border-white/5">
+<div class="max-w-5xl mx-auto flex items-center justify-between px-4 h-16">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center size-9">
+<svg height="40" viewBox="0 0 40 40" width="40" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="grad0" x1="0" x2="40" y1="0" y2="40">
+<stop offset="0%" stop-color="#6C83FF"></stop>
+<stop offset="100%" stop-color="#2F3CCF"></stop>
+</linearGradient>
+</defs>
+<path d="M8 32C8 32 8 12 14 12C20 12 20 28 26 28C32 28 32 8 32 8" fill="none" stroke="url(#grad0)" stroke-linecap="round" stroke-linejoin="round" stroke-width="5.5"></path>
+</svg>
+</div>
+<span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">MyHub</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-primary/10 border-2 border-primary/20 overflow-hidden">
+<img alt="User profile avatar portrait" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPL4YNGmqxPpt0AYrfKv6zUWDBiOIDxCLfc-tfIgbTp9U14H1nNelVPdHflflPGD8BbzhV8RLpTStZTlNE-XV6HHn5fnkzcANcMf2JSrjAU_TQGvztV1zrl98eZfn50glHZ5vDkdh17-Huvvps2lrElLnZrKxDULM-CVrRlwaaJZ-sNXAHfaYjtGfIq02rbAZCn8BK8XYCGW_BfGh4oymunSKj4q0Z5H45Z4IwHQ5Ph0GaBCPWIhhpI33vqG7filNR61oLUClhs67k"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-4 space-y-3 pt-4">
+<div class="overflow-hidden">
+<div class="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm mb-3">
+<div class="size-16 shrink-0 rounded-lg overflow-hidden">
+<img alt="Article thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeko7d4QweE0UuAM_k-N54jdwJzMNYtwe4UopJpEC8IL-8tbijJF8lmbavrtkNVbwQQgBdtzc7eaXe5VR9vp7QTb1XoyhNwV4ae5KMS6Lge5ne8CPuQ4OJEnZD6Xj1BSjiB2HbuC1e9d32D_jFcEkKtoFSEke8PBMSjoDOokLFxSLknjv325K0ZKWp5z0NdL10Yr3bnvr98mlIIFgW6_F6PVgqtvV5njmGinbyvcKS7P1Qn2h4IgR6X6Q5uoPBy7GK-7YzvsqJRIhB"/>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">Understanding Quantum Computing: The Future of Processing</h4>
+<p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Modified 12 mins ago</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm mb-3">
+<div class="size-16 shrink-0 rounded-lg overflow-hidden relative">
+<img alt="Video thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFVBQpeqyddiq-EsSvrfzzTGxiDPBB26-cGd9DCMebwXH-8k5IrY4h1TfOBmSBGiTPrsV6jLZaQ4I2JIt2XFQoKpTAW786ac1pNuf8sb5ceGOtdtHO9BVc_xKKNVORqduM9kQavIVigAl1ikvvR2ZaXWd9kMoWy142oVN8ZTxAwouO7_N9yJ1AzrhqetfRz92GIk-LgsG237pJN-vHPP4fqsO-6WEt9O-kM7YNv3jlTIooDO2feaZt3htNUSfNWo0jidycm8QZ4j8x"/>
+<div class="absolute inset-0 flex items-center justify-center bg-black/20">
+<span class="material-symbols-outlined text-white text-xl">play_circle</span>
+</div>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">Weekly Team Sync - Product Design</h4>
+<p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Modified 2 hours ago</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm mb-3">
+<div class="size-16 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">format_quote</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">"The best way to predict the future is to create it..."</h4>
+<p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Modified 5 hours ago</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm mb-3">
+<div class="size-16 shrink-0 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-3xl">link</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">Tailwind CSS Documentation</h4>
+<p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Modified 1 day ago</p>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-[60]">
+<div class="flex items-center gap-3">
+<div class="flex-1 flex items-center glass-effect rounded-full h-14 px-5 shadow-lg border border-white/20">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300" style="font-variation-settings: 'wght' 200;">search</span>
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-slate-800 dark:text-white placeholder-slate-500 px-3 text-sm" placeholder="搜索" type="text"/>
+</div>
+<button class="size-14 min-w-[3.5rem] rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform glass-effect border-white/20 aspect-square">
+<span class="material-symbols-outlined text-3xl text-slate-800 dark:text-white" style="font-variation-settings: 'wght' 200;">edit_square</span>
+</button>
+</div>
+</div>
+
+</body></html>

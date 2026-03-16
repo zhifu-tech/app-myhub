@@ -1,52 +1,42 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.orbitmvi.orbit.Container
-import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.auth.api.session.AuthSessionCoordinator
+import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.card.loadCards
+import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.loadCollections
+import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.util.ViewModelContainerHost
 
 class DashboardViewModel(
     val logger: Logger = logger("Dashboard"),
     internal val cardRepository: CardRepository,
     internal val collectionRepository: CollectionRepository,
     private val userRepository: UserRepository,
-    private val authSessionCoordinator: AuthSessionCoordinator,
-) : ContainerHost<DashboardUiState, DashboardSideEffect>, ViewModel() {
+) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>() {
 
-    override val container: Container<DashboardUiState, DashboardSideEffect> = container(
-        initialState = DashboardUiState.Loading
-    ) {
-        initInternal()
-    }
-    val uiState: DashboardUiState
-        get() = container.stateFlow.value
+    override val container = container<DashboardUiState, DashboardSideEffect>(
+        // fixme 替换为很正的初始化状态
+        initialState = DashboardUiState.Content(
+            collectionSectionState = CollectionSectionState(),
+            cardSectionState = CardSectionState(),
+            searchState = SearchState(),
+        )
+    )
 
-    @Composable
-    fun <R> collectFieldAsState(
-        selector: (DashboardUiState) -> R,
-    ): State<R> = container.stateFlow.map(selector)
-        .distinctUntilChanged()
-        .collectAsState(initial = selector(uiState))
-
+    // TODO FOLLOWING CODE SHOULD BE CHECK
+    //
     fun retry() {
         viewModelScope.launch {
             logger.debug { "Retrying dashboard" }
@@ -123,6 +113,7 @@ class DashboardViewModel(
                         source = "init",
                         cardSectionState = cardSectionState,
                         collectionSectionState = collectionSectionState,
+                        searchState = SearchState(),
                     )
                 }
             }

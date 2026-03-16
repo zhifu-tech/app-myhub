@@ -16,13 +16,7 @@ import tech.zhifu.app.myhub.datastore.repository.tag.di.tagRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.template.di.templateRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
 
-/**
- * 仓库依赖注入模块（客户端）
- *
- * 提供所有 Repository 的实现
- * 包含本地和远程数据源模块（localDataSourceModule, remoteDataSourceModule）
- */
-val repositoryModule = module {
+fun repositoryModule() = module {
     // Bookkeeper 存储（数据库实现 - 持久化）
     single<BookkeeperStorage> {
         DatabaseBookkeeperStorage(

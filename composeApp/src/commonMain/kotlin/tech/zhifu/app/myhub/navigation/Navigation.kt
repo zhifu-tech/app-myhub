@@ -7,57 +7,22 @@ import androidx.navigation3.runtime.entryProvider
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import tech.zhifu.app.myhub.feature.capture.api.navigation.CaptureNavKey
-import tech.zhifu.app.myhub.feature.capture.navigation.captureEntry
-import tech.zhifu.app.myhub.feature.card.api.CardNavKey
-import tech.zhifu.app.myhub.feature.card.navigation.cardEntry
 import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavKey
-import tech.zhifu.app.myhub.feature.dashboard.api.navigation.dashboardNavItem
 import tech.zhifu.app.myhub.feature.dashboard.navigation.dashboardEntry
-import tech.zhifu.app.myhub.feature.profile.api.navigation.ProfileNavKey
-import tech.zhifu.app.myhub.feature.profile.api.navigation.profileNavItem
-import tech.zhifu.app.myhub.feature.profile.navigation.profileEntry
-import tech.zhifu.app.myhub.feature.settings.api.SettingsNavKey
-import tech.zhifu.app.myhub.feature.settings.navigation.settingsEntry
 
 fun navAppStartKey(): NavKey = DashboardNavKey
 
 fun navAppKeySet(): Set<NavKey> = setOf(
     DashboardNavKey,
-    ExploreNavKey,
-    FavoritesNavKey,
-    ProfileNavKey,
-)
-
-@Composable
-fun navAppKeyItemMap(): Map<NavKey, NavItem> = mapOf(
-    DashboardNavKey to dashboardNavItem(),
-    ExploreNavKey to exploreNavItem(),
-    FavoritesNavKey to favoritesNavItem(),
-    ProfileNavKey to profileNavItem(),
 )
 
 fun navKeySerializerModule() = SerializersModule {
     polymorphic(NavKey::class) {
         subclass(DashboardNavKey::class)
-        subclass(ExploreNavKey::class)
-        subclass(FavoritesNavKey::class)
-        subclass(ProfileNavKey::class)
-        subclass(LoginNavKey::class)
-        subclass(CaptureNavKey::class)
-        subclass(CardNavKey::class)
-        subclass(SettingsNavKey::class)
     }
 }
 
 @Composable
 fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvider {
     dashboardEntry(this@navEntryProvider)
-    entry<ExploreNavKey> { PlaceholderScreen("Explore") }
-    entry<FavoritesNavKey> { PlaceholderScreen("Favorites") }
-    entry<LoginNavKey> { PlaceholderScreen("Login Required") }
-    profileEntry(this@navEntryProvider)
-    captureEntry(this@navEntryProvider)
-    cardEntry(this@navEntryProvider)
-    settingsEntry(this@navEntryProvider)
 }

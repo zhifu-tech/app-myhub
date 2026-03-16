@@ -1,6 +1,9 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
 sealed class DashboardSideEffect {
+
+    object ResetSearch : DashboardSideEffect()
+
     object NavigateToAuth : DashboardSideEffect()
 
     data class NavigateToCardDetail(val cardId: String) : DashboardSideEffect()

@@ -12,7 +12,7 @@ import tech.zhifu.app.myhub.datastore.repository.template.CardTemplateRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.startup.StartupTask
 
-val bootstrapModule = module {
+fun bootstrapModule() = module {
     factory {
         Bootstrap(
             userRepository = get<UserRepository>(),

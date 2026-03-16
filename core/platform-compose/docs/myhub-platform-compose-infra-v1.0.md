@@ -39,24 +39,24 @@
 **状态说明**：
 
 - **评审状态**：用于标识文档的评审进度
-  - 🟢 通过：文档已通过评审，可以进入实施阶段
-  - 🟡 待评审：文档正在等待评审或评审进行中
-  - 🔴 需修改：文档评审后需要修改
+    - 🟢 通过：文档已通过评审，可以进入实施阶段
+    - 🟡 待评审：文档正在等待评审或评审进行中
+    - 🔴 需修改：文档评审后需要修改
 - **方案状态**：用于标识方案的实施进度
-  - 🔒 已锁定：方案设计已确定，不允许随意修改
-  - 📝 进行中：方案设计正在进行中，可以修改
-  - ⏸️ 暂停：方案设计暂时停止，保留当前状态
+    - 🔒 已锁定：方案设计已确定，不允许随意修改
+    - 📝 进行中：方案设计正在进行中，可以修改
+    - ⏸️ 暂停：方案设计暂时停止，保留当前状态
 - 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
 ## 修改历史
 
-| 版本 | 日期       | 修改内容                           | 修改原因           |
-| ---- | ---------- | ---------------------------------- | ------------------ |
-| v1.0 | 2026-01-13 | 初始方案设计                       | 新建               |
-| v1.0 | 2026-01-13 | 完成架构设计文档                   | 完善文档           |
-| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定     | 状态更新：评审通过 |
+| 版本   | 日期         | 修改内容            | 修改原因      |
+|------|------------|-----------------|-----------|
+| v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
+| v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
+| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
 
 ---
 
@@ -171,8 +171,8 @@
 
 #### 3.2.1 支持的平台
 
-| 平台    | 支持状态    | 说明                     |
-| ------- | ----------- | ------------------------ |
+| 平台      | 支持状态   | 说明                     |
+|---------|--------|------------------------|
 | Android | ✅ 完全支持 | 使用 Android Compose API |
 | iOS     | ✅ 完全支持 | 使用 iOS Compose API     |
 | JVM     | ✅ 完全支持 | 使用 JVM Compose API     |
@@ -407,7 +407,8 @@ enum class Language(val code: String, val region: String?) {
 
 fun String.toLanguage(): Language
 fun Language.toCode(): String
-@Composable fun Language.getLocalizedLabel(): String
+@Composable
+fun Language.getLocalizedLabel(): String
 ```
 
 **设计要点**：
@@ -500,32 +501,25 @@ KMP 依赖关系逻辑图
 graph TD
 %% ===== Common =====
     commonMain["commonMain<br/>(公共接口)"]
-
 %% ===== Web =====
     webMain["webMain<br/>(Web公共代码)"]
     jsMain["jsMain"]
     wasmJsMain["wasmJsMain"]
-
 %% ===== JVM / Android =====
     jvmMain["jvmMain"]
     androidMain["androidMain"]
-
 %% ===== Native Root =====
     nativeMain["nativeMain"]
-
 %% ===== iOS =====
     iosMain["iosMain"]
-
 %% ===== Relations =====
     commonMain --> webMain
     commonMain --> jvmMain
     commonMain --> androidMain
     commonMain --> nativeMain
-
 %% Web
     webMain --> jsMain
     webMain --> wasmJsMain
-
 %% Native branches
     nativeMain --> iosMain
 ```
@@ -633,7 +627,7 @@ actual object LocalAppLocale {
         @Composable get() {
             val configuration = LocalConfiguration.current
             return configuration.locales[0].language + "-" +
-                   configuration.locales[0].country
+                    configuration.locales[0].country
         }
 
     @Composable
@@ -926,11 +920,11 @@ class LanguageTest {
 
 ### 6.2 里程碑
 
-| 里程碑             | 目标日期   | 状态         |
-| ------------------ | ---------- | ------------ |
-| 基础架构完成       | 2026-01-13 | ✅ 已完成     |
-| 文档完善           | 2026-01-13 | ✅ 已完成     |
-| 功能扩展（如需要） | 持续进行   | 🔄 持续进行   |
+| 里程碑       | 目标日期       | 状态      |
+|-----------|------------|---------|
+| 基础架构完成    | 2026-01-13 | ✅ 已完成   |
+| 文档完善      | 2026-01-13 | ✅ 已完成   |
+| 功能扩展（如需要） | 持续进行       | 🔄 持续进行 |
 
 ---
 
@@ -1036,20 +1030,20 @@ class LanguageTest {
 
 ### 8.3 术语表
 
-| 术语               | 说明                                             |
-| ------------------ | ------------------------------------------------ |
-| KMP                | Kotlin Multiplatform，Kotlin 多平台框架          |
-| Compose            | Jetpack Compose，声明式 UI 框架                  |
-| CompositionLocal   | Compose 提供的隐式传递上下文的机制               |
-| expect/actual      | KMP 提供的跨平台抽象机制                         |
-| Source Set         | KMP 中的源集，用于组织不同平台的代码             |
-| 混合模块           | 包含多个相关功能的模块，而非单一功能             |
+| 术语                 | 说明                                |
+|--------------------|-----------------------------------|
+| KMP                | Kotlin Multiplatform，Kotlin 多平台框架 |
+| Compose            | Jetpack Compose，声明式 UI 框架         |
+| CompositionLocal   | Compose 提供的隐式传递上下文的机制             |
+| expect/actual      | KMP 提供的跨平台抽象机制                    |
+| Source Set         | KMP 中的源集，用于组织不同平台的代码              |
+| 混合模块               | 包含多个相关功能的模块，而非单一功能                |
 | LocalAppTheme      | 主题管理 CompositionLocal，提供深色/浅色主题支持 |
-| LocalAppLocale     | 语言环境管理 CompositionLocal，提供多语言支持    |
-| WindowSizeDetector | 窗口尺寸检测函数，提供跨平台的窗口大小检测能力   |
-| WindowSizeClass    | 窗口尺寸类别枚举，用于响应式布局                 |
-| SwipeBackGesture   | 滑动返回手势 Modifier，提供统一的滑动返回交互    |
-| Language           | 语言枚举，提供语言代码和枚举之间的转换           |
+| LocalAppLocale     | 语言环境管理 CompositionLocal，提供多语言支持   |
+| WindowSizeDetector | 窗口尺寸检测函数，提供跨平台的窗口大小检测能力           |
+| WindowSizeClass    | 窗口尺寸类别枚举，用于响应式布局                  |
+| SwipeBackGesture   | 滑动返回手势 Modifier，提供统一的滑动返回交互       |
+| Language           | 语言枚举，提供语言代码和枚举之间的转换               |
 
 ### 8.4 常见问题
 

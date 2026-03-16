@@ -1,8 +1,4 @@
 <resources>
-    <string name="settings">設置</string>
-    <string name="platform_language_english">英語</string>
-    <string name="platform_language_simplified_chinese">簡體中文</string>
-    <string name="platform_language_traditional_chinese">繁體中文</string>
-    <string name="platform_language_japanese">日語</string>
+  <string name="settings">設置</string>
 </resources>
 

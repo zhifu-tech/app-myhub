@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.feature.dashboard
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewState
+import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 
 sealed class DashboardUiState(
     val state: State,
@@ -15,6 +16,8 @@ sealed class DashboardUiState(
         val reviewState: ReviewState? = null,
         val collectionSectionState: CollectionSectionState,
         val cardSectionState: CardSectionState,
+
+        val searchState: SearchState,
     ) : DashboardUiState(state = State.CONTENT)
 
     data class Error(

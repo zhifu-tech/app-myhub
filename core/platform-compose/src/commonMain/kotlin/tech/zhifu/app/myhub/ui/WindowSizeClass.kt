@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.ui
 
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
@@ -17,7 +18,9 @@ val LocalWindowSizeClass = compositionLocalOf<WindowSizeClass> {
 }
 
 @Composable
-fun rememberWindowSizeClass(windowAdaptiveInfo: WindowAdaptiveInfo): WindowSizeClass {
+fun rememberWindowSizeClass(
+    windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()
+): WindowSizeClass {
     val windowSizeClass = windowAdaptiveInfo.windowSizeClass
     val minWidthDp = windowSizeClass.minWidthDp
     val minHeightDp = windowSizeClass.minHeightDp

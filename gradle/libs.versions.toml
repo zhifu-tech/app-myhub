@@ -37,6 +37,7 @@ cmpMediaPlayer = "1.0.53"
 richeditor = "1.0.0-rc13"
 orbit = "11.0.0"
 annotationJvm = "1.9.1"
+haze = "1.7.2"
 
 [libraries]
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -80,6 +81,8 @@ filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref =
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+chrisbanes-haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 richeditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richeditor" }
 orbit-core = { module = "org.orbit-mvi:orbit-core", version.ref = "orbit" }
 orbit-compose = { module = "org.orbit-mvi:orbit-compose", version.ref = "orbit" }
@@ -124,7 +127,6 @@ sqldelight-sqlite-dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect"
 sqldelight-web = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqldelight" }
 umeng-asms = { module = "com.umeng.umsdk:asms", version.ref = "umeng-asms" }
 umeng-common = { module = "com.umeng.umsdk:common", version.ref = "umeng-common" }
-androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
