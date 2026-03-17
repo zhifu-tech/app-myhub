@@ -1,5 +1,14 @@
 <resources>
   <string name="feature_dashboard_dashboard">仪表盘</string>
+  <string name="feature_dashboard_menu_layout_list">列表</string>
+  <string name="feature_dashboard_menu_layout_grid">图标</string>
+  <string name="feature_dashboard_menu_sort_by_date">按日期排序</string>
+  <string name="feature_dashboard_menu_sort_by_name">按名称排序</string>
+  <string name="feature_dashboard_menu_support">反馈与帮助</string>
+  <string name="feature_dashboard_menu_license">开源代码许可</string>
+  <string name="feature_dashboard_menu_logout">退出登录</string>
+  // TODO Following need check
+
   <string name="feature_dashboard_search_placeholder">搜索卡片内容、标签或作者...</string>
   <string name="feature_dashboard_good_evening">晚上好，学者</string>
   <string name="feature_dashboard_cards_to_review">你今天有 %1$d 张卡片需要复习。</string>
@@ -24,5 +33,5 @@
   <string name="feature_dashboard_recent_edits">最近编辑</string>
   <string name="feature_dashboard_favorites">收藏</string>
   <string name="feature_dashboard_total">总计卡片</string>
-</resources>
 
+</resources>

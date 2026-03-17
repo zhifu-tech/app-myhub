@@ -69,7 +69,7 @@ class UserRepositoryImpl(
         )
 
     override fun streamUser(): Flow<User?> =
-        store.stream<StoreWriteResponse>(
+        store.stream<StoreReadResponse<User>>(
             request = StoreReadRequest.localOnly(
                 key = UserStoreKey.ById(""), // 约定：空 id 表示当前登录用户
             )
@@ -127,6 +127,20 @@ class UserRepositoryImpl(
         val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
         if (current.language == language) return
         val updated = current.copy(language = language)
+        insertUserPreferences(updated, needSync = true)
+    }
+
+    override suspend fun updateUserPreferencesLayoutAsList(userId: String, layoutAsList: Boolean) {
+        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
+        if (current.layoutAsList == layoutAsList) return
+        val updated = current.copy(layoutAsList = layoutAsList)
+        insertUserPreferences(updated, needSync = true)
+    }
+
+    override suspend fun updateUserPreferencesSortAsDate(userId: String, sortAsDate: Boolean) {
+        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
+        if (current.sortAsDate == sortAsDate) return
+        val updated = current.copy(sortAsDate = sortAsDate)
         insertUserPreferences(updated, needSync = true)
     }
 }

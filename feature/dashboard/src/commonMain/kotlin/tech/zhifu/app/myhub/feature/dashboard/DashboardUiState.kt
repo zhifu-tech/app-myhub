@@ -11,6 +11,10 @@ sealed class DashboardUiState(
     object Loading : DashboardUiState(state = State.LOADING)
 
     data class Content(
+        val layoutAsList: Boolean = true,
+        val sortAsDate: Boolean = true,
+
+        // FOLLOWING NEED REFINE
         val source: String = "Unknown",
         val isRefreshing: Boolean = false,
         val reviewState: ReviewState? = null,

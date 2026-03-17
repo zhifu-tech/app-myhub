@@ -5,10 +5,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBarContent
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.FabContent
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBarAvatarContent
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBarContent
-import tech.zhifu.app.myhub.feature.dashboard.content.menu.MenuContent
-import tech.zhifu.app.myhub.feature.dashboard.content.menu.MenuItemLayoutContent
-import tech.zhifu.app.myhub.feature.dashboard.content.menu.MenuItemLogoutContent
-import tech.zhifu.app.myhub.feature.dashboard.content.menu.MenuItemSortContent
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchBarContent
 import tech.zhifu.app.myhub.theme.AppTheme
 import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
@@ -25,29 +21,6 @@ fun DashboardScreen_Loading() {
                     actions = {
                         TopBarAvatarContent(
                             onClick = {},
-                            menu = {
-                                MenuContent(
-                                    expanded = true,
-                                    onDismissRequest = {},
-                                    menuItemLayout = {
-                                        MenuItemLayoutContent(
-                                            layoutAsList = true,
-                                            onActionLayout = {}
-                                        )
-                                    },
-                                    menuItemSort = {
-                                        MenuItemSortContent(
-                                            sortAsDate = true,
-                                            onActionSort = {},
-                                        )
-                                    },
-                                    menuItemLogout = {
-                                        MenuItemLogoutContent(
-                                            onActionLogout = {},
-                                        )
-                                    }
-                                )
-                            }
                         )
                     }
                 )

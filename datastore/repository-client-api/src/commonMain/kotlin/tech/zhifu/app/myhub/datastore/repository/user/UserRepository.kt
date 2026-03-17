@@ -36,4 +36,8 @@ interface UserRepository {
     suspend fun updateUserPreferencesTheme(userId: String, theme: String)
 
     suspend fun updateUserPreferencesLanguage(userId: String, language: String)
+
+    suspend fun updateUserPreferencesLayoutAsList(userId: String, layoutAsList: Boolean)
+
+    suspend fun updateUserPreferencesSortAsDate(userId: String, sortAsDate: Boolean)
 }

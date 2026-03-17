@@ -3,11 +3,17 @@ package tech.zhifu.app.myhub.feature.dashboard
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
+import tech.zhifu.app.myhub.datastore.repository.user.preferences
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.card.loadCards
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
@@ -35,6 +41,11 @@ class DashboardViewModel(
         )
     )
 
+    init {
+        // FIXME:
+//        observeUserPreferences()
+    }
+
     // TODO FOLLOWING CODE SHOULD BE CHECK
     //
     fun retry() {
@@ -57,6 +68,20 @@ class DashboardViewModel(
     fun dismissFocusReview() = intent {
         reduce {
             state/*.copy(showFocusReview = false)*/
+        }
+    }
+
+    fun updateLayoutAsList(layoutAsList: Boolean) {
+        viewModelScope.launch {
+            val userId = userRepository.getUserOrNull()?.id ?: return@launch
+            userRepository.updateUserPreferencesLayoutAsList(userId, layoutAsList)
+        }
+    }
+
+    fun updateSortAsDate(sortAsDate: Boolean) {
+        viewModelScope.launch {
+            val userId = userRepository.getUserOrNull()?.id ?: return@launch
+            userRepository.updateUserPreferencesSortAsDate(userId, sortAsDate)
         }
     }
 
@@ -185,6 +210,40 @@ class DashboardViewModel(
                     )
                 }
             }
+        }
+    }
+
+    private fun observeUserPreferences() {
+        viewModelScope.launch {
+            userRepository.streamUser()
+                .map { it?.id }
+                .distinctUntilChanged()
+                .flatMapLatest { userId ->
+                    if (userId.isNullOrBlank()) {
+                        flowOf(null)
+                    } else {
+                        userRepository.streamUserPreferences(userId)
+                            .map { response ->
+                                (response as? StoreReadResponse.Data)
+                                    ?.value
+                                    ?.preferences
+                            }
+                    }
+                }
+                .map { prefs ->
+                    val layoutAsList = prefs?.layoutAsList ?: true
+                    val sortAsDate = prefs?.sortAsDate ?: true
+                    layoutAsList to sortAsDate
+                }
+                .distinctUntilChanged()
+                .collect { (layoutAsList, sortAsDate) ->
+                    reduce<DashboardUiState.Content> {
+                        copy(
+                            layoutAsList = layoutAsList,
+                            sortAsDate = sortAsDate
+                        )
+                    }
+                }
         }
     }
 

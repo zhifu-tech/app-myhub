@@ -6,27 +6,30 @@ import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_grid
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_list
 
 @Composable
 fun MenuItemLayout(
     viewModel: DashboardViewModel
 ) {
-    // fixme 这里需要从用户偏好 中加载配置
-    var layoutAsList by rememberSaveable { mutableStateOf(true) }
+    val layoutAsList = viewModel.collectFieldAsState { state ->
+        (state as? DashboardUiState.Content)?.layoutAsList ?: true
+    }.value
 
     MenuItemLayoutContent(
         layoutAsList = layoutAsList,
         onActionLayout = {
-            layoutAsList = it
+            viewModel.updateLayoutAsList(it)
         }
     )
 }
@@ -41,7 +44,12 @@ fun MenuItemLayoutContent(
         onCheckedChange = { checked ->
             if (checked) onActionLayout(true)
         },
-        text = { Text(text = "列表") },
+        text = {
+            Text(
+                text = stringResource(Res.string.feature_dashboard_menu_layout_list),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        },
         shapes = MenuDefaults.itemShape(0, 5),
         leadingIcon = {
             Icon(
@@ -61,7 +69,12 @@ fun MenuItemLayoutContent(
         onCheckedChange = { checked ->
             if (checked) onActionLayout(false)
         },
-        text = { Text(text = "图标") },
+        text = {
+            Text(
+                text = stringResource(Res.string.feature_dashboard_menu_layout_grid),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        },
         shapes = MenuDefaults.itemShape(1, 5),
         leadingIcon = {
             Icon(

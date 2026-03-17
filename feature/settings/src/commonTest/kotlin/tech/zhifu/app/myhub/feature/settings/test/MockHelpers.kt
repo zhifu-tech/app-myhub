@@ -103,4 +103,16 @@ class MockUserRepository(
         if (current.userId != userId) return
         preferences = current.copy(language = language)
     }
+
+    override suspend fun updateUserPreferencesLayoutAsList(userId: String, layoutAsList: Boolean) {
+        val current = preferences ?: return
+        if (current.userId != userId) return
+        preferences = current.copy(layoutAsList = layoutAsList)
+    }
+
+    override suspend fun updateUserPreferencesSortAsDate(userId: String, sortAsDate: Boolean) {
+        val current = preferences ?: return
+        if (current.userId != userId) return
+        preferences = current.copy(sortAsDate = sortAsDate)
+    }
 }

@@ -207,6 +207,8 @@ fun DbUserPreferences.toDomain() = UserPreferences(
     userId = user_id,
     theme = theme,
     language = language,
+    layoutAsList = layout_as_list.toBoolean(def = true),
+    sortAsDate = sort_as_date.toBoolean(def = true),
     autoSync = auto_sync.toBoolean(),
     syncInterval = sync_interval
 )

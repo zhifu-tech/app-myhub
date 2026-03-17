@@ -26,7 +26,9 @@ fun Menu(
         onDismissRequest = onDismissRequest,
         menuItemLayout = { MenuItemLayout(viewModel = viewModel) },
         menuItemSort = { MenuItemSort(viewModel = viewModel) },
-        menuItemLogout = { MenuItemLogout(viewModel = viewModel) }
+        menuItemLicense = { MenuItemLicense(viewModel = viewModel) },
+        menuItemSupport = { MenuItemSupport(viewModel = viewModel) },
+        menuItemLogout = { MenuItemLogout(viewModel = viewModel) },
     )
 }
 
@@ -36,6 +38,8 @@ fun MenuContent(
     onDismissRequest: () -> Unit,
     menuItemLayout: @Composable () -> Unit,
     menuItemSort: @Composable () -> Unit,
+    menuItemSupport: @Composable () -> Unit,
+    menuItemLicense: @Composable () -> Unit,
     menuItemLogout: @Composable () -> Unit,
 ) {
     val groupInteractionSource = remember { MutableInteractionSource() }
@@ -48,18 +52,25 @@ fun MenuContent(
             interactionSource = groupInteractionSource,
         ) {
             menuItemLayout()
-            HorizontalDivider(
-                modifier = Modifier.padding(
-                    paddingValues = MenuDefaults.HorizontalDividerPadding
-                )
-            )
+
+            MenuItemDivider()
             menuItemSort()
-            HorizontalDivider(
-                modifier = Modifier.padding(paddingValues = MenuDefaults.HorizontalDividerPadding)
-            )
+
+            MenuItemDivider()
+            menuItemLicense()
+            menuItemSupport()
+
+            MenuItemDivider()
             menuItemLogout()
         }
     }
+}
+
+@Composable
+private fun MenuItemDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(paddingValues = MenuDefaults.HorizontalDividerPadding)
+    )
 }
 
 @Composable

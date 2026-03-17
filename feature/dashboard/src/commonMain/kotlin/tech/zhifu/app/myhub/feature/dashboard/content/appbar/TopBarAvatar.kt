@@ -58,7 +58,7 @@ fun TopBarAvatar(
 @Composable
 fun TopBarAvatarContent(
     onClick: () -> Unit,
-    menu: @Composable () -> Unit,
+    menu: (@Composable () -> Unit) = {},
 ) {
     TooltipBox(
         state = rememberTooltipState(),

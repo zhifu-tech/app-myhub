@@ -1,5 +1,14 @@
 <resources>
   <string name="feature_dashboard_dashboard">Dashboard</string>
+  <string name="feature_dashboard_menu_layout_list">List</string>
+  <string name="feature_dashboard_menu_layout_grid">Grid</string>
+  <string name="feature_dashboard_menu_sort_by_date">Sort by date</string>
+  <string name="feature_dashboard_menu_sort_by_name">Sort by name</string>
+  <string name="feature_dashboard_menu_support">Feedback &amp; Support</string>
+  <string name="feature_dashboard_menu_license">Open source licenses</string>
+  <string name="feature_dashboard_menu_logout">Log out</string>
+
+  // TODO Following need check
   <string name="feature_dashboard_search_placeholder">Search card content, tags, or authors...</string>
   <string name="feature_dashboard_good_evening">Good evening, Scholar</string>
   <string name="feature_dashboard_cards_to_review">You have %1$d cards to review today.</string>
@@ -25,4 +34,3 @@
   <string name="feature_dashboard_favorites">Favorites</string>
   <string name="feature_dashboard_total">Total Cards</string>
 </resources>
-
