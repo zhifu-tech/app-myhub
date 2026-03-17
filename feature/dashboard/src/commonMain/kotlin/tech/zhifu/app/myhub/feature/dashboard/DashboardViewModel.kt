@@ -9,9 +9,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.card.loadCards
-import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.loadCollections
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.observeUserPreferences
@@ -29,13 +27,7 @@ class DashboardViewModel(
 ) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>() {
 
     override val container = container<DashboardUiState, DashboardSideEffect>(
-        // fixme 替换为很正的初始化状态
-        initialState = DashboardUiState.Content(
-            collectionSectionState = CollectionSectionState(),
-            cardSectionState = CardSectionState(),
-            searchState = SearchState(),
-            userPreferences = UserPreferences(""),
-        )
+        initialState = DashboardUiState.Error()
     )
 
     init {
@@ -44,15 +36,13 @@ class DashboardViewModel(
         }
     }
 
-    // TODO FOLLOWING CODE SHOULD BE CHECK
-    //
     fun retry() {
         viewModelScope.launch {
-            logger.debug { "Retrying dashboard" }
             initInternal()
         }
     }
 
+    // TODO FOLLOWING CODE SHOULD BE CHECK
     fun refresh() {
         logger.debug { "Refreshing dashboard" }
         uiState.let { it as? DashboardUiState.Content }
@@ -96,14 +86,14 @@ class DashboardViewModel(
     }
 
     private suspend fun initInternal() {
+        intent {
+            reduce {
+                DashboardUiState.Loading()
+            }
+        }
         val userId = userRepository.getUserOrNull()?.id ?: run {
 //            navigateToAuth()
             return
-        }
-        intent {
-            reduce {
-                DashboardUiState.Loading
-            }
         }
         runCatching {
             coroutineScope {
@@ -197,26 +187,6 @@ class DashboardViewModel(
             }
         }
     }
-
-//    suspend fun observeUserPreferences() {
-//        userRepository.streamUser()
-//            .map { it?.id.orEmpty() }
-//            .distinctUntilChanged()
-//            .flatMapLatest { userId ->
-//                userRepository.streamUserPreferences(userId).map { response ->
-//                    response.requireData().preferences
-//                        ?: UserPreferences("")
-//                }
-//            }
-//            .distinctUntilChanged()
-//            .collect { userPreferences ->
-//                reduce<DashboardUiState.Content> {
-//                    copy(
-//                        userPreferences = userPreferences,
-//                    )
-//                }
-//            }
-//    }
 
     private suspend fun loadMoreCardsInternal() {
         val userId = userRepository.getUserOrNull()?.id ?: run {

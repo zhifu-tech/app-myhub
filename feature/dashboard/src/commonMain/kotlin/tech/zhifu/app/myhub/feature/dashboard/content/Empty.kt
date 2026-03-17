@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.feature.dashboard.content
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,30 +16,30 @@ import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentTexts
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticQuote
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_subtitle
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_title
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_empty_subtitle
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_empty_title
 
 @Composable
-fun Error(
+fun Empty(
     viewModel: DashboardViewModel,
     modifier: Modifier = Modifier
 ) {
-    val title = stringResource(Res.string.feature_dashboard_error_title)
-    val subtitle = stringResource(Res.string.feature_dashboard_error_subtitle)
+    val title = stringResource(Res.string.feature_dashboard_empty_title)
+    val subtitle = stringResource(Res.string.feature_dashboard_empty_subtitle)
 
     StaticContent(
         modifier = modifier,
         contentCard = {
             StaticContentCard(
+                onClick = {
+
+                },
                 stateIndicator = {
                     StaticContentState(
                         stateIndicator = { modifier ->
-                            ErrorIndicator(modifier)
+                            EmptyIndicator(modifier)
                         }
                     )
-                },
-                onClick = {
-                    viewModel.retry()
                 }
             )
         },
@@ -58,9 +58,9 @@ fun Error(
 }
 
 @Composable
-private fun ErrorIndicator(modifier: Modifier) {
+private fun EmptyIndicator(modifier: Modifier) {
     Icon(
-        imageVector = Icons.Outlined.Refresh,
+        imageVector = Icons.Outlined.Add,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
         modifier = modifier.size(36.dp)

@@ -1,5 +1,12 @@
 <resources>
   <string name="feature_dashboard_dashboard">Dashboard</string>
+  <string name="feature_dashboard_loading_title">Loading resources...</string>
+  <string name="feature_dashboard_loading_subtitle">A journey of a thousand miles begins with a single step</string>
+  <string name="feature_dashboard_loading_quote">“The best time to plant a tree was ten years ago. The second best time is now.”</string>
+  <string name="feature_dashboard_empty_title">Tap to capture your assets</string>
+  <string name="feature_dashboard_empty_subtitle">A journey of a thousand miles begins with a single step</string>
+  <string name="feature_dashboard_error_title">Load failed</string>
+  <string name="feature_dashboard_error_subtitle">Something went wrong. Tap to retry</string>
   <string name="feature_dashboard_menu_layout_list">List</string>
   <string name="feature_dashboard_menu_layout_grid">Grid</string>
   <string name="feature_dashboard_menu_sort_by_date">Sort by date</string>
@@ -33,4 +40,5 @@
   <string name="feature_dashboard_recent_edits">Recent Edits</string>
   <string name="feature_dashboard_favorites">Favorites</string>
   <string name="feature_dashboard_total">Total Cards</string>
+
 </resources>

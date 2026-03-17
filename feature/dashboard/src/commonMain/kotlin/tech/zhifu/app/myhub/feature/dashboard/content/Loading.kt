@@ -1,32 +1,35 @@
 package tech.zhifu.app.myhub.feature.dashboard.content
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.content.drawables.MaterialSymbolsProgress_activity
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContent
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentCard
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentTexts
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticQuote
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_subtitle
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_title
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_subtitle
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_title
 
 @Composable
-fun Error(
+fun Loading(
     viewModel: DashboardViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val title = stringResource(Res.string.feature_dashboard_error_title)
-    val subtitle = stringResource(Res.string.feature_dashboard_error_subtitle)
-
     StaticContent(
         modifier = modifier,
         contentCard = {
@@ -34,19 +37,16 @@ fun Error(
                 stateIndicator = {
                     StaticContentState(
                         stateIndicator = { modifier ->
-                            ErrorIndicator(modifier)
+                            LoadingIndicator(modifier)
                         }
                     )
-                },
-                onClick = {
-                    viewModel.retry()
                 }
             )
         },
         contentTexts = { isLandscape ->
             StaticContentTexts(
-                title = title,
-                subtitle = subtitle,
+                title = stringResource(Res.string.feature_dashboard_loading_title),
+                subtitle = stringResource(Res.string.feature_dashboard_loading_subtitle),
                 staticContentQuote = {
                     if (isLandscape.not()) {
                         StaticQuote()
@@ -58,11 +58,21 @@ fun Error(
 }
 
 @Composable
-private fun ErrorIndicator(modifier: Modifier) {
+private fun LoadingIndicator(modifier: Modifier) {
+    val transition = rememberInfiniteTransition(label = "loading-spinner")
+    val rotation by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1500, easing = LinearEasing),
+        ),
+        label = "loading-spinner-rotation",
+    )
     Icon(
-        imageVector = Icons.Outlined.Refresh,
+        imageVector = MaterialSymbolsProgress_activity,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
         modifier = modifier.size(36.dp)
+            .graphicsLayer { rotationZ = rotation },
     )
 }

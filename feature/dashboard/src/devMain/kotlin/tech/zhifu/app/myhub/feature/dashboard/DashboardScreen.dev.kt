@@ -13,8 +13,8 @@ import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
 @Composable
 fun DashboardScreen_Loading() {
     AppTheme {
-        val uiState = DashboardUiState.Loading
-        DashboardScreen(
+        val uiState = DashboardUiState.Loading()
+        DashboardScreenContent(
             state = uiState.state,
             topBar = {
                 TopBarContent(
@@ -41,6 +41,7 @@ fun DashboardScreen_Loading() {
                     }
                 )
             },
+            loading = {},
             error = {},
             content = {},
         )

@@ -8,7 +8,9 @@ import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 sealed class DashboardUiState(
     val state: State,
 ) {
-    object Loading : DashboardUiState(state = State.LOADING)
+    data class Loading(
+        val hasAuthed: Boolean = false
+    ) : DashboardUiState(state = State.LOADING)
 
     data class Content(
         val userPreferences: UserPreferences,

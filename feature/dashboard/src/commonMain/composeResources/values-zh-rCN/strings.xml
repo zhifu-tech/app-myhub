@@ -1,5 +1,12 @@
 <resources>
   <string name="feature_dashboard_dashboard">仪表盘</string>
+  <string name="feature_dashboard_loading_title">资源加载中...</string>
+  <string name="feature_dashboard_loading_subtitle">千里始于足下</string>
+  <string name="feature_dashboard_loading_quote">“种一棵树最好的时间是十年前，其次是现在。”</string>
+  <string name="feature_dashboard_empty_title">点击捕获你的资产</string>
+  <string name="feature_dashboard_empty_subtitle">千里之行始于足下</string>
+  <string name="feature_dashboard_error_title">加载失败</string>
+  <string name="feature_dashboard_error_subtitle">发生错误，点击重试</string>
   <string name="feature_dashboard_menu_layout_list">列表</string>
   <string name="feature_dashboard_menu_layout_grid">图标</string>
   <string name="feature_dashboard_menu_sort_by_date">按日期排序</string>
@@ -7,6 +14,7 @@
   <string name="feature_dashboard_menu_support">反馈与帮助</string>
   <string name="feature_dashboard_menu_license">开源代码许可</string>
   <string name="feature_dashboard_menu_logout">退出登录</string>
+
   // TODO Following need check
 
   <string name="feature_dashboard_search_placeholder">搜索卡片内容、标签或作者...</string>
