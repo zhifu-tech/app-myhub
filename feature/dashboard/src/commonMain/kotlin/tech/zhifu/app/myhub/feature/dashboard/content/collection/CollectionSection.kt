@@ -28,8 +28,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.SectionHeader
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCollectionDetail
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCollectionList
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_asset_collections
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_curated_library
@@ -52,8 +50,8 @@ fun CollectionSectionRoute(
     CollectionSection(
         listState = listState,
         collections = payload.collections,
-        onCollectionClick = viewModel::navigateToCollectionDetail,
-        onViewAllClick = viewModel::navigateToCollectionList,
+        onCollectionClick = {},
+        onViewAllClick = {},
         isLoadingMore = payload.isLoading,
         hasMore = payload.hasMore,
         modifier = Modifier.fillMaxWidth().padding(bottom = 36.dp)

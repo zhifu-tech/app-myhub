@@ -123,6 +123,8 @@ kotlin {
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.dashboardApi)
+            implementation(projects.feature.mixed)
+            implementation(projects.feature.mixedApi)
 
             implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
             implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)

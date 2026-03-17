@@ -49,6 +49,36 @@ internal fun AppContent() {
     NavDisplay(
         entries = entries,
         sceneStrategy = sceneStrategy,
+//        transitionSpec = {
+//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
+//            slideIntoContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Left,
+//                animationSpec = animationSpec
+//            ) togetherWith slideOutOfContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Left,
+//                animationSpec = animationSpec
+//            )
+//        },
+//        popTransitionSpec = {
+//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
+//            slideIntoContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Right,
+//                animationSpec = animationSpec
+//            ) togetherWith slideOutOfContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Right,
+//                animationSpec = animationSpec
+//            )
+//        },
+//        predictivePopTransitionSpec = {
+//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
+//            slideIntoContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Right,
+//                animationSpec = animationSpec
+//            ) togetherWith slideOutOfContainer(
+//                AnimatedContentTransitionScope.SlideDirection.Right,
+//                animationSpec = animationSpec
+//            )
+//        },
         onBack = navigator::goBack
     )
 }

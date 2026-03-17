@@ -30,6 +30,7 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.dashboardApi)
+            implementation(projects.feature.mixedApi)
 
             implementation(libs.chrisbanes.haze)
             implementation(libs.chrisbanes.haze.materials)

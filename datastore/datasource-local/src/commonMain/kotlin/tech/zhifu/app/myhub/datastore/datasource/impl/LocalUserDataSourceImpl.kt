@@ -41,12 +41,6 @@ class LocalUserDataSourceImpl(
         )
     }
 
-    override suspend fun getUser(): User {
-        return database.userQueries.selectCurrentUser()
-            .executeAsOne()
-            .toDomain()
-    }
-
     override suspend fun getUserOrNull(): User? {
         return database.userQueries.selectCurrentUser()
             .executeAsOneOrNull()
@@ -105,11 +99,11 @@ class LocalUserDataSourceImpl(
             ?.toDomain()
     }
 
-    override fun observeUserPreferences(userId: String): Flow<UserPreferences> {
-        return database.user_preferencesQueries
-            .selectUserPreferencesByUserId(userId)
-            .asFlow()
-            .mapToOneOrNull(Dispatchers.Default)
-            .map { it?.toDomain() ?: UserPreferences(userId = userId) }
-    }
+    override fun observeUserPreferences(
+        userId: String,
+    ): Flow<UserPreferences> = database.user_preferencesQueries
+        .selectUserPreferencesByUserId(userId)
+        .asFlow()
+        .mapToOneOrNull(Dispatchers.Default)
+        .map { it?.toDomain() ?: UserPreferences(userId = userId) }
 }

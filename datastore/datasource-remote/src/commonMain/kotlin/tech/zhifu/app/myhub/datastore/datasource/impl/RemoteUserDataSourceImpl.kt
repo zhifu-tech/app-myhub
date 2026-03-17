@@ -31,24 +31,22 @@ class RemoteUserDataSourceImpl(
     private val logger: Logger = logger("remote-user-datasource")
 ) : RemoteUserDataSource {
 
-    override suspend fun getUser(id: String): User? {
-        return try {
-            val response: HttpResponse = httpClient.get(
-                "${ApiConfig.BASE_URL}${ApiConfig.USERS_PATH}/$id"
-            )
-            when (response.status) {
-                HttpStatusCode.OK -> {
-                    val userResponse: UserResponse = response.body()
-                    userResponse.toDomain()
-                }
-
-                HttpStatusCode.NotFound -> null
-                else -> throw ApiException(response.status, "Failed to fetch user: ${response.status}")
+    override suspend fun getUser(id: String): User? = try {
+        val response: HttpResponse = httpClient.get(
+            urlString = "${ApiConfig.BASE_URL}${ApiConfig.USERS_PATH}/$id"
+        )
+        when (response.status) {
+            HttpStatusCode.OK -> {
+                val userResponse: UserResponse = response.body()
+                userResponse.toDomain()
             }
-        } catch (e: Exception) {
-            if (e is ApiException) throw e
-            throw NetworkException("Network error while fetching user", e)
+
+            HttpStatusCode.NotFound -> null
+            else -> throw ApiException(response.status, "Failed to fetch user: ${response.status}")
         }
+    } catch (e: Exception) {
+        if (e is ApiException) throw e
+        throw NetworkException("Network error while fetching user", e)
     }
 
     override suspend fun createUser(user: User): User = try {
@@ -130,8 +128,13 @@ class RemoteUserDataSourceImpl(
         throw NetworkException("Network error while getting user preferences", e)
     }
 
-    override suspend fun updateUserPreferences(userId: String, preferences: UserPreferences): UserPreferences = try {
-        val response = httpClient.put("${ApiConfig.BASE_URL}${ApiConfig.USERS_PATH}/$userId/preferences") {
+    override suspend fun updateUserPreferences(
+        userId: String,
+        preferences: UserPreferences,
+    ): UserPreferences = try {
+        val response = httpClient.put(
+            urlString = "${ApiConfig.BASE_URL}${ApiConfig.USERS_PATH}/$userId/preferences"
+        ) {
             contentType(ContentType.Application.Json)
             setBody(preferences)
         }

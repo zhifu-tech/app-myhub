@@ -25,19 +25,13 @@ interface UserRepository {
 
     // ==================== UserPreferences 操作 ====================
 
-    suspend fun insertUserPreferences(preferences: UserPreferences, needSync: Boolean = true)
+    fun streamUserPreferences(
+        userId: String,
+        refresh: Boolean = false,
+    ): Flow<StoreReadResponse<UserStoreData>>
 
-    suspend fun getUserPreferences(): UserPreferences
-
-    suspend fun getUserPreferences(userId: String): UserStoreData?
-
-    fun streamUserPreferences(userId: String, refresh: Boolean = false): Flow<StoreReadResponse<UserStoreData>>
-
-    suspend fun updateUserPreferencesTheme(userId: String, theme: String)
-
-    suspend fun updateUserPreferencesLanguage(userId: String, language: String)
-
-    suspend fun updateUserPreferencesLayoutAsList(userId: String, layoutAsList: Boolean)
-
-    suspend fun updateUserPreferencesSortAsDate(userId: String, sortAsDate: Boolean)
+    suspend fun insertUserPreferences(
+        preferences: UserPreferences,
+        needSync: Boolean = true
+    )
 }

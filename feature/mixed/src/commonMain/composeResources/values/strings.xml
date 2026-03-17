@@ -1,0 +1,6 @@
+<resources>
+  <string name="feature_mixed_open_source_licenses">Open source licenses</string>
+  <string name="feature_mixed_support">Feedback &amp; Support</string>
+  <string name="feature_mixed_support_body">For feedback or help, please contact us. This page may be updated later.</string>
+  <string name="feature_mixed_support_contact">Email: support@myhub.app</string>
+</resources>

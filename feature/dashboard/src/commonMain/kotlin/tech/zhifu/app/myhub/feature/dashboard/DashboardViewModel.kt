@@ -3,22 +3,18 @@ package tech.zhifu.app.myhub.feature.dashboard
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.orbitmvi.orbit.viewmodel.container
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.datastore.repository.user.preferences
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.card.loadCards
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.loadCollections
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.observeUserPreferences
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
@@ -29,7 +25,7 @@ class DashboardViewModel(
     val logger: Logger = logger("Dashboard"),
     internal val cardRepository: CardRepository,
     internal val collectionRepository: CollectionRepository,
-    private val userRepository: UserRepository,
+    internal val userRepository: UserRepository,
 ) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>() {
 
     override val container = container<DashboardUiState, DashboardSideEffect>(
@@ -38,12 +34,14 @@ class DashboardViewModel(
             collectionSectionState = CollectionSectionState(),
             cardSectionState = CardSectionState(),
             searchState = SearchState(),
+            userPreferences = UserPreferences(""),
         )
     )
 
     init {
-        // FIXME:
-//        observeUserPreferences()
+        viewModelScope.launch {
+            observeUserPreferences()
+        }
     }
 
     // TODO FOLLOWING CODE SHOULD BE CHECK
@@ -68,20 +66,6 @@ class DashboardViewModel(
     fun dismissFocusReview() = intent {
         reduce {
             state/*.copy(showFocusReview = false)*/
-        }
-    }
-
-    fun updateLayoutAsList(layoutAsList: Boolean) {
-        viewModelScope.launch {
-            val userId = userRepository.getUserOrNull()?.id ?: return@launch
-            userRepository.updateUserPreferencesLayoutAsList(userId, layoutAsList)
-        }
-    }
-
-    fun updateSortAsDate(sortAsDate: Boolean) {
-        viewModelScope.launch {
-            val userId = userRepository.getUserOrNull()?.id ?: return@launch
-            userRepository.updateUserPreferencesSortAsDate(userId, sortAsDate)
         }
     }
 
@@ -113,7 +97,7 @@ class DashboardViewModel(
 
     private suspend fun initInternal() {
         val userId = userRepository.getUserOrNull()?.id ?: run {
-            navigateToAuth()
+//            navigateToAuth()
             return
         }
         intent {
@@ -136,6 +120,7 @@ class DashboardViewModel(
                 reduce {
                     DashboardUiState.Content(
                         source = "init",
+                        userPreferences = UserPreferences(""),
                         cardSectionState = cardSectionState,
                         collectionSectionState = collectionSectionState,
                         searchState = SearchState(),
@@ -146,7 +131,7 @@ class DashboardViewModel(
             logger.error(e) { "Failed to initialize dashboard" }
             intent {
                 if (isUnauthorizedError(e)) {
-                    navigateToAuth()
+//                    navigateToAuth()
                 }
                 reduce {
                     DashboardUiState.Error(
@@ -159,7 +144,7 @@ class DashboardViewModel(
 
     private suspend fun refreshInternal() {
         val userId = userRepository.getUserOrNull()?.id ?: run {
-            navigateToAuth()
+//            navigateToAuth()
             return
         }
         intent {
@@ -199,7 +184,7 @@ class DashboardViewModel(
             logger.error(e) { "Failed to refresh dashboard" }
             intent {
                 if (isUnauthorizedError(e)) {
-                    navigateToAuth()
+//                    navigateToAuth()
                 }
                 reduce {
                     val state = state as? DashboardUiState.Content
@@ -213,43 +198,29 @@ class DashboardViewModel(
         }
     }
 
-    private fun observeUserPreferences() {
-        viewModelScope.launch {
-            userRepository.streamUser()
-                .map { it?.id }
-                .distinctUntilChanged()
-                .flatMapLatest { userId ->
-                    if (userId.isNullOrBlank()) {
-                        flowOf(null)
-                    } else {
-                        userRepository.streamUserPreferences(userId)
-                            .map { response ->
-                                (response as? StoreReadResponse.Data)
-                                    ?.value
-                                    ?.preferences
-                            }
-                    }
-                }
-                .map { prefs ->
-                    val layoutAsList = prefs?.layoutAsList ?: true
-                    val sortAsDate = prefs?.sortAsDate ?: true
-                    layoutAsList to sortAsDate
-                }
-                .distinctUntilChanged()
-                .collect { (layoutAsList, sortAsDate) ->
-                    reduce<DashboardUiState.Content> {
-                        copy(
-                            layoutAsList = layoutAsList,
-                            sortAsDate = sortAsDate
-                        )
-                    }
-                }
-        }
-    }
+//    suspend fun observeUserPreferences() {
+//        userRepository.streamUser()
+//            .map { it?.id.orEmpty() }
+//            .distinctUntilChanged()
+//            .flatMapLatest { userId ->
+//                userRepository.streamUserPreferences(userId).map { response ->
+//                    response.requireData().preferences
+//                        ?: UserPreferences("")
+//                }
+//            }
+//            .distinctUntilChanged()
+//            .collect { userPreferences ->
+//                reduce<DashboardUiState.Content> {
+//                    copy(
+//                        userPreferences = userPreferences,
+//                    )
+//                }
+//            }
+//    }
 
     private suspend fun loadMoreCardsInternal() {
         val userId = userRepository.getUserOrNull()?.id ?: run {
-            navigateToAuth()
+//            navigateToAuth()
             return
         }
         intent {
@@ -284,7 +255,7 @@ class DashboardViewModel(
             logger.error(e) { "Failed to load more cards" }
             intent {
                 if (isUnauthorizedError(e)) {
-                    navigateToAuth()
+//                    navigateToAuth()
                 }
                 reduce {
                     val state = state as? DashboardUiState.Content
@@ -302,7 +273,7 @@ class DashboardViewModel(
 
     private suspend fun loadMoreCollectionsInternal() {
         val userId = userRepository.getUserOrNull()?.id ?: run {
-            navigateToAuth()
+//            navigateToAuth()
             return
         }
         intent {
@@ -337,7 +308,7 @@ class DashboardViewModel(
             logger.error(e) { "Failed to load more collections" }
             intent {
                 if (isUnauthorizedError(e)) {
-                    navigateToAuth()
+//                    navigateToAuth()
                 }
                 reduce {
                     val state = state as? DashboardUiState.Content

@@ -9,7 +9,6 @@ interface LocalUserDataSource {
 
     suspend fun updateUser(user: User)
 
-    suspend fun getUser(): User
     suspend fun getUserOrNull(): User?
 
     suspend fun getUser(userId: String): User?

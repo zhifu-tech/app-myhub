@@ -68,16 +68,27 @@ class UserRepositoryImpl(
             )
         )
 
-    override fun streamUser(): Flow<User?> =
-        store.stream<StoreReadResponse<User>>(
-            request = StoreReadRequest.localOnly(
-                key = UserStoreKey.ById(""), // 约定：空 id 表示当前登录用户
-            )
-        ).map {
-            (it as? StoreReadResponse.Data)?.value?.user
-        }
+    override fun streamUser(): Flow<User?> = store.stream<StoreReadResponse<User>>(
+        request = StoreReadRequest.localOnly(
+            key = UserStoreKey.ById(""), // 约定：空 id 表示当前登录用户
+        )
+    ).map {
+        (it as? StoreReadResponse.Data)?.value?.user
+    }
 
-    override suspend fun insertUserPreferences(preferences: UserPreferences, needSync: Boolean) {
+    override fun streamUserPreferences(
+        userId: String,
+        refresh: Boolean,
+    ): Flow<StoreReadResponse<UserStoreData>> = store.stream<StoreWriteResponse>(
+        request = StoreReadRequest.localOnly(
+            key = UserStoreKey.PreferencesById(userId),
+        )
+    )
+
+    override suspend fun insertUserPreferences(
+        preferences: UserPreferences,
+        needSync: Boolean,
+    ) {
         store.write(
             StoreWriteRequest.of(
                 key = UserStoreKey.PreferencesById(preferences.userId),
@@ -93,54 +104,5 @@ class UserRepositoryImpl(
                 payload = preferences,
             )
         }
-    }
-
-    override suspend fun getUserPreferences(): UserPreferences {
-        val user = getUser()
-        return getUserPreferences(user.id).preferences ?: run {
-            logger.error { "Get UserPreferences before bootstrap finished. " }
-            throw IllegalStateException("UserPreferences not found")
-        }
-    }
-
-    override suspend fun getUserPreferences(userId: String): UserStoreData =
-        store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
-            key = UserStoreKey.PreferencesById(userId)
-        )
-
-    override fun streamUserPreferences(userId: String, refresh: Boolean): Flow<StoreReadResponse<UserStoreData>> =
-        store.stream<StoreWriteResponse>(
-            request = StoreReadRequest.cached(
-                key = UserStoreKey.PreferencesById(userId),
-                refresh = refresh
-            )
-        )
-
-    override suspend fun updateUserPreferencesTheme(userId: String, theme: String) {
-        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
-        if (current.theme == theme) return
-        val updated = current.copy(theme = theme)
-        insertUserPreferences(updated, needSync = true)
-    }
-
-    override suspend fun updateUserPreferencesLanguage(userId: String, language: String) {
-        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
-        if (current.language == language) return
-        val updated = current.copy(language = language)
-        insertUserPreferences(updated, needSync = true)
-    }
-
-    override suspend fun updateUserPreferencesLayoutAsList(userId: String, layoutAsList: Boolean) {
-        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
-        if (current.layoutAsList == layoutAsList) return
-        val updated = current.copy(layoutAsList = layoutAsList)
-        insertUserPreferences(updated, needSync = true)
-    }
-
-    override suspend fun updateUserPreferencesSortAsDate(userId: String, sortAsDate: Boolean) {
-        val current = getUserPreferences(userId).preferences ?: UserPreferences(userId = userId)
-        if (current.sortAsDate == sortAsDate) return
-        val updated = current.copy(sortAsDate = sortAsDate)
-        insertUserPreferences(updated, needSync = true)
     }
 }

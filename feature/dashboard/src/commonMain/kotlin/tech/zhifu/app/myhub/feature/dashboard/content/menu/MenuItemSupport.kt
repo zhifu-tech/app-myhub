@@ -14,18 +14,17 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_support
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToSupport
 
 @Composable
 fun MenuItemSupport(
     viewModel: DashboardViewModel,
+    onBeforeNavigate: () -> Unit,
 ) {
     MenuItemSupportContent(
         onClick = {
-            logger.debug {
-                "MenuItemSupport onActionSupport"
-            }
+            onBeforeNavigate()
+            viewModel.navigateToSupport()
         }
     )
 }

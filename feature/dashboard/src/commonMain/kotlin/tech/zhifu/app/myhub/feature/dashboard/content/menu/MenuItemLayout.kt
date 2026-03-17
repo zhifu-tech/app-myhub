@@ -12,24 +12,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_grid
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_list
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateUsePreferencesLayoutAsList
 
 @Composable
 fun MenuItemLayout(
     viewModel: DashboardViewModel
 ) {
-    val layoutAsList = viewModel.collectFieldAsState { state ->
-        (state as? DashboardUiState.Content)?.layoutAsList ?: true
-    }.value
+    val layoutAsList = viewModel.collectUserPreferencesFieldState {
+        it.layoutAsList
+    }.value ?: true
 
     MenuItemLayoutContent(
         layoutAsList = layoutAsList,
         onActionLayout = {
-            viewModel.updateLayoutAsList(it)
+            viewModel.updateUsePreferencesLayoutAsList(it)
         }
     )
 }

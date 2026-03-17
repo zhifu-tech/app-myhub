@@ -38,6 +38,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.MockContent
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
+import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
+import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -48,10 +50,15 @@ fun DashboardRoute(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
-    DashboardSideEffect(navigator = navigator, viewModel = viewModel)
+    DashboardSideEffect(
+        navigator = navigator,
+        viewModel = viewModel
+    )
+
     val state by viewModel.collectFieldAsState {
         it.state
     }
+
     DashboardScreen(
         state = state,
         topBar = {
@@ -161,37 +168,13 @@ private fun DashboardSideEffect(
     viewModel.collectSharedSideEffect { effect ->
         logger.warn { "navigate collectSharedSideEffect is  $effect" }
         when (effect) {
-            is DashboardSideEffect.NavigateToAuth -> {
-                logger.warn { "navigate to auth called from Dashboard" }
+
+            DashboardSideEffect.NavigateToOpenSourceLicenses -> {
+                navigator.navigateToOpenSourceLicenses()
             }
 
-            is DashboardSideEffect.NavigateToCapture -> {
-                logger.warn { "navigate to capture called from Dashboard" }
-//                navigator.navigateToCapture()
-            }
-
-            is DashboardSideEffect.NavigateToCardDetail -> {
-//                navigator.navigateToCardDetail(effect.cardId)
-            }
-
-            is DashboardSideEffect.NavigateToCardEdit -> {
-                logger.warn { "navigate to edit called from Dashboard" }
-            }
-
-            is DashboardSideEffect.NavigateToCardList -> {
-                logger.warn { "navigate to card list called from Dashboard" }
-            }
-
-            is DashboardSideEffect.NavigateToCollectionDetail -> {
-                logger.warn { "navigate to collection detail called from Dashboard" }
-            }
-
-            DashboardSideEffect.NavigateToCollectionList -> {
-                logger.warn { "navigate to collection list called from Dashboard" }
-            }
-
-            DashboardSideEffect.NavigateToReview -> {
-                logger.warn { "navigate to review called from Dashboard" }
+            DashboardSideEffect.NavigateToSupport -> {
+                navigator.navigateToSupport()
             }
 
             else -> Unit

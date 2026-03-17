@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
+import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.feature.dashboard.content.card.CardSectionState
 import tech.zhifu.app.myhub.feature.dashboard.content.collection.CollectionSectionState
-import tech.zhifu.app.myhub.feature.dashboard.content.review.ReviewState
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 
 sealed class DashboardUiState(
@@ -11,13 +11,11 @@ sealed class DashboardUiState(
     object Loading : DashboardUiState(state = State.LOADING)
 
     data class Content(
-        val layoutAsList: Boolean = true,
-        val sortAsDate: Boolean = true,
+        val userPreferences: UserPreferences,
 
         // FOLLOWING NEED REFINE
         val source: String = "Unknown",
         val isRefreshing: Boolean = false,
-        val reviewState: ReviewState? = null,
         val collectionSectionState: CollectionSectionState,
         val cardSectionState: CardSectionState,
 

@@ -15,6 +15,7 @@ import tech.zhifu.app.myhub.navigation.NavItem
 @Serializable
 object DashboardNavKey : NavKey
 
+
 @Composable
 fun dashboardNavItem() = object : NavItem {
     override val selectedIcon: ImageVector = Icons.Default.Home

@@ -28,10 +28,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.card.NewCaptureCard
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCapture
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCardDetail
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCardEdit
-import tech.zhifu.app.myhub.feature.dashboard.navigateToCardList
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_latest_captures
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_recently_added
@@ -73,10 +69,10 @@ fun ContentGridContentRoute(
         cards = state.cards,
         hasMoreCards = state.hasMore,
         isLoadingMoreCards = state.isLoading,
-        onNavigateToCardEdit = viewModel::navigateToCardEdit,
-        onNavigateToCardDetail = viewModel::navigateToCardDetail,
-        onNavigateToCapture = viewModel::navigateToCapture,
-        onNavigateToCardList = viewModel::navigateToCardList,
+        onNavigateToCardEdit = {},
+        onNavigateToCardDetail = {},
+        onNavigateToCapture = {},
+        onNavigateToCardList = {},
     )
 }
 

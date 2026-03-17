@@ -26,8 +26,8 @@ fun Menu(
         onDismissRequest = onDismissRequest,
         menuItemLayout = { MenuItemLayout(viewModel = viewModel) },
         menuItemSort = { MenuItemSort(viewModel = viewModel) },
-        menuItemLicense = { MenuItemLicense(viewModel = viewModel) },
-        menuItemSupport = { MenuItemSupport(viewModel = viewModel) },
+        menuItemLicense = { MenuItemLicense(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
+        menuItemSupport = { MenuItemSupport(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
         menuItemLogout = { MenuItemLogout(viewModel = viewModel) },
     )
 }

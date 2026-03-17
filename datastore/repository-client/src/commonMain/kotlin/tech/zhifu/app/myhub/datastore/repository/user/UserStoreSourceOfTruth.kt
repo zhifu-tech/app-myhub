@@ -24,12 +24,9 @@ fun createUserStoreSourceOfTruth(
                 }
             }
 
-            is UserStoreKey.PreferencesById -> flow {
-                val userPreferences = localUserDataSource.getUserPreferences(userId = key.id)
-                if (userPreferences != null) {
-                    emit(UserStoreData.PreferencesData(userPreferences))
-                } else {
-                    emit(null)
+            is UserStoreKey.PreferencesById -> {
+                localUserDataSource.observeUserPreferences(userId = key.id).map {
+                    UserStoreData.PreferencesData(it)
                 }
             }
         }
