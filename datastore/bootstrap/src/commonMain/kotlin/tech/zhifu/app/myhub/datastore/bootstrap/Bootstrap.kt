@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.logger.debug
@@ -11,7 +10,6 @@ import kotlin.random.Random
 class Bootstrap(
     private val userRepository: UserRepository,
     private val tagRepository: TagRepository,
-    private val collectionRepository: CollectionRepository,
     private val cardRepository: CardRepository,
     private val configBuilder: () -> BootstrapConfigBuilder,
 ) {
@@ -29,19 +27,10 @@ class Bootstrap(
             tagRepository.insertTag(it)
         }
         logger.debug { "Inserted tags: ${config.tags}" }
-        config.collections.forEach {
-            collectionRepository.insertCollection(it)
-        }
-        logger.debug { "Inserted collections: ${config.collections}" }
         config.cards.forEach {
             cardRepository.insertCard(it, needSync = false)
         }
         logger.debug { "Inserted cards: ${config.cards}" }
-
-        config.collectionCards.forEach {
-            collectionRepository.insertCollectionCard(it)
-        }
-        logger.debug { "Inserted collection cards: ${config.collectionCards}" }
     }
 }
 

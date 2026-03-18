@@ -8,7 +8,6 @@ import tech.zhifu.app.myhub.datastore.datasource.di.remoteDataSourceModule
 import tech.zhifu.app.myhub.datastore.repository.auth.di.authModule
 import tech.zhifu.app.myhub.datastore.repository.capture.di.captureRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.card.di.repositoryCardModule
-import tech.zhifu.app.myhub.datastore.repository.collection.di.collectionRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.store.DatabaseBookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.sync.di.syncRepositoryModule
@@ -31,7 +30,6 @@ fun repositoryModule() = module {
         captureRepositoryModule,
         repositoryCardModule(),
         tagRepositoryModule(),
-        collectionRepositoryModule(),
         userRepositoryModule(),
         syncRepositoryModule(),
     )

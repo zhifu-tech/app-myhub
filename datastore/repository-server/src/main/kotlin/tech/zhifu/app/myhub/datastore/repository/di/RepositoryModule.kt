@@ -3,18 +3,15 @@ package tech.zhifu.app.myhub.datastore.repository.di
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
 import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.collection.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.datasource.tag.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.CollectionRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.SyncRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
@@ -54,12 +51,6 @@ val repositoryModule = module {
     single<SyncRepository> {
         SyncRepositoryImpl(
             localSyncDataSource = get<LocalSyncDataSource>()
-        )
-    }
-
-    single<CollectionRepository> {
-        CollectionRepositoryImpl(
-            localDataSource = get<LocalCollectionDataSource>()
         )
     }
 }

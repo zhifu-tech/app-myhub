@@ -3,12 +3,10 @@ package tech.zhifu.app.myhub.service.di
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.auth.TokenService
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
 import tech.zhifu.app.myhub.service.CardService
-import tech.zhifu.app.myhub.service.CollectionService
 import tech.zhifu.app.myhub.service.SyncService
 import tech.zhifu.app.myhub.service.TagService
 import tech.zhifu.app.myhub.service.UserService
@@ -47,12 +45,6 @@ val serviceModule = module {
     factory<TagService> {
         TagService(
             tagRepository = get<TagRepository>()
-        )
-    }
-
-    factory<CollectionService> {
-        CollectionService(
-            collectionRepository = get<CollectionRepository>()
         )
     }
 

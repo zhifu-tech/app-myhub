@@ -18,8 +18,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTag
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
-import tech.zhifu.app.myhub.datastore.model.domain.Collection
-import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
@@ -45,13 +43,6 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
         val userPreferences = readResource("user_preferences.json", localeDir)
             .let { json.decodeFromString<UserPreferences>(it) }
             .copy(userId = userId)
-
-        val collections = readResource("collection.json", localeDir)
-            .let { json.decodeFromString<List<Collection>>(it) }
-            .map { it -> it.copy(userId = userId) }
-        val collectionCards = readOptionalResource("collection_card.json", localeDir)
-            ?.let { json.decodeFromString<List<CollectionCard>>(it) }
-            .orEmpty()
 
         val tags: List<Tag> = readResource("tag.json", localeDir)
             .let { json.decodeFromString<List<Tag>>(it) }
@@ -81,20 +72,12 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
             user = user,
             userPreferences = userPreferences,
             tags = tags,
-            collections = collections,
             cards = cards,
-            collectionCards = collectionCards
         )
     }
 
     private suspend fun readResource(fileName: String, localeDir: String): String {
         return Res.readBytes("files/$localeDir/$fileName").decodeToString()
-    }
-
-    private suspend fun readOptionalResource(fileName: String, localeDir: String): String? {
-        return runCatching {
-            Res.readBytes("files/$localeDir/$fileName").decodeToString()
-        }.getOrNull()
     }
 
     private fun resolveLocaleDir(localeTag: String): String {

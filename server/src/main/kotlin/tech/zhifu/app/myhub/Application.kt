@@ -1,20 +1,22 @@
 package tech.zhifu.app.myhub
 
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
 import org.koin.ktor.plugin.Koin
 import tech.zhifu.app.myhub.api.auth.authApi
 import tech.zhifu.app.myhub.api.capture.captureAnalysisApi
 import tech.zhifu.app.myhub.api.card.cardsApi
-import tech.zhifu.app.myhub.api.collection.collectionsApi
 import tech.zhifu.app.myhub.api.media.mediaUploadApi
 import tech.zhifu.app.myhub.api.sync.syncApi
 import tech.zhifu.app.myhub.api.tag.tagsApi
@@ -80,7 +82,6 @@ fun Application.module() {
         usersApi()
         cardsApi()
         tagsApi()
-        collectionsApi()
         mediaUploadApi()
         captureAnalysisApi()
     }
