@@ -21,7 +21,8 @@ import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateUsePreferencesLayo
 
 @Composable
 fun MenuItemLayout(
-    viewModel: DashboardViewModel
+    viewModel: DashboardViewModel,
+    onBeforeNavigate: () -> Unit,
 ) {
     val layoutAsList = viewModel.collectUserPreferencesFieldState {
         it.layoutAsList
@@ -30,6 +31,7 @@ fun MenuItemLayout(
     MenuItemLayoutContent(
         layoutAsList = layoutAsList,
         onActionLayout = {
+            onBeforeNavigate()
             viewModel.updateUsePreferencesLayoutAsList(it)
         }
     )

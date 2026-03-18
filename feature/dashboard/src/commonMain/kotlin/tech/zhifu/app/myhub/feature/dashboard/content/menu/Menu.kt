@@ -24,8 +24,8 @@ fun Menu(
     MenuContent(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        menuItemLayout = { MenuItemLayout(viewModel = viewModel) },
-        menuItemSort = { MenuItemSort(viewModel = viewModel) },
+        menuItemLayout = { MenuItemLayout(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
+        menuItemSort = { MenuItemSort(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
         menuItemLicense = { MenuItemLicense(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
         menuItemSupport = { MenuItemSupport(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
         menuItemLogout = { MenuItemLogout(viewModel = viewModel) },

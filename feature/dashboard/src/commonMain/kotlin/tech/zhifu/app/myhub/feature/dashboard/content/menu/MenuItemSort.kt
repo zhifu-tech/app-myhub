@@ -22,6 +22,7 @@ import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateUsePreferencesSort
 @Composable
 fun MenuItemSort(
     viewModel: DashboardViewModel,
+    onBeforeNavigate: () -> Unit,
 ) {
     val sortAsDate = viewModel.collectUserPreferencesFieldState {
         it.sortAsDate
@@ -30,6 +31,7 @@ fun MenuItemSort(
     MenuItemSortContent(
         sortAsDate = sortAsDate,
         onActionSort = {
+            onBeforeNavigate()
             viewModel.updateUsePreferencesSortAsDate(it)
         }
     )
