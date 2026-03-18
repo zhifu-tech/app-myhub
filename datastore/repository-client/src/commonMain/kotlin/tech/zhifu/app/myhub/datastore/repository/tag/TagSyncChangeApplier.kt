@@ -1,7 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.tag
 
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
-import tech.zhifu.app.myhub.datastore.repository.impl.applyChange
+import tech.zhifu.app.myhub.datastore.repository.sync.applyChange
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType

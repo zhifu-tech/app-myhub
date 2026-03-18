@@ -7,8 +7,8 @@ import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
-import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
-import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
+import tech.zhifu.app.myhub.datastore.repository.sync.recordDeleteOperation
+import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug

@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.user
 
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.datastore.repository.impl.applyChange
+import tech.zhifu.app.myhub.datastore.repository.sync.applyChange
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncEntityType

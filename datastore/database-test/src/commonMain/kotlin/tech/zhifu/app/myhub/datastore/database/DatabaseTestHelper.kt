@@ -17,8 +17,6 @@ import tech.zhifu.app.myhub.getPlatform
  */
 expect suspend fun createTestDatabase(): MyHubDatabase
 
-const val TEST_USER_ID = "test-user-1"
-
 /**
  * 销毁测试数据库
  *
