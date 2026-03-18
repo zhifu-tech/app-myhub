@@ -20,8 +20,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.content.drawables.QuoteIcon
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.drawables.QuoteIcon
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_quote
 
 @Composable

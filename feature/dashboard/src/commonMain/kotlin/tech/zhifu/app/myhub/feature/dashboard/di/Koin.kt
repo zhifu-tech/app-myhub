@@ -7,8 +7,6 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 fun dashboardModule() = module {
     viewModel {
         DashboardViewModel(
-            cardRepository = get(),
-            collectionRepository = get(),
             userRepository = get(),
         )
     }

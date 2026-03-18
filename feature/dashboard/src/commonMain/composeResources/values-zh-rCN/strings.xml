@@ -15,31 +15,4 @@
   <string name="feature_dashboard_menu_license">开源代码许可</string>
   <string name="feature_dashboard_menu_logout">退出登录</string>
 
-  // TODO Following need check
-
-  <string name="feature_dashboard_search_placeholder">搜索卡片内容、标签或作者...</string>
-  <string name="feature_dashboard_good_evening">晚上好，学者</string>
-  <string name="feature_dashboard_cards_to_review">你今天有 %1$d 张卡片需要复习。</string>
-  <string name="feature_dashboard_no_cards_to_review">今天没有需要复习的卡片。</string>
-  <string name="feature_dashboard_focus_and_review">专注复习</string>
-  <string name="feature_dashboard_asset_collections">资产合集</string>
-  <string name="feature_dashboard_latest_captures">最新摘录</string>
-  <string name="feature_dashboard_view_all">查看全部</string>
-  <string name="feature_dashboard_new_capture">新建摘录</string>
-  <string name="feature_dashboard_curated_library">你整理的卡片库</string>
-  <string name="feature_dashboard_recently_added">各分类最近添加的卡片</string>
-  <string name="feature_dashboard_search">搜索</string>
-  <string name="feature_dashboard_refresh">刷新</string>
-  <string name="feature_dashboard_more_options">更多选项</string>
-  <string name="feature_dashboard_last_synced">上次同步：%1$s</string>
-  <string name="feature_dashboard_never_synced">从未同步</string>
-  <string name="feature_dashboard_just_now">刚刚</string>
-  <string name="feature_dashboard_minutes_ago">%1$d 分钟前</string>
-  <string name="feature_dashboard_hours_ago">%1$d 小时前</string>
-  <string name="feature_dashboard_days_ago">%1$d 天前</string>
-  <string name="feature_dashboard_total_cards">总计</string>
-  <string name="feature_dashboard_recent_edits">最近编辑</string>
-  <string name="feature_dashboard_favorites">收藏</string>
-  <string name="feature_dashboard_total">总计卡片</string>
-
 </resources>

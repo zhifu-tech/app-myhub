@@ -29,6 +29,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSearchStateQuery
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectResetSearch
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateSearchStateQuery
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 

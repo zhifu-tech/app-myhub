@@ -10,9 +10,11 @@ import androidx.compose.ui.Modifier
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
+import tech.zhifu.app.myhub.feature.dashboard.content.Content
 import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
@@ -52,7 +54,7 @@ fun DashboardScreen(
             Error(modifier = it, viewModel = viewModel)
         },
         content = {
-
+            Content(modifier = it, viewModel = viewModel)
         }
     )
 }
@@ -88,15 +90,18 @@ internal fun DashboardScreenContent(
     ) { contentPadding ->
         when (state) {
             DashboardUiState.State.LOADING -> {
-                loading(Modifier.padding(contentPadding))
+                loading(Modifier.padding(paddingValues = contentPadding))
             }
 
             DashboardUiState.State.ERROR -> {
-                error(Modifier.padding(contentPadding))
+                error(Modifier.padding(paddingValues = contentPadding))
             }
 
             DashboardUiState.State.CONTENT -> {
-                content(Modifier.padding(contentPadding))
+                content(
+                    Modifier.padding(paddingValues = contentPadding)
+                        .hazeSource(state = hazeState)
+                )
             }
         }
     }

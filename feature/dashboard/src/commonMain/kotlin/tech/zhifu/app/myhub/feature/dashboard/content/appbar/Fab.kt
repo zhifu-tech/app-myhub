@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.content.search.resetSearchState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.resetSearchState
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.util.rememberKeyboardOpenState

@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.drawables
+package tech.zhifu.app.myhub.feature.dashboard.resources.drawables
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
