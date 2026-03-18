@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchBar
 
@@ -17,6 +18,14 @@ fun BottomBar(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
+    val bottomBarEnabled = viewModel.collectFieldAsState {
+        it is DashboardUiState.Content
+    }.value
+
+    if (bottomBarEnabled.not()) {
+        return
+    }
+
     BottomBarContent(
         modifier = modifier,
         searchBar = { modifier ->
@@ -43,7 +52,7 @@ fun BottomBarContent(
     Row(
         modifier = modifier.fillMaxWidth()
             .imePadding()
-            .padding(16.dp), // 保持 SearchBar 与键盘间距
+            .padding(32.dp), // 保持 SearchBar 与键盘间距
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End
     ) {

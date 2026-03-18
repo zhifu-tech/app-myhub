@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +22,7 @@ import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -39,6 +41,8 @@ fun DashboardScreen(
         it.state
     }
 
+    logger.debug { "DashboardScreen state is $state" }
+
     DashboardScreenContent(
         state = state,
         topBar = {
@@ -53,8 +57,12 @@ fun DashboardScreen(
         error = {
             Error(modifier = it, viewModel = viewModel)
         },
-        content = {
-            Content(modifier = it, viewModel = viewModel)
+        content = { paddingValues, modifier ->
+            Content(
+                paddingValues = paddingValues,
+                modifier = modifier,
+                viewModel = viewModel
+            )
         }
     )
 }
@@ -66,7 +74,7 @@ internal fun DashboardScreenContent(
     bottomBar: @Composable (Modifier) -> Unit,
     loading: @Composable (Modifier) -> Unit,
     error: @Composable (Modifier) -> Unit,
-    content: @Composable (Modifier) -> Unit,
+    content: @Composable (PaddingValues, Modifier) -> Unit,
 ) {
     val hazeState = rememberHazeState()
     val hazeStyle = HazeMaterials.regular(containerColor = MaterialTheme.colorScheme.surface)
@@ -99,8 +107,8 @@ internal fun DashboardScreenContent(
 
             DashboardUiState.State.CONTENT -> {
                 content(
-                    Modifier.padding(paddingValues = contentPadding)
-                        .hazeSource(state = hazeState)
+                    contentPadding,
+                    Modifier.hazeSource(state = hazeState)
                 )
             }
         }

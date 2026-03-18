@@ -9,6 +9,7 @@ interface AppBuildEnvConfig {
     val appEnv: String
     val enableLogging: Boolean
     val enableDebugFeatures: Boolean
+    val enableServer: Boolean
 }
 
 interface AppBuildTierConfig {

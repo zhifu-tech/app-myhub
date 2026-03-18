@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -29,6 +30,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentCountThreshold
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSearchStateQuery
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectResetSearch
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateSearchStateQuery
@@ -40,6 +43,13 @@ fun SearchBar(
     modifier: Modifier,
     viewModel: DashboardViewModel
 ) {
+    val showSearchEntrance by viewModel.collectContentCountThreshold(
+        SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD
+    )
+    if (showSearchEntrance.not()) {
+        return
+    }
+
     val query = viewModel.collectSearchStateQuery().value.orEmpty()
 
     logger.debug {

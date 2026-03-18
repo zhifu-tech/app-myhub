@@ -27,6 +27,7 @@ kotlin {
             implementation(projects.core.platform)
             implementation(projects.core.platformCompose)
             implementation(projects.component.card)
+            implementation(projects.datastore.bootstrap)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.dashboardApi)

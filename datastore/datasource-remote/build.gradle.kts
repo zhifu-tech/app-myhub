@@ -16,6 +16,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.appBuildConfig)
             implementation(projects.core.logger)
             implementation(projects.core.network)
             implementation(projects.core.platform)
@@ -37,4 +38,3 @@ kotlin {
         }
     }
 }
-

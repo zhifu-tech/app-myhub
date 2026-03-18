@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MyHub - Grid View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-32">
+<header class="sticky top-0 z-50 glass-effect border-b border-slate-200/10 dark:border-white/5">
+<div class="max-w-5xl mx-auto flex items-center justify-between px-4 h-16">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center size-9">
+<svg class="w-full h-full" fill="none" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="kineticGradient" x1="0%" x2="100%" y1="0%">
+<stop offset="0%" stop-color="#B4A3FF"></stop>
+<stop offset="100%" stop-color="#4F46E5"></stop>
+</linearGradient>
+</defs>
+<path d="M8 32C8 32 8 12 14 12C20 12 20 28 26 28C32 28 32 8 32 8" stroke="url(#kineticGradient)" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"></path>
+<circle cx="32" cy="8" fill="#131316" r="3"></circle>
+</svg>
+</div>
+<span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">MyHub</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-primary/10 border-2 border-primary/20 overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPL4YNGmqxPpt0AYrfKv6zUWDBiOIDxCLfc-tfIgbTp9U14H1nNelVPdHflflPGD8BbzhV8RLpTStZTlNE-XV6HHn5fnkzcANcMf2JSrjAU_TQGvztV1zrl98eZfn50glHZ5vDkdh17-Huvvps2lrElLnZrKxDULM-CVrRlwaaJZ-sNXAHfaYjtGfIq02rbAZCn8BK8XYCGW_BfGh4oymunSKj4q0Z5H45Z4IwHQ5Ph0GaBCPWIhhpI33vqG7filNR61oLUClhs67k"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-4 pt-6">
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-purple-50/50 dark:bg-purple-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-purple-600">auto_fix_high</span>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">Meeting Insights: Q3 Planning</h4>
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">Review Now</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-amber-50/50 dark:bg-amber-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-amber-600">neurology</span>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">Voice Memo #42</h4>
+<div class="flex items-center gap-1.5 text-amber-600">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">AI Processing...</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-blue-50/50 dark:bg-blue-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-blue-600">edit_note</span>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">Drafting Research Paper</h4>
+<div class="flex items-center gap-1.5 text-blue-600">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">Continue Inputting</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-teal-50/50 dark:bg-teal-900/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-teal-600">rocket_launch</span>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">UI/UX Best Practices 2024</h4>
+<div class="flex items-center gap-1.5 text-teal-600">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+<span class="text-[11px] font-semibold uppercase tracking-wider">Continue Inputting</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+<img alt="Article thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeko7d4QweE0UuAM_k-N54jdwJzMNYtwe4UopJpEC8IL-8tbijJF8lmbavrtkNVbwQQgBdtzc7eaXe5VR9vp7QTb1XoyhNwV4ae5KMS6Lge5ne8CPuQ4OJEnZD6Xj1BSjiB2HbuC1e9d32D_jFcEkKtoFSEke8PBMSjoDOokLFxSLknjv325K0ZKWp5z0NdL10Yr3bnvr98mlIIFgW6_F6PVgqtvV5njmGinbyvcKS7P1Qn2h4IgR6X6Q5uoPBy7GK-7YzvsqJRIhB"/>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">Quantum Computing Basics</h4>
+<div class="flex items-center gap-1.5 text-slate-500">
+<span class="text-[11px] font-medium">Modified 1d ago</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+<div class="aspect-[4/3] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+<img alt="Video thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFVBQpeqyddiq-EsSvrfzzTGxiDPBB26-cGd9DCMebwXH-8k5IrY4h1TfOBmSBGiTPrsV6jLZaQ4I2JIt2XFQoKpTAW786ac1pNuf8sb5ceGOtdtHO9BVc_xKKNVORqduM9kQavIVigAl1ikvvR2ZaXWd9kMoWy142oVN8ZTxAwouO7_N9yJ1AzrhqetfRz92GIk-LgsG237pJN-vHPP4fqsO-6WEt9O-kM7YNv3jlTIooDO2feaZt3htNUSfNWo0jidycm8QZ4j8x"/>
+<div class="absolute inset-0 flex items-center justify-center bg-black/20">
+<span class="material-symbols-outlined text-white text-3xl">play_circle</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-2">
+<h4 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug">Weekly Team Sync</h4>
+<div class="flex items-center gap-1.5 text-slate-500">
+<span class="text-[11px] font-medium">Modified 2 hours ago</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-[60]">
+<div class="flex items-center gap-3">
+<div class="flex-1 flex items-center glass-effect rounded-full h-14 px-5 shadow-lg border border-white/30">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300" style="font-variation-settings: 'wght' 200;">search</span>
+<input class="bg-transparent border-none focus:ring-0 flex-1 text-slate-800 dark:text-white placeholder-slate-500 px-3 text-sm" placeholder="搜索" type="text"/>
+<button class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 200;">mic</span>
+</button>
+</div>
+<button class="size-14 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform glass-effect border-white/20">
+<span class="material-symbols-outlined text-slate-800 dark:text-white text-3xl" style="font-variation-settings: 'wght' 100;">edit_square</span>
+</button>
+</div>
+</div>
+
+</body></html>

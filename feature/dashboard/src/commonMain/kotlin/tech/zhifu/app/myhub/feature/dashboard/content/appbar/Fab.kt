@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentEmptyState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.resetSearchState
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
@@ -33,6 +34,10 @@ fun Fab(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
+    val isContentEmpty by viewModel.collectContentEmptyState()
+    if (isContentEmpty) {
+        return
+    }
     FabContent(
         modifier = modifier,
         onClickAdd = {

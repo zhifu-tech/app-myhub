@@ -6,6 +6,9 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
+// 搜索入口内容数量阈值
+const val SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD = 5
+
 @Composable
 fun DashboardViewModel.collectSearchStateQuery(): State<String?> =
     collectFieldAsState { state ->

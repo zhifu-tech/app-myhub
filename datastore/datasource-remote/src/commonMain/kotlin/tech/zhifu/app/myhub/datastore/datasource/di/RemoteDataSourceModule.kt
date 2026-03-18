@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.datastore.datasource.di
 import io.ktor.client.HttpClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.datastore.datasource.RemoteAuthDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardDataSource
 import tech.zhifu.app.myhub.datastore.datasource.RemoteCardTemplateDataSource
@@ -17,6 +18,7 @@ import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteCollectionDataSource
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteSyncDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteTagDataSourceImpl
 import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteUserDataSourceImpl
+import tech.zhifu.app.myhub.datastore.datasource.impl.RemoteUserDataSourceNoop
 import tech.zhifu.app.myhub.datastore.datasource.impl.TokenRefreshProviderAdapter
 import tech.zhifu.app.myhub.network.auth.TokenRefreshProvider
 import tech.zhifu.app.myhub.network.createHttpClient
@@ -79,9 +81,11 @@ val remoteDataSourceModule = module {
     }
 
     single<RemoteUserDataSource> {
-        RemoteUserDataSourceImpl(
-            httpClient = get<HttpClient>()
-        )
+        if (AppBuildConfig.enableServer) {
+            RemoteUserDataSourceImpl(httpClient = get())
+        } else {
+            RemoteUserDataSourceNoop()
+        }
     }
 
     single<RemoteCollectionDataSource> {
@@ -102,4 +106,3 @@ val remoteDataSourceModule = module {
         )
     }
 }
-
