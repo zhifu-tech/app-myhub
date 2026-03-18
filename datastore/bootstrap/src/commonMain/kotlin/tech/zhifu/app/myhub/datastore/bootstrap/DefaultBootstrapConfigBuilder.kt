@@ -17,7 +17,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardMetadata
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTag
-import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
@@ -63,9 +62,6 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
         val tagIdsByCardId: Map<String, List<String>> = cardTags.groupBy { it.cardId }
             .mapValues { (_, items) -> items.map { it.tagId } }
 
-        val cardTemplates = readResource("template.json", localeDir)
-            .let { json.decodeFromString<List<CardTemplate>>(it) }
-
         val strictJson = Json(json) {
             ignoreUnknownKeys = false
         }
@@ -87,7 +83,6 @@ internal class DefaultBootstrapConfigBuilder : BootstrapConfigBuilder {
             tags = tags,
             collections = collections,
             cards = cards,
-            templates = cardTemplates,
             collectionCards = collectionCards
         )
     }

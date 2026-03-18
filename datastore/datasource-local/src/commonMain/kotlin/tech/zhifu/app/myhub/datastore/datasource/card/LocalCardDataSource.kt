@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.datastore.datasource.card
 
 import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
 enum class CardSort {
     NEWEST,
@@ -43,8 +42,4 @@ interface LocalCardDataSource {
     suspend fun deleteCard(cardId: String)
 
     suspend fun deleteCards(userId: String)
-
-    suspend fun getUnreviewedCards(userId: String): List<Card>
-
-    suspend fun getReviewProgress(userId: String): ReviewProgress
 }

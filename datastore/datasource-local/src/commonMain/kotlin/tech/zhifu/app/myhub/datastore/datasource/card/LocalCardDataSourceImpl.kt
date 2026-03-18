@@ -14,11 +14,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
-import tech.zhifu.app.myhub.datastore.datasource.card.CardSort
-import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.datasource.tag.toDomain
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.model.domain.attribution
 import tech.zhifu.app.myhub.datastore.model.domain.carrierImage
 import tech.zhifu.app.myhub.datastore.model.domain.carrierVideo
@@ -319,43 +316,5 @@ class LocalCardDataSourceImpl(
 
     override suspend fun deleteCards(userId: String) {
         database.cardQueries.deleteCardsByUserId(userId)
-    }
-
-    override suspend fun getUnreviewedCards(userId: String): List<Card> {
-        val cardRows = database.user_cardQueries
-            .selectUnreviewedCards(userId)
-            .awaitAsList()
-
-        if (cardRows.isEmpty()) {
-            return emptyList()
-        }
-
-        val cardIds = cardRows.map { it.id }
-
-        val cards = cardIds.mapNotNull { cardId ->
-            val cardRow = database.card_with_metadataQueries
-                .selectCardWithMetadataByCardId(cardId)
-                .awaitAsList()
-                .firstOrNull()
-                ?: return@mapNotNull null
-
-            val tags = database.card_tagQueries
-                .selectTagsByCardId(cardId)
-                .awaitAsList()
-                .map { it.toDomain() }
-            cardRow.toDomain(tags)
-        }
-
-        return cards
-    }
-
-    override suspend fun getReviewProgress(userId: String): ReviewProgress {
-        val progress = database.user_cardQueries
-            .selectReviewProgress(user_id = userId)
-            .awaitAsOne()
-        return ReviewProgress(
-            completed = progress.completed.toInt(),
-            total = progress.total_count.toInt()
-        )
     }
 }

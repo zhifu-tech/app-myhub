@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 
 interface CardRepository {
 
@@ -60,8 +59,4 @@ interface CardRepository {
     suspend fun clearCards(
         userId: String
     )
-
-    suspend fun getReviewProgress(
-        userId: String
-    ): ReviewProgress
 }

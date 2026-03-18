@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.model.dto
 
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
-import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import kotlin.time.Instant
 
@@ -32,34 +31,6 @@ fun CollectionResponse.toDomain(): Collection {
         userId = userId,
         createdAt = Instant.parse(createdAt),
         updatedAt = Instant.parse(updatedAt)
-    )
-}
-
-/**
- * 扩展函数：CardTemplate 转 CardTemplateResponse
- */
-fun CardTemplate.toResponse(): CardTemplateResponse {
-    return CardTemplateResponse(
-        id = id,
-        type = type,
-        title = title,
-        content = content,
-        description = description,
-        createdAt = createdAt.toString()
-    )
-}
-
-/**
- * 扩展函数：CardTemplateResponse 转 CardTemplate
- */
-fun CardTemplateResponse.toDomain(): CardTemplate {
-    return CardTemplate(
-        id = id,
-        type = type,
-        title = title,
-        content = content,
-        description = description,
-        createdAt = Instant.parse(createdAt)
     )
 }
 

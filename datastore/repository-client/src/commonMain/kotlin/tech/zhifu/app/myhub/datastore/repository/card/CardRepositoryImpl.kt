@@ -7,9 +7,7 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
-import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.ReviewProgress
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.impl.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
@@ -23,7 +21,6 @@ class CardRepositoryImpl(
     private val store: CardStore,
     private val syncRepository: SyncRepository,
     private val tagRepository: TagRepository,
-    private val localCardDataSource: LocalCardDataSource,
     private val logger: Logger = logger("CardRepo")
 ) : CardRepository {
 
@@ -161,9 +158,5 @@ class CardRepositoryImpl(
             entityId = userId,
             payload = "",
         )
-    }
-
-    override suspend fun getReviewProgress(userId: String): ReviewProgress {
-        return localCardDataSource.getReviewProgress(userId)
     }
 }

@@ -3,7 +3,6 @@ package tech.zhifu.app.myhub.datastore.bootstrap
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.collection.CollectionRepository
 import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
-import tech.zhifu.app.myhub.datastore.repository.template.CardTemplateRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
@@ -14,7 +13,6 @@ class Bootstrap(
     private val tagRepository: TagRepository,
     private val collectionRepository: CollectionRepository,
     private val cardRepository: CardRepository,
-    private val cardTemplateRepository: CardTemplateRepository,
     private val configBuilder: () -> BootstrapConfigBuilder,
 ) {
     suspend fun initialize(localeTag: String) {
@@ -35,10 +33,6 @@ class Bootstrap(
             collectionRepository.insertCollection(it)
         }
         logger.debug { "Inserted collections: ${config.collections}" }
-        config.templates.forEach {
-            cardTemplateRepository.insertTemplate(it, config.userId, needSync = false)
-        }
-        logger.debug { "Inserted templates: ${config.templates}" }
         config.cards.forEach {
             cardRepository.insertCard(it, needSync = false)
         }

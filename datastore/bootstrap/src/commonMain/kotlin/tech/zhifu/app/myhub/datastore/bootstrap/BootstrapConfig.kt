@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
@@ -15,7 +14,6 @@ data class BootstrapConfig(
     val tags: List<Tag>,
     val collections: List<Collection>,
     val cards: List<Card>,
-    val templates: List<CardTemplate>,
     val collectionCards: List<CollectionCard> = emptyList(),
 )
 

@@ -13,7 +13,6 @@ import tech.zhifu.app.myhub.datastore.repository.store.BookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.store.DatabaseBookkeeperStorage
 import tech.zhifu.app.myhub.datastore.repository.sync.di.syncRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.tag.di.tagRepositoryModule
-import tech.zhifu.app.myhub.datastore.repository.template.di.templateRepositoryModule
 import tech.zhifu.app.myhub.datastore.repository.user.di.userRepositoryModule
 
 fun repositoryModule() = module {
@@ -34,7 +33,6 @@ fun repositoryModule() = module {
         tagRepositoryModule(),
         collectionRepositoryModule(),
         userRepositoryModule(),
-        templateRepositoryModule(),
         syncRepositoryModule(),
     )
 }

@@ -66,29 +66,3 @@ WHERE user_id = ? AND card_id = ?;
 deleteUserCardsByUserId:
 DELETE FROM user_card
 WHERE user_id = ?;
-
--- Review 相关查询
-
--- 查询所有未复习的卡片（last_reviewed_at IS NULL）
-selectUnreviewedCards:
-SELECT c.*
-FROM card c
-INNER JOIN user_card uc ON c.id = uc.card_id
-WHERE uc.user_id = :user_id
-  AND uc.last_reviewed_at IS NULL
-ORDER BY c.created_at DESC;
-
--- 统计未复习卡片数量
-selectUnreviewedCardCount:
-SELECT COUNT(*) total_count
-FROM user_card
-WHERE user_id = :user_id
-  AND last_reviewed_at IS NULL;
-
--- 统计 ReviewProgress（已复习/总待复习）
-selectReviewProgress:
-SELECT 
-    COUNT(CASE WHEN last_reviewed_at IS NOT NULL THEN 1 END) completed,
-    COUNT(CASE WHEN last_reviewed_at IS NULL THEN 1 END) total_count
-FROM user_card
-WHERE user_id = :user_id;
