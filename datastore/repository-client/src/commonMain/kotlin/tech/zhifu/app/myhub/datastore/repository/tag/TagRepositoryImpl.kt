@@ -7,11 +7,10 @@ import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
+import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.sync.recordDeleteOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
-import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.sync.SyncEntityType
@@ -80,15 +79,11 @@ class TagRepositoryImpl(
         )
 
     override suspend fun ensureTags(userId: String, tags: List<Tag>, needSync: Boolean): List<Tag> {
-        logger.debug { "ensure tags: $tags" }
         if (tags.isEmpty()) return emptyList()
 
         val existingTags = getTags(userId).tags
         val byId = existingTags.associateBy { it.id }
         val byName = existingTags.associateBy { it.name }
-        logger.debug { "existing tags: $existingTags" }
-        logger.debug { "byId: $byId" }
-        logger.debug { "byName: $byName" }
         return tags.map { tag ->
             val existing = tag.id.takeIf { it.isNotBlank() }?.let(byId::get) ?: byName[tag.name]
             if (existing != null) {
@@ -101,9 +96,7 @@ class TagRepositoryImpl(
                     createdAt = now,
                     updatedAt = now
                 )
-                logger.debug { "new tag: $newTag" }
                 insertTag(newTag, needSync = needSync)
-                logger.debug { "inserted new tag: $newTag" }
                 newTag
             }
         }

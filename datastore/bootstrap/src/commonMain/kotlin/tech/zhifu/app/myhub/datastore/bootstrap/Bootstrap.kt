@@ -20,17 +20,13 @@ class Bootstrap(
             localeTag = localeTag,
         )
         userRepository.insertUser(config.user)
-        logger.debug { "Inserted user: ${config.user}" }
         userRepository.insertUserPreferences(config.userPreferences)
-        logger.debug { "Inserted user preferences: ${config.userPreferences}" }
         config.tags.forEach {
             tagRepository.insertTag(it)
         }
-        logger.debug { "Inserted tags: ${config.tags}" }
         config.cards.forEach {
             cardRepository.insertCard(it, needSync = false)
         }
-        logger.debug { "Inserted cards: ${config.cards}" }
     }
 }
 

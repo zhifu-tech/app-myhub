@@ -5,7 +5,6 @@ import org.mobilenativefoundation.store.store5.Updater
 import org.mobilenativefoundation.store.store5.UpdaterResult
 import tech.zhifu.app.myhub.datastore.datasource.user.RemoteUserDataSource
 import tech.zhifu.app.myhub.logger.Logger
-import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 
 internal fun createUserStoreUpdater(
@@ -13,10 +12,6 @@ internal fun createUserStoreUpdater(
     logger: Logger,
 ): UserStoreUpdater = Updater.by(
     post = { key, data ->
-        logger.debug("updater") {
-            "post is called with key: $key (type=${key::class.qualifiedName}, " +
-                "data=$data, instance=${key.hashCode()}"
-        }
         when (key) {
             is UserStoreKey.ById if data is UserStoreData.UserData -> remoteUserDataSource
                 .updateUser(
