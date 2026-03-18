@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.template
 
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.store5.SourceOfTruth
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardTemplateDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
 fun createTemplateStoreSourceOfTruth(

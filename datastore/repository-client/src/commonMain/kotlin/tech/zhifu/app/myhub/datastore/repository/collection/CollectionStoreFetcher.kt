@@ -3,7 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository.collection
 import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
-import tech.zhifu.app.myhub.datastore.datasource.RemoteCollectionDataSource
+import tech.zhifu.app.myhub.datastore.datasource.collection.RemoteCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.logger.Logger
 

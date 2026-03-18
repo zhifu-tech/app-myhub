@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
 import tech.zhifu.app.myhub.sync.SyncPullChange
 import tech.zhifu.app.myhub.sync.SyncPullResponse

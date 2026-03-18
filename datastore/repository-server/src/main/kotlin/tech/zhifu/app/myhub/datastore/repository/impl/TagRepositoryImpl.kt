@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
+import tech.zhifu.app.myhub.datastore.datasource.tag.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Tag
 import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import kotlin.random.Random

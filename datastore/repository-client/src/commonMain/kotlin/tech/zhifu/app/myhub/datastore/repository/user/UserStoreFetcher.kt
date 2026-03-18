@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.user
 
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
-import tech.zhifu.app.myhub.datastore.datasource.RemoteUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.user.RemoteUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 
 fun createUserStoreFetcher(

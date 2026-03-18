@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.auth
 
-import tech.zhifu.app.myhub.datastore.datasource.RemoteAuthDataSource
+import tech.zhifu.app.myhub.datastore.datasource.auth.RemoteAuthDataSource
 import tech.zhifu.app.myhub.datastore.model.dto.LoginResponse
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.logger.error

@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardTemplateDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardTemplate
 import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository
 

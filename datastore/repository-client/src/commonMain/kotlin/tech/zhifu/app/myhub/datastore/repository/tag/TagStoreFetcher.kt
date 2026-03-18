@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.tag
 
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
-import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
+import tech.zhifu.app.myhub.datastore.datasource.tag.RemoteTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 

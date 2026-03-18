@@ -3,7 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository.tag
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
 import org.mobilenativefoundation.store.store5.UpdaterResult
-import tech.zhifu.app.myhub.datastore.datasource.RemoteTagDataSource
+import tech.zhifu.app.myhub.datastore.datasource.tag.RemoteTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error

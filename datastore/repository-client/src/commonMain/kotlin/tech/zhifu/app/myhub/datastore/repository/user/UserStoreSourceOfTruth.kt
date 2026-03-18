@@ -3,7 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository.user
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.store5.SourceOfTruth
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
 fun createUserStoreSourceOfTruth(

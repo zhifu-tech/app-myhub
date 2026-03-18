@@ -2,12 +2,12 @@ package tech.zhifu.app.myhub.datastore.repository.di
 
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalCardTemplateDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
+import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.collection.LocalCollectionDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.tag.LocalTagDataSource
+import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.CardTemplateRepository

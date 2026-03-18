@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.RemoteSyncDataSource
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncCoordinatorImpl
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncForegroundScheduler

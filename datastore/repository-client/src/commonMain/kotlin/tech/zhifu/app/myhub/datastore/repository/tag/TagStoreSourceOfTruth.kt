@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.tag
 
 import kotlinx.coroutines.flow.flow
 import org.mobilenativefoundation.store.store5.SourceOfTruth
-import tech.zhifu.app.myhub.datastore.datasource.LocalTagDataSource
+import tech.zhifu.app.myhub.datastore.datasource.tag.LocalTagDataSource
 import tech.zhifu.app.myhub.logger.Logger
 
 fun createTagStoreSourceOfTruth(

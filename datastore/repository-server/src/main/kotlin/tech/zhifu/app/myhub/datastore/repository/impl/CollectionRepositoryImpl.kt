@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
+import tech.zhifu.app.myhub.datastore.datasource.collection.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.repository.CollectionRepository
 

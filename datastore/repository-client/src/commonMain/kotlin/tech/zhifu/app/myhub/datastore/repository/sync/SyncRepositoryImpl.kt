@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.mobilenativefoundation.store.store5.StoreReadResponse
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserStoreData

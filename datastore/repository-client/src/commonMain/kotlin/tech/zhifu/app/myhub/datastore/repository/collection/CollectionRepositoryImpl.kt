@@ -7,7 +7,7 @@ import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.impl.extensions.get
-import tech.zhifu.app.myhub.datastore.datasource.LocalCollectionDataSource
+import tech.zhifu.app.myhub.datastore.datasource.collection.LocalCollectionDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.Collection
 import tech.zhifu.app.myhub.datastore.model.domain.CollectionCard
 import tech.zhifu.app.myhub.datastore.repository.impl.recordDeleteOperation

@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.template
 
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.FetcherResult
-import tech.zhifu.app.myhub.datastore.datasource.RemoteCardTemplateDataSource
+import tech.zhifu.app.myhub.datastore.datasource.card.RemoteCardTemplateDataSource
 
 fun createTemplateStoreFetcher(
     remoteCardTemplateDataSource: RemoteCardTemplateDataSource

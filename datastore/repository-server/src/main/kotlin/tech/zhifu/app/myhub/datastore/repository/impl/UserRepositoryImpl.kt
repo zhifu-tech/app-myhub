@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.datastore.repository.impl
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalUserDataSource
+import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.UserRepository

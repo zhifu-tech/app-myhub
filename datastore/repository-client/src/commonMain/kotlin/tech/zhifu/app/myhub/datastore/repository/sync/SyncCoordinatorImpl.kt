@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.datastore.repository.sync
 
-import tech.zhifu.app.myhub.datastore.datasource.LocalSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.RemoteSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.SyncOutboxStatus
+import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.RemoteSyncDataSource
+import tech.zhifu.app.myhub.datastore.datasource.sync.SyncOutboxStatus
 import tech.zhifu.app.myhub.sync.SyncCoordinator
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOutboxUploadItem
