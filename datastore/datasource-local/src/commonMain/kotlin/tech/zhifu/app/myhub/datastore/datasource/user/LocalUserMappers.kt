@@ -45,6 +45,7 @@ internal fun DbUserPreferences.toDomain() = UserPreferences(
     language = language,
     layoutAsList = layout_as_list.toBoolean(def = true),
     sortAsDate = sort_as_date.toBoolean(def = true),
+    sortAsName = sort_as_name.toBoolean(def = true),
     autoSync = auto_sync.toBoolean(),
     syncInterval = sync_interval
 )

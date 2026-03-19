@@ -73,6 +73,7 @@ class LocalUserDataSourceImpl(
             language = preferences.language,
             layout_as_list = if (preferences.layoutAsList) 1L else 0L,
             sort_as_date = if (preferences.sortAsDate) 1L else 0L,
+            sort_as_name = if (preferences.sortAsName) 1L else 0L,
             default_card_type = preferences.defaultCardType,
             auto_sync = if (preferences.autoSync) 1L else 0L,
             sync_interval = preferences.syncInterval
@@ -85,6 +86,7 @@ class LocalUserDataSourceImpl(
             language = preferences.language,
             layout_as_list = if (preferences.layoutAsList) 1L else 0L,
             sort_as_date = if (preferences.sortAsDate) 1L else 0L,
+            sort_as_name = if (preferences.sortAsName) 1L else 0L,
             default_card_type = preferences.defaultCardType,
             auto_sync = if (preferences.autoSync) 1L else 0L,
             sync_interval = preferences.syncInterval,

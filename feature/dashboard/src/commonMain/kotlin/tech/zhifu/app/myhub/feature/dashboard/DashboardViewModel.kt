@@ -2,29 +2,22 @@ package tech.zhifu.app.myhub.feature.dashboard
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
-import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.datastore.repository.user.preferences
-import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentItem
-import tech.zhifu.app.myhub.feature.dashboard.content.item.mockContentItems
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.streamContentItems
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.streamUser
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.streamUserPreferences
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.util.ViewModelContainerHost
 
 class DashboardViewModel(
@@ -32,78 +25,76 @@ class DashboardViewModel(
     internal val bootstrap: Bootstrap,
     internal val userRepository: UserRepository,
 ) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>() {
-
-    override val container = container<DashboardUiState, DashboardSideEffect>(
-        initialState = DashboardUiState.Loading()
-    )
-
     private var loadJob: Job? = null
 
-    init {
-        startLoading()
+    override val container = container<DashboardUiState, DashboardSideEffect>(
+        initialState = DashboardUiState.Loading("资源加载中...")
+    ) {
+        initLoadData("init")
     }
 
     fun retry() {
-        startLoading()
+        initLoadData("retry")
     }
 
-    private fun startLoading() {
+    fun loadMoreData() {
+        val state = uiState as? DashboardUiState.Content ?: run {
+            logger.warn { "当前非Content状态，不能加载更多" }
+            return
+        }
+        if (state.hasMore) {
+            return
+        }
+        viewModelScope.launch {
+            streamContentItems(
+                userId = state.user.id,
+                pageIndex = state.pageIndx,
+                pageSize = state.pageSize,
+                user = state.user,
+                userPreferences = state.userPreferences
+            ).first()
+        }
+    }
+
+    private fun initLoadData(reason: String) {
+        logger.debug {
+            "加载数据 as $reason"
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            intent { reduce { DashboardUiState.Loading() } }
-            logger.debug { "DashboardViewModel init" }
-            userRepository.streamUser()
-                .onEach { user ->
-                    if (user == null) {
-                        bootstrap.initialize("default")
-                    }
-                }
+            // 1. 取用户信息
+            streamUser()
                 .filterNotNull()
                 .distinctUntilChangedBy { it.id }
+                // 2. 获取用户偏好
                 .flatMapLatest { user ->
-                    val itemsFlow = flowOf(mockContentItems())
-                    val preferencesFlow = userRepository.streamUserPreferences(user.id)
-                        .map { response ->
-                            response.requireData().preferences
-                                ?: UserPreferences(user.id)
-                        }
-                        .distinctUntilChanged()
-                    val updates = merge(
-                        itemsFlow.map { Update(items = it) },
-                        preferencesFlow.map { Update(preferences = it) }
-                    )
-                    updates.scan(
-                        DashboardUiState.Content(
-                            user = user,
-                            userPreferences = UserPreferences(user.id),
-                            contentItems = emptyList()
-                        )
-                    ) { state, update ->
-                        state.copy(
-                            user = user,
-                            userPreferences = update.preferences ?: state.userPreferences,
-                            contentItems = update.items ?: state.contentItems
-                        )
+                    streamUserPreferences(
+                        userId = user.id
+                    ).map {
+                        user to it
                     }
                 }
-                .catch { e ->
-                    logger.error(throwable = e) { "Dashboard load failed" }
-                    intent {
-                        reduce {
-                            DashboardUiState.Error(
-                                message = e.message ?: "加载失败，请重试"
-                            )
-                        }
+                // 3. 获取 内容数据
+                .distinctUntilChangedBy { (user, userPreference) ->
+                    // 用户 或着 排序偏好发生变化，重新拉取数据
+                    Triple(user.id, userPreference.sortAsDate, userPreference.sortAsName)
+                }
+                .flatMapLatest { (user, userPreference) ->
+                    streamContentItems(
+                        userId = user.id,
+                        pageIndex = 1,
+                        sortAsDate = userPreference.sortAsDate,
+                        sortAsName = userPreference.sortAsName,
+                        user = user,
+                        userPreferences = userPreference,
+                    ).map {
+                        Triple(user, userPreference, it)
                     }
                 }
-                .collectLatest { state ->
-                    intent { reduce { state } }
+                .collect {
+                    logger.debug { "Init finished." }
                 }
         }
     }
 }
 
-private data class Update(
-    val preferences: UserPreferences? = null,
-    val items: List<ContentItem>? = null,
-)

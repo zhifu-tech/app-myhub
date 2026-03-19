@@ -87,6 +87,7 @@ fun ContentGridItem(
                     Text(
                         text = action.label,
                         color = action.color,
+                        maxLines = 1,
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.labelMedium,
                     )

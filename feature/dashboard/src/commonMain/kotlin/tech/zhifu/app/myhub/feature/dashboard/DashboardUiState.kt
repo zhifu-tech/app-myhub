@@ -9,13 +9,18 @@ sealed class DashboardUiState(
     val state: State,
 ) {
     data class Loading(
-        val hasAuthed: Boolean = false
+        val message: String,
     ) : DashboardUiState(state = State.LOADING)
 
     data class Content(
         val user: User,
-        val userPreferences: UserPreferences = UserPreferences(""),
+        val userPreferences: UserPreferences,
         val searchState: SearchState = SearchState(),
+
+        // 分页信息
+        val pageIndx: Int = 1,
+        val pageSize: Int = 20,
+        val hasMore: Boolean = false,
         val contentItems: List<ContentItem> = emptyList(),
     ) : DashboardUiState(state = State.CONTENT)
 
