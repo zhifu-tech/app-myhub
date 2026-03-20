@@ -26,7 +26,6 @@ fun initKoin(
         startupModule(),
         analyticsModule(),
         bootstrapModule(),
-
         dashboardModule(),
     )
 }

@@ -9,6 +9,18 @@ import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.ui.graphics.Color
+import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+
+fun ContentItem.toPreviewPayload(): PreviewPayload {
+    val imageCover = cover as? ContentItemCover.Image
+    return PreviewPayload(
+        contentId = id,
+        title = title,
+        summary = action?.label,
+        coverUrl = imageCover?.url,
+        isVideo = imageCover?.isVideo ?: false,
+    )
+}
 
 fun mockContentItems(): List<ContentItem> {
     val slate500 = Color(0xFF64748B)

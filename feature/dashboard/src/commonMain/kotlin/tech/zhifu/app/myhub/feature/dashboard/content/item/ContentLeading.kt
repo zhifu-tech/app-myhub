@@ -25,12 +25,15 @@ fun ContentItemLeading(
     size: Dp?,
     iconSize: Dp,
     shape: CornerBasedShape,
+    modifier: Modifier = Modifier,
 ) {
-    val containerModifier = if (size != null) {
-        Modifier.size(size).clip(shape)
-    } else {
-        Modifier.fillMaxSize().clip(shape)
-    }
+    val containerModifier = modifier.then(
+        if (size != null) {
+            Modifier.size(size).clip(shape)
+        } else {
+            Modifier.fillMaxSize().clip(shape)
+        }
+    )
     when (val cover = item.cover) {
         is ContentItemCover.Icon -> {
             val background = if (size == null) {

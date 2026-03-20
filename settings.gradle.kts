@@ -218,6 +218,7 @@ include(":feature:dashboard-api")
 include(":feature:dashboard")
 include(":feature:mixed-api")
 include(":feature:mixed")
+include(":feature:preview")
 
 // ============================================================================
 // 应用模块

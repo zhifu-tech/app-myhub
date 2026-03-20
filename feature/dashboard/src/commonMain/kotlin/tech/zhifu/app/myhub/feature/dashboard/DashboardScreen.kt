@@ -22,6 +22,9 @@ import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
+import tech.zhifu.app.myhub.feature.preview.Preview
+import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
@@ -32,16 +35,13 @@ fun DashboardScreen(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
-    DashboardSideEffect(
-        navigator = navigator,
-        viewModel = viewModel
-    )
-
+    DashboardSideEffect(navigator = navigator, viewModel = viewModel)
     val state by viewModel.collectFieldAsState {
         it.state
     }
-
     logger.debug { "DashboardScreen state is $state" }
+
+    val previewState = rememberPreviewState()
 
     DashboardScreenContent(
         state = state,
@@ -61,15 +61,18 @@ fun DashboardScreen(
             Content(
                 paddingValues = paddingValues,
                 modifier = modifier,
-                viewModel = viewModel
+                viewModel = viewModel,
+                previewState = previewState,
             )
-        }
+        },
+        previewState = previewState,
     )
 }
 
 @Composable
 internal fun DashboardScreenContent(
     state: DashboardUiState.State,
+    previewState: PreviewState,
     topBar: @Composable (Modifier) -> Unit,
     bottomBar: @Composable (Modifier) -> Unit,
     loading: @Composable (Modifier) -> Unit,
@@ -84,8 +87,8 @@ internal fun DashboardScreenContent(
         topBar = {
             topBar(
                 Modifier.hazeEffect(state = hazeState, style = hazeStyle) {
-                    this.inputScale = hazeInputScale
-                    this.progressive = HazeProgressive.verticalGradient(
+                    inputScale = hazeInputScale
+                    progressive = HazeProgressive.verticalGradient(
                         startIntensity = 1f,
                         endIntensity = 0f
                     )
@@ -108,11 +111,12 @@ internal fun DashboardScreenContent(
             DashboardUiState.State.CONTENT -> {
                 content(
                     contentPadding,
-                    Modifier.hazeSource(state = hazeState)
+                    Modifier.hazeSource(state = hazeState),
                 )
             }
         }
     }
+    Preview(state = previewState)
 }
 
 @Composable

@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub
 
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation3.runtime.NavKey
@@ -17,6 +18,7 @@ import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
 import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.navigation.toEntries
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.LocalSharedTransitionScope
 import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.rememberWindowSizeClass
 
@@ -46,39 +48,16 @@ internal fun AppContent() {
     val navigator = AppNavigator(navigationState)
     val entries = navigationState.toEntries(entryProvider = navigator.navEntryProvider())
     val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
-    NavDisplay(
-        entries = entries,
-        sceneStrategy = sceneStrategy,
-//        transitionSpec = {
-//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
-//            slideIntoContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Left,
-//                animationSpec = animationSpec
-//            ) togetherWith slideOutOfContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Left,
-//                animationSpec = animationSpec
-//            )
-//        },
-//        popTransitionSpec = {
-//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
-//            slideIntoContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Right,
-//                animationSpec = animationSpec
-//            ) togetherWith slideOutOfContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Right,
-//                animationSpec = animationSpec
-//            )
-//        },
-//        predictivePopTransitionSpec = {
-//            val animationSpec = tween<IntOffset>(durationMillis = 1000)
-//            slideIntoContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Right,
-//                animationSpec = animationSpec
-//            ) togetherWith slideOutOfContainer(
-//                AnimatedContentTransitionScope.SlideDirection.Right,
-//                animationSpec = animationSpec
-//            )
-//        },
-        onBack = navigator::goBack
-    )
+    SharedTransitionLayout {
+        CompositionLocalProvider(
+            LocalSharedTransitionScope provides this
+        ) {
+            NavDisplay(
+                entries = entries,
+                sceneStrategy = sceneStrategy,
+                onBack = navigator::goBack,
+                sharedTransitionScope = this@SharedTransitionLayout
+            )
+        }
+    }
 }

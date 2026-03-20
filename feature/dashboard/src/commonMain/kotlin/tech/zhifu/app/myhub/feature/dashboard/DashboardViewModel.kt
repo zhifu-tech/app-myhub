@@ -57,9 +57,7 @@ class DashboardViewModel(
     }
 
     private fun initLoadData(reason: String) {
-        logger.debug {
-            "加载数据 as $reason"
-        }
+        logger.debug { "加载数据 as $reason" }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             // 1. 取用户信息
