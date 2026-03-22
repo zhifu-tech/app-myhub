@@ -19,8 +19,8 @@ fun ContentListContent(
     modifier: Modifier,
     paddingValues: PaddingValues,
     items: List<ContentItem>,
-    onLoadMore: () -> Unit,
     previewState: PreviewState,
+    onLoadMore: () -> Unit,
     onClickItem: (ContentItem) -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -40,12 +40,12 @@ fun ContentListContent(
             ContentItemHost(
                 item = item,
                 previewState = previewState,
-            ) { modifier ->
+            ) { modifier, visible ->
                 ContentListItem(
-                    item = item,
-                    previewState = previewState,
                     modifier = modifier,
-                    onClick = { onClickItem(item) }
+                    item = item,
+                    onClick = { onClickItem(item) },
+                    visible = visible,
                 )
             }
         }

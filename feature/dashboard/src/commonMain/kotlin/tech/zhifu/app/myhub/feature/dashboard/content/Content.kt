@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -39,16 +40,20 @@ fun Content(
         it.layoutAsList
     }.value ?: true
 
+    val onClickItem: (ContentItem) -> Unit = remember(previewState) {
+        { item ->
+            previewState.show(payload = item.toPreviewPayload())
+        }
+    }
+
     ContentContent(
         modifier = modifier,
         paddingValues = paddingValues,
         items = items,
         layoutAsList = layoutAsList,
-        onLoadMore = viewModel::loadMoreData,
         previewState = previewState,
-        onClickItem = {
-            previewState.show(payload = it.toPreviewPayload())
-        }
+        onLoadMore = viewModel::loadMoreData,
+        onClickItem = onClickItem,
     )
 }
 
@@ -58,8 +63,8 @@ private fun ContentContent(
     paddingValues: PaddingValues,
     items: List<ContentItem>,
     layoutAsList: Boolean,
-    onLoadMore: () -> Unit,
     previewState: PreviewState,
+    onLoadMore: () -> Unit,
     onClickItem: (ContentItem) -> Unit,
 ) {
     val modifier = modifier
@@ -74,8 +79,8 @@ private fun ContentContent(
             modifier = modifier,
             paddingValues = paddingValues,
             items = items,
-            onLoadMore = onLoadMore,
             previewState = previewState,
+            onLoadMore = onLoadMore,
             onClickItem = onClickItem,
         )
     } else {
@@ -83,8 +88,8 @@ private fun ContentContent(
             modifier = modifier,
             paddingValues = paddingValues,
             items = items,
-            onLoadMore = onLoadMore,
             previewState = previewState,
+            onLoadMore = onLoadMore,
             onClickItem = onClickItem,
         )
     }

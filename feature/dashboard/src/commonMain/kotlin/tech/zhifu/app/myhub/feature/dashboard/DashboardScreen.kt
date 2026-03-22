@@ -7,9 +7,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.HazeMaterials
@@ -22,7 +24,7 @@ import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
-import tech.zhifu.app.myhub.feature.preview.Preview
+import tech.zhifu.app.myhub.feature.preview.PreviewOverlay
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
 import tech.zhifu.app.myhub.logger.debug
@@ -35,16 +37,12 @@ fun DashboardScreen(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
-    DashboardSideEffect(navigator = navigator, viewModel = viewModel)
-    val state by viewModel.collectFieldAsState {
-        it.state
-    }
-    logger.debug { "DashboardScreen state is $state" }
-
-    val previewState = rememberPreviewState()
-
-    DashboardScreenContent(
-        state = state,
+    DashboardSideEffect(
+        navigator = navigator,
+        viewModel = viewModel
+    )
+    DashboardScreen(
+        viewModel = viewModel,
         topBar = {
             TopBar(modifier = it, viewModel = viewModel)
         },
@@ -57,27 +55,57 @@ fun DashboardScreen(
         error = {
             Error(modifier = it, viewModel = viewModel)
         },
-        content = { paddingValues, modifier ->
+        content = { paddingValues, modifier, predicate ->
             Content(
                 paddingValues = paddingValues,
                 modifier = modifier,
                 viewModel = viewModel,
-                previewState = previewState,
+                previewState = predicate,
             )
         },
-        previewState = previewState,
     )
 }
 
 @Composable
-internal fun DashboardScreenContent(
-    state: DashboardUiState.State,
-    previewState: PreviewState,
+fun DashboardScreen(
+    viewModel: DashboardViewModel,
     topBar: @Composable (Modifier) -> Unit,
     bottomBar: @Composable (Modifier) -> Unit,
     loading: @Composable (Modifier) -> Unit,
     error: @Composable (Modifier) -> Unit,
-    content: @Composable (PaddingValues, Modifier) -> Unit,
+    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
+) {
+    val previewState = rememberPreviewState()
+    logger.debug {
+        "DashboardScreen: showPreview= $previewState"
+    }
+    val content: @Composable (PaddingValues, Modifier) -> Unit =
+        remember(content, previewState) {
+            { paddingValues, modifier ->
+                content(paddingValues, modifier, previewState)
+            }
+        }
+    DashboardScaffold(
+        viewModel = viewModel,
+        topBar = topBar,
+        bottomBar = bottomBar,
+        loading = loading,
+        error = error,
+        content = content,
+    )
+    PreviewOverlay(
+        state = previewState,
+    )
+}
+
+@Composable
+internal fun DashboardScaffold(
+    viewModel: DashboardViewModel,
+    topBar: @Composable (Modifier) -> Unit,
+    bottomBar: @Composable (Modifier) -> Unit,
+    loading: @Composable (Modifier) -> Unit,
+    error: @Composable (Modifier) -> Unit,
+    content: @Composable ((PaddingValues, Modifier) -> Unit),
 ) {
     val hazeState = rememberHazeState()
     val hazeStyle = HazeMaterials.regular(containerColor = MaterialTheme.colorScheme.surface)
@@ -99,24 +127,40 @@ internal fun DashboardScreenContent(
             bottomBar(Modifier)
         },
     ) { contentPadding ->
-        when (state) {
-            DashboardUiState.State.LOADING -> {
-                loading(Modifier.padding(paddingValues = contentPadding))
-            }
+        DashboardContent(
+            viewModel = viewModel,
+            loading = loading,
+            contentPadding = contentPadding,
+            error = error,
+            content = content,
+            hazeState = hazeState,
+        )
+    }
+}
 
-            DashboardUiState.State.ERROR -> {
-                error(Modifier.padding(paddingValues = contentPadding))
-            }
+@Composable
+private fun DashboardContent(
+    viewModel: DashboardViewModel,
+    loading: @Composable ((Modifier) -> Unit),
+    contentPadding: PaddingValues,
+    error: @Composable ((Modifier) -> Unit),
+    content: @Composable ((PaddingValues, Modifier) -> Unit),
+    hazeState: HazeState
+) {
+    val state by viewModel.collectFieldAsState { it.state }
+    when (state) {
+        DashboardUiState.State.LOADING -> {
+            loading(Modifier.padding(paddingValues = contentPadding))
+        }
 
-            DashboardUiState.State.CONTENT -> {
-                content(
-                    contentPadding,
-                    Modifier.hazeSource(state = hazeState),
-                )
-            }
+        DashboardUiState.State.ERROR -> {
+            error(Modifier.padding(paddingValues = contentPadding))
+        }
+
+        DashboardUiState.State.CONTENT -> {
+            content(contentPadding, Modifier.hazeSource(state = hazeState))
         }
     }
-    Preview(state = previewState)
 }
 
 @Composable

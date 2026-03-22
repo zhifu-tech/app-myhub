@@ -10,8 +10,6 @@ fun EntryProviderScope<NavKey>.dashboardEntry(
     navigator: AppNavigator,
 ) {
     entry<DashboardNavKey> {
-        DashboardScreen(
-            navigator = navigator,
-        )
+        DashboardScreen(navigator = navigator)
     }
 }

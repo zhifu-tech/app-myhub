@@ -15,26 +15,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.feature.preview.sharedWith
-import tech.zhifu.app.myhub.ui.LocalSharedTransitionScope
-
+import tech.zhifu.app.myhub.feature.preview.sharedElementWithCallerManagedVisibility
 
 @Composable
 fun ContentListItem(
     item: ContentItem,
-    previewState: PreviewState,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    visible: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -55,21 +49,15 @@ fun ContentListItem(
             .padding(all = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val sharedVisible by remember(item.id) {
-            derivedStateOf {
-                previewState.payload?.contentId != item.id || previewState.visible.not()
-            }
-        }
-        val sharedTransitionScope = LocalSharedTransitionScope.current
         ContentItemLeading(
             item = item,
             size = 64.dp,
             iconSize = 30.dp,
             shape = MaterialTheme.shapes.small,
-            modifier = sharedTransitionScope.sharedWith(
+            modifier = Modifier.sharedElementWithCallerManagedVisibility(
                 key = "content-image-${item.id}",
-                visible = sharedVisible,
-            ),
+                visible = visible,
+            )
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(
@@ -77,9 +65,9 @@ fun ContentListItem(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                modifier = sharedTransitionScope.sharedWith(
+                modifier = Modifier.sharedElementWithCallerManagedVisibility(
                     key = "content-title-${item.id}",
-                    visible = sharedVisible,
+                    visible = visible,
                 ),
                 text = item.title,
                 color = MaterialTheme.colorScheme.onBackground,

@@ -6,25 +6,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.feature.preview.sharedWith
-import tech.zhifu.app.myhub.ui.LocalSharedTransitionScope
+import tech.zhifu.app.myhub.feature.preview.sharedElementWithCallerManagedVisibility
 
 @Composable
 fun ContentItemHost(
     item: ContentItem,
     previewState: PreviewState,
-    content: @Composable (Modifier) -> Unit,
+    content: @Composable (Modifier, Boolean) -> Unit,
 ) {
     val visible by remember(item.id) {
         derivedStateOf {
             previewState.payload?.contentId != item.id || previewState.visible.not()
         }
     }
-    val sharedTransitionScope = LocalSharedTransitionScope.current
     content(
-        sharedTransitionScope.sharedWith(
+        Modifier.sharedElementWithCallerManagedVisibility(
             key = "content-preview-${item.id}",
             visible = visible,
-        )
+        ),
+        visible,
     )
 }

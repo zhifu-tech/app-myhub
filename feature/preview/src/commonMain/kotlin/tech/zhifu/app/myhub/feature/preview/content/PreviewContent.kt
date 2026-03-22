@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.preview.content
 
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,19 +11,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.PreviewPayload
-import tech.zhifu.app.myhub.feature.preview.sharedWith
+import tech.zhifu.app.myhub.feature.preview.sharedElementWithCallerManagedVisibility
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 
 @Composable
 fun PreviewContent(
-    sharedTransitionScope: SharedTransitionScope,
     payload: PreviewPayload,
     visible: Boolean,
 ) {
+    logger.debug { "PreviewContent called." }
+
     Surface(
-        modifier = sharedTransitionScope.sharedWith(
-            key = "content-preview-${payload.contentId}",
-            visible = visible,
-        ).fillMaxWidth()
+        modifier = Modifier
+            .sharedElementWithCallerManagedVisibility(
+                key = "content-preview-${payload.contentId}",
+                visible = visible,
+            )
+            .fillMaxWidth()
             .clip(shape = RoundedCornerShape(40.dp)),
         shape = RoundedCornerShape(40.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -43,20 +47,24 @@ fun PreviewContent(
 
             PreviewContentTitle(
                 title = payload.title ?: "Untitled",
-                modifier = sharedTransitionScope.sharedWith(
-                    key = "content-title-${payload.contentId}",
-                    visible = visible,
-                ).fillMaxWidth()
+                modifier = Modifier
+                    .sharedElementWithCallerManagedVisibility(
+                        key = "content-title-${payload.contentId}",
+                        visible = visible,
+                    )
+                    .fillMaxWidth()
                     .padding(start = 4.dp, end = 4.dp, top = 8.dp)
             )
 
             PreviewContentCover(
                 coverUrl = payload.coverUrl,
                 isVideo = payload.isVideo,
-                modifier = sharedTransitionScope.sharedWith(
-                    key = "content-image-${payload.contentId}",
-                    visible = visible,
-                ).fillMaxWidth()
+                modifier = Modifier
+                    .sharedElementWithCallerManagedVisibility(
+                        key = "content-image-${payload.contentId}",
+                        visible = visible,
+                    )
+                    .fillMaxWidth()
                     .padding(top = 24.dp)
             )
 

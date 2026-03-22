@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.serialization.Serializable
 
 @Composable
 fun rememberPreviewState(): PreviewState {
@@ -37,6 +38,8 @@ class PreviewState internal constructor(
     }
 }
 
+@Stable
+@Serializable
 data class PreviewPayload(
     val contentId: String,
     val title: String? = null,

@@ -20,8 +20,8 @@ fun ContentGridContent(
     modifier: Modifier,
     paddingValues: PaddingValues,
     items: List<ContentItem>,
-    onLoadMore: () -> Unit,
     previewState: PreviewState,
+    onLoadMore: () -> Unit,
     onClickItem: (ContentItem) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
@@ -42,12 +42,12 @@ fun ContentGridContent(
             ContentItemHost(
                 item = item,
                 previewState = previewState,
-            ) { modifier ->
+            ) { modifier, visible ->
                 ContentGridItem(
-                    item = item,
-                    previewState = previewState,
                     modifier = modifier,
-                    onClick = { onClickItem(item) }
+                    item = item,
+                    onClick = { onClickItem(item) },
+                    visible = visible,
                 )
             }
         }
