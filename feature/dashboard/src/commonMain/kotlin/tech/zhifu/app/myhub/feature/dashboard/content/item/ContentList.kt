@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.dashboard.content.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -31,7 +32,7 @@ fun ContentListContent(
         onLoadMore = onLoadMore
     )
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.padding(top = 24.dp),
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         state = listState,

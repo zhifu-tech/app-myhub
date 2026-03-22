@@ -7,7 +7,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeProgressive
@@ -79,18 +78,13 @@ fun DashboardScreen(
     logger.debug {
         "DashboardScreen: showPreview= $previewState"
     }
-    val content: @Composable (PaddingValues, Modifier) -> Unit =
-        remember(content, previewState) {
-            { paddingValues, modifier ->
-                content(paddingValues, modifier, previewState)
-            }
-        }
     DashboardScaffold(
         viewModel = viewModel,
         topBar = topBar,
         bottomBar = bottomBar,
         loading = loading,
         error = error,
+        previewState = previewState,
         content = content,
     )
     PreviewOverlay(
@@ -105,10 +99,13 @@ internal fun DashboardScaffold(
     bottomBar: @Composable (Modifier) -> Unit,
     loading: @Composable (Modifier) -> Unit,
     error: @Composable (Modifier) -> Unit,
-    content: @Composable ((PaddingValues, Modifier) -> Unit),
+    previewState: PreviewState,
+    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
 ) {
     val hazeState = rememberHazeState()
-    val hazeStyle = HazeMaterials.regular(containerColor = MaterialTheme.colorScheme.surface)
+    val hazeStyle = HazeMaterials.regular(
+        containerColor = MaterialTheme.colorScheme.surface
+    )
     val hazeInputScale: HazeInputScale = HazeInputScale.Default
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -134,6 +131,7 @@ internal fun DashboardScaffold(
             error = error,
             content = content,
             hazeState = hazeState,
+            previewState = previewState,
         )
     }
 }
@@ -144,8 +142,9 @@ private fun DashboardContent(
     loading: @Composable ((Modifier) -> Unit),
     contentPadding: PaddingValues,
     error: @Composable ((Modifier) -> Unit),
-    content: @Composable ((PaddingValues, Modifier) -> Unit),
-    hazeState: HazeState
+    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
+    hazeState: HazeState,
+    previewState: PreviewState,
 ) {
     val state by viewModel.collectFieldAsState { it.state }
     when (state) {
@@ -158,7 +157,7 @@ private fun DashboardContent(
         }
 
         DashboardUiState.State.CONTENT -> {
-            content(contentPadding, Modifier.hazeSource(state = hazeState))
+            content(contentPadding, Modifier.hazeSource(state = hazeState), previewState)
         }
     }
 }
