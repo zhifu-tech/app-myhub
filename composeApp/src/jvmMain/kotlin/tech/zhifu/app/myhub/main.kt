@@ -16,7 +16,9 @@ fun main() = application {
     val koinApplication = initKoin()
     koinApplication.koin.get<StartupOrchestrator>().start()
 
-    val windowState = remember { WindowState(size = DpSize(1280.dp, 800.dp)) }
+    val windowState = remember {
+        WindowState(size = DpSize(width = 390.dp, height = 844.dp))
+    }
 
     Window(
         onCloseRequest = ::exitApplication,

@@ -34,7 +34,7 @@ class PreviewState internal constructor(
     }
 
     companion object {
-        const val SHARED_BOUNDS_DURATION_MS = 360
+        const val SHARED_BOUNDS_DURATION_MS = 10000
     }
 }
 

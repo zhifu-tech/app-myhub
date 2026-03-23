@@ -1,8 +1,5 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.item
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,42 +11,43 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.sharedElementWithCallerManagedVisibility
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 
 @Composable
 fun ContentGridItem(
     item: ContentItem,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    visible: Boolean = true,
+    visible: Boolean,
 ) {
-    Column(
-        modifier = modifier
-            .shadow(
-                elevation = 2.dp,
-                shape = MaterialTheme.shapes.large,
-                clip = false
-            )
-            .clip(shape = MaterialTheme.shapes.large)
-            .background(color = MaterialTheme.colorScheme.surface)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
-                shape = MaterialTheme.shapes.large
-            )
-            .clickable(onClick = onClick)
+    logger.debug {
+        "ContentGridItem: item=${item.id}"
+    }
+    ElevatedCard(
+        onClick = onClick,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp,
+        ),
     ) {
+        logger.debug { "ContentGridItem: inner" }
         Box(
             modifier = Modifier
                 .fillMaxWidth()

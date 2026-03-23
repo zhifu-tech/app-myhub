@@ -32,7 +32,7 @@ fun Modifier.sharedElementWithCallerManagedVisibility(
     key: String,
     visible: Boolean
 ): Modifier = with(receiver = LocalSharedTransitionScope.current) {
-    Modifier.sharedElementWithCallerManagedVisibility(
+    sharedElementWithCallerManagedVisibility(
         sharedContentState = rememberSharedContentState(key = key),
         visible = visible,
         boundsTransform = { _, _ ->
