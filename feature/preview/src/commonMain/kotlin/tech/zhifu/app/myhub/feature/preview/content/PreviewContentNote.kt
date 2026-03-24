@@ -9,18 +9,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+import tech.zhifu.app.myhub.feature.preview.resources.Res
+import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_journal_entry
 
 @Composable
-internal fun PreviewContentBody(
-    bodyText: String,
+internal fun PreviewContentNote(
+    payload: PreviewPayload,
     modifier: Modifier,
 ) {
+    val bodyText = payload.note.orEmpty()
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
-            text = "JOURNAL ENTRY", // fixme: 增加i18n
+            text = stringResource(Res.string.feature_preview_journal_entry),
             style = MaterialTheme.typography.labelSmall.copy(
                 letterSpacing = 1.5.sp,
                 fontWeight = FontWeight.Bold,

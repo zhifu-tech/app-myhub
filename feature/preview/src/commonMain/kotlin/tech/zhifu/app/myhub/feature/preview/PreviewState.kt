@@ -6,7 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.serialization.Serializable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun rememberPreviewState(): PreviewState {
@@ -15,39 +16,39 @@ fun rememberPreviewState(): PreviewState {
 
 @Stable
 class PreviewState internal constructor(
-    initialVisible: Boolean = false,
     initialVisiblePayload: PreviewPayload? = null,
 ) {
-    var visible by mutableStateOf(initialVisible)
-        private set
     var payload by mutableStateOf(initialVisiblePayload)
         private set
 
     fun show(payload: PreviewPayload) {
-        if (this.payload == payload && visible) return
+        if (this.payload == payload) return
         this.payload = payload
-        this.visible = true
     }
 
     fun hide() {
-        this.visible = false
-    }
-
-    companion object {
-        const val SHARED_BOUNDS_DURATION_MS = 10000
+        this.payload = null
     }
 }
 
 @Stable
-@Serializable
 data class PreviewPayload(
-    val contentId: String,
-    val title: String? = null,
-    val summary: String? = null,
-    val coverUrl: String? = null,
-    val isVideo: Boolean = false,
-    val dateText: String? = null,
-    val location: String? = null,
-    val tags: List<String> = emptyList(),
-    val body: String? = null,
+    val id: String,
+    val title: String?,
+    val note: String?,
+    //
+    val coverIcon: ImageVector?,
+    val coverBackground: Color,
+    val coverTint: Color?,
+    val coverUrl: String?,
+    //
+    val isVideo: Boolean,
+    val location: String?,
+    val tags: List<String>,
+    //
+    val actionLabel: String,
+    val actionIcon: ImageVector,
+    val actionColor: Color,
+    //
+    val updatedTimeMs: Long,
 )

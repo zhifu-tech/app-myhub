@@ -23,10 +23,9 @@ import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
-import tech.zhifu.app.myhub.feature.preview.PreviewOverlay
+import tech.zhifu.app.myhub.feature.preview.Preview
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
-import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -75,9 +74,6 @@ fun DashboardScreen(
     content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
 ) {
     val previewState = rememberPreviewState()
-    logger.debug {
-        "DashboardScreen: showPreview= $previewState"
-    }
     DashboardScaffold(
         viewModel = viewModel,
         topBar = topBar,
@@ -87,7 +83,7 @@ fun DashboardScreen(
         previewState = previewState,
         content = content,
     )
-    PreviewOverlay(
+    Preview(
         state = previewState,
     )
 }
@@ -104,7 +100,7 @@ internal fun DashboardScaffold(
 ) {
     val hazeState = rememberHazeState()
     val hazeStyle = HazeMaterials.regular(
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
     )
     val hazeInputScale: HazeInputScale = HazeInputScale.Default
     Scaffold(
@@ -123,6 +119,7 @@ internal fun DashboardScaffold(
         bottomBar = {
             bottomBar(Modifier)
         },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) { contentPadding ->
         DashboardContent(
             viewModel = viewModel,

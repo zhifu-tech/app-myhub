@@ -1,9 +1,8 @@
 package tech.zhifu.app.myhub.feature.preview.content
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -11,26 +10,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+import tech.zhifu.app.myhub.feature.preview.sharedBounds
 
 @Composable
 internal fun PreviewContentTopMeta(
-    dateText: String,
+    payload: PreviewPayload,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier,
 ) {
-    Box(
-        modifier = modifier
-    ) {
+    val contentId = payload.id
+    val actionIcon = payload.actionIcon
+    val actionColor = payload.actionColor
+    val actionLabel = payload.actionLabel
+
+    Box(modifier = modifier) {
         Icon(
-            imageVector = Icons.Outlined.EditNote,
+            imageVector = actionIcon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.size(20.dp),
+            tint = actionColor.copy(0.6f),
+            modifier = Modifier
+                .sharedBounds(
+                    key = "content-action-icon-$contentId",
+                    animatedVisibilityScope = animatedVisibilityScope,
+                )
+                .size(20.dp),
         )
         Text(
-            text = dateText,
+            text = actionLabel,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            modifier = Modifier.align(Alignment.CenterEnd),
+            color = actionColor.copy(0.6f),
+            modifier = Modifier
+                .sharedBounds(
+                    key = "content-action-label-$contentId",
+                    animatedVisibilityScope = animatedVisibilityScope,
+                )
+                .align(Alignment.CenterEnd),
         )
     }
 }

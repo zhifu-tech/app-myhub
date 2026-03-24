@@ -39,16 +39,20 @@ fun ContentGridContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         state = gridState,
     ) {
-        items(items, key = { it.id }) { item ->
+        items(
+            items = items,
+            key = { it.id },
+            contentType = { "gridItem" }
+        ) { item ->
             ContentItemHost(
                 item = item,
                 previewState = previewState,
-            ) { modifier, visible ->
+                modifier = Modifier.animateItem(),
+                onClickItem = onClickItem,
+            ) { animatedVisibilityScope ->
                 ContentGridItem(
-                    modifier = modifier,
                     item = item,
-                    onClick = { onClickItem(item) },
-                    visible = visible,
+                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
         }

@@ -25,7 +25,6 @@ fun ContentListContent(
     onClickItem: (ContentItem) -> Unit,
 ) {
     val listState = rememberLazyListState()
-
     AutoLoadMoreList(
         listState = listState,
         totalCount = items.size,
@@ -37,16 +36,20 @@ fun ContentListContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         state = listState,
     ) {
-        items(items, key = { it.id }) { item ->
+        items(
+            items = items,
+            key = { it.id },
+            contentType = { "listItem" }
+        ) { item ->
             ContentItemHost(
                 item = item,
                 previewState = previewState,
-            ) { modifier, visible ->
+                modifier = Modifier.animateItem(),
+                onClickItem = onClickItem,
+            ) { animatedVisibilityScope ->
                 ContentListItem(
-                    modifier = modifier,
                     item = item,
-                    onClick = { onClickItem(item) },
-                    visible = visible,
+                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
         }

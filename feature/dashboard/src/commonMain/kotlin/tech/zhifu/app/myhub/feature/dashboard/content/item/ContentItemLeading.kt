@@ -1,8 +1,7 @@
-package tech.zhifu.app.myhub.feature.preview.content
+package tech.zhifu.app.myhub.feature.dashboard.content.item
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -12,29 +11,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 
 @Composable
-internal fun PreviewContentCover(
-    modifier: Modifier,
-    payload: PreviewPayload,
+fun ContentItemLeading(
+    item: ContentItem,
+    modifier: Modifier = Modifier,
 ) {
-    val background = payload.coverBackground
-    val coverUrl = payload.coverUrl
-    val coverIcon = payload.coverIcon
-    val coverIconTint = payload.coverTint
-    val isVideo = payload.isVideo
-
+    val cover = item.cover
+    val coverUrl = cover.url
+    val coverIcon = cover.icon
+    val coverIconTint = cover.tint
+    val isVideo = item.isVideo
     Box(
         modifier = modifier
-            .aspectRatio(4f / 3f)
-            .clip(shape = MaterialTheme.shapes.large)
-            .background(color = background),
+            .background(color = cover.background),
         contentAlignment = Alignment.Center,
     ) {
         if (coverUrl != null) {
@@ -45,6 +39,7 @@ internal fun PreviewContentCover(
                 contentScale = ContentScale.Crop,
             )
         }
+
         if (coverIcon != null && coverIconTint != null) {
             Icon(
                 imageVector = coverIcon,
@@ -53,6 +48,7 @@ internal fun PreviewContentCover(
                 modifier = Modifier.size(36.dp),
             )
         }
+
         if (isVideo) {
             Box(
                 modifier = Modifier

@@ -72,7 +72,7 @@ private fun ContentContent(
         .tapToClearFocus()
         .testTag("content-list")
         .padding(horizontal = 16.dp)
-        .background(color = MaterialTheme.colorScheme.background)
+        .background(color = MaterialTheme.colorScheme.surfaceVariant)
 
     if (layoutAsList) {
         ContentListContent(

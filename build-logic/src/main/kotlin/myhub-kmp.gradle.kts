@@ -38,14 +38,15 @@ configure<KotlinMultiplatformExtension> {
 
 kotlin {
     compilerOptions {
-        optIn.add("androidx.compose.ui.ExperimentalComposeUiApi")
+        optIn.add("androidx.compose.animation.ExperimentalSharedTransitionApi")
+        optIn.add("androidx.compose.foundation.layout.ExperimentalLayoutApi")
         optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
         optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+        optIn.add("androidx.compose.ui.ExperimentalComposeUiApi")
         optIn.add("dev.chrisbanes.haze.ExperimentalHazeApi")
         optIn.add("dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi")
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
         optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
         optIn.add("org.mobilenativefoundation.store.core5.ExperimentalStoreApi")
-        optIn.add("androidx.compose.animation.ExperimentalSharedTransitionApi")
     }
 }
