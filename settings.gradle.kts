@@ -219,6 +219,7 @@ include(":feature:dashboard")
 include(":feature:mixed-api")
 include(":feature:mixed")
 include(":feature:preview")
+include(":feature:sharing")
 
 // ============================================================================
 // 应用模块

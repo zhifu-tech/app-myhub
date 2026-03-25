@@ -49,3 +49,28 @@ internal fun PreviewContentTopMeta(
         )
     }
 }
+
+@Composable
+internal fun PreviewContentTopMetaSnapshot(
+    payload: PreviewPayload,
+    modifier: Modifier,
+) {
+    val actionIcon = payload.actionIcon
+    val actionColor = payload.actionColor
+    val actionLabel = payload.actionLabel
+
+    Box(modifier = modifier) {
+        Icon(
+            imageVector = actionIcon,
+            contentDescription = null,
+            tint = actionColor.copy(0.6f),
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            text = actionLabel,
+            style = MaterialTheme.typography.labelSmall,
+            color = actionColor.copy(0.6f),
+            modifier = Modifier.align(Alignment.CenterEnd),
+        )
+    }
+}

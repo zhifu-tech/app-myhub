@@ -4,6 +4,7 @@ android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
 androidx-activity = "1.13.0"
+androidx-core = "1.13.1"
 cache4k = "0.14.0"
 composeHotReload = "1.0.0"
 firebase-analytics = "2.4.0"
@@ -42,6 +43,7 @@ haze = "1.7.2"
 [libraries]
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 androidx-activity-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }

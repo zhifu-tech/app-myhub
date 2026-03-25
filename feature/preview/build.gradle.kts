@@ -26,6 +26,7 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platformCompose)
+            implementation(projects.feature.sharing)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
@@ -33,8 +34,13 @@ kotlin {
             implementation(libs.jb.compose.material3.material3)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
+            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.koin.core)
             implementation(libs.coil.compose)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
         }
     }
 }

@@ -18,7 +18,7 @@ import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.feature.preview.sharedElement
 
 @Composable
-fun PreviewContent(
+internal fun PreviewContent(
     payload: PreviewPayload,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
@@ -69,6 +69,59 @@ fun PreviewContent(
                         key = "content-image-${payload.id}",
                         animatedVisibilityScope = animatedVisibilityScope,
                     )
+                    .fillMaxWidth()
+                    .padding(top = 24.dp)
+            )
+
+            PreviewContentMeta(
+                payload = payload,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 24.dp)
+            )
+
+            PreviewContentNote(
+                payload = payload,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 24.dp, bottom = 32.dp)
+            )
+        }
+    }
+}
+
+@Composable
+internal fun PreviewContentSnapshot(
+    payload: PreviewPayload,
+    modifier: Modifier = Modifier,
+) {
+    ElevatedCard(
+        modifier = Modifier.clip(shape = MaterialTheme.shapes.large),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 6.dp,
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 24.dp)
+        ) {
+            PreviewContentTopMetaSnapshot(
+                payload = payload,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 8.dp)
+            )
+
+            PreviewContentTitle(
+                title = payload.title.orEmpty(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp, top = 8.dp)
+            )
+
+            PreviewContentCover(
+                payload = payload,
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)
             )

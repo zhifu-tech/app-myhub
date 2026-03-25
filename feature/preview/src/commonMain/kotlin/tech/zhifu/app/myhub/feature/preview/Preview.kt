@@ -70,7 +70,8 @@ fun Preview(
                             modifier = Modifier.weight(1f, fill = false),
                         )
                         PreviewActionShareButton(
-                            onShare = {},
+                            sharePayload = payload,
+                            shareContentWidth = maxCardWidth,
                         )
                     }
                 } else {
@@ -89,7 +90,8 @@ fun Preview(
                                 .widthIn(max = maxCardWidth),
                         )
                         PreviewActionShareButton(
-                            onShare = {},
+                            sharePayload = payload,
+                            shareContentWidth = maxCardWidth,
                             modifier = Modifier
                         )
                     }
@@ -103,7 +105,7 @@ fun Preview(
 private fun PreviewOverlay(
     state: PreviewState
 ) {
-    val onClick: () -> Unit = remember { { state.hide() } }
+    val onClick = remember { { state.hide() } }
     val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
