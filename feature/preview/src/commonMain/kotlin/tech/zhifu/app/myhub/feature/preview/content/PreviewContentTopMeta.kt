@@ -11,8 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.PreviewPayload
-import tech.zhifu.app.myhub.feature.preview.sharedBounds
+import tech.zhifu.app.myhub.feature.preview.sharedElement
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun PreviewContentTopMeta(
     payload: PreviewPayload,
@@ -24,7 +25,7 @@ internal fun PreviewContentTopMeta(
     val actionColor = payload.actionColor
     val actionLabel = payload.actionLabel
     val iconModifier = if (animatedVisibilityScope != null) {
-        Modifier.sharedBounds(
+        Modifier.sharedElement(
             key = "content-action-icon-$contentId",
             animatedVisibilityScope = animatedVisibilityScope,
         )
@@ -32,7 +33,7 @@ internal fun PreviewContentTopMeta(
         Modifier
     }
     val labelModifier = if (animatedVisibilityScope != null) {
-        Modifier.sharedBounds(
+        Modifier.sharedElement(
             key = "content-action-label-$contentId",
             animatedVisibilityScope = animatedVisibilityScope,
         )

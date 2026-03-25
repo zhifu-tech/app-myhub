@@ -28,6 +28,7 @@ internal fun PreviewContent(
         modifier.sharedBounds(
             key = "content-preview-${payload.id}",
             animatedVisibilityScope = animatedVisibilityScope,
+            overlayClipShape = MaterialTheme.shapes.large,
         )
     } else {
         modifier

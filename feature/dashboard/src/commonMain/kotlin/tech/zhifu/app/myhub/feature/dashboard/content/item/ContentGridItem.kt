@@ -1,6 +1,5 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.item
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,21 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.sharedBounds
-import tech.zhifu.app.myhub.feature.preview.sharedElement
 
 @Composable
 fun ContentGridItem(
     item: ContentItem,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     ContentItemLeading(
         item = item,
         modifier = Modifier
-            .sharedElement(
-                key = "content-image-${item.id}",
-                animatedVisibilityScope = animatedVisibilityScope,
-            )
             .fillMaxWidth()
             .aspectRatio(4f / 3f)
     )
@@ -43,11 +35,6 @@ fun ContentGridItem(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            modifier = Modifier
-                .sharedBounds(
-                    key = "content-title-${item.id}",
-                    animatedVisibilityScope = animatedVisibilityScope,
-                ),
             text = item.title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
@@ -64,12 +51,7 @@ fun ContentGridItem(
                         imageVector = icon,
                         contentDescription = null,
                         tint = action.color,
-                        modifier = Modifier
-                            .sharedBounds(
-                                key = "content-action-icon-${item.id}",
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-                            .size(16.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
@@ -79,11 +61,7 @@ fun ContentGridItem(
                     maxLines = 1,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier
-                        .sharedBounds(
-                            key = "content-action-label-${item.id}",
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
+                    modifier = Modifier,
                 )
             }
         }

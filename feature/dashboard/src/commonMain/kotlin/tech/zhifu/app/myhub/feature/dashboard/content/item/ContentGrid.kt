@@ -52,7 +52,6 @@ fun ContentGridContent(
             ) { animatedVisibilityScope ->
                 ContentGridItem(
                     item = item,
-                    animatedVisibilityScope = animatedVisibilityScope,
                 )
             }
         }

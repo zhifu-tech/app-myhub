@@ -68,7 +68,12 @@ fun ContentListItem(
                             imageVector = icon,
                             contentDescription = null,
                             tint = action.color,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier
+                                .sharedElement(
+                                    key = "content-action-icon-${item.id}",
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                )
+                                .size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -76,6 +81,11 @@ fun ContentListItem(
                         text = action.label,
                         color = action.color,
                         style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier
+                            .sharedElement(
+                                key = "content-action-label-${item.id}",
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
                     )
                 }
             }

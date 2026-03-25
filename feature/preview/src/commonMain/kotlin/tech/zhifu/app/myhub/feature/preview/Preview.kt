@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,7 +41,18 @@ fun Preview(
         modifier = modifier.fillMaxSize(),
         targetState = state.payload,
         transitionSpec = {
-            fadeIn() togetherWith fadeOut()
+            fadeIn(
+                animationSpec = tween(
+                    durationMillis = PreviewTransitionTokens.OVERLAY_ENTER_DURATION_MS,
+                    delayMillis = PreviewTransitionTokens.OVERLAY_ENTER_DELAY_MS,
+                    easing = FastOutSlowInEasing,
+                )
+            ) togetherWith fadeOut(
+                animationSpec = tween(
+                    durationMillis = PreviewTransitionTokens.OVERLAY_EXIT_DURATION_MS,
+                    easing = FastOutSlowInEasing,
+                )
+            )
         }
     ) { payload ->
         if (payload == null) {
