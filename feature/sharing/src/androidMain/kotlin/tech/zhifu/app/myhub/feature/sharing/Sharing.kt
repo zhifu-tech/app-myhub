@@ -117,6 +117,9 @@ public actual fun rememberShare(): Share {
     }
 }
 
+@Composable
+public actual fun rememberShareSupported(): Boolean = true
+
 private fun getLocalFileFromUrl(url: String): File {
     val uri = url.toUri()
     require(uri.scheme == "file") {

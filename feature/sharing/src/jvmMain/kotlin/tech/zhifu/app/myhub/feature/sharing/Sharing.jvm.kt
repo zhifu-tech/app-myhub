@@ -9,3 +9,6 @@ public actual fun rememberShare(): Share = remember {
         override fun invoke(data: List<String>, options: SharingOptions?) = Unit
     }
 }
+
+@Composable
+public actual fun rememberShareSupported(): Boolean = false

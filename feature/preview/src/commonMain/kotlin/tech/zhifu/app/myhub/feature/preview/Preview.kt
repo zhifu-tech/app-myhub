@@ -7,6 +7,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.preview.content.PreviewActionDownloadButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
 
@@ -69,10 +71,18 @@ fun Preview(
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier.weight(1f, fill = false),
                         )
-                        PreviewActionShareButton(
-                            sharePayload = payload,
-                            shareContentWidth = maxCardWidth,
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            PreviewActionDownloadButton(
+                                sharePayload = payload,
+                                shareContentWidth = maxCardWidth,
+                            )
+                            PreviewActionShareButton(
+                                sharePayload = payload,
+                                shareContentWidth = maxCardWidth,
+                            )
+                        }
                     }
                 } else {
                     Row(
@@ -89,11 +99,19 @@ fun Preview(
                             modifier = Modifier
                                 .widthIn(max = maxCardWidth),
                         )
-                        PreviewActionShareButton(
-                            sharePayload = payload,
-                            shareContentWidth = maxCardWidth,
-                            modifier = Modifier
-                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            PreviewActionDownloadButton(
+                                sharePayload = payload,
+                                shareContentWidth = maxCardWidth,
+                            )
+                            PreviewActionShareButton(
+                                sharePayload = payload,
+                                shareContentWidth = maxCardWidth,
+                                modifier = Modifier
+                            )
+                        }
                     }
                 }
             }
@@ -107,6 +125,11 @@ private fun PreviewOverlay(
 ) {
     val onClick = remember { { state.hide() } }
     val interactionSource = remember { MutableInteractionSource() }
+    val overlayColor = if (isSystemInDarkTheme()) {
+        MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)
+    } else {
+        MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f)
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -115,6 +138,6 @@ private fun PreviewOverlay(
                 indication = null,
                 onClick = onClick,
             )
-            .background(color = MaterialTheme.colorScheme.scrim.copy(0.35f))
+            .background(color = overlayColor)
     )
 }

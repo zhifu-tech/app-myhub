@@ -40,6 +40,7 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(libs.androidx.activity.activityCompose)
             implementation(libs.androidx.core.ktx)
         }
     }

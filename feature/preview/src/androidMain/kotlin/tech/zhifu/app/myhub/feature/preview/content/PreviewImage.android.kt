@@ -30,7 +30,7 @@ import java.io.FileOutputStream
 import kotlin.random.Random
 
 @Composable
-internal actual fun rememberPreviewShareImage(
+internal actual fun rememberPreviewImage(
     payload: PreviewPayload,
     width: Dp,
 ): suspend () -> String? {

@@ -43,7 +43,7 @@ import tech.zhifu.app.myhub.theme.AppTheme
 import kotlin.math.abs
 
 @Composable
-internal actual fun rememberPreviewShareImage(
+internal actual fun rememberPreviewImage(
     payload: PreviewPayload,
     width: Dp,
 ): suspend () -> String? {

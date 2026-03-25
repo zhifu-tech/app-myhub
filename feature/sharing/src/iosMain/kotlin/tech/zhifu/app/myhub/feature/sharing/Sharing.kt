@@ -84,3 +84,6 @@ public actual fun rememberShare(): Share = remember {
         }
     }
 }
+
+@Composable
+public actual fun rememberShareSupported(): Boolean = true

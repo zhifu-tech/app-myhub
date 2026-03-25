@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.Dp
 import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 
 @Composable
-internal actual fun rememberPreviewShareImage(
+internal actual fun rememberPreviewImage(
     payload: PreviewPayload,
     width: Dp,
 ): suspend () -> String? = remember(payload, width) { suspend { null } }

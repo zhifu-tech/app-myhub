@@ -1,3 +1,7 @@
 <resources>
   <string name="feature_preview_journal_entry">JOURNAL ENTRY</string>
+  <string name="feature_preview_download_success">Saved to Photos</string>
+  <string name="feature_preview_download_permission_denied">Photo permission denied</string>
+  <string name="feature_preview_download_failure">Failed to save image</string>
+  <string name="feature_preview_download_unsupported">Download is not supported on this platform</string>
 </resources>

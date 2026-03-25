@@ -1,0 +1,7 @@
+<resources>
+  <string name="feature_preview_journal_entry">笔记</string>
+  <string name="feature_preview_download_success">已保存到相册</string>
+  <string name="feature_preview_download_permission_denied">相册权限被拒绝</string>
+  <string name="feature_preview_download_failure">保存图片失败</string>
+  <string name="feature_preview_download_unsupported">当前平台暂不支持下载</string>
+</resources>

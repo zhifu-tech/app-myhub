@@ -30,3 +30,6 @@ public interface Share {
  * Remember a sharing function that uses the native sharing mechanism of the platform.
  */
 @Composable public expect fun rememberShare(): Share
+
+/** Whether current platform provides a native share entry. */
+@Composable public expect fun rememberShareSupported(): Boolean
