@@ -16,7 +16,7 @@ import tech.zhifu.app.myhub.feature.preview.sharedBounds
 @Composable
 internal fun PreviewContentTopMeta(
     payload: PreviewPayload,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    animatedVisibilityScope: AnimatedVisibilityScope?,
     modifier: Modifier,
 ) {
     val contentId = payload.id
@@ -30,10 +30,14 @@ internal fun PreviewContentTopMeta(
             contentDescription = null,
             tint = actionColor.copy(0.6f),
             modifier = Modifier
-                .sharedBounds(
-                    key = "content-action-icon-$contentId",
-                    animatedVisibilityScope = animatedVisibilityScope,
-                )
+                .apply {
+                    if (animatedVisibilityScope != null) {
+                        sharedBounds(
+                            key = "content-action-icon-$contentId",
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        )
+                    }
+                }
                 .size(20.dp),
         )
         Text(
@@ -41,10 +45,14 @@ internal fun PreviewContentTopMeta(
             style = MaterialTheme.typography.labelSmall,
             color = actionColor.copy(0.6f),
             modifier = Modifier
-                .sharedBounds(
-                    key = "content-action-label-$contentId",
-                    animatedVisibilityScope = animatedVisibilityScope,
-                )
+                .apply {
+                    if (animatedVisibilityScope != null) {
+                        sharedBounds(
+                            key = "content-action-label-$contentId",
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        )
+                    }
+                }
                 .align(Alignment.CenterEnd),
         )
     }

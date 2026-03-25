@@ -54,7 +54,7 @@ internal actual fun rememberPreviewShareImage(
 
             val controller = ComposeUIViewController {
                 AppTheme {
-                    PreviewContentSnapshot(
+                    PreviewContent(
                         payload = payload,
                         modifier = Modifier.width(width),
                     )

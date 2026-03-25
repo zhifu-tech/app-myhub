@@ -58,7 +58,7 @@ internal actual fun rememberPreviewShareImage(
                 }
                 composeView.setContent {
                     AppTheme {
-                        PreviewContentSnapshot(
+                        PreviewContent(
                             payload = payload,
                             modifier = Modifier.width(width),
                         )
