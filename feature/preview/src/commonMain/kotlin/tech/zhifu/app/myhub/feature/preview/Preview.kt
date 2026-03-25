@@ -24,15 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.content.PreviewActionDownloadButton
+import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
+import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotController
 
 @Composable
 fun Preview(
     state: PreviewState,
     modifier: Modifier = Modifier,
 ) {
+    val snapshotController = rememberPreviewSnapshotController()
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
         targetState = state.payload,
@@ -70,17 +72,20 @@ fun Preview(
                             payload = payload,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier.weight(1f, fill = false),
+                            snapshotController = snapshotController,
                         )
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            PreviewActionDownloadButton(
+                            PreviewActionSavingButton(
                                 sharePayload = payload,
                                 shareContentWidth = maxCardWidth,
+                                snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
                                 sharePayload = payload,
                                 shareContentWidth = maxCardWidth,
+                                snapshotController = snapshotController,
                             )
                         }
                     }
@@ -98,17 +103,20 @@ fun Preview(
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier
                                 .widthIn(max = maxCardWidth),
+                            snapshotController = snapshotController,
                         )
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            PreviewActionDownloadButton(
+                            PreviewActionSavingButton(
                                 sharePayload = payload,
                                 shareContentWidth = maxCardWidth,
+                                snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
                                 sharePayload = payload,
                                 shareContentWidth = maxCardWidth,
+                                snapshotController = snapshotController,
                                 modifier = Modifier
                             )
                         }

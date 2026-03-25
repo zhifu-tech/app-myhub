@@ -16,13 +16,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.preview.PreviewPayload
-import tech.zhifu.app.myhub.feature.sharing.rememberShare
-import tech.zhifu.app.myhub.feature.sharing.rememberShareSupported
+import tech.zhifu.app.myhub.core.sharing.rememberShare
+import tech.zhifu.app.myhub.core.sharing.rememberShareSupported
 
 @Composable
 internal fun PreviewActionShareButton(
     sharePayload: PreviewPayload,
     shareContentWidth: Dp,
+    snapshotController: PreviewSnapshotController? = null,
     modifier: Modifier = Modifier,
 ) {
     val shareSupported = rememberShareSupported()
@@ -31,9 +32,11 @@ internal fun PreviewActionShareButton(
     }
     val share = rememberShare()
     val coroutineScope = rememberCoroutineScope()
-    val capturePreviewImage = rememberPreviewImage(
+    val capturePreviewImage = rememberPreviewSnapshot(
         payload = sharePayload,
         width = shareContentWidth,
+        snapshotController = snapshotController,
+        exportMode = ExportMode.FullContent,
     )
     val onShare = remember(share, capturePreviewImage, coroutineScope) {
         {

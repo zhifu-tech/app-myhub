@@ -26,7 +26,8 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platformCompose)
-            implementation(projects.feature.sharing)
+            implementation(projects.core.saving)
+            implementation(projects.core.sharing)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
@@ -40,7 +41,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.activity.activityCompose)
             implementation(libs.androidx.core.ktx)
         }
     }

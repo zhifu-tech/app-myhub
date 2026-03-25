@@ -169,6 +169,8 @@ include(":core:startup")
 // 网络模块
 include(":core:network")
 include(":core:network-test")
+include(":core:sharing")
+include(":core:saving")
 
 // 统计模块
 include(":core:analytics")
@@ -219,7 +221,6 @@ include(":feature:dashboard")
 include(":feature:mixed-api")
 include(":feature:mixed")
 include(":feature:preview")
-include(":feature:sharing")
 
 // ============================================================================
 // 应用模块

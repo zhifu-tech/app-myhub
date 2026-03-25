@@ -22,17 +22,36 @@ internal fun PreviewContent(
     payload: PreviewPayload,
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    snapshotController: PreviewSnapshotController? = null,
 ) {
+    val contentModifier = if (animatedVisibilityScope != null) {
+        modifier.sharedBounds(
+            key = "content-preview-${payload.id}",
+            animatedVisibilityScope = animatedVisibilityScope,
+        )
+    } else {
+        modifier
+    }
+    val titleModifier = if (animatedVisibilityScope != null) {
+        Modifier.sharedBounds(
+            key = "content-title-${payload.id}",
+            animatedVisibilityScope = animatedVisibilityScope,
+        )
+    } else {
+        Modifier
+    }
+    val coverModifier = if (animatedVisibilityScope != null) {
+        Modifier.sharedElement(
+            key = "content-image-${payload.id}",
+            animatedVisibilityScope = animatedVisibilityScope,
+        )
+    } else {
+        Modifier
+    }
+
     ElevatedCard(
-        modifier = modifier
-            .apply {
-                if (animatedVisibilityScope != null) {
-                    sharedBounds(
-                        key = "content-preview-${payload.id}",
-                        animatedVisibilityScope = animatedVisibilityScope,
-                    )
-                }
-            }
+        modifier = contentModifier
+            .previewSnapshotSource(snapshotController)
             .clip(shape = MaterialTheme.shapes.large),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(
@@ -57,30 +76,14 @@ internal fun PreviewContent(
 
             PreviewContentTitle(
                 title = payload.title.orEmpty(),
-                modifier = Modifier
-                    .apply {
-                        if (animatedVisibilityScope != null) {
-                            sharedBounds(
-                                key = "content-title-${payload.id}",
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-                        }
-                    }
+                modifier = titleModifier
                     .fillMaxWidth()
                     .padding(start = 4.dp, end = 4.dp, top = 8.dp)
             )
 
             PreviewContentCover(
                 payload = payload,
-                modifier = Modifier
-                    .apply {
-                        if (animatedVisibilityScope != null) {
-                            sharedElement(
-                                key = "content-image-${payload.id}",
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-                        }
-                    }
+                modifier = coverModifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)
             )
