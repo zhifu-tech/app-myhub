@@ -21,7 +21,6 @@ kotlin {
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
-            api(libs.mnf.store.store5)
         }
     }
 }

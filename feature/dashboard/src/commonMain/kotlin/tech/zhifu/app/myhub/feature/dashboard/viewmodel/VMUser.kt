@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.datastore.repository.user.preferences
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.logger.debug
@@ -47,9 +46,10 @@ fun DashboardViewModel.streamUser(
 
 fun DashboardViewModel.streamUserPreferences(
     userId: String
-): Flow<UserPreferences> = userRepository.streamUserPreferences(userId)
-    .map { response ->
-        response.dataOrNull()?.preferences ?: run {
+): Flow<UserPreferences> = userRepository
+    .streamUserPreferences(userId)
+    .map { preferences ->
+        preferences ?: run {
             logger.debug { "用户偏好不存在，采用默认值" }
             UserPreferences(userId)
         }

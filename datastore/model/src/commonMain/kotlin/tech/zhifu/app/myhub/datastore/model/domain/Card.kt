@@ -1,17 +1,56 @@
 package tech.zhifu.app.myhub.datastore.model.domain
 
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 
 @Serializable
 data class Card(
     val id: String,
     val type: CardType,
-    val source: CardSource,
-    val carriers: String,
-    val userId: String,
+    val status: CardStatus,
+    val title: String,
+    val summary: String,
+
+    val version: Int,
+    val deleted: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
-    val metadata: List<CardMetadata> = emptyList(),
-    val tags: List<Tag> = emptyList(),
-)
+
+    internal val locationRaw: String?,
+    internal val tagsRaw: String?,
+    internal val uiRaw: String?,
+    internal val contentRaw: String?,
+    internal val sourceRaw: String?,
+) {
+    @Transient
+    private var map: Map<String, Any> = emptyMap()
+
+    internal fun <T> getFromMap(
+        key: String,
+        raw: String?,
+        deserializer: DeserializationStrategy<T>,
+    ): T? = getFromMap(key) {
+        raw ?: return@getFromMap null
+        Json.decodeFromString(deserializer = deserializer, string = raw)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <T> getFromMap(
+        key: String,
+        crossinline factory: Card.() -> T?
+    ): T? = map.getOrElse(key) {
+        val newValue = runCatching(block = factory).getOrNull() ?: NOE
+        if (map.isEmpty()) {
+            map = mutableMapOf()
+        }
+        (map as MutableMap)[key] = newValue
+    } as? T
+
+    companion object {
+        internal object NOE // NULL OR EMPTY
+    }
+}
+

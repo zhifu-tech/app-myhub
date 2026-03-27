@@ -55,14 +55,11 @@ deleteUser:
 DELETE FROM user
 WHERE id = ?;
 
--- 其它
--- 当前活跃用户（优先 active）
 selectCurrentUser:
 SELECT *
 FROM user
 WHERE last_login_at IS NOT NULL
 ORDER BY
--- active 用户排在最前
   CASE WHEN status = 'active' THEN 0 ELSE 1 END,
   last_login_at DESC
 LIMIT 1;

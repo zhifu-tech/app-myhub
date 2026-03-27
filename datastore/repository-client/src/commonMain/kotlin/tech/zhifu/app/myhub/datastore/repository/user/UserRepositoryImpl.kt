@@ -7,11 +7,10 @@ import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
-import org.mobilenativefoundation.store.store5.impl.extensions.get
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
+import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.sync.SyncEntityType
@@ -22,11 +21,14 @@ class UserRepositoryImpl(
     private val store: UserStore,
 ) : UserRepository {
 
-    override suspend fun insertUser(user: User, needSync: Boolean) {
+    override suspend fun insertUser(
+        user: User,
+        needSync: Boolean
+    ) {
         store.write(
-            StoreWriteRequest.of(
-                key = UserStoreKey.ById(user.id),
-                value = UserStoreData.UserData(user)
+            request = StoreWriteRequest.of(
+                key = UserStoreKey.ById(id = user.id),
+                value = UserStoreData.UserData(user = user)
             )
         )
 
@@ -40,61 +42,57 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getUser(): User = getUserOrNull() ?: run {
-        logger.error { "Get User before bootstrap finished" }
-        throw IllegalStateException("At least one user is needed!")
-    }
+    override suspend fun getUser(): User =
+        getUserOrNull() ?: run {
+            logger.error { "Get User before bootstrap finished" }
+            throw IllegalStateException("At least one user is needed!")
+        }
 
     override suspend fun getUserOrNull(): User? =
-        store.stream<StoreWriteResponse>(
-            request = StoreReadRequest.localOnly(
-                key = UserStoreKey.ById(""/*current user*/)
+        store
+            .stream<StoreReadRequest<UserStoreData>>(
+                request = StoreReadRequest.localOnly(
+                    // 约定：空 id 表示当前登录用户
+                    key = UserStoreKey.ById("")
+                )
             )
-        ).first()
-            .let { it as? StoreReadResponse.Data }
-            ?.let { it.value as? UserStoreData.UserData }
+            .first()
+            .dataOrNull()
             ?.user
 
-    override suspend fun getUser(userId: String): UserStoreData =
-        store.get<UserStoreKey, UserStoreData, StoreWriteResponse>(
-            key = UserStoreKey.ById(userId)
-        )
-
-    override fun streamUser(userId: String, refresh: Boolean): Flow<StoreReadResponse<UserStoreData>> =
-        store.stream<StoreWriteResponse>(
-            request = StoreReadRequest.cached(
-                key = UserStoreKey.ById(userId),
-                refresh = refresh
+    override fun streamUser(): Flow<User?> =
+        store
+            .stream<StoreReadResponse<User>>(
+                request = StoreReadRequest.localOnly(
+                    // 约定：空 id 表示当前登录用户
+                    key = UserStoreKey.ById(id = ""),
+                )
             )
-        )
-
-    override fun streamUser(): Flow<User?> = store.stream<StoreReadResponse<User>>(
-        request = StoreReadRequest.localOnly(
-            key = UserStoreKey.ById(""), // 约定：空 id 表示当前登录用户
-        )
-    ).map {
-        (it as? StoreReadResponse.Data)?.value?.user
-    }
+            .map { it.dataOrNull()?.user }
 
     override fun streamUserPreferences(
         userId: String,
-        refresh: Boolean,
-    ): Flow<StoreReadResponse<UserStoreData>> = store.stream<StoreWriteResponse>(
-        request = StoreReadRequest.localOnly(
-            key = UserStoreKey.PreferencesById(userId),
-        )
-    )
+    ): Flow<UserPreferences?> =
+        store
+            .stream<StoreWriteResponse>(
+                request = StoreReadRequest.localOnly(
+                    key = UserStoreKey.PreferencesById(id = userId),
+                )
+            )
+            .map { it.dataOrNull()?.preferences }
+
 
     override suspend fun insertUserPreferences(
         preferences: UserPreferences,
         needSync: Boolean,
     ) {
-        store.write(
-            StoreWriteRequest.of(
-                key = UserStoreKey.PreferencesById(preferences.userId),
-                value = UserStoreData.PreferencesData(preferences)
+        store
+            .write(
+                request = StoreWriteRequest.of(
+                    key = UserStoreKey.PreferencesById(id = preferences.userId),
+                    value = UserStoreData.PreferencesData(preferences = preferences)
+                )
             )
-        )
 
         if (needSync) {
             syncRepository.recordInsertOperation(

@@ -23,11 +23,8 @@ internal fun createCardStoreBookkeeper(
     }
 )
 
-private fun CardStoreKey<String>.toBookkeeperKey(): String = when (this) {
-    is CardStoreKey.ById -> "card:$id"
-    is CardStoreKey.ByIds -> "cards:ids:${ids.sorted().joinToString(",")}"
-    is CardStoreKey.ByUser ->
-        "cards:$userId:$page:$size:sort=${sort?.name}:filters=${filters.hashToken()}"
-}
-
-private fun List<*>?.hashToken(): Int = this?.hashCode() ?: 0
+private fun CardStoreKey<String>.toBookkeeperKey(): String =
+    when (this) {
+        is CardStoreKey.ById -> "card:$id"
+        is CardStoreKey.ByUserCursor -> "cards:$userId:$cursor:$size"
+    }

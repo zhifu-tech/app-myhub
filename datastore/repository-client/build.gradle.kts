@@ -40,6 +40,7 @@ kotlin {
 
             implementation(libs.mnf.store.cache5)
             implementation(libs.mnf.store.core5)
+            implementation(libs.mnf.store.store5)
         }
 
         commonTest.dependencies {

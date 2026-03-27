@@ -100,7 +100,12 @@ class SyncCoordinatorImpl(
                 val operations = change.toSyncOperation() ?: return
                 val applier = syncAppliers.value[entityType] ?: return@forEach
                 // 1. Apply changes first.
-                applier.applyChanges(entityType, operations, change)
+                applier.applyChanges(
+                    userid = userId,
+                    entity = entityType,
+                    operations = operations,
+                    change = change
+                )
 
                 // 2. Insert operation log
                 val oplogId = "oplog-${change.entityType}-${change.entityId}-${change.updatedAt}"

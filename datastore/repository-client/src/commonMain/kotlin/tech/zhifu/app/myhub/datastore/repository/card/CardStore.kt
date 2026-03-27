@@ -1,18 +1,15 @@
-
 package tech.zhifu.app.myhub.datastore.repository.card
 
-import org.mobilenativefoundation.store.cache5.CacheBuilder
+import kotlinx.coroutines.flow.Flow
 import org.mobilenativefoundation.store.cache5.StoreMultiCache
-import org.mobilenativefoundation.store.core5.KeyProvider
-import org.mobilenativefoundation.store.core5.StoreKey
 import org.mobilenativefoundation.store.store5.Bookkeeper
 import org.mobilenativefoundation.store.store5.Fetcher
 import org.mobilenativefoundation.store.store5.MutableStore
 import org.mobilenativefoundation.store.store5.SourceOfTruth
+import org.mobilenativefoundation.store.store5.StoreReadRequest
+import org.mobilenativefoundation.store.store5.StoreReadResponse
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
-import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfig
-import tech.zhifu.app.myhub.datastore.repository.store.StoreCacheConfigs
 
 typealias CardStore = MutableStore<CardStoreKey<String>, CardStoreData>
 typealias CardStoreCache = StoreMultiCache<String, CardStoreKey<String>, CardStoreData.Single, CardStoreData.Collection, CardStoreData>
@@ -21,36 +18,35 @@ typealias CardStoreBookkeeper = Bookkeeper<CardStoreKey<String>>
 typealias CardStoreUpdater = Updater<CardStoreKey<String>, CardStoreData, StoreWriteResponse>
 typealias CardStoreFetcher = Fetcher<CardStoreKey<String>, CardStoreData>
 
-fun createCardStoreCache(
-    config: StoreCacheConfig = StoreCacheConfigs.CARD
-): CardStoreCache = StoreMultiCache(
-    keyProvider = object : KeyProvider<String, CardStoreData.Single> {
-        override fun fromCollection(
-            key: StoreKey.Collection<String>,
-            value: CardStoreData.Single
-        ): StoreKey.Single<String> = CardStoreKey.ById(value.id)
-
-        override fun fromSingle(
-            key: StoreKey.Single<String>,
-            value: CardStoreData.Single
-        ): StoreKey.Collection<String> = CardStoreKey.ByUser(
-            userId = value.card.userId,
-            page = 1,
-            size = 20
+fun CardStore.storeStreamCard(
+    userId: String,
+    cardId: String
+): Flow<StoreReadResponse<CardStoreData>> =
+    stream<StoreReadResponse<CardStoreData>>(
+        request = StoreReadRequest.localOnly(
+            key = CardStoreKey.ById(userId, cardId),
         )
-    },
-    singlesCache = CacheBuilder<StoreKey.Single<String>, CardStoreData.Single>()
-        .maximumSize(config.singleCacheSize.toLong())
-        .expireAfterWrite(config.expireAfterWrite)
-        .apply {
-            config.expireAfterAccess?.let { expireAfterAccess(it) }
-        }
-        .build(),
-    collectionsCache = CacheBuilder<StoreKey.Collection<String>, CardStoreData.Collection>()
-        .maximumSize(config.collectionCacheSize.toLong())
-        .expireAfterWrite(config.expireAfterWrite)
-        .apply {
-            config.expireAfterAccess?.let { expireAfterAccess(it) }
-        }
-        .build()
-)
+    )
+
+fun CardStore.storeStreamCards(
+    userId: String,
+    cursorCardId: String?,
+    cursorTitle: String?,
+    cursorUpdatedAt: Long?,
+    orderByUpdated: Boolean,
+    orderByTitle: Boolean,
+    limit: Int
+): Flow<StoreReadResponse<CardStoreData>> =
+    stream<StoreWriteResponse>(
+        request = StoreReadRequest.localOnly(
+            key = CardStoreKey.ByUserCursor(
+                userId = userId,
+                cursor = cursorCardId,
+                cursorTitle = cursorTitle,
+                cursorUpdatedAt = cursorUpdatedAt,
+                orderByUpdated = orderByUpdated,
+                orderByTitle = orderByTitle,
+                size = limit,
+            ),
+        )
+    )

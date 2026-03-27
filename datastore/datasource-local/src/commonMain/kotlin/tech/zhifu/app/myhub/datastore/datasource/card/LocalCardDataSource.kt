@@ -3,43 +3,26 @@ package tech.zhifu.app.myhub.datastore.datasource.card
 import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
-enum class CardSort {
-    NEWEST,
-    OLDEST,
-}
-
 interface LocalCardDataSource {
 
-    suspend fun insertCard(card: Card)
-
-    suspend fun getCard(cardId: String): Card?
-
-    fun observeCard(cardId: String): Flow<Card>
-
-    suspend fun getCards(
+    suspend fun insertCard(
         userId: String,
-        page: Int = 1,
-        limit: Int = 20,
-        type: String? = null,
-        isFavorite: Boolean? = null
-    ): List<Card>
+        card: Card
+    )
 
-    suspend fun countCards(
+    fun flowCard(
+        cardId: String,
+    ): Flow<Card?>
+
+    fun flowCards(
         userId: String,
-        type: String? = null,
-        isFavorite: Boolean? = null
-    ): Long
-
-    fun observeCards(userId: String): Flow<List<Card>>
-
-    fun observeCardsPage(
-        userId: String,
-        page: Int,
-        size: Int,
-        sort: CardSort? = null,
+        cursorCardId: String?,
+        cursorTitle: String? = null,
+        cursorUpdatedAt: Long? = null,
+        orderByUpdated: Boolean = true,
+        orderByTitle: Boolean = false,
+        limit: Int
     ): Flow<List<Card>>
 
     suspend fun deleteCard(cardId: String)
-
-    suspend fun deleteCards(userId: String)
 }

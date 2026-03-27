@@ -166,7 +166,7 @@ image
 {
   "media": [
     {
-      "type": "image",
+      "media_type": "image/jpeg",
       "url": "",
       "caption": ""
     }
@@ -177,11 +177,20 @@ image
 支持：
 
 ```text
-image
-video
-file
-audio
+image/jpeg
+image/png
+image/webp
+audio/mpeg
+audio/wav
+video/mp4
+video/quicktime
+application/pdf
 ```
+
+说明：
+
+* `media_type` 使用标准 MIME 类型（MediaType），便于跨端解析与渲染。
+* `url` 可为本地路径或远端地址，`caption` 用于展示说明。
 
 ---
 

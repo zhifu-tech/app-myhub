@@ -1,0 +1,43 @@
+-- 卡片关系表（知识网络边）
+CREATE TABLE card_relation (
+  id TEXT PRIMARY KEY NOT NULL,
+  from_card_id TEXT NOT NULL,
+  to_card_id TEXT NOT NULL,
+  relation_type TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (from_card_id) REFERENCES card(id) ON DELETE CASCADE,
+  FOREIGN KEY (to_card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_card_relation_from_card_id ON card_relation(from_card_id);
+CREATE INDEX idx_card_relation_to_card_id ON card_relation(to_card_id);
+CREATE INDEX idx_card_relation_type ON card_relation(relation_type);
+
+upsertCardRelation:
+INSERT OR REPLACE INTO card_relation (
+  id,
+  from_card_id,
+  to_card_id,
+  relation_type,
+  created_at
+)
+VALUES (?, ?, ?, ?, ?);
+
+deleteCardRelationById:
+DELETE FROM card_relation
+WHERE id = ?;
+
+deleteCardRelationsByCardId:
+DELETE FROM card_relation
+WHERE from_card_id = ?
+   OR to_card_id = ?;
+
+selectCardRelationsByFromCardId:
+SELECT *
+FROM card_relation
+WHERE from_card_id = ?;
+
+selectCardRelationsByToCardId:
+SELECT *
+FROM card_relation
+WHERE to_card_id = ?;

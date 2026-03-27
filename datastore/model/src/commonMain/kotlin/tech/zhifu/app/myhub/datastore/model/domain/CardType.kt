@@ -3,14 +3,12 @@ package tech.zhifu.app.myhub.datastore.model.domain
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class CardType(val wire: String) {
-    Review("review"),
-    Do("do"),
-    Material("material");
+enum class CardType(val value: String) {
+    NOTE("note");
 
     companion object {
         fun fromWire(value: String?): CardType {
-            return entries.firstOrNull { it.wire == value?.lowercase() } ?: Review
+            return entries.firstOrNull { it.value == value?.lowercase() } ?: NOTE
         }
     }
 }

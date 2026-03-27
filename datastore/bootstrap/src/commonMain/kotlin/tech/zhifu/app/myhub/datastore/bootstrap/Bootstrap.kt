@@ -1,7 +1,5 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
-import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
-import tech.zhifu.app.myhub.datastore.repository.tag.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
@@ -9,27 +7,17 @@ import kotlin.random.Random
 
 class Bootstrap(
     private val userRepository: UserRepository,
-    private val tagRepository: TagRepository,
-    private val cardRepository: CardRepository,
-    private val configBuilder: () -> BootstrapConfigBuilder,
 ) {
     suspend fun initialize(localeTag: String) {
-        logger.debug { "Initializing bootstrap with locale tag: $localeTag" }
-        val config = configBuilder().buildConfig(
-            userId = generateUUId(),
-            localeTag = localeTag,
-        )
+        val config =
+            buildBootstrapConfig(
+                userId = generateUUId(),
+                localeTag = localeTag,
+            )
         userRepository.insertUser(config.user)
         userRepository.insertUserPreferences(config.userPreferences)
-        config.tags.forEach {
-            tagRepository.insertTag(it)
-        }
-        config.cards.forEach {
-            cardRepository.insertCard(it, needSync = false)
-        }
     }
 }
-
 
 private fun generateUUId(): String {
     val bytes = ByteArray(16)

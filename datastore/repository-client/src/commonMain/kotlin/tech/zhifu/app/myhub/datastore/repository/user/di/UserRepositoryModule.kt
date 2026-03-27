@@ -26,7 +26,6 @@ fun userRepositoryModule() = module {
                 cache = createUserStoreCache(),
                 sourceOfTruth = createUserStoreSourceOfTruth(
                     localUserDataSource = get(),
-                    logger = logger,
                 ),
                 bookkeeper = createUserStoreBookkeeper(
                     bookkeeperStorage = get()

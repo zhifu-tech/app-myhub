@@ -16,10 +16,8 @@ import kotlinx.serialization.json.Json
 import org.koin.ktor.plugin.Koin
 import tech.zhifu.app.myhub.api.auth.authApi
 import tech.zhifu.app.myhub.api.capture.captureAnalysisApi
-import tech.zhifu.app.myhub.api.card.cardsApi
 import tech.zhifu.app.myhub.api.media.mediaUploadApi
 import tech.zhifu.app.myhub.api.sync.syncApi
-import tech.zhifu.app.myhub.api.tag.tagsApi
 import tech.zhifu.app.myhub.api.user.usersApi
 import tech.zhifu.app.myhub.auth.configureAuthentication
 import tech.zhifu.app.myhub.di.koinModules
@@ -80,8 +78,6 @@ fun Application.module() {
         authApi()
         syncApi()
         usersApi()
-        cardsApi()
-        tagsApi()
         mediaUploadApi()
         captureAnalysisApi()
     }

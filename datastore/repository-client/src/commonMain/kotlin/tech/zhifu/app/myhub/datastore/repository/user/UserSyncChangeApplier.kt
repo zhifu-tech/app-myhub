@@ -15,6 +15,7 @@ class UserSyncChangeApplier(
 ) : SyncChangeApplier {
 
     override suspend fun applyChanges(
+        userid: String,
         entity: SyncEntityType,
         operations: SyncOperations,
         change: SyncPullChange
@@ -40,6 +41,7 @@ class UserPreferencesSyncChangeApplier(
 ) : SyncChangeApplier {
 
     override suspend fun applyChanges(
+        userid: String,
         entity: SyncEntityType,
         operations: SyncOperations,
         change: SyncPullChange

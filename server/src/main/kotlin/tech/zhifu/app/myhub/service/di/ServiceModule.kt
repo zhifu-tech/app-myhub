@@ -2,13 +2,9 @@ package tech.zhifu.app.myhub.service.di
 
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.auth.TokenService
-import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
-import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
-import tech.zhifu.app.myhub.service.CardService
 import tech.zhifu.app.myhub.service.SyncService
-import tech.zhifu.app.myhub.service.TagService
 import tech.zhifu.app.myhub.service.UserService
 import tech.zhifu.app.myhub.service.media.CaptureAnalysisService
 import tech.zhifu.app.myhub.service.media.MediaUploadService
@@ -17,12 +13,6 @@ import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderConfig
 import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderFactory
 
 val serviceModule = module {
-    factory<CardService> {
-        CardService(
-            cardRepository = get<CardRepository>(),
-            tagRepository = get<TagRepository>()
-        )
-    }
 
     factory<UserService> {
         UserService(
@@ -39,12 +29,6 @@ val serviceModule = module {
     factory<TokenService> {
         TokenService(
             userRepository = get<UserRepository>()
-        )
-    }
-
-    factory<TagService> {
-        TagService(
-            tagRepository = get<TagRepository>()
         )
     }
 

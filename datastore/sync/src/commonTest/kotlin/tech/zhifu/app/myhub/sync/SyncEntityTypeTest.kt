@@ -12,10 +12,6 @@ class SyncEntityTypeTest {
     fun `SyncEntityType values`() {
         assertEquals("user", SyncEntityType.User.value)
         assertEquals("user_preferences", SyncEntityType.UserPreferences.value)
-        assertEquals("collection", SyncEntityType.Collection.value)
-        assertEquals("card", SyncEntityType.Card.value)
-        assertEquals("tag", SyncEntityType.Tag.value)
-        assertEquals("template", SyncEntityType.Template.value)
     }
 
     @Test

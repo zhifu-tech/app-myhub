@@ -10,7 +10,6 @@ data class UserPreferences(
     val layoutAsList: Boolean = true,
     val sortAsDate: Boolean = true,
     val sortAsName: Boolean = true,
-    val defaultCardType: String? = null,
     val autoSync: Boolean = true,
     val syncInterval: Long = 3600000L
 )

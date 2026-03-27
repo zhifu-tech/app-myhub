@@ -1,62 +1,38 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
 import kotlinx.coroutines.flow.Flow
-import org.mobilenativefoundation.store.core5.StoreKey
-import org.mobilenativefoundation.store.store5.StoreReadResponse
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 interface CardRepository {
 
     suspend fun insertCard(
         card: Card,
-        needSync: Boolean = true
+        userId: String,
     )
 
     suspend fun getCard(
+        userId: String,
         cardId: String
-    ): CardStoreData?
+    ): Card?
 
-    suspend fun getCards(
+    fun flowCard(
         userId: String,
-        page: Int,
-        size: Int,
-        sort: StoreKey.Sort? = null
-    ): CardStoreData
+        cardId: String
+    ): Flow<Card?>
 
-    suspend fun getCards(
-        cardIds: List<String>
-    ): CardStoreData?
-
-    fun streamCards(
+    fun flowCards(
         userId: String,
-        page: Int = 1,
-        size: Int = 20,
-        sort: StoreKey.Sort? = null,
-        refresh: Boolean = false
-    ): Flow<StoreReadResponse<CardStoreData>>
+        cursorCardId: String?,
+        cursorTitle: String? = null,
+        cursorUpdatedAt: Long? = null,
+        orderByUpdated: Boolean = true,
+        orderByTitle: Boolean = false,
+        limit: Int
+    ): Flow<List<Card>>
 
-    fun streamCard(
+    suspend fun deleteCard(
+        userId: String,
         cardId: String,
-        refresh: Boolean = false
-    ): Flow<StoreReadResponse<CardStoreData>>
-
-    suspend fun fetchCards(
-        userId: String,
-        page: Int = 1,
-        size: Int = 20,
-        sort: StoreKey.Sort? = null,
-        filters: List<StoreKey.Filter<*>>? = null
-    ): Flow<StoreReadResponse<CardStoreData>>
-
-    suspend fun fetchCard(
-        cardId: String
-    ): Flow<StoreReadResponse<CardStoreData>>
-
-    suspend fun clearCard(
-        cardId: String
-    )
-
-    suspend fun clearCards(
-        userId: String
+        needSync: Boolean = true,
     )
 }

@@ -3,12 +3,6 @@ CREATE TABLE user_card (
   user_id TEXT NOT NULL,
   card_id TEXT NOT NULL,
 
-  is_favorite INTEGER NOT NULL DEFAULT 0,
-  last_reviewed_at TEXT,
-
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-
   PRIMARY KEY (user_id, card_id),
   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
   FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
@@ -17,16 +11,12 @@ CREATE TABLE user_card (
 -- 索引
 CREATE INDEX idx_user_card_user_id ON user_card(user_id);
 CREATE INDEX idx_user_card_card_id ON user_card(card_id);
-CREATE INDEX idx_user_card_updated_at ON user_card(user_id, updated_at);
-CREATE INDEX idx_user_card_user_favorite ON user_card(user_id, is_favorite);
-CREATE INDEX idx_user_card_review_status ON user_card(user_id, last_reviewed_at);
 
 -- CRUD 操作
 
 selectUserCardsByUserId:
 SELECT * FROM user_card
-WHERE user_id = ?
-ORDER BY updated_at DESC;
+WHERE user_id = ?;
 
 selectUserCardIdsByUserId:
 SELECT card_id FROM user_card
@@ -36,28 +26,12 @@ selectUserCardById:
 SELECT * FROM user_card
 WHERE user_id = ? AND card_id = ?;
 
-selectFavoriteUserCards:
-SELECT * FROM user_card
-WHERE user_id = ? AND is_favorite = 1
-ORDER BY updated_at DESC;
-
 insertUserCard:
 INSERT OR REPLACE INTO user_card (
     user_id,
-    card_id,
-    is_favorite,
-    last_reviewed_at,
-    created_at,
-    updated_at
+    card_id
 )
-VALUES (?, ?, ?, ?, ?, ?);
-
-updateUserCard:
-UPDATE user_card
-SET is_favorite = ?,
-    last_reviewed_at = ?,
-    updated_at = ?
-WHERE user_id = ? AND card_id = ?;
+VALUES ( ?, ?);
 
 deleteUserCard:
 DELETE FROM user_card

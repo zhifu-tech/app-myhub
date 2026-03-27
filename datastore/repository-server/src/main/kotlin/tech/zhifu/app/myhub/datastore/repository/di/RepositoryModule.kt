@@ -2,18 +2,12 @@ package tech.zhifu.app.myhub.datastore.repository.di
 
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.database.di.databaseModule
-import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
 import tech.zhifu.app.myhub.datastore.datasource.di.localDataSourceModule
 import tech.zhifu.app.myhub.datastore.datasource.sync.LocalSyncDataSource
-import tech.zhifu.app.myhub.datastore.datasource.tag.LocalTagDataSource
 import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
-import tech.zhifu.app.myhub.datastore.repository.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.SyncRepository
-import tech.zhifu.app.myhub.datastore.repository.TagRepository
 import tech.zhifu.app.myhub.datastore.repository.UserRepository
-import tech.zhifu.app.myhub.datastore.repository.impl.CardRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.SyncRepositoryImpl
-import tech.zhifu.app.myhub.datastore.repository.impl.TagRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.impl.UserRepositoryImpl
 
 /**
@@ -26,20 +20,6 @@ val repositoryModule = module {
     // 包含本地数据源模块
     includes(databaseModule)
     includes(localDataSourceModule)
-
-    // Repository 实现（服务端）
-    single<TagRepository> {
-        TagRepositoryImpl(
-            localDataSource = get<LocalTagDataSource>()
-        )
-    }
-
-    single<CardRepository> {
-        CardRepositoryImpl(
-            localDataSource = get<LocalCardDataSource>(),
-            tagRepository = get<TagRepository>()
-        )
-    }
 
     single<UserRepository> {
         val repository = UserRepositoryImpl(
