@@ -8,8 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +31,6 @@ fun ContentItemHost(
     val onClick: () -> Unit = remember(item, onClickItem) {
         { onClickItem(item) }
     }
-    val interactionSource = remember { MutableInteractionSource() }
     AnimatedVisibility(
         visible = previewState.payload?.id != item.id,
         enter = fadeIn(
@@ -63,16 +60,12 @@ fun ContentItemHost(
         modifier = modifier,
     ) {
         ElevatedCard(
+            onClick = onClick,
             modifier = Modifier
                 .sharedBounds(
                     key = "content-preview-${item.id}",
                     animatedVisibilityScope = this,
                     overlayClipShape = MaterialTheme.shapes.large,
-                )
-                .clickable(
-//                    interactionSource = interactionSource,
-//                    indication = null,
-                    onClick = onClick,
                 )
                 .clip(MaterialTheme.shapes.large),
             shape = MaterialTheme.shapes.large,
