@@ -1,8 +1,6 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 import kotlin.random.Random
 
 class Bootstrap(

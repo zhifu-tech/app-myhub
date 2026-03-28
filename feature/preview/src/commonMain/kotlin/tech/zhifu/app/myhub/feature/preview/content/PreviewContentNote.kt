@@ -10,16 +10,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.feature.preview.resources.Res
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_journal_entry
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewContentNote(
-    payload: PreviewPayload,
+    card: ContentCard,
     modifier: Modifier,
 ) {
-    val bodyText = payload.note.orEmpty()
+    val bodyText = card.summary
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp),

@@ -24,10 +24,10 @@ import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.model.ContentCard
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.random.Random
@@ -39,7 +39,7 @@ internal actual fun Modifier.previewSnapshotSource(
 
 @Composable
 internal actual fun rememberPreviewSnapshot(
-    payload: PreviewPayload,
+    card: ContentCard,
     width: Dp,
     snapshotController: PreviewSnapshotController?,
     exportMode: ExportMode,
@@ -51,7 +51,7 @@ internal actual fun rememberPreviewSnapshot(
     val parentLifecycleOwner = parentView.findViewTreeLifecycleOwner()
     val parentSavedStateOwner = parentView.findViewTreeSavedStateRegistryOwner()
 
-    return remember(context, density, payload, width, parentComposition, snapshotController, exportMode) {
+    return remember(context, density, card, width, parentComposition, snapshotController, exportMode) {
         suspend {
             val visible = if (exportMode == ExportMode.Visible) {
                 snapshotController?.captureVisibleSnapshot?.invoke()
@@ -65,7 +65,7 @@ internal actual fun rememberPreviewSnapshot(
                 parentComposition = parentComposition,
                 parentLifecycleOwner = parentLifecycleOwner,
                 parentSavedStateOwner = parentSavedStateOwner,
-                payload = payload,
+                payload = card,
                 width = width,
             )
         }
@@ -79,7 +79,7 @@ private suspend fun captureFullContentImage(
     parentComposition: CompositionContext?,
     parentLifecycleOwner: LifecycleOwner?,
     parentSavedStateOwner: SavedStateRegistryOwner?,
-    payload: PreviewPayload,
+    payload: ContentCard,
     width: Dp,
 ): String? {
     val bitmap = withContext(Dispatchers.Main.immediate) {
@@ -95,7 +95,7 @@ private suspend fun captureFullContentImage(
         composeView.setContent {
             AppTheme {
                 PreviewContent(
-                    payload = payload,
+                    card = payload,
                     modifier = Modifier.width(width),
                 )
             }

@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.user
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.store5.StoreReadRequest
@@ -51,11 +52,13 @@ class UserRepositoryImpl(
     override suspend fun getUserOrNull(): User? =
         store
             .stream<StoreReadRequest<UserStoreData>>(
-                request = StoreReadRequest.localOnly(
+                request = StoreReadRequest.skipMemory(
                     // 约定：空 id 表示当前登录用户
-                    key = UserStoreKey.ById("")
+                    key = UserStoreKey.ById(""),
+                    refresh = false,
                 )
             )
+            .filterNot { it is StoreReadResponse.Loading || it is StoreReadResponse.NoNewData }
             .first()
             .dataOrNull()
             ?.user

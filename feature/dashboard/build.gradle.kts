@@ -32,6 +32,7 @@ kotlin {
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.mixedApi)
             implementation(projects.feature.preview)
+            implementation(projects.ui.model)
 
             implementation(libs.chrisbanes.haze)
             implementation(libs.chrisbanes.haze.materials)
@@ -45,11 +46,13 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.orbit.core)
             implementation(libs.orbit.compose)
             implementation(libs.orbit.viewmodel)
 
             if (project.isDev()) {
+                implementation(projects.core.startup)
                 implementation(libs.jb.compose.ui.uiToolingPreview)
             }
         }

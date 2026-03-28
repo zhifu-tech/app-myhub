@@ -5,30 +5,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewContentCover(
     modifier: Modifier,
-    payload: PreviewPayload,
+    card: ContentCard,
 ) {
-    val background = payload.coverBackground
-    val coverUrl = payload.coverUrl
-    val coverIcon = payload.coverIcon
-    val coverIconTint = payload.coverTint
-    val isVideo = payload.isVideo
+    val background = card.cover.background
+    val coverUrl = card.cover.url
+    val coverIcon = card.cover.icon
+    val coverIconTint = card.cover.tint
 
     Box(
         modifier = modifier
@@ -52,21 +48,6 @@ internal fun PreviewContentCover(
                 tint = coverIconTint,
                 modifier = Modifier.size(36.dp),
             )
-        }
-        if (isVideo) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.PlayCircle,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp),
-                )
-            }
         }
     }
 }

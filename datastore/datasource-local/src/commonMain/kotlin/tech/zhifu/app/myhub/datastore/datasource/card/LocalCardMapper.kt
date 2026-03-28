@@ -9,7 +9,7 @@ import kotlin.time.Instant
 internal typealias DbCard = tech.zhifu.app.myhub.datastore.database.Card
 
 private fun Long?.toInstant(def: Instant = Clock.System.now()) =
-    this?.let { Instant.parse(it.toString()) } ?: def
+    this?.let { Instant.fromEpochMilliseconds(it) } ?: def
 
 internal fun List<DbCard>.toDomainList(): List<Card> =
     map { it.toDomain() }

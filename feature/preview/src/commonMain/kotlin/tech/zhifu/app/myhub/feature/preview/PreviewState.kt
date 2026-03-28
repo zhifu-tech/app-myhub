@@ -6,8 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun rememberPreviewState(): PreviewState {
@@ -16,39 +15,17 @@ fun rememberPreviewState(): PreviewState {
 
 @Stable
 class PreviewState internal constructor(
-    initialVisiblePayload: PreviewPayload? = null,
+    initialCard: ContentCard? = null,
 ) {
-    var payload by mutableStateOf(initialVisiblePayload)
+    var card by mutableStateOf(initialCard)
         private set
 
-    fun show(payload: PreviewPayload) {
-        if (this.payload == payload) return
-        this.payload = payload
+    fun show(card: ContentCard) {
+        if (this.card == card) return
+        this.card = card
     }
 
     fun hide() {
-        this.payload = null
+        this.card = null
     }
 }
-
-@Stable
-data class PreviewPayload(
-    val id: String,
-    val title: String?,
-    val note: String?,
-    //
-    val coverIcon: ImageVector?,
-    val coverBackground: Color,
-    val coverTint: Color?,
-    val coverUrl: String?,
-    //
-    val isVideo: Boolean,
-    val location: String?,
-    val tags: List<String>,
-    //
-    val actionLabel: String,
-    val actionIcon: ImageVector,
-    val actionColor: Color,
-    //
-    val updatedTimeMs: Long,
-)

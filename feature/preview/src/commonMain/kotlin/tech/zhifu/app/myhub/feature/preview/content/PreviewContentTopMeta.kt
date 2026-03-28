@@ -10,20 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.feature.preview.sharedElement
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
 internal fun PreviewContentTopMeta(
-    payload: PreviewPayload,
+    card: ContentCard,
     animatedVisibilityScope: AnimatedVisibilityScope?,
     modifier: Modifier,
 ) {
-    val contentId = payload.id
-    val actionIcon = payload.actionIcon
-    val actionColor = payload.actionColor
-    val actionLabel = payload.actionLabel
+    val contentId = card.id
+    val actionIcon = card.action.icon
+    val actionColor = card.action.color
+    val actionLabel = card.action.label
     val iconModifier = if (animatedVisibilityScope != null) {
         Modifier.sharedElement(
             key = "content-action-icon-$contentId",

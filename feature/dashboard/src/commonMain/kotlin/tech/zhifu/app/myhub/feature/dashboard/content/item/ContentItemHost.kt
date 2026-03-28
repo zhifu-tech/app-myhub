@@ -19,20 +19,21 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.PreviewTransitionTokens
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentItemHost(
-    item: ContentItem,
+    item: ContentCard,
     previewState: PreviewState,
     modifier: Modifier,
-    onClickItem: (ContentItem) -> Unit,
+    onClickItem: (ContentCard) -> Unit,
     content: @Composable (AnimatedVisibilityScope) -> Unit,
 ) {
     val onClick: () -> Unit = remember(item, onClickItem) {
         { onClickItem(item) }
     }
     AnimatedVisibility(
-        visible = previewState.payload?.id != item.id,
+        visible = previewState.card?.id != item.id,
         enter = fadeIn(
             animationSpec = tween(
                 durationMillis = PreviewTransitionTokens.HOST_ENTER_DURATION_MS,

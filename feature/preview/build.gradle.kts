@@ -28,6 +28,7 @@ kotlin {
             implementation(projects.core.platformCompose)
             implementation(projects.core.saving)
             implementation(projects.core.sharing)
+            implementation(projects.ui.model)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

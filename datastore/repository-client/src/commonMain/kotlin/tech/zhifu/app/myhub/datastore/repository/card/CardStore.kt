@@ -37,7 +37,7 @@ fun CardStore.storeStreamCards(
     orderByTitle: Boolean,
     limit: Int
 ): Flow<StoreReadResponse<CardStoreData>> =
-    stream<StoreWriteResponse>(
+    stream<StoreReadResponse<CardStoreData>>(
         request = StoreReadRequest.localOnly(
             key = CardStoreKey.ByUserCursor(
                 userId = userId,

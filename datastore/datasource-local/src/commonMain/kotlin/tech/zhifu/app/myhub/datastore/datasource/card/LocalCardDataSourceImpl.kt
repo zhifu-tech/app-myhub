@@ -6,6 +6,7 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.content
@@ -13,37 +14,53 @@ import tech.zhifu.app.myhub.datastore.model.domain.location
 import tech.zhifu.app.myhub.datastore.model.domain.source
 import tech.zhifu.app.myhub.datastore.model.domain.tags
 import tech.zhifu.app.myhub.datastore.model.domain.ui
+import tech.zhifu.app.myhub.logger.error
+import tech.zhifu.app.myhub.logger.logger
 
 class LocalCardDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalCardDataSource {
+    private val json = Json {
+        explicitNulls = false
+        encodeDefaults = false
+    }
 
     override suspend fun insertCard(
         userId: String,
         card: Card,
-    ) = database.transaction {
-        val createdEpoch = card.createdAt.toEpochMilliseconds()
-        val updatedEpoch = card.updatedAt.toEpochMilliseconds()
-        database.cardQueries.insertCard(
-            id = card.id,
-            type = card.type.value,
-            title = card.title,
-            summary = card.summary,
-            content = card.content.toString(),
-            ui = card.ui.toString(),
-            location = card.location?.toString().orEmpty(),
-            tags = card.tags.toString(),
-            status = card.status.wire,
-            source = card.source.toString(),
-            created_at = createdEpoch,
-            updated_at = updatedEpoch,
-            version = 1,
-            deleted = 0,
-        )
-        database.user_cardQueries.insertUserCard(
-            user_id = userId,
-            card_id = card.id,
-        )
+    ) {
+        runCatching {
+            database.transaction {
+                val createdEpoch = card.createdAt.toEpochMilliseconds()
+                val updatedEpoch = card.updatedAt.toEpochMilliseconds()
+                database.cardQueries.insertCard(
+                    id = card.id,
+                    type = card.type.value,
+                    title = card.title,
+                    summary = card.summary,
+                    content = card.content?.let { json.encodeToString(it) },
+                    ui = card.ui?.let { json.encodeToString(it) },
+                    location = card.location?.let { json.encodeToString(it) },
+                    tags = json.encodeToString(card.tags),
+                    status = card.status.wire,
+                    source = card.source?.let { json.encodeToString(it) },
+                    created_at = createdEpoch,
+                    updated_at = updatedEpoch,
+                    version = 1,
+                    deleted = 0,
+                )
+                database.user_cardQueries.insertUserCard(
+                    user_id = userId,
+                    card_id = card.id,
+                )
+            }
+        }.onFailure { error ->
+            logger.error(error) {
+                "insertCard.failed cardId=${card.id}, userId=$userId, error=${error.message}. " +
+                    "请重点检查: 1) card 表结构是否已迁移到最新字段; 2) user 是否存在导致 FK 失败。"
+            }
+            throw error
+        }
     }
 
     override fun flowCard(

@@ -13,18 +13,18 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+import tech.zhifu.app.myhub.ui.model.ContentCard
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
 @Composable
 internal actual fun rememberPreviewSnapshot(
-    payload: PreviewPayload,
+    card: ContentCard,
     width: Dp,
     snapshotController: PreviewSnapshotController?,
     exportMode: ExportMode,
-): suspend () -> String? = remember(payload, width, snapshotController, exportMode) {
+): suspend () -> String? = remember(card, width, snapshotController, exportMode) {
     suspend {
         when (exportMode) {
             ExportMode.Visible -> snapshotController?.captureVisibleSnapshot?.invoke()

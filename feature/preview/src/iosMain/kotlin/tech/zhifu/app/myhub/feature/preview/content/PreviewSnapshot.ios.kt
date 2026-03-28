@@ -35,11 +35,11 @@ import platform.UIKit.UIImagePNGRepresentation
 import platform.UIKit.UIScreen
 import platform.UIKit.UIWindow
 import platform.UIKit.UIWindowLevelNormal
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.model.ContentCard
 import kotlin.math.abs
 
 @Composable
@@ -49,25 +49,25 @@ internal actual fun Modifier.previewSnapshotSource(
 
 @Composable
 internal actual fun rememberPreviewSnapshot(
-    payload: PreviewPayload,
+    card: ContentCard,
     width: Dp,
     snapshotController: PreviewSnapshotController?,
     exportMode: ExportMode,
 ): suspend () -> String? {
-    return remember(payload, width, snapshotController, exportMode) {
+    return remember(card, width, snapshotController, exportMode) {
         suspend {
             val visible = if (exportMode == ExportMode.Visible) {
                 snapshotController?.captureVisibleSnapshot?.invoke()
             } else {
                 null
             }
-            visible ?: captureFullContentImage(payload, width)
+            visible ?: captureFullContentImage(card, width)
         }
     }
 }
 
 private suspend fun captureFullContentImage(
-    payload: PreviewPayload,
+    payload: ContentCard,
     width: Dp,
 ): String? {
     val widthPt = width.value.toDouble().coerceAtLeast(1.0)
@@ -75,7 +75,7 @@ private suspend fun captureFullContentImage(
     val controller = ComposeUIViewController {
         AppTheme {
             PreviewContent(
-                payload = payload,
+                card = payload,
                 modifier = Modifier.width(width),
             )
         }

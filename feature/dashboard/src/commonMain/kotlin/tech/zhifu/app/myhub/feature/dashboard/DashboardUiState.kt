@@ -2,8 +2,8 @@ package tech.zhifu.app.myhub.feature.dashboard
 
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentItem
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 sealed class DashboardUiState(
     val state: State,
@@ -21,7 +21,7 @@ sealed class DashboardUiState(
         val pageIndx: Int = 1,
         val pageSize: Int = 20,
         val hasMore: Boolean = false,
-        val contentItems: List<ContentItem> = emptyList(),
+        val contentItems: List<ContentCard> = emptyList(),
     ) : DashboardUiState(state = State.CONTENT)
 
     data class Error(

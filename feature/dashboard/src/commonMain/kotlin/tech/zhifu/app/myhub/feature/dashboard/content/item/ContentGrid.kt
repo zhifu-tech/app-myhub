@@ -15,15 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentGridContent(
     modifier: Modifier,
     paddingValues: PaddingValues,
-    items: List<ContentItem>,
+    items: List<ContentCard>,
     previewState: PreviewState,
     onLoadMore: () -> Unit,
-    onClickItem: (ContentItem) -> Unit,
+    onClickItem: (ContentCard) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
     AutoLoadMoreGrid(
@@ -49,7 +50,7 @@ fun ContentGridContent(
                 previewState = previewState,
                 modifier = Modifier.animateItem(),
                 onClickItem = onClickItem,
-            ) { animatedVisibilityScope ->
+            ) {
                 ContentGridItem(
                     item = item,
                 )

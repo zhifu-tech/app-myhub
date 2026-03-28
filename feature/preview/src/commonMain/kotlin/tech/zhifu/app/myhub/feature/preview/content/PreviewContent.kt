@@ -13,20 +13,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.feature.preview.sharedElement
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewContent(
-    payload: PreviewPayload,
+    card: ContentCard,
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     snapshotController: PreviewSnapshotController? = null,
 ) {
     val contentModifier = if (animatedVisibilityScope != null) {
         modifier.sharedBounds(
-            key = "content-preview-${payload.id}",
+            key = "content-preview-${card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
             overlayClipShape = MaterialTheme.shapes.large,
         )
@@ -35,7 +35,7 @@ internal fun PreviewContent(
     }
     val titleModifier = if (animatedVisibilityScope != null) {
         Modifier.sharedBounds(
-            key = "content-title-${payload.id}",
+            key = "content-title-${card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
         )
     } else {
@@ -43,7 +43,7 @@ internal fun PreviewContent(
     }
     val coverModifier = if (animatedVisibilityScope != null) {
         Modifier.sharedElement(
-            key = "content-image-${payload.id}",
+            key = "content-image-${card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
         )
     } else {
@@ -69,33 +69,33 @@ internal fun PreviewContent(
                 .padding(all = 24.dp)
         ) {
             PreviewContentTopMeta(
-                payload = payload,
+                card = card,
                 animatedVisibilityScope = animatedVisibilityScope,
                 modifier = Modifier.fillMaxWidth()
                     .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 8.dp)
             )
 
             PreviewContentTitle(
-                title = payload.title.orEmpty(),
+                title = card.title,
                 modifier = titleModifier
                     .fillMaxWidth()
                     .padding(start = 4.dp, end = 4.dp, top = 8.dp)
             )
 
             PreviewContentCover(
-                payload = payload,
+                card = card,
                 modifier = coverModifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)
             )
 
             PreviewContentMeta(
-                payload = payload,
+                card = card,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 24.dp)
             )
 
             PreviewContentNote(
-                payload = payload,
+                card = card,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 24.dp, bottom = 32.dp)
             )
         }

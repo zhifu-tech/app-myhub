@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 internal const val PREVIEW_SHARE_LINK = "https://example.com"
 
@@ -24,7 +24,7 @@ internal fun rememberPreviewSnapshotController(): PreviewSnapshotController {
 
 @Composable
 internal expect fun rememberPreviewSnapshot(
-    payload: PreviewPayload,
+    card: ContentCard,
     width: Dp,
     snapshotController: PreviewSnapshotController? = null,
     exportMode: ExportMode = ExportMode.FullContent,

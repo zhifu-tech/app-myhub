@@ -1,11 +1,11 @@
 package tech.zhifu.app.myhub.feature.preview
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -39,7 +39,7 @@ fun Preview(
     val snapshotController = rememberPreviewSnapshotController()
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
-        targetState = state.payload,
+        targetState = state.card,
         transitionSpec = {
             fadeIn(
                 animationSpec = tween(
@@ -54,8 +54,8 @@ fun Preview(
                 )
             )
         }
-    ) { payload ->
-        if (payload == null) {
+    ) { card ->
+        if (card == null) {
             Spacer(modifier = Modifier.fillMaxSize())
         } else {
             PreviewOverlay(state = state)
@@ -82,7 +82,7 @@ fun Preview(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         PreviewContent(
-                            payload = payload,
+                            card = card,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier.weight(1f, fill = false),
                             snapshotController = snapshotController,
@@ -91,12 +91,12 @@ fun Preview(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             PreviewActionSavingButton(
-                                sharePayload = payload,
+                                card = card,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
-                                sharePayload = payload,
+                                card = card,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
@@ -112,7 +112,7 @@ fun Preview(
                     ) {
                         Spacer(modifier.size(shareActionSize))
                         PreviewContent(
-                            payload = payload,
+                            card = card,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier
                                 .widthIn(max = maxCardWidth),
@@ -122,12 +122,12 @@ fun Preview(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             PreviewActionSavingButton(
-                                sharePayload = payload,
+                                card = card,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
-                                sharePayload = payload,
+                                card = card,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                                 modifier = Modifier

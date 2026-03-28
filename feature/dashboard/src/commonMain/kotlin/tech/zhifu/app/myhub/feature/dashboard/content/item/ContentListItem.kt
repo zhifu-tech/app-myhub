@@ -19,10 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.sharedElement
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentListItem(
-    item: ContentItem,
+    item: ContentCard,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Row(

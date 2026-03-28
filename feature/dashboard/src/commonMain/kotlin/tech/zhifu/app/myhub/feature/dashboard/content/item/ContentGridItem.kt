@@ -18,10 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentGridItem(
-    item: ContentItem,
+    item: ContentCard,
 ) {
     ContentItemLeading(
         item = item,

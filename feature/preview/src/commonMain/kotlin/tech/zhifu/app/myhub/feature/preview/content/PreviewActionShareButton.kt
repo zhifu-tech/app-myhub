@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import tech.zhifu.app.myhub.feature.preview.PreviewPayload
 import tech.zhifu.app.myhub.core.sharing.rememberShare
 import tech.zhifu.app.myhub.core.sharing.rememberShareSupported
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewActionShareButton(
-    sharePayload: PreviewPayload,
+    card: ContentCard,
     shareContentWidth: Dp,
     snapshotController: PreviewSnapshotController? = null,
     modifier: Modifier = Modifier,
@@ -33,7 +33,7 @@ internal fun PreviewActionShareButton(
     val share = rememberShare()
     val coroutineScope = rememberCoroutineScope()
     val capturePreviewImage = rememberPreviewSnapshot(
-        payload = sharePayload,
+        card = card,
         width = shareContentWidth,
         snapshotController = snapshotController,
         exportMode = ExportMode.FullContent,

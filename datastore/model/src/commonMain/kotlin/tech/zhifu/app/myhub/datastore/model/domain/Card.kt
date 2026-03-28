@@ -41,16 +41,20 @@ data class Card(
     private inline fun <T> getFromMap(
         key: String,
         crossinline factory: Card.() -> T?
-    ): T? = map.getOrElse(key) {
-        val newValue = runCatching(block = factory).getOrNull() ?: NOE
-        if (map.isEmpty()) {
-            map = mutableMapOf()
+    ): T? {
+        val value = map.getOrElse(key) {
+            val newValue = runCatching(block = factory).getOrNull() ?: NOE
+            if (map.isEmpty()) {
+                map = mutableMapOf()
+            }
+            (map as MutableMap<String, Any>)[key] = newValue
+            newValue
         }
-        (map as MutableMap)[key] = newValue
-    } as? T
+        if (value === NOE) return null
+        return value as? T
+    }
 
     companion object {
         internal object NOE // NULL OR EMPTY
     }
 }
-

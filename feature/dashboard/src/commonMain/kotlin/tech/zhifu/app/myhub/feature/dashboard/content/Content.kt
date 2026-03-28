@@ -6,18 +6,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
-import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentItem
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
-import tech.zhifu.app.myhub.feature.dashboard.content.item.toPreviewPayload
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
 import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.util.tapToClearFocus
 
 @Composable
@@ -40,12 +38,6 @@ fun Content(
         it.layoutAsList
     }.value ?: true
 
-    val onClickItem: (ContentItem) -> Unit = remember(previewState) {
-        { item ->
-            previewState.show(payload = item.toPreviewPayload())
-        }
-    }
-
     ContentContent(
         modifier = modifier,
         paddingValues = paddingValues,
@@ -53,7 +45,7 @@ fun Content(
         layoutAsList = layoutAsList,
         previewState = previewState,
         onLoadMore = viewModel::loadMoreData,
-        onClickItem = onClickItem,
+        onClickItem = previewState::show,
     )
 }
 
@@ -61,11 +53,11 @@ fun Content(
 private fun ContentContent(
     modifier: Modifier,
     paddingValues: PaddingValues,
-    items: List<ContentItem>,
+    items: List<ContentCard>,
     layoutAsList: Boolean,
     previewState: PreviewState,
     onLoadMore: () -> Unit,
-    onClickItem: (ContentItem) -> Unit,
+    onClickItem: (ContentCard) -> Unit,
 ) {
     val modifier = modifier
         .fillMaxSize()
