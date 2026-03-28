@@ -16,12 +16,7 @@ sealed class DashboardUiState(
         val user: User,
         val userPreferences: UserPreferences,
         val searchState: SearchState = SearchState(),
-
-        // 分页信息
-        val pageIndx: Int = 1,
-        val pageSize: Int = 20,
-        val hasMore: Boolean = false,
-        val contentItems: List<ContentCard> = emptyList(),
+        val items: List<ContentCard> = emptyList(),
     ) : DashboardUiState(state = State.CONTENT)
 
     data class Error(

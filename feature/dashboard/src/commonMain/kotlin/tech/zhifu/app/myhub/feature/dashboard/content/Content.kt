@@ -26,7 +26,7 @@ fun Content(
     previewState: PreviewState,
 ) {
     val items = viewModel.collectFieldAsState {
-        (it as? DashboardUiState.Content)?.contentItems
+        (it as? DashboardUiState.Content)?.items
     }.value ?: emptyList()
 
     if (items.isEmpty()) {
@@ -44,7 +44,7 @@ fun Content(
         items = items,
         layoutAsList = layoutAsList,
         previewState = previewState,
-        onLoadMore = viewModel::loadMoreData,
+        onLoadMore = viewModel::loadMore,
         onClickItem = previewState::show,
     )
 }

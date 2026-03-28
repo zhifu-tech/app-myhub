@@ -8,7 +8,7 @@ data class ContentCard(
     val title: String,
     val summary: String,
     val location: String,
-    val updatedTimeMs: Long,
+    val updatedAt: Long,
     val tags: List<String>,
     val cover: ContentCardCover,
     val action: ContentCardAction,
