@@ -29,7 +29,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.resources.Res
+import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentCountThreshold
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSearchStateQuery
@@ -88,6 +91,7 @@ fun SearchBarContent(
     val inputStyle: TextStyle = MaterialTheme.typography.bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurface
     )
+    val placeholderText = stringResource(Res.string.feature_dashboard_search_placeholder)
 
     Surface(
         shape = RoundedCornerShape(9999.dp),
@@ -121,7 +125,7 @@ fun SearchBarContent(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Search,
-                        contentDescription = "search",
+                        contentDescription = placeholderText,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
@@ -129,7 +133,7 @@ fun SearchBarContent(
                     Box(modifier = Modifier.weight(1f)) {
                         if (query.isEmpty()) {
                             Text(
-                                text = "搜索",
+                                text = placeholderText,
                                 style = placeholderStyle
                             )
                         }

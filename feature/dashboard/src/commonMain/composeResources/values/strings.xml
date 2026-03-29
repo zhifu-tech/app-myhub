@@ -9,6 +9,7 @@
   <string name="feature_dashboard_error_subtitle">Something went wrong. Tap to retry</string>
   <string name="feature_dashboard_menu_layout_list">List</string>
   <string name="feature_dashboard_menu_layout_grid">Grid</string>
+  <string name="feature_dashboard_search_placeholder">Search</string>
   <string name="feature_dashboard_menu_sort_by_date">Sort by date</string>
   <string name="feature_dashboard_menu_sort_by_name">Sort by name</string>
   <string name="feature_dashboard_menu_support">Feedback &amp; Support</string>

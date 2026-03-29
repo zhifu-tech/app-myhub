@@ -1,0 +1,16 @@
+{
+  "name": "MyHub",
+  "short_name": "MyHub",
+  "lang": "zh-CN",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0A7B83",
+  "icons": [
+    {
+      "src": "app-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

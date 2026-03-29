@@ -9,6 +9,7 @@
   <string name="feature_dashboard_error_subtitle">发生错误，点击重试</string>
   <string name="feature_dashboard_menu_layout_list">列表</string>
   <string name="feature_dashboard_menu_layout_grid">图标</string>
+  <string name="feature_dashboard_search_placeholder">搜索</string>
   <string name="feature_dashboard_menu_sort_by_date">按日期排序</string>
   <string name="feature_dashboard_menu_sort_by_name">按名称排序</string>
   <string name="feature_dashboard_menu_support">反馈与帮助</string>
