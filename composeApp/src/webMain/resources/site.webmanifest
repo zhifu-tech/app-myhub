@@ -8,7 +8,7 @@
   "theme_color": "#0A7B83",
   "icons": [
     {
-      "src": "app-logo.svg",
+      "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
