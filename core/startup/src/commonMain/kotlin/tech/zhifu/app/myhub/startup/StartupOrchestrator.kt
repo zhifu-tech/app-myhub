@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
@@ -157,7 +158,7 @@ class StartupOrchestrator(
             runCatching {
                 task.run()
             }.onSuccess {
-                logger.info {
+                logger.debug {
                     "Startup task completed: ${task.id}, attempts=$attempt, elapsed=${startNanos.elapsedNow()}"
                 }
                 return

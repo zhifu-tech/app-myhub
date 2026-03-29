@@ -112,6 +112,7 @@ class DashboardViewModel(
                 .first()
                 .map { it.toDashboardContentCard() }
         }.onSuccess { cards ->
+            logger.debug { "刷新成功，刷新UI ${cards.size}" }
             val user = userFlow.value ?: return@intent
             val prefs = prefsFlow.value ?: return@intent
             reduce {

@@ -163,17 +163,11 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
         }
 
-        wasmJsMain.dependencies {
+        webMain.dependencies {
             implementation(devNpm("copy-webpack-plugin", "9.1.0"))
             implementation(npm("sql.js", "1.12.0"))
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
         }
-
-//        jsMain.dependencies {
-//            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
-//            implementation(npm("sql.js", "1.12.0"))
-//            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-//        }
     }
 }
 

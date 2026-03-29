@@ -3,6 +3,8 @@ package tech.zhifu.app.myhub.datastore.repository.card
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.card.LocalCardDataSource
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 
 internal fun createCardStoreSourceOfTruth(
     localCardDataSource: LocalCardDataSource,
@@ -35,6 +37,7 @@ internal fun createCardStoreSourceOfTruth(
                         limit = key.size,
                     )
                     .map { items ->
+                        logger.debug { "flowCards: $items" }
                         if (items.isEmpty()) null
                         else CardStoreData.Collection.fromCards(items, key.userId)
                     }

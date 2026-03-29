@@ -14,6 +14,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.location
 import tech.zhifu.app.myhub.datastore.model.domain.source
 import tech.zhifu.app.myhub.datastore.model.domain.tags
 import tech.zhifu.app.myhub.datastore.model.domain.ui
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 
@@ -82,6 +83,7 @@ class LocalCardDataSourceImpl(
         val query = when {
             orderByUpdated -> {
                 val hasCursor = cursorCardId != null && cursorUpdatedAt != null
+                logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
                 if (hasCursor) {
                     database.cardQueries.selectCardsByUserIdWithUpdatedDescNext(
                         userId = userId,
@@ -90,6 +92,7 @@ class LocalCardDataSourceImpl(
                         limit = limit.toLong()
                     )
                 } else {
+                    logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
                     database.cardQueries.selectCardsByUserIdWithUpdatedDescFirst(
                         userId = userId,
                         limit = limit.toLong()
@@ -98,6 +101,7 @@ class LocalCardDataSourceImpl(
             }
 
             orderByTitle -> {
+                logger.debug { "orderByTitle hasCursor=$cursorCardId, cursorTitle=$cursorTitle" }
                 val hasCursor = cursorCardId != null && cursorTitle != null
                 if (hasCursor) {
                     database.cardQueries.selectCardsByUserIdWithTitleDescNext(

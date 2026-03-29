@@ -10,11 +10,6 @@ interface LocalCardDataSource {
         card: Card
     )
 
-//    suspend fun insertCards(
-//        userId: String,
-//        cards: List<Card>
-//    )
-
     fun flowCard(
         cardId: String,
     ): Flow<Card?>

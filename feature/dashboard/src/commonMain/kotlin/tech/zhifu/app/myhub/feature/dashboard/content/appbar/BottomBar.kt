@@ -50,7 +50,8 @@ fun BottomBarContent(
     fab: @Composable (Modifier) -> Unit,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .imePadding()
             .padding(32.dp), // 保持 SearchBar 与键盘间距
         verticalAlignment = Alignment.CenterVertically,
@@ -60,5 +61,3 @@ fun BottomBarContent(
         fab(Modifier)
     }
 }
-
-

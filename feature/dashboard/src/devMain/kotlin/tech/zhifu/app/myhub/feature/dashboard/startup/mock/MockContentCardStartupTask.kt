@@ -49,6 +49,7 @@ internal class MockContentCardStartupTask(
             logger.debug { "MockContentCardStartupTask: skip as cards already exists" }
             return
         }
+        logger.debug { "MockContentCardStartupTask: not skip" }
 
         mockContentCards()
             .map {
