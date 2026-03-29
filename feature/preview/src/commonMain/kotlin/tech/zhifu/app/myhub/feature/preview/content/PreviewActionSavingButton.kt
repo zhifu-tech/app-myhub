@@ -26,7 +26,7 @@ import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_fai
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_permission_denied
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_success
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_unsupported
-import tech.zhifu.app.myhub.ui.LocalSnabackbarState
+import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
@@ -35,7 +35,7 @@ internal fun PreviewActionSavingButton(
     shareContentWidth: Dp,
     snapshotController: PreviewSnapshotController? = null,
     modifier: Modifier = Modifier,
-    snackbarHostState: SnackbarHostState = LocalSnabackbarState.current,
+    snackbarHostState: SnackbarHostState = LocalSnackbarState.current,
 ) {
     val isSavingSupported = rememberImageSavingSupported()
     if (!isSavingSupported) {

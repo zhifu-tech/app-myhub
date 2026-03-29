@@ -161,7 +161,6 @@ include(":core:logger")
 include(":core:cache")
 include(":core:app-build-config")
 include(":core:platform")
-include(":core:platform-compose")
 include(":core:navigation")
 include(":core:settings")
 include(":core:startup")
@@ -215,6 +214,7 @@ include(":component:media")
 // ============================================================================
 // UI 模型模块
 // ============================================================================
+include(":ui:design")
 include(":ui:model")
 
 // ============================================================================

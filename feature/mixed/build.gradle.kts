@@ -24,8 +24,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.navigation)
-            implementation(projects.core.platformCompose)
             implementation(projects.feature.mixedApi)
+            implementation(projects.ui.design)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

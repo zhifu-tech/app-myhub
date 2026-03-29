@@ -5,7 +5,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import tech.zhifu.app.myhub.ui.LocalSharedTransitionScope
+import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
 
 @Composable
 fun Modifier.sharedBounds(

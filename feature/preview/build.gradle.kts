@@ -25,7 +25,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
-            implementation(projects.core.platformCompose)
+            implementation(projects.ui.design)
             implementation(projects.core.saving)
             implementation(projects.core.sharing)
             implementation(projects.ui.model)

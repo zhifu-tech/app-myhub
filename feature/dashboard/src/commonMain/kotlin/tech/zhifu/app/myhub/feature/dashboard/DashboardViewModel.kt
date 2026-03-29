@@ -24,8 +24,8 @@ import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
 import tech.zhifu.app.myhub.ui.model.toDashboardContentCard
-import tech.zhifu.app.myhub.util.ViewModelContainerHost
 
 class DashboardViewModel(
     val logger: Logger = logger("Dashboard"),

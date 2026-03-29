@@ -16,8 +16,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.platformCompose)
             implementation(projects.core.logger)
+            implementation(projects.ui.design)
 
             implementation(libs.coil.compose)
             implementation(libs.compose.multiplatform.media.player)

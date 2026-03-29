@@ -38,7 +38,7 @@ import platform.UIKit.UIWindowLevelNormal
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.design.theme.AppTheme
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import kotlin.math.abs
 

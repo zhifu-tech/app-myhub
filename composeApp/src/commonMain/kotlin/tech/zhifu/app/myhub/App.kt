@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub
 
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
@@ -9,7 +8,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
@@ -26,11 +24,11 @@ import tech.zhifu.app.myhub.navigation.navKeySerializerModule
 import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
 import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.navigation.toEntries
-import tech.zhifu.app.myhub.theme.AppTheme
-import tech.zhifu.app.myhub.ui.LocalSharedTransitionScope
-import tech.zhifu.app.myhub.ui.LocalSnabackbarState
-import tech.zhifu.app.myhub.ui.LocalWindowSizeClass
-import tech.zhifu.app.myhub.ui.rememberWindowSizeClass
+import tech.zhifu.app.myhub.ui.design.theme.AppTheme
+import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
+import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
+import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
+import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
 
 @Composable
 fun App(
@@ -55,14 +53,18 @@ internal fun AppContent() {
         appKeys = navAppKeySet(),
         navKeysSerializerModule = navKeySerializerModule(),
     )
-    val navigator = AppNavigator(navigationState)
-    val entries = navigationState.toEntries(entryProvider = navigator.navEntryProvider())
+    val navigator = remember(navigationState) {
+        AppNavigator(navigationState)
+    }
+    val entries = navigationState.toEntries(
+        entryProvider = navigator.navEntryProvider()
+    )
     val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
     val snackbarHostState = remember { SnackbarHostState() }
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
-            LocalSnabackbarState provides snackbarHostState,
+            LocalSnackbarState provides snackbarHostState,
         ) {
             NavDisplay(
                 entries = entries,
@@ -71,13 +73,11 @@ internal fun AppContent() {
                 sharedTransitionScope = this@SharedTransitionLayout
             )
         }
-        Box(modifier = Modifier.fillMaxSize()) {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
-            )
-        }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 32.dp),
+        )
     }
 }

@@ -26,11 +26,11 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platform)
-            implementation(projects.core.platformCompose)
             implementation(projects.core.settings)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.settingsApi)
+            implementation(projects.ui.design)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

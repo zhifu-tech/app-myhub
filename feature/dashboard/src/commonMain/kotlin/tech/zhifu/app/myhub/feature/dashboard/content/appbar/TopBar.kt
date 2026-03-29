@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.platform.resources.app_logo
-import tech.zhifu.app.myhub.platform.resources.app_name
-import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
+import tech.zhifu.app.myhub.ui.design.resources.app_logo
+import tech.zhifu.app.myhub.ui.design.resources.app_name
+import tech.zhifu.app.myhub.ui.design.resources.Res as PlatformRes
 
 @Composable
 internal fun TopBar(

@@ -18,9 +18,9 @@ import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectShowSnack
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
 import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.ui.LocalSnabackbarState
+import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
+import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
 import tech.zhifu.app.myhub.ui.model.ContentCard
-import tech.zhifu.app.myhub.util.tapToClearFocus
 
 @Composable
 fun Content(
@@ -29,7 +29,7 @@ fun Content(
     paddingValues: PaddingValues,
     previewState: PreviewState,
 ) {
-    val snackbarState = LocalSnabackbarState.current
+    val snackbarState = LocalSnackbarState.current
     viewModel.collectSideEffectShowSnack {
         viewModel.viewModelScope.launch {
             snackbarState.showSnackbar(it.message)

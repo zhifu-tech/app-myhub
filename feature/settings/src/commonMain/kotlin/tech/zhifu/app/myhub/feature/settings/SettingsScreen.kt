@@ -14,8 +14,8 @@ import tech.zhifu.app.myhub.component.LoadingWheel
 import tech.zhifu.app.myhub.feature.settings.content.ContentRoute
 import tech.zhifu.app.myhub.feature.settings.content.ErrorRoute
 import tech.zhifu.app.myhub.navigation.AppNavigator
-import tech.zhifu.app.myhub.platform.resources.settings
-import tech.zhifu.app.myhub.platform.resources.Res as PlatformRes
+import tech.zhifu.app.myhub.ui.design.resources.settings
+import tech.zhifu.app.myhub.ui.design.resources.Res as PlatformRes
 
 @Composable
 fun SettingsRoute(

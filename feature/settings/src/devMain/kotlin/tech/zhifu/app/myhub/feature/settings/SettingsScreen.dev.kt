@@ -10,8 +10,8 @@ import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingSta
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItem
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingState
 import tech.zhifu.app.myhub.language.Language
-import tech.zhifu.app.myhub.theme.AppTheme
-import tech.zhifu.app.myhub.ui.PreviewPhoneLightDark
+import tech.zhifu.app.myhub.ui.design.theme.AppTheme
+import tech.zhifu.app.myhub.ui.design.PreviewPhoneLightDark
 
 @PreviewPhoneLightDark
 @Composable

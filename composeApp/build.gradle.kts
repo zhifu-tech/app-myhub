@@ -115,7 +115,6 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platform)
-            implementation(projects.core.platformCompose)
             implementation(projects.core.startup)
             implementation(projects.datastore.model)
             implementation(projects.datastore.bootstrap)
@@ -125,6 +124,7 @@ kotlin {
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.mixed)
             implementation(projects.feature.mixedApi)
+            implementation(projects.ui.design)
 
             implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
             implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)

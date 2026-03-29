@@ -21,7 +21,7 @@ import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
 import tech.zhifu.app.myhub.component.media.component.MediaThumbnail
-import tech.zhifu.app.myhub.theme.AppTheme
+import tech.zhifu.app.myhub.ui.design.theme.AppTheme
 
 private object PreviewMediaPreviewer : MediaPreviewer {
     override fun openInSystemPlayer(item: MediaItem): Boolean = false

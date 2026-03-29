@@ -27,7 +27,7 @@ import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentEmptyState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.resetSearchState
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.util.rememberKeyboardOpenState
+import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
 
 @Composable
 fun Fab(
