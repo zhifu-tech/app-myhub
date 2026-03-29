@@ -156,6 +156,8 @@ private fun DashboardContent(
         DashboardUiState.State.CONTENT -> {
             content(contentPadding, Modifier.hazeSource(state = hazeState), previewState)
         }
+
+        else -> {}
     }
 }
 

@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.dashboard.viewmodel
 
 import androidx.compose.runtime.Composable
+import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
@@ -17,4 +18,13 @@ fun DashboardViewModel.collectContentCountThreshold(
     val size = (state as? DashboardUiState.Content)
         ?.items?.size ?: 0
     size >= threshold
+}
+
+@Composable
+fun DashboardViewModel.collectSideEffectShowSnack(
+    block: (DashboardSideEffect.ShowSnack) -> Unit
+) = collectSharedSideEffect {
+    (it as? DashboardSideEffect.ShowSnack)?.let { effect ->
+        block(effect)
+    }
 }

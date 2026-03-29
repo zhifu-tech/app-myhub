@@ -9,12 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectShowSnack
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
 import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.ui.LocalSnabackbarState
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.util.tapToClearFocus
 
@@ -25,6 +29,13 @@ fun Content(
     paddingValues: PaddingValues,
     previewState: PreviewState,
 ) {
+    val snackbarState = LocalSnabackbarState.current
+    viewModel.collectSideEffectShowSnack {
+        viewModel.viewModelScope.launch {
+            snackbarState.showSnackbar(it.message)
+        }
+    }
+
     val items = viewModel.collectFieldAsState {
         (it as? DashboardUiState.Content)?.items
     }.value ?: emptyList()

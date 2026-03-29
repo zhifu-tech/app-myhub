@@ -39,7 +39,7 @@ fun Error(
                     )
                 },
                 onClick = {
-                    viewModel.retry()
+                    viewModel.refresh()
                 }
             )
         },

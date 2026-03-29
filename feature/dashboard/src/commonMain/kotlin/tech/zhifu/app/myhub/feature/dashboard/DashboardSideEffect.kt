@@ -7,4 +7,6 @@ sealed class DashboardSideEffect {
     object NavigateToOpenSourceLicenses : DashboardSideEffect()
 
     object NavigateToSupport : DashboardSideEffect()
+
+    data class ShowSnack(val message: String) : DashboardSideEffect()
 }

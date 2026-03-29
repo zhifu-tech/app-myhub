@@ -1,19 +1,18 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
@@ -25,7 +24,6 @@ import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.model.toDashboardContentCard
 import tech.zhifu.app.myhub.util.ViewModelContainerHost
 
@@ -36,32 +34,11 @@ class DashboardViewModel(
     internal val cardRepository: CardRepository,
 ) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>() {
 
-    fun retry() {
-        actionFlow.tryEmit(Action.Refresh)
-    }
-
-    fun loadMore() {
-        actionFlow.tryEmit(Action.LoadMore)
-    }
-
     override val container = container<DashboardUiState, DashboardSideEffect>(
-        initialState = DashboardUiState.Loading("资源加载中...")
+        initialState = DashboardUiState.Idle,
     ) {
-        // 启动 Flow -> container 映射
         observeUiStateFlow()
-        // 首次刷新
-        actionFlow.tryEmit(Action.Refresh)
     }
-
-    private fun observeUiStateFlow() = intent {
-        uiStateFlow.collect { newState ->
-            reduce { newState }
-        }
-    }
-
-    private val actionFlow = MutableSharedFlow<Action>(
-        extraBufferCapacity = 64
-    )
 
     private val userFlow: StateFlow<User?> =
         userRepository
@@ -98,143 +75,191 @@ class DashboardViewModel(
                 initialValue = null
             )
 
-    private val internalStateFlow: StateFlow<InternalState> =
-        merge(
-            actionFlow,
-            prefsFlow
-                .filterNotNull()
-                .distinctUntilChangedBy { prefs ->
-                    Triple(prefs.userId, prefs.sortAsName, prefs.sortAsDate)
-                }
-                .map { Action.Refresh }
-        )
-            .flatMapLatest { action ->
-                flow {
-                    emit(Mutation.Loading(action))
-
-                    val user = userFlow.value ?: return@flow
-                    val prefs = prefsFlow.value ?: return@flow
-                    val currentItems = latestInternalState.value.items
-                    val isRefresh = action is Action.Refresh
-                    val cursor = if (isRefresh) null else currentItems.lastOrNull()
-                    val pageSize = 20
-
-                    cardRepository
-                        .flowCards(
-                            userId = user.id,
-                            cursorCardId = cursor?.id,
-                            cursorTitle = cursor?.title,
-                            cursorUpdatedAt = cursor?.updatedAt,
-                            orderByUpdated = prefs.sortAsDate,
-                            orderByTitle = prefs.sortAsName,
-                            limit = pageSize
-                        )
-                        .map { list -> list.map { it.toDashboardContentCard() } }
-                        .collect { cards ->
-                            emit(
-                                value = Mutation.Success(
-                                    action = action,
-                                    items = cards,
-                                    pageSize = pageSize
-                                )
-                            )
-                        }
-                }.catch { e ->
-                    emit(Mutation.Error(action, e))
-                }
+    fun refresh() = intent {
+        run {
+            val currentState = state as? DashboardUiState.Loading
+            if (currentState != null) {
+                logger.debug { "正在刷新，忽略本次刷新请求" }
+                return@intent
             }
-            .scan(initial = InternalState()) { state, mutation ->
-                when (mutation) {
-
-                    is Mutation.Loading -> {
-                        state.copy(
-                            isLoading = true,
-                            error = null
-                        )
-                    }
-
-                    is Mutation.Success -> {
-                        val isRefresh = mutation.action is Action.Refresh
-                        state.copy(
-                            isLoading = false,
-                            items = if (isRefresh) mutation.items else state.items + mutation.items,
-                            hasMore = mutation.items.size >= mutation.pageSize,
-                            error = null
-                        )
-                    }
-
-                    is Mutation.Error -> {
-                        state.copy(
-                            isLoading = false,
-                            error = mutation.error
-                        )
-                    }
-                }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-                initialValue = InternalState()
-            )
-
-    private val latestInternalState: StateFlow<InternalState> = internalStateFlow
-
-    private val uiStateFlow: StateFlow<DashboardUiState> =
-        combine(
-            internalStateFlow,
-            userFlow.filterNotNull(),
-            prefsFlow.filterNotNull()
-        ) { state, user, prefs ->
-            when {
-                state.isLoading && state.items.isEmpty() -> {
-                    DashboardUiState.Loading("加载中...")
-                }
-
-                state.error != null && state.items.isEmpty() -> {
-                    DashboardUiState.Error(state.error.message ?: "加载失败")
+        }
+        reduce {
+            when (state) {
+                is DashboardUiState.Content -> {
+                    logger.debug { "刷新发生在内容态，不清空UI" }
+                    state
                 }
 
                 else -> {
-                    DashboardUiState.Content(
-                        user = user,
-                        userPreferences = prefs,
-                        items = state.items
-                    )
+                    logger.debug { "刷新发生在非内容态，清空UI" }
+                    DashboardUiState.Loading
                 }
             }
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = DashboardUiState.Loading("初始化中...")
-            )
-}
+        runCatching {
+            val user = userFlow.value ?: return@intent
+            val prefs = prefsFlow.value ?: return@intent
+            cardRepository
+                .flowCards(
+                    userId = user.id,
+                    cursorCardId = null,
+                    cursorTitle = null,
+                    cursorUpdatedAt = null,
+                    orderByUpdated = prefs.sortAsDate,
+                    orderByTitle = prefs.sortAsName,
+                    limit = DashboardUiState.Content.PAGE_SIZE,
+                )
+                .first()
+                .map { it.toDashboardContentCard() }
+        }.onSuccess { cards ->
+            val user = userFlow.value ?: return@intent
+            val prefs = prefsFlow.value ?: return@intent
+            reduce {
+                DashboardUiState.Content(
+                    user = user,
+                    userPreferences = prefs,
+                    items = cards,
+                    hasMore = cards.size == DashboardUiState.Content.PAGE_SIZE,
+                    isLoadingMore = false
+                )
+            }
+        }.onFailure { e ->
+            handleError(e, "刷新失败，请稍后重试")
+        }
+    }
 
-private data class InternalState(
-    val items: List<ContentCard> = emptyList(),
-    val hasMore: Boolean = true,
-    val isLoading: Boolean = false,
-    val error: Throwable? = null,
-)
+    fun loadMore() = intent {
+        run {
+            val currentState = state as? DashboardUiState.Content
+            if (currentState == null) {
+                logger.debug { "非内容状态，忽略本次加载更多请求" }
+                return@intent
+            }
+            if (currentState.isLoadingMore) {
+                logger.debug { "正在加载更多，忽略本次加载更多请求" }
+                return@intent
+            }
+            if (!currentState.hasMore) {
+                logger.debug { "没有更多了，忽略本次加载更多请求" }
+                return@intent
+            }
+        }
+        reduce {
+            when (val currentState = state) {
+                is DashboardUiState.Content -> {
+                    currentState.copy(isLoadingMore = true)
+                }
 
-sealed interface Action {
-    object Refresh : Action
-    object LoadMore : Action
-}
+                else -> state
+            }
+        }
+        runCatching {
+            val user = userFlow.value ?: return@intent
+            val prefs = prefsFlow.value ?: return@intent
+            val cursor = (state as? DashboardUiState.Content)?.items?.lastOrNull()
+            cardRepository
+                .flowCards(
+                    userId = user.id,
+                    cursorCardId = cursor?.id,
+                    cursorTitle = cursor?.title,
+                    cursorUpdatedAt = cursor?.updatedAt,
+                    orderByUpdated = prefs.sortAsDate,
+                    orderByTitle = prefs.sortAsName,
+                    limit = DashboardUiState.Content.PAGE_SIZE
+                )
+                .first()
+                .map { it.toDashboardContentCard() }
 
-private sealed interface Mutation {
-    data class Loading(
-        val action: Action
-    ) : Mutation
+        }.onSuccess { cards ->
+            reduce {
+                when (val currentState = state) {
+                    is DashboardUiState.Content -> {
+                        currentState.copy(
+                            items = currentState.items + cards,
+                            hasMore = cards.size == DashboardUiState.Content.PAGE_SIZE,
+                            isLoadingMore = false,
+                        )
+                    }
 
-    data class Success(
-        val action: Action,
-        val items: List<ContentCard>,
-        val pageSize: Int
-    ) : Mutation
+                    else -> run {
+                        logger.debug { "非内容状态，忽略本次加载更多请求" }
+                        state
+                    }
+                }
+            }
+        }.onFailure { e ->
+            handleError(e, "加载异常，请稍后重试")
+        }
+    }
 
-    data class Error(
-        val action: Action,
-        val error: Throwable
-    ) : Mutation
+    @OptIn(FlowPreview::class)
+    private fun observeUiStateFlow() = intent {
+        userFlow
+            .filterNotNull()
+            .onEach { user ->
+                reduce {
+                    when (val currentState = state) {
+                        is DashboardUiState.Content -> {
+                            currentState.copy(user = user)
+                        }
+
+                        else -> run {
+                            logger.debug { "非内容状态，忽略本次用户更新请求" }
+                            return@reduce state
+                        }
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+
+        prefsFlow
+            .filterNotNull()
+            .distinctUntilChangedBy { prefs ->
+                listOf(prefs.layoutAsList, prefs.userId, prefs.sortAsName, prefs.sortAsDate)
+            }
+            // give the time to show the loading state
+            .debounce(timeoutMillis = 300)
+            .onEach { userPreferences ->
+                reduce {
+                    when (val currentState = state) {
+                        is DashboardUiState.Content -> {
+                            currentState.copy(userPreferences = userPreferences)
+                        }
+
+                        else -> run {
+                            logger.debug { "非内容状态，忽略本次用户偏好更新请求" }
+                            state
+                        }
+                    }
+                }
+            }
+            .onEach {
+                logger.debug { "更新用户偏好发生变化，刷新UI" }
+                refresh()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun handleError(
+        e: Throwable,
+        message: String
+    ) = intent {
+        logger.error(e) { message }
+        reduce {
+            when (val currentState = state) {
+                is DashboardUiState.Content -> {
+                    currentState.copy(
+                        errorMessage = message,
+                        isLoadingMore = false,
+                    )
+                }
+
+                else -> run {
+                    DashboardUiState.Error(message = message)
+                    state
+                }
+            }
+        }
+        postSideEffect(DashboardSideEffect.ShowSnack(message))
+    }
 }
