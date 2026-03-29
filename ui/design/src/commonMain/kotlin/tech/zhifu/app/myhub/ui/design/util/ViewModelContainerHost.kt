@@ -32,14 +32,6 @@ abstract class ViewModelContainerHost<STATE : Any, SIDE_EFFECT : Any>
         )
     }
 
-    inline fun <reified T : STATE> reduce(
-        crossinline reducer: T.() -> T
-    ) = intent {
-        (state as? T)?.let {
-            reduce { it.reducer() }
-        }
-    }
-
     @Composable
     fun <R> collectFieldAsState(
         lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
@@ -53,6 +45,7 @@ abstract class ViewModelContainerHost<STATE : Any, SIDE_EFFECT : Any>
         )
 
     @Composable
+    @Suppress("ComposableNaming")
     fun collectSharedSideEffect(
         lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
         sideEffect: (suspend (sideEffect: SIDE_EFFECT) -> Unit)

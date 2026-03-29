@@ -33,11 +33,10 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentCountThreshold
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSearchStateQuery
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectResetSearch
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateSearchStateQuery
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentSearchQuery
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectResetSearch
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 
@@ -46,31 +45,28 @@ fun SearchBar(
     modifier: Modifier,
     viewModel: DashboardViewModel
 ) {
-    val showSearchEntrance by viewModel.collectContentCountThreshold(
-        SHOW_SEARCH_ENTRANCE_CONTENT_COUNT_THRESHOLD
-    )
-    if (showSearchEntrance.not()) {
-        return
-    }
-
-    val query = viewModel.collectSearchStateQuery().value.orEmpty()
-
-    logger.debug {
-        "SearchBarRoute is called $query"
-    }
-
+    // 1. 监听重置搜索事件
     val focusManager = LocalFocusManager.current
-    viewModel.collectSideEffectResetSearch { effect ->
+    viewModel.CollectSideEffectResetSearch { effect ->
         logger.debug { "SearchBarRoute collectSideEffect is  $effect" }
         focusManager.clearFocus()
     }
 
+    // 2. 监听内容为空，且搜索状态为false时，隐藏搜索框
+    val isContentEmpty by viewModel.collectContentAsEmpty()
+    if (isContentEmpty) {
+        val isSearching by viewModel.collectContentAsSearching()
+        if (isSearching.not()) {
+            logger.debug { "SearchBar hidden" }
+            return
+        }
+    }
+
+    // 3. 监听搜索内容变化
+    val query by viewModel.collectContentSearchQuery()
     SearchBarContent(
         query = query,
-        onQueryChange = { query ->
-            logger.debug { "SearchBarRoute updateSearchStateQuery  $query" }
-            viewModel.updateSearchStateQuery(query)
-        },
+        onQueryChange = viewModel::search,
         modifier = modifier,
     )
 }

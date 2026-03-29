@@ -10,13 +10,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_sort_by_date
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_sort_by_name
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldSortAsDate
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateUsePreferencesSortAsDate
 
 @Composable
@@ -24,9 +25,7 @@ fun MenuItemSort(
     viewModel: DashboardViewModel,
     onBeforeNavigate: () -> Unit,
 ) {
-    val sortAsDate = viewModel.collectUserPreferencesFieldState {
-        it.sortAsDate
-    }.value ?: true
+    val sortAsDate by viewModel.collectUserPreferencesFieldSortAsDate()
 
     MenuItemSortContent(
         sortAsDate = sortAsDate,

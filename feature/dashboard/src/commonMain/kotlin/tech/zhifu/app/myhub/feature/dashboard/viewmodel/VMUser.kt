@@ -3,17 +3,23 @@ package tech.zhifu.app.myhub.feature.dashboard.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
+
 @Composable
-fun <R> DashboardViewModel.collectUserPreferencesFieldState(
-    selector: (UserPreferences) -> R
-) = collectFieldAsState { uiState ->
-    (uiState as? DashboardUiState.Content)
-        ?.userPreferences?.let { selector(it) }
-}
+fun DashboardViewModel.collectUserPreferencesFieldLayoutAsList() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)
+            ?.userPreferences?.layoutAsList ?: true
+    }
+
+@Composable
+fun DashboardViewModel.collectUserPreferencesFieldSortAsDate() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)
+            ?.userPreferences?.sortAsDate ?: true
+    }
 
 fun DashboardViewModel.updateUsePreferencesLayoutAsList(
     layoutAsList: Boolean

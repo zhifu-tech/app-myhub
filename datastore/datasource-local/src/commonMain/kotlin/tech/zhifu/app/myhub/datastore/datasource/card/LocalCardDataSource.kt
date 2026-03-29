@@ -21,6 +21,7 @@ interface LocalCardDataSource {
         cursorUpdatedAt: Long? = null,
         orderByUpdated: Boolean = true,
         orderByTitle: Boolean = false,
+        query: String? = null,
         limit: Int
     ): Flow<List<Card>>
 

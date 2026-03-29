@@ -16,15 +16,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentEmptyState
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.resetSearchState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
@@ -34,12 +33,16 @@ fun Fab(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val isContentEmpty by viewModel.collectContentEmptyState()
+    val isContentEmpty by viewModel.collectContentAsEmpty()
+    val isSearching by viewModel.collectContentAsSearching()
     if (isContentEmpty) {
-        return
+        if (isSearching.not()) {
+            return
+        }
     }
     FabContent(
         modifier = modifier,
+        isSearching = isSearching,
         onClickAdd = {
             logger.debug {
                 "FabRoute onClickAdd is called"
@@ -49,7 +52,7 @@ fun Fab(
             logger.debug {
                 "FabRoute onClickClear is called"
             }
-            viewModel.resetSearchState()
+            viewModel.search(reset = true)
         }
     )
 }
@@ -59,15 +62,13 @@ fun FabContent(
     modifier: Modifier = Modifier,
     onClickAdd: () -> Unit,
     onClickClose: () -> Unit,
+    isSearching: Boolean,
 ) {
     val isKeyboardOpened by rememberKeyboardOpenState()
-
-    LaunchedEffect(isKeyboardOpened) {
-        logger.debug { "FABContent isKeyboardOpened= $isKeyboardOpened" }
-    }
+    val showAsClose = isKeyboardOpened || isSearching
 
     FloatingActionButton(
-        onClick = if (isKeyboardOpened) {
+        onClick = if (showAsClose) {
             onClickClose
         } else {
             onClickAdd
@@ -78,7 +79,7 @@ fun FabContent(
             .height(56.dp)
             .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = true)
     ) {
-        FabIcon(isClose = isKeyboardOpened)
+        FabIcon(isClose = showAsClose)
     }
 }
 

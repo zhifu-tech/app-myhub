@@ -32,6 +32,7 @@ internal fun createCardStoreSourceOfTruth(
                         cursorUpdatedAt = key.cursorUpdatedAt,
                         orderByTitle = key.orderByTitle,
                         orderByUpdated = key.orderByUpdated,
+                        query = key.query,
                         limit = key.size,
                     )
                     .map { items ->

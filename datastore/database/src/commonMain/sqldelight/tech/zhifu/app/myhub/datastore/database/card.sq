@@ -56,6 +56,40 @@ WHERE uc.user_id = :userId
 ORDER BY c.updated_at DESC, c.id DESC
 LIMIT :limit;
 
+selectCardsByUserIdWithUpdatedDescSearchFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithUpdatedDescSearchNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+  AND (c.updated_at < :cursorUpdatedAt
+       OR (c.updated_at = :cursorUpdatedAt AND c.id < :cursorId))
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
 selectCardsByUserIdWithTitleDescFirst:
 SELECT c.*
 FROM card c
@@ -69,6 +103,42 @@ SELECT c.*
 FROM card c
 JOIN user_card uc ON uc.card_id = c.id
 WHERE uc.user_id = :userId
+  AND (
+    c.title < :cursorTitle
+    OR (c.title = :cursorTitle AND c.id < :cursorId)
+  )
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescSearchFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescSearchNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
   AND (
     c.title < :cursorTitle
     OR (c.title = :cursorTitle AND c.id < :cursorId)

@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectSideEffectShowSnack
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectShowSnack
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldLayoutAsList
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
@@ -30,24 +33,23 @@ fun Content(
     previewState: PreviewState,
 ) {
     val snackbarState = LocalSnackbarState.current
-    viewModel.collectSideEffectShowSnack {
+    viewModel.CollectSideEffectShowSnack {
         viewModel.viewModelScope.launch {
             snackbarState.showSnackbar(it.message)
         }
     }
 
-    val items = viewModel.collectFieldAsState {
-        (it as? DashboardUiState.Content)?.items
-    }.value ?: emptyList()
-
-    if (items.isEmpty()) {
-        Empty(viewModel = viewModel, modifier = modifier)
-        return
+    val isContentEmpty by viewModel.collectContentAsEmpty()
+    if (isContentEmpty) {
+        val isSearching by viewModel.collectContentAsSearching()
+        if (isSearching.not()) {
+            Empty(viewModel = viewModel, modifier = modifier)
+            return
+        }
     }
 
-    val layoutAsList = viewModel.collectUserPreferencesFieldState {
-        it.layoutAsList
-    }.value ?: true
+    val items by viewModel.collectContentFieldItems()
+    val layoutAsList by viewModel.collectUserPreferencesFieldLayoutAsList()
 
     ContentContent(
         modifier = modifier,

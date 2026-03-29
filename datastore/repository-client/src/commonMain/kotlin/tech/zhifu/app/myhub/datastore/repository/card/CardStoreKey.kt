@@ -16,6 +16,7 @@ sealed interface CardStoreKey<out Id : Any> : StoreKey<Id> {
         val cursorTitle: String? = null,
         val orderByUpdated: Boolean = true,
         val orderByTitle: Boolean = false,
+        val query: String? = null,
         override val cursor: String? = null,
         override val size: Int = 20,
         @Deprecated("Do not use")

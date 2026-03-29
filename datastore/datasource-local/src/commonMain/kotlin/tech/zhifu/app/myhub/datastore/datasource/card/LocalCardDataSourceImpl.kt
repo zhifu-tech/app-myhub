@@ -78,43 +78,85 @@ class LocalCardDataSourceImpl(
         cursorUpdatedAt: Long?,
         orderByUpdated: Boolean,
         orderByTitle: Boolean,
+        query: String?,
         limit: Int
     ): Flow<List<Card>> {
+        val normalizedQuery = query
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.lowercase()
+
         val query = when {
             orderByUpdated -> {
                 val hasCursor = cursorCardId != null && cursorUpdatedAt != null
                 logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
-                if (hasCursor) {
-                    database.cardQueries.selectCardsByUserIdWithUpdatedDescNext(
-                        userId = userId,
-                        cursorUpdatedAt = cursorUpdatedAt,
-                        cursorId = cursorCardId,
-                        limit = limit.toLong()
-                    )
+                if (normalizedQuery != null) {
+                    if (hasCursor) {
+                        database.cardQueries.selectCardsByUserIdWithUpdatedDescSearchNext(
+                            userId = userId,
+                            query = normalizedQuery,
+                            cursorUpdatedAt = cursorUpdatedAt,
+                            cursorId = cursorCardId,
+                            limit = limit.toLong()
+                        )
+                    } else {
+                        database.cardQueries.selectCardsByUserIdWithUpdatedDescSearchFirst(
+                            userId = userId,
+                            query = normalizedQuery,
+                            limit = limit.toLong()
+                        )
+                    }
                 } else {
-                    logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
-                    database.cardQueries.selectCardsByUserIdWithUpdatedDescFirst(
-                        userId = userId,
-                        limit = limit.toLong()
-                    )
+                    if (hasCursor) {
+                        database.cardQueries.selectCardsByUserIdWithUpdatedDescNext(
+                            userId = userId,
+                            cursorUpdatedAt = cursorUpdatedAt,
+                            cursorId = cursorCardId,
+                            limit = limit.toLong()
+                        )
+                    } else {
+                        logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
+                        database.cardQueries.selectCardsByUserIdWithUpdatedDescFirst(
+                            userId = userId,
+                            limit = limit.toLong()
+                        )
+                    }
                 }
             }
 
             orderByTitle -> {
                 logger.debug { "orderByTitle hasCursor=$cursorCardId, cursorTitle=$cursorTitle" }
                 val hasCursor = cursorCardId != null && cursorTitle != null
-                if (hasCursor) {
-                    database.cardQueries.selectCardsByUserIdWithTitleDescNext(
-                        userId = userId,
-                        cursorTitle = cursorTitle,
-                        cursorId = cursorCardId,
-                        limit = limit.toLong()
-                    )
+                if (normalizedQuery != null) {
+                    if (hasCursor) {
+                        database.cardQueries.selectCardsByUserIdWithTitleDescSearchNext(
+                            userId = userId,
+                            query = normalizedQuery,
+                            cursorTitle = cursorTitle,
+                            cursorId = cursorCardId,
+                            limit = limit.toLong()
+                        )
+                    } else {
+                        database.cardQueries.selectCardsByUserIdWithTitleDescSearchFirst(
+                            userId = userId,
+                            query = normalizedQuery,
+                            limit = limit.toLong()
+                        )
+                    }
                 } else {
-                    database.cardQueries.selectCardsByUserIdWithTitleDescFirst(
-                        userId = userId,
-                        limit = limit.toLong()
-                    )
+                    if (hasCursor) {
+                        database.cardQueries.selectCardsByUserIdWithTitleDescNext(
+                            userId = userId,
+                            cursorTitle = cursorTitle,
+                            cursorId = cursorCardId,
+                            limit = limit.toLong()
+                        )
+                    } else {
+                        database.cardQueries.selectCardsByUserIdWithTitleDescFirst(
+                            userId = userId,
+                            limit = limit.toLong()
+                        )
+                    }
                 }
             }
 

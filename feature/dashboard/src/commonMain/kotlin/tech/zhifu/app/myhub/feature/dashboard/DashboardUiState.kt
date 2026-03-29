@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.feature.dashboard
 
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
-import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
 import tech.zhifu.app.myhub.ui.model.ContentCard
 
 sealed class DashboardUiState(
@@ -15,7 +14,7 @@ sealed class DashboardUiState(
     data class Content(
         val user: User,
         val userPreferences: UserPreferences,
-        val searchState: SearchState = SearchState(),
+        val searchQuery: String? = null,
         val items: List<ContentCard> = emptyList(),
         val hasMore: Boolean = false,
         val isLoadingMore: Boolean = false,

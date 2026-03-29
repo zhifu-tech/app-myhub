@@ -6,25 +6,46 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 
 @Composable
-fun DashboardViewModel.collectContentEmptyState() = collectFieldAsState {
-    (it as? DashboardUiState.Content)
-        ?.items?.isEmpty() ?: true
-}
+fun DashboardViewModel.collectContentAsEmpty() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)
+            ?.items?.isEmpty() ?: true
+    }
 
 @Composable
-fun DashboardViewModel.collectContentCountThreshold(
-    threshold: Int
-) = collectFieldAsState { state ->
-    val size = (state as? DashboardUiState.Content)
-        ?.items?.size ?: 0
-    size >= threshold
-}
+fun DashboardViewModel.collectContentFieldItems() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)
+            ?.items ?: emptyList()
+    }
 
 @Composable
-fun DashboardViewModel.collectSideEffectShowSnack(
+fun DashboardViewModel.collectContentAsSearching() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)?.searchQuery?.isNotEmpty()
+            ?: false
+    }
+
+@Composable
+fun DashboardViewModel.collectContentSearchQuery() =
+    collectFieldAsState {
+        (it as? DashboardUiState.Content)?.searchQuery.orEmpty()
+    }
+
+@Composable
+fun DashboardViewModel.CollectSideEffectShowSnack(
     block: (DashboardSideEffect.ShowSnack) -> Unit
 ) = collectSharedSideEffect {
     (it as? DashboardSideEffect.ShowSnack)?.let { effect ->
+        block(effect)
+    }
+}
+
+@Composable
+fun DashboardViewModel.CollectSideEffectResetSearch(
+    block: (DashboardSideEffect.ResetSearch) -> Unit
+) = collectSharedSideEffect {
+    (it as? DashboardSideEffect.ResetSearch)?.let { effect ->
         block(effect)
     }
 }

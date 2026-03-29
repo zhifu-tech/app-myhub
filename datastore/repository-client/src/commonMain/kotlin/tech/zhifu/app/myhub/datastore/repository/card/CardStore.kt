@@ -35,6 +35,7 @@ fun CardStore.storeStreamCards(
     cursorUpdatedAt: Long?,
     orderByUpdated: Boolean,
     orderByTitle: Boolean,
+    query: String?,
     limit: Int
 ): Flow<StoreReadResponse<CardStoreData>> =
     stream<StoreReadResponse<CardStoreData>>(
@@ -46,6 +47,7 @@ fun CardStore.storeStreamCards(
                 cursorUpdatedAt = cursorUpdatedAt,
                 orderByUpdated = orderByUpdated,
                 orderByTitle = orderByTitle,
+                query = query,
                 size = limit,
             ),
         )

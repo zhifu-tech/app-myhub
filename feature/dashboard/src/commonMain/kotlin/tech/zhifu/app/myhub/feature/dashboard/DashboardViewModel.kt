@@ -2,10 +2,12 @@ package tech.zhifu.app.myhub.feature.dashboard
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -39,6 +41,8 @@ class DashboardViewModel(
     ) {
         observeUiStateFlow()
     }
+
+    private val searchQueryFlow = MutableStateFlow("")
 
     private val userFlow: StateFlow<User?> =
         userRepository
@@ -99,6 +103,7 @@ class DashboardViewModel(
         runCatching {
             val user = userFlow.value ?: return@intent
             val prefs = prefsFlow.value ?: return@intent
+            val query = searchQueryFlow.value
             cardRepository
                 .flowCards(
                     userId = user.id,
@@ -107,22 +112,38 @@ class DashboardViewModel(
                     cursorUpdatedAt = null,
                     orderByUpdated = prefs.sortAsDate,
                     orderByTitle = prefs.sortAsName,
+                    query = query,
                     limit = DashboardUiState.Content.PAGE_SIZE,
                 )
                 .first()
                 .map { it.toDashboardContentCard() }
         }.onSuccess { cards ->
             logger.debug { "刷新成功，刷新UI ${cards.size}" }
-            val user = userFlow.value ?: return@intent
-            val prefs = prefsFlow.value ?: return@intent
             reduce {
-                DashboardUiState.Content(
-                    user = user,
-                    userPreferences = prefs,
-                    items = cards,
-                    hasMore = cards.size == DashboardUiState.Content.PAGE_SIZE,
-                    isLoadingMore = false
-                )
+                when (val currentState = state) {
+                    is DashboardUiState.Content -> {
+                        currentState.copy(
+                            items = cards,
+                            hasMore = cards.size == DashboardUiState.Content.PAGE_SIZE,
+                            isLoadingMore = false,
+                        )
+                    }
+
+                    else -> {
+                        val user = userFlow.value ?: return@reduce state
+                        val prefs = prefsFlow.value ?: return@reduce state
+                        val searchQuery = searchQueryFlow.value
+                        DashboardUiState.Content(
+                            user = user,
+                            userPreferences = prefs,
+                            searchQuery = searchQuery,
+                            items = cards,
+                            hasMore = cards.size == DashboardUiState.Content.PAGE_SIZE,
+                            isLoadingMore = false
+                        )
+
+                    }
+                }
             }
         }.onFailure { e ->
             handleError(e, "刷新失败，请稍后重试")
@@ -157,7 +178,9 @@ class DashboardViewModel(
         runCatching {
             val user = userFlow.value ?: return@intent
             val prefs = prefsFlow.value ?: return@intent
-            val cursor = (state as? DashboardUiState.Content)?.items?.lastOrNull()
+            val currentState = state as? DashboardUiState.Content
+            val cursor = currentState?.items?.lastOrNull()
+            val query = searchQueryFlow.value
             cardRepository
                 .flowCards(
                     userId = user.id,
@@ -166,6 +189,7 @@ class DashboardViewModel(
                     cursorUpdatedAt = cursor?.updatedAt,
                     orderByUpdated = prefs.sortAsDate,
                     orderByTitle = prefs.sortAsName,
+                    query = query,
                     limit = DashboardUiState.Content.PAGE_SIZE
                 )
                 .first()
@@ -190,6 +214,15 @@ class DashboardViewModel(
             }
         }.onFailure { e ->
             handleError(e, "加载异常，请稍后重试")
+        }
+    }
+
+    fun search(query: String = "", reset: Boolean = false) {
+        searchQueryFlow.value = query
+        if (reset) {
+            intent {
+                postSideEffect(DashboardSideEffect.ResetSearch)
+            }
         }
     }
 
@@ -236,6 +269,29 @@ class DashboardViewModel(
             }
             .onEach {
                 logger.debug { "更新用户偏好发生变化，刷新UI" }
+                refresh()
+            }
+            .launchIn(viewModelScope)
+
+        searchQueryFlow
+            .onEach { searchQuery ->
+                reduce {
+                    when (val currentState = state) {
+                        is DashboardUiState.Content -> {
+                            currentState.copy(searchQuery = searchQuery)
+                        }
+
+                        else -> run {
+                            logger.debug { "非内容状态，忽略本次搜索关键词更新请求" }
+                            state
+                        }
+                    }
+                }
+            }
+            .debounce(timeoutMillis = 300)
+            .distinctUntilChanged()
+            .onEach {
+                logger.debug { "搜索关键词发生变化，刷新UI" }
                 refresh()
             }
             .launchIn(viewModelScope)

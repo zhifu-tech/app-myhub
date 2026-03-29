@@ -64,6 +64,7 @@ class CardRepositoryImpl(
         cursorUpdatedAt: Long?,
         orderByUpdated: Boolean,
         orderByTitle: Boolean,
+        query: String?,
         limit: Int
     ): Flow<List<Card>> =
         store
@@ -74,6 +75,7 @@ class CardRepositoryImpl(
                 cursorUpdatedAt = cursorUpdatedAt,
                 orderByUpdated = orderByUpdated,
                 orderByTitle = orderByTitle,
+                query = query,
                 limit = limit,
             )
             .map { it.dataOrNull()?.cards ?: emptyList() }

@@ -26,5 +26,5 @@ internal fun createCardStoreBookkeeper(
 private fun CardStoreKey<String>.toBookkeeperKey(): String =
     when (this) {
         is CardStoreKey.ById -> "card:$id"
-        is CardStoreKey.ByUserCursor -> "cards:$userId:$cursor:$size"
+        is CardStoreKey.ByUserCursor -> "cards:$userId:$cursor:$size:$orderByUpdated:$orderByTitle:${query.orEmpty()}"
     }
