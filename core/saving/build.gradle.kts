@@ -24,5 +24,9 @@ kotlin {
             implementation(libs.androidx.activity.activityCompose)
             implementation(libs.androidx.core.ktx)
         }
+
+        webMain.dependencies {
+            implementation(libs.jb.compose.ui.ui)
+        }
     }
 }
