@@ -52,19 +52,19 @@
 
 ## 3.1 字段映射表（`Card/CardUi -> ContentItem`）
 
-| ContentItem 字段     | 来源                       | 规则                                |
-|--------------------|--------------------------|-----------------------------------|
-| `id`               | `card.id`                | 直接映射                              |
-| `title`            | `card.title`             | 直接映射                              |
-| `summary`          | `card.summary`           | 直接映射                              |
-| `location`         | `card.location?.name`    | 无则空字符串                            |
-| `updatedTimeMs`    | `card.updatedAt`         | `toEpochMilliseconds()`           |
-| `tags`             | `card.tags`              | 直接映射                              |
-| `cover.url`        | `card.ui.cover.imageUrl` |                      |
-| `cover.icon`       | `card.ui.cover.iconKey`  | 通过 `iconKey -> ImageVector` 注册表转换 |
-| `cover.background` | `card.ui.cover.bgColor`  | `#RRGGBB` -> `Color`              |
-| `cover.tint`       | `card.ui.cover.tintColor`| 同上                                |
-| `action.*`         | UI 规则层                   | 基于 `status/type` 生成默认动作           |
+| ContentItem 字段     | 来源                        | 规则                                |
+|--------------------|---------------------------|-----------------------------------|
+| `id`               | `card.id`                 | 直接映射                              |
+| `title`            | `card.title`              | 直接映射                              |
+| `summary`          | `card.summary`            | 直接映射                              |
+| `location`         | `card.location?.name`     | 无则空字符串                            |
+| `updatedTimeMs`    | `card.updatedAt`          | `toEpochMilliseconds()`           |
+| `tags`             | `card.tags`               | 直接映射                              |
+| `cover.url`        | `card.ui.cover.imageUrl`  |                                   |
+| `cover.icon`       | `card.ui.cover.iconKey`   | 通过 `iconKey -> ImageVector` 注册表转换 |
+| `cover.background` | `card.ui.cover.bgColor`   | `#RRGGBB` -> `Color`              |
+| `cover.tint`       | `card.ui.cover.tintColor` | 同上                                |
+| `action.*`         | UI 规则层                    | 基于 `status/type` 生成默认动作           |
 
 ## 3.2 关键约束
 
