@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
@@ -47,6 +48,7 @@ fun Fab(
             logger.debug {
                 "FabRoute onClickAdd is called"
             }
+            viewModel.navigateToAiCapture()
         },
         onClickClose = {
             logger.debug {

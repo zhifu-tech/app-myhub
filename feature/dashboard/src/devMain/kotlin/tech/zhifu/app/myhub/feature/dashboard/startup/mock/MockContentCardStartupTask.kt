@@ -79,7 +79,7 @@ fun ContentCard.toSeedCard(now: Instant): Card {
         title = title,
         summary = summary,
         version = 1,
-        deleted = false,
+        deletedAt = false,
         createdAt = now,
         updatedAt = Instant.fromEpochMilliseconds(updatedAt),
         locationRaw = """{"name":"${escapeJson(location)}","latitude":0.0,"longitude":0.0}""",

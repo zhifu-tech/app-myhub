@@ -222,6 +222,8 @@ include(":ui:model")
 // ============================================================================
 include(":feature:dashboard-api")
 include(":feature:dashboard")
+include(":feature:ai-api")
+include(":feature:ai")
 include(":feature:mixed-api")
 include(":feature:mixed")
 include(":feature:preview")

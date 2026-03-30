@@ -10,3 +10,7 @@ fun DashboardViewModel.navigateToOpenSourceLicenses() = intent {
 fun DashboardViewModel.navigateToSupport() = intent {
     postSideEffect(DashboardSideEffect.NavigateToSupport)
 }
+
+fun DashboardViewModel.navigateToAiCapture() = intent {
+    postSideEffect(DashboardSideEffect.NavigateToAiCapture)
+}

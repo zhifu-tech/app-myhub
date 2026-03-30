@@ -5,6 +5,7 @@ import org.koin.core.context.startKoin
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.datastore.bootstrap.di.bootstrapModule
 import tech.zhifu.app.myhub.datastore.repository.di.repositoryModule
+import tech.zhifu.app.myhub.feature.ai.di.aiModule
 import tech.zhifu.app.myhub.feature.dashboard.di.dashboardModule
 import tech.zhifu.app.myhub.logger.LoggerConfig
 import tech.zhifu.app.myhub.logger.di.loggerModule
@@ -26,6 +27,7 @@ fun initKoin(
         startupModule(),
         analyticsModule(),
         bootstrapModule(),
+        aiModule(),
         dashboardModule(),
     )
 }

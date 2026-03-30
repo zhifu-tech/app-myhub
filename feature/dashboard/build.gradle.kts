@@ -28,6 +28,7 @@ kotlin {
             implementation(projects.datastore.bootstrap)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.aiApi)
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.mixedApi)
             implementation(projects.feature.preview)

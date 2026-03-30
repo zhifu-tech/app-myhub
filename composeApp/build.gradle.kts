@@ -120,6 +120,8 @@ kotlin {
             implementation(projects.datastore.bootstrap)
             implementation(projects.datastore.repositoryClient)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.ai)
+            implementation(projects.feature.aiApi)
             implementation(projects.feature.dashboard)
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.mixed)

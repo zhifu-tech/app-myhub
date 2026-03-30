@@ -21,6 +21,7 @@ import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
+import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAiCapture
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.feature.preview.Preview
@@ -176,6 +177,10 @@ private fun DashboardSideEffect(
 
             DashboardSideEffect.NavigateToSupport -> {
                 navigator.navigateToSupport()
+            }
+
+            DashboardSideEffect.NavigateToAiCapture -> {
+                navigator.navigateToAiCapture()
             }
 
             else -> Unit
