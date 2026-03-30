@@ -15,9 +15,9 @@ data class Card(
     val summary: String,
 
     val version: Int,
-    val deleted: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
+    val deletedAt: Instant?,
 
     internal val locationRaw: String?,
     internal val tagsRaw: String?,

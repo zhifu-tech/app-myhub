@@ -28,6 +28,6 @@ internal fun DbCard.toDomain(): Card =
         sourceRaw = source,
         createdAt = created_at.toInstant(),
         updatedAt = updated_at.toInstant(),
+        deletedAt = deleted_at?.toInstant(),
         version = version.toInt(),
-        deleted = deleted != 0L,
     )

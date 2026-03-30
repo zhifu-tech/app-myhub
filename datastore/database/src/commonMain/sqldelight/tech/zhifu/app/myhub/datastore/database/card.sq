@@ -12,8 +12,8 @@ CREATE TABLE card (
     source TEXT, -- JSON-TEXT
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
-    version INTEGER NOT NULL DEFAULT 1,
-    deleted INTEGER NOT NULL DEFAULT 0
+    deleted_at INTEGER DEFAULT NULL,
+    version INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE INDEX idx_card_updated_at ON card(updated_at);
@@ -26,7 +26,7 @@ CREATE INDEX idx_card_title_id_desc ON card(title DESC, id DESC);
 
 insertCard:
 INSERT OR REPLACE INTO card (
-  id, type, title, summary, status, content, ui, location, tags, source, created_at, updated_at, version, deleted
+  id, type, title, summary, status, content, ui, location, tags, source, created_at, updated_at, deleted_at, version
 )
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
