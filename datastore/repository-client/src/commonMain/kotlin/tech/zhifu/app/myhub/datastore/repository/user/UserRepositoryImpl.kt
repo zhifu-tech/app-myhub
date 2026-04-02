@@ -14,7 +14,6 @@ import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
-import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
 class UserRepositoryImpl(
@@ -117,8 +116,6 @@ class UserRepositoryImpl(
         userId: String,
         theme: String,
     ): Long {
-        logger.info { "updateUserPreferencesTheme: $theme" }
-        val userId = getUserOrNull()?.id ?: return 0L
         val res = store
             .write(
                 request = StoreWriteRequest.of(
@@ -129,7 +126,6 @@ class UserRepositoryImpl(
                     )
                 )
             )
-        logger.info { "updateUserPreferencesTheme: ${res is StoreWriteResponse.Success}" }
         return if (res is StoreWriteResponse.Success) 1L else 0L
     }
 
@@ -139,7 +135,6 @@ class UserRepositoryImpl(
         sortAsDate: Boolean,
         sortAsName: Boolean,
     ): Long {
-        val userId = getUserOrNull()?.id ?: return 0L
         val res = store
             .write(
                 request = StoreWriteRequest.of(
@@ -158,7 +153,6 @@ class UserRepositoryImpl(
         userId: String,
         layoutAsList: Boolean,
     ): Long {
-        val userId = getUserOrNull()?.id ?: return 0L
         val res = store
             .write(
                 request = StoreWriteRequest.of(

@@ -22,11 +22,11 @@ import tech.zhifu.app.myhub.ui.state.theme.collectDarkThemeState
 import tech.zhifu.app.myhub.ui.state.theme.updateTheme
 
 @Composable
-fun ThemeSettingItemRoute(
+fun ThemeSettingItem(
     viewModel: SettingsViewModel
 ) {
     val isDarkMode by viewModel.collectDarkThemeState()
-    ThemeSettingItem(
+    ThemeSettingItemContent(
         isDarkMode = isDarkMode,
         enabled = true,
         onThemeChanged = { isDarkMode ->
@@ -39,7 +39,7 @@ fun ThemeSettingItemRoute(
 }
 
 @Composable
-internal fun ThemeSettingItem(
+internal fun ThemeSettingItemContent(
     isDarkMode: Boolean,
     enabled: Boolean = true,
     onThemeChanged: (Boolean) -> Unit

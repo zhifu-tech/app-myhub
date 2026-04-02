@@ -13,7 +13,7 @@ import tech.zhifu.app.myhub.feature.settings.content.TopBar
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Composable
-fun SettingsRoute(
+fun SettingsScreen(
     navigator: AppNavigator,
     viewModel: SettingsViewModel = koinViewModel<SettingsViewModel>()
 ) {

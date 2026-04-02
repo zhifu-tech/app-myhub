@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
-import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItemRoute
+import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItem
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearance_language
 
@@ -20,27 +20,6 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearan
 fun Content(
     viewModel: SettingsViewModel,
     modifier: Modifier,
-) {
-    ContentContent(
-        themeSettingItem = {
-            ThemeSettingItemRoute(viewModel = viewModel)
-        },
-//        languageSettingsItem = {
-//            LanguageSettingItemRoute(viewModel = viewModel)
-//        },
-//        aiProviderSettingsItem = {
-//            AiProviderSettingItemRoute(viewModel = viewModel)
-//        },
-        modifier = modifier
-    )
-}
-
-@Composable
-internal fun ContentContent(
-    themeSettingItem: @Composable () -> Unit,
-//    languageSettingsItem: @Composable () -> Unit,
-//    aiProviderSettingsItem: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
@@ -53,8 +32,7 @@ internal fun ContentContent(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-
-        themeSettingItem()
+        ThemeSettingItem(viewModel = viewModel)
 //        languageSettingsItem()
 //        Text(
 //            text = stringResource(Res.string.feature_settings_ai),

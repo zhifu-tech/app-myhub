@@ -19,8 +19,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingSta
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectShowSnack
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
 import tech.zhifu.app.myhub.ui.model.ContentCard
@@ -33,9 +31,6 @@ fun Content(
     paddingValues: PaddingValues,
     previewState: PreviewState,
 ) {
-    logger.debug {
-        "DashboardContent Content called!"
-    }
     val snackbarState = LocalSnackbarState.current
     viewModel.CollectSideEffectShowSnack {
         viewModel.viewModelScope.launch {
@@ -52,10 +47,6 @@ fun Content(
         }
         return
     }
-    logger.debug {
-        "DashboardContent Content called!2"
-    }
-
     ContentContent(
         viewModel = viewModel,
         modifier = modifier,
@@ -75,10 +66,6 @@ private fun ContentContent(
     onLoadMore: () -> Unit,
     onClickItem: (ContentCard) -> Unit,
 ) {
-    logger.debug {
-        "DashboardContent ContentContent called!"
-    }
-
     val layoutAsList by viewModel.collectLayoutAsList()
 
     val modifier = modifier

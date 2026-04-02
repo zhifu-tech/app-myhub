@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
@@ -21,11 +22,11 @@ import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
 import tech.zhifu.app.myhub.ui.model.toDashboardContentCard
 import tech.zhifu.app.myhub.ui.state.layout.LayoutState
-import tech.zhifu.app.myhub.ui.state.layout.initLayoutStateFlow
+import tech.zhifu.app.myhub.ui.state.layout.createLayoutStateFlow
 import tech.zhifu.app.myhub.ui.state.user.UserState
-import tech.zhifu.app.myhub.ui.state.user.initUserStateFlow
+import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
-import tech.zhifu.app.myhub.ui.state.user.preferences.initUserPreferencesStatFlow
+import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
 
 class DashboardViewModel(
     internal val bootstrap: Bootstrap,
@@ -39,15 +40,15 @@ class DashboardViewModel(
 
     val logger: Logger = logger("Dashboard")
 
-    override val container =
-        container<DashboardUiState, DashboardSideEffect>(
+    override val container: Container<DashboardUiState, DashboardSideEffect> =
+        container(
             initialState = DashboardUiState.Idle,
         ) {
             observeUiStateFlow()
         }
-    override val userStateFlow = initUserStateFlow()
-    override val userPreferencesStateFlow = initUserPreferencesStatFlow()
-    override val layoutStateFlow = initLayoutStateFlow()
+    override val userStateFlow = createUserStateFlow()
+    override val userPreferencesStateFlow = createUserPreferencesStatFlow()
+    override val layoutStateFlow = createLayoutStateFlow()
     override val searchStateFlow = initSearchStateFlow()
 
     fun refresh() = intent {

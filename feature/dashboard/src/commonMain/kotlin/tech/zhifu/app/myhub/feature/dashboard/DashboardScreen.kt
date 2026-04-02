@@ -28,9 +28,6 @@ import tech.zhifu.app.myhub.feature.preview.Preview
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Composable
@@ -98,9 +95,6 @@ private fun DashboardContent(
     previewState: PreviewState,
 ) {
     val state by viewModel.collectFieldAsState { it.state }
-    logger.debug {
-        "DashboardContent uiState is $state"
-    }
     when (state) {
         DashboardUiState.State.LOADING -> {
             Loading(
@@ -135,7 +129,6 @@ private fun DashboardSideEffect(
     viewModel: DashboardViewModel
 ) {
     viewModel.collectSharedSideEffect { effect ->
-        logger.warn { "navigate collectSharedSideEffect is  $effect" }
         when (effect) {
 
             DashboardSideEffect.NavigateToOpenSourceLicenses -> {

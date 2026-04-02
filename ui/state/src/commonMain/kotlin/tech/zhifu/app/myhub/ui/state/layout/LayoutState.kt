@@ -1,9 +1,8 @@
 package tech.zhifu.app.myhub.ui.state.layout
 
 import kotlinx.coroutines.flow.StateFlow
-import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-interface LayoutState : UserPreferencesState {
+interface LayoutState {
     val layoutStateFlow: StateFlow<Layout>
 }
 
