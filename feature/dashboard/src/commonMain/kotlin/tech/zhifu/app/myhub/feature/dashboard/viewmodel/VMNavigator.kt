@@ -11,6 +11,10 @@ fun DashboardViewModel.navigateToSupport() = intent {
     postSideEffect(DashboardSideEffect.NavigateToSupport)
 }
 
+fun DashboardViewModel.navigateToSettings() = intent {
+    postSideEffect(DashboardSideEffect.NavigateToSettings)
+}
+
 fun DashboardViewModel.navigateToAiCapture() = intent {
     postSideEffect(DashboardSideEffect.NavigateToAiCapture)
 }

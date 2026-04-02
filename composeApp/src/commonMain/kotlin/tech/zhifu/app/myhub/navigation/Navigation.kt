@@ -14,6 +14,8 @@ import tech.zhifu.app.myhub.feature.dashboard.navigation.dashboardEntry
 import tech.zhifu.app.myhub.feature.mixed.api.OpenSourceLicensesNavKey
 import tech.zhifu.app.myhub.feature.mixed.api.SupportNavKey
 import tech.zhifu.app.myhub.feature.mixed.navigation.mixedEntry
+import tech.zhifu.app.myhub.feature.settings.api.SettingsNavKey
+import tech.zhifu.app.myhub.feature.settings.navigation.settingsEntry
 
 fun navAppStartKey(): NavKey = DashboardNavKey
 
@@ -27,6 +29,7 @@ fun navKeySerializerModule() = SerializersModule {
         subclass(AiNavKey::class)
         subclass(OpenSourceLicensesNavKey::class)
         subclass(SupportNavKey::class)
+        subclass(SettingsNavKey::class)
     }
 }
 
@@ -35,4 +38,5 @@ fun AppNavigator.navEntryProvider(): (NavKey) -> NavEntry<NavKey> = entryProvide
     dashboardEntry(this@navEntryProvider)
     aiEntry(this@navEntryProvider)
     mixedEntry(this@navEntryProvider)
+    settingsEntry(this@navEntryProvider)
 }

@@ -2,9 +2,10 @@ package tech.zhifu.app.myhub.datastore.repository.user
 
 import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.User
-import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
+import tech.zhifu.app.myhub.datastore.operations.user.UserPreferencesOperations
 
-interface UserRepository {
+interface UserRepository :
+    UserPreferencesOperations {
 
     // ==================== User 操作 ====================
 
@@ -19,16 +20,5 @@ interface UserRepository {
 
     suspend fun getUserOrNull(): User?
 
-    fun streamUser(): Flow<User?>
-
-    // ==================== UserPreferences 操作 ====================
-
-    fun streamUserPreferences(
-        userId: String,
-    ): Flow<UserPreferences?>
-
-    suspend fun insertUserPreferences(
-        preferences: UserPreferences,
-        needSync: Boolean = true
-    )
+    fun userFlow(): Flow<User?>
 }

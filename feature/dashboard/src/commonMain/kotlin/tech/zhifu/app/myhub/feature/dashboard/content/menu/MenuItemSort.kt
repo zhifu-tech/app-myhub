@@ -17,21 +17,21 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_sort_by_date
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_sort_by_name
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldSortAsDate
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.updateUsePreferencesSortAsDate
+import tech.zhifu.app.myhub.ui.state.layout.collectSortAsDate
+import tech.zhifu.app.myhub.ui.state.layout.updateSortAsDate
 
 @Composable
 fun MenuItemSort(
     viewModel: DashboardViewModel,
     onBeforeNavigate: () -> Unit,
 ) {
-    val sortAsDate by viewModel.collectUserPreferencesFieldSortAsDate()
+    val sortAsDate by viewModel.collectSortAsDate()
 
     MenuItemSortContent(
         sortAsDate = sortAsDate,
         onActionSort = {
             onBeforeNavigate()
-            viewModel.updateUsePreferencesSortAsDate(it)
+            viewModel.updateSortAsDate(it)
         }
     )
 }

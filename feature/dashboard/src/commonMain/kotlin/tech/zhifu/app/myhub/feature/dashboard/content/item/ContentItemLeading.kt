@@ -12,6 +12,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Composable
 fun ContentItemLeading(
@@ -20,7 +21,7 @@ fun ContentItemLeading(
 ) {
     val cover = item.cover
     val coverUrl = cover.url
-    val coverIcon = cover.icon
+    val coverIcon = cover.iconKey?.toImageVector()
     val coverIconTint = cover.tint
     Box(
         modifier = modifier

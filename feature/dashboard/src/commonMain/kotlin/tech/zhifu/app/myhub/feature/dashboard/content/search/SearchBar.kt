@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,10 +34,8 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentSearchQuery
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectResetSearch
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 
@@ -55,7 +54,7 @@ fun SearchBar(
     // 2. 监听内容为空，且搜索状态为false时，隐藏搜索框
     val isContentEmpty by viewModel.collectContentAsEmpty()
     if (isContentEmpty) {
-        val isSearching by viewModel.collectContentAsSearching()
+        val isSearching by viewModel.collectSearchingState()
         if (isSearching.not()) {
             logger.debug { "SearchBar hidden" }
             return
@@ -63,9 +62,9 @@ fun SearchBar(
     }
 
     // 3. 监听搜索内容变化
-    val query by viewModel.collectContentSearchQuery()
+    val searchQuery by viewModel.searchStateFlow.collectAsState()
     SearchBarContent(
-        query = query,
+        query = searchQuery,
         onQueryChange = viewModel::search,
         modifier = modifier,
     )

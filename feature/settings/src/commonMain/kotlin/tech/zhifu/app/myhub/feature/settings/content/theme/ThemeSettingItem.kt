@@ -10,27 +10,31 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.settings.SettingsUiState
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_dark_mode
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_off
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_on
+import tech.zhifu.app.myhub.ui.state.theme.collectDarkThemeState
+import tech.zhifu.app.myhub.ui.state.theme.updateTheme
 
 @Composable
 fun ThemeSettingItemRoute(
     viewModel: SettingsViewModel
 ) {
-    val state = viewModel.collectFieldAsState { uiState ->
-        (uiState as? SettingsUiState.Content)?.themeSettingState
-    }.value ?: return
-
+    val isDarkMode by viewModel.collectDarkThemeState()
     ThemeSettingItem(
-        isDarkMode = state.isDarkMode,
-        enabled = state.isSubmitting.not(),
-        onThemeChanged = viewModel::updateTheme
+        isDarkMode = isDarkMode,
+        enabled = true,
+        onThemeChanged = { isDarkMode ->
+            viewModel
+                .updateTheme(
+                    theme = if (isDarkMode) "dark" else "light",
+                )
+        }
     )
 }
 

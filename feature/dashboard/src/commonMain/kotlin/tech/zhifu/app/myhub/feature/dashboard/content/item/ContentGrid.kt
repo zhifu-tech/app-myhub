@@ -10,28 +10,34 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentGridContent(
+    viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    items: List<ContentCard>,
     previewState: PreviewState,
     onLoadMore: () -> Unit,
     onClickItem: (ContentCard) -> Unit,
 ) {
+    val items by viewModel.collectContentFieldItems()
     val gridState = rememberLazyGridState()
+
     AutoLoadMoreGrid(
         gridState = gridState,
         totalCount = items.size,
         onLoadMore = onLoadMore
     )
+
     LazyVerticalGrid(
         modifier = modifier.padding(top = 24.dp),
         contentPadding = paddingValues,

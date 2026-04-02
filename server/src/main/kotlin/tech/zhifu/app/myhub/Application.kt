@@ -18,7 +18,6 @@ import tech.zhifu.app.myhub.api.auth.authApi
 import tech.zhifu.app.myhub.api.capture.captureAnalysisApi
 import tech.zhifu.app.myhub.api.media.mediaUploadApi
 import tech.zhifu.app.myhub.api.sync.syncApi
-import tech.zhifu.app.myhub.api.user.usersApi
 import tech.zhifu.app.myhub.auth.configureAuthentication
 import tech.zhifu.app.myhub.di.koinModules
 import tech.zhifu.app.myhub.exception.configException
@@ -77,7 +76,7 @@ fun Application.module() {
 
         authApi()
         syncApi()
-        usersApi()
+//        usersApi()
         mediaUploadApi()
         captureAnalysisApi()
     }

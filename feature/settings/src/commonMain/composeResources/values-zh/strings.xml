@@ -7,5 +7,13 @@
   <string name="feature_settings_retry">重试</string>
   <string name="feature_settings_on">开启</string>
   <string name="feature_settings_off">关闭</string>
+  <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_ai_config">AI Provider 配置</string>
+  <string name="feature_settings_ai_mode">模式</string>
+  <string name="feature_settings_ai_direct_endpoint">直连 Endpoint</string>
+  <string name="feature_settings_ai_direct_model">直连 Model</string>
+  <string name="feature_settings_ai_direct_api_key">直连 API Key</string>
+  <string name="feature_settings_ai_timeout_ms">超时（毫秒）</string>
+  <string name="feature_settings_ai_retries">最大重试次数</string>
+  <string name="feature_settings_ai_save">保存 AI 配置</string>
 </resources>
-

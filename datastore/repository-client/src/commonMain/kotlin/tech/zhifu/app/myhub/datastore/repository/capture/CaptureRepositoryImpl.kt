@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.network.ApiConfig
 import tech.zhifu.app.myhub.network.createHttpClient
 
+@Deprecated("Legacy server-first capture repository implementation.")
 class HttpCaptureRepository(
     private val httpClient: HttpClient = createHttpClient()
 ) : CaptureRepository {

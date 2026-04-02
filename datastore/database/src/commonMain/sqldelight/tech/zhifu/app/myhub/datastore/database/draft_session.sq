@@ -40,4 +40,4 @@ selectLatestDraftSessions:
 SELECT *
 FROM draft_session
 ORDER BY updated_at DESC
-LIMIT ? OFFSET ?;
+LIMIT :limit OFFSET :offset;

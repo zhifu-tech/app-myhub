@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.menu
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -24,11 +25,20 @@ fun Menu(
     MenuContent(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
-        menuItemLayout = { MenuItemLayout(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
-        menuItemSort = { MenuItemSort(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
-        menuItemLicense = { MenuItemLicense(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
-        menuItemSupport = { MenuItemSupport(viewModel = viewModel, onBeforeNavigate = onDismissRequest) },
-        menuItemLogout = { MenuItemLogout(viewModel = viewModel) },
+        content = {
+            MenuItemLayout(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
+
+            MenuItemDivider()
+            MenuItemSort(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
+
+            MenuItemDivider()
+            MenuItemLicense(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
+            MenuItemSupport(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
+
+            MenuItemDivider()
+            MenuItemSettings(viewModel = viewModel)
+            MenuItemLogout(viewModel = viewModel)
+        },
     )
 }
 
@@ -36,33 +46,18 @@ fun Menu(
 fun MenuContent(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    menuItemLayout: @Composable () -> Unit,
-    menuItemSort: @Composable () -> Unit,
-    menuItemSupport: @Composable () -> Unit,
-    menuItemLicense: @Composable () -> Unit,
-    menuItemLogout: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val groupInteractionSource = remember { MutableInteractionSource() }
     DropdownMenuPopup(
         expanded = expanded,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         DropdownMenuGroup(
             shapes = MenuDefaults.groupShape(0, 1),
             interactionSource = groupInteractionSource,
-        ) {
-            menuItemLayout()
-
-            MenuItemDivider()
-            menuItemSort()
-
-            MenuItemDivider()
-            menuItemLicense()
-            menuItemSupport()
-
-            MenuItemDivider()
-            menuItemLogout()
-        }
+            content = content
+        )
     }
 }
 

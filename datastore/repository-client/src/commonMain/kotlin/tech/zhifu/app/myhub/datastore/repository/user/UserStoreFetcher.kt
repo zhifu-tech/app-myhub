@@ -16,9 +16,14 @@ fun createUserStoreFetcher(
         }
 
         is UserStoreKey.PreferencesById -> {
-            val preferences = remoteUserDataSource.getUserPreferences(key.id)
+            val preferences = remoteUserDataSource.getUserPreferences(userId = key.id)
                 ?: UserPreferences(userId = key.id)
-            FetcherResult.Data(UserStoreData.PreferencesData(preferences))
+            FetcherResult.Data(
+                value = UserStoreData.PreferencesData(
+                    preferences = preferences,
+                    id = key.id
+                )
+            )
         }
     }
 }

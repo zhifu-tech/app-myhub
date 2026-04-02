@@ -191,6 +191,8 @@ if (isServerEnabled) {
 // Bootstrap 模块
 include(":datastore:bootstrap")
 
+// 数据存储模块
+include(":datastore:operations")
 // 数据源模块
 include(":datastore:datasource-local")
 include(":datastore:datasource-remote")
@@ -216,6 +218,7 @@ include(":component:media")
 // ============================================================================
 include(":ui:design")
 include(":ui:model")
+include(":ui:state")
 
 // ============================================================================
 // 功能模块
@@ -227,6 +230,8 @@ include(":feature:ai")
 include(":feature:mixed-api")
 include(":feature:mixed")
 include(":feature:preview")
+include(":feature:settings-api")
+include(":feature:settings")
 
 // ============================================================================
 // 应用模块

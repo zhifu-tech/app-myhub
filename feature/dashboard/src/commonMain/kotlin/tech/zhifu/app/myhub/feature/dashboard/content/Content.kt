@@ -15,15 +15,16 @@ import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
+import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectShowSnack
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectUserPreferencesFieldLayoutAsList
 import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.state.layout.collectLayoutAsList
 
 @Composable
 fun Content(
@@ -32,6 +33,9 @@ fun Content(
     paddingValues: PaddingValues,
     previewState: PreviewState,
 ) {
+    logger.debug {
+        "DashboardContent Content called!"
+    }
     val snackbarState = LocalSnackbarState.current
     viewModel.CollectSideEffectShowSnack {
         viewModel.viewModelScope.launch {
@@ -41,21 +45,21 @@ fun Content(
 
     val isContentEmpty by viewModel.collectContentAsEmpty()
     if (isContentEmpty) {
-        val isSearching by viewModel.collectContentAsSearching()
+        val isSearching by viewModel.collectSearchingState()
         if (isSearching.not()) {
             Empty(viewModel = viewModel, modifier = modifier)
             return
         }
+        return
+    }
+    logger.debug {
+        "DashboardContent Content called!2"
     }
 
-    val items by viewModel.collectContentFieldItems()
-    val layoutAsList by viewModel.collectUserPreferencesFieldLayoutAsList()
-
     ContentContent(
+        viewModel = viewModel,
         modifier = modifier,
         paddingValues = paddingValues,
-        items = items,
-        layoutAsList = layoutAsList,
         previewState = previewState,
         onLoadMore = viewModel::loadMore,
         onClickItem = previewState::show,
@@ -64,14 +68,19 @@ fun Content(
 
 @Composable
 private fun ContentContent(
+    viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    items: List<ContentCard>,
-    layoutAsList: Boolean,
     previewState: PreviewState,
     onLoadMore: () -> Unit,
     onClickItem: (ContentCard) -> Unit,
 ) {
+    logger.debug {
+        "DashboardContent ContentContent called!"
+    }
+
+    val layoutAsList by viewModel.collectLayoutAsList()
+
     val modifier = modifier
         .fillMaxSize()
         .tapToClearFocus()
@@ -81,18 +90,18 @@ private fun ContentContent(
 
     if (layoutAsList) {
         ContentListContent(
+            viewModel = viewModel,
             modifier = modifier,
             paddingValues = paddingValues,
-            items = items,
             previewState = previewState,
             onLoadMore = onLoadMore,
             onClickItem = onClickItem,
         )
     } else {
         ContentGridContent(
+            viewModel = viewModel,
             modifier = modifier,
             paddingValues = paddingValues,
-            items = items,
             previewState = previewState,
             onLoadMore = onLoadMore,
             onClickItem = onClickItem,

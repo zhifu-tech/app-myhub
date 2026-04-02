@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.jb.composeMultiplatform)
     alias(libs.plugins.jb.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -16,7 +17,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.component.media)
+            implementation(projects.core.analytics)
+            implementation(projects.core.network)
             implementation(projects.core.navigation)
+            implementation(projects.core.settings)
+            implementation(projects.core.startup)
+            implementation(projects.datastore.model)
+            implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.aiApi)
             implementation(projects.ui.design)
 
@@ -28,7 +36,10 @@ kotlin {
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.orbit.core)
+            implementation(libs.orbit.compose)
             implementation(libs.orbit.viewmodel)
         }
     }

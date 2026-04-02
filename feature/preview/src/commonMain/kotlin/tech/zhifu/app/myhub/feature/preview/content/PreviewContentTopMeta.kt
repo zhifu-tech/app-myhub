@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.sharedElement
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.model.ContentCardIcon
+import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -21,7 +23,8 @@ internal fun PreviewContentTopMeta(
     modifier: Modifier,
 ) {
     val contentId = card.id
-    val actionIcon = card.action.icon
+    val actionIcon = card.action.iconKey.toImageVector()
+        ?: ContentCardIcon.EditNote.icon
     val actionColor = card.action.color
     val actionLabel = card.action.label
     val iconModifier = if (animatedVisibilityScope != null) {

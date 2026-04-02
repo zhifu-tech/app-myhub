@@ -7,5 +7,13 @@
   <string name="feature_settings_retry">Retry</string>
   <string name="feature_settings_on">On</string>
   <string name="feature_settings_off">Off</string>
+  <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_ai_config">AI Provider Config</string>
+  <string name="feature_settings_ai_mode">Mode</string>
+  <string name="feature_settings_ai_direct_endpoint">Direct Endpoint</string>
+  <string name="feature_settings_ai_direct_model">Direct Model</string>
+  <string name="feature_settings_ai_direct_api_key">Direct API Key</string>
+  <string name="feature_settings_ai_timeout_ms">Timeout (ms)</string>
+  <string name="feature_settings_ai_retries">Max Retries</string>
+  <string name="feature_settings_ai_save">Save AI Settings</string>
 </resources>
-

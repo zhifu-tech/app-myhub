@@ -12,35 +12,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
-import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingItemRoute
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItemRoute
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_appearance_language
 
 @Composable
-fun ContentRoute(
+fun Content(
     viewModel: SettingsViewModel,
     modifier: Modifier,
 ) {
-    Content(
+    ContentContent(
         themeSettingItem = {
             ThemeSettingItemRoute(viewModel = viewModel)
         },
-        languageSettingsItem = {
-            LanguageSettingItemRoute(viewModel = viewModel)
-        },
-        inlineMessage = {
-            InlineMessageRoute(viewModel = viewModel)
-        },
+//        languageSettingsItem = {
+//            LanguageSettingItemRoute(viewModel = viewModel)
+//        },
+//        aiProviderSettingsItem = {
+//            AiProviderSettingItemRoute(viewModel = viewModel)
+//        },
         modifier = modifier
     )
 }
 
 @Composable
-internal fun Content(
+internal fun ContentContent(
     themeSettingItem: @Composable () -> Unit,
-    languageSettingsItem: @Composable () -> Unit,
-    inlineMessage: @Composable () -> Unit,
+//    languageSettingsItem: @Composable () -> Unit,
+//    aiProviderSettingsItem: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -56,8 +55,12 @@ internal fun Content(
         )
 
         themeSettingItem()
-        languageSettingsItem()
-        inlineMessage()
+//        languageSettingsItem()
+//        Text(
+//            text = stringResource(Res.string.feature_settings_ai),
+//            style = MaterialTheme.typography.titleMedium,
+//            color = MaterialTheme.colorScheme.primary
+//        )
+//        aiProviderSettingsItem()
     }
 }
-

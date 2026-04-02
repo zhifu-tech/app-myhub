@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserPreferences(
     val userId: String,
-    val theme: String = "dark",
-    val language: String = "zh-CN",
+    val theme: String? = null,
+    val language: String? = null,
     val layoutAsList: Boolean = true,
     val sortAsDate: Boolean = true,
     val sortAsName: Boolean = true,

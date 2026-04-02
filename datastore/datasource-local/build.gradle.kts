@@ -25,6 +25,7 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.datastore.model)
             implementation(projects.datastore.database)
+            api(projects.datastore.operations)
 
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)

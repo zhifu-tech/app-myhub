@@ -12,8 +12,12 @@ sealed class UserStoreData : StoreData<String> {
     ) : UserStoreData(), StoreData.Single<String>
 
     data class PreferencesData(
-        val preferences: UserPreferences,
-        override val id: String = preferences.userId
+        val preferences: UserPreferences? = null,
+        val themeToWrite: String? = null,
+        val sortAsNameToWrite: Boolean? = null,
+        val sortAsDateToWrite: Boolean? = null,
+        val layoutAsListToWrite: Boolean? = null,
+        override val id: String,
     ) : UserStoreData(), StoreData.Single<String>
 }
 

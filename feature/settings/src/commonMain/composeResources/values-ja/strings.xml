@@ -7,5 +7,13 @@
   <string name="feature_settings_retry">再試行</string>
   <string name="feature_settings_on">オン</string>
   <string name="feature_settings_off">オフ</string>
+  <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_ai_config">AI Provider 設定</string>
+  <string name="feature_settings_ai_mode">モード</string>
+  <string name="feature_settings_ai_direct_endpoint">Direct Endpoint</string>
+  <string name="feature_settings_ai_direct_model">Direct Model</string>
+  <string name="feature_settings_ai_direct_api_key">Direct API Key</string>
+  <string name="feature_settings_ai_timeout_ms">タイムアウト (ms)</string>
+  <string name="feature_settings_ai_retries">最大リトライ回数</string>
+  <string name="feature_settings_ai_save">AI 設定を保存</string>
 </resources>
-

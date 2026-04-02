@@ -13,7 +13,6 @@ class Bootstrap(
                 localeTag = localeTag,
             )
         userRepository.insertUser(config.user)
-        userRepository.insertUserPreferences(config.userPreferences)
     }
 }
 

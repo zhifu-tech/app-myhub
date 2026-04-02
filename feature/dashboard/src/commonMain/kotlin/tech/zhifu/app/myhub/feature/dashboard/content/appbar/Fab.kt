@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsSearching
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
@@ -35,7 +35,7 @@ fun Fab(
     viewModel: DashboardViewModel,
 ) {
     val isContentEmpty by viewModel.collectContentAsEmpty()
-    val isSearching by viewModel.collectContentAsSearching()
+    val isSearching by viewModel.collectSearchingState()
     if (isContentEmpty) {
         if (isSearching.not()) {
             return
@@ -91,38 +91,42 @@ private fun FabIcon(
     modifier: Modifier = Modifier,
 ) {
     val transition = updateTransition(targetState = isClose, label = "fab-icon")
-    val closeAlpha by transition.animateFloat(
-        transitionSpec = {
-            tween(durationMillis = 180, easing = FastOutSlowInEasing)
-        },
-        label = "fab-close-alpha"
-    ) { showClose ->
-        if (showClose) 1f else 0f
-    }
-    val addAlpha by transition.animateFloat(
-        transitionSpec = {
-            tween(durationMillis = 180, easing = FastOutSlowInEasing)
-        },
-        label = "fab-add-alpha"
-    ) { showClose ->
-        if (showClose) 0f else 1f
-    }
-    val closeRotation by transition.animateFloat(
-        transitionSpec = {
-            tween(durationMillis = 180, easing = FastOutSlowInEasing)
-        },
-        label = "fab-close-rotation"
-    ) { showClose ->
-        if (showClose) 0f else -90f
-    }
-    val addRotation by transition.animateFloat(
-        transitionSpec = {
-            tween(durationMillis = 180, easing = FastOutSlowInEasing)
-        },
-        label = "fab-add-rotation"
-    ) { showClose ->
-        if (showClose) 90f else 0f
-    }
+    val closeAlpha by transition
+        .animateFloat(
+            transitionSpec = {
+                tween(durationMillis = 180, easing = FastOutSlowInEasing)
+            },
+            label = "fab-close-alpha"
+        ) { showClose ->
+            if (showClose) 1f else 0f
+        }
+    val addAlpha by transition
+        .animateFloat(
+            transitionSpec = {
+                tween(durationMillis = 180, easing = FastOutSlowInEasing)
+            },
+            label = "fab-add-alpha"
+        ) { showClose ->
+            if (showClose) 0f else 1f
+        }
+    val closeRotation by transition
+        .animateFloat(
+            transitionSpec = {
+                tween(durationMillis = 180, easing = FastOutSlowInEasing)
+            },
+            label = "fab-close-rotation"
+        ) { showClose ->
+            if (showClose) 0f else -90f
+        }
+    val addRotation by transition
+        .animateFloat(
+            transitionSpec = {
+                tween(durationMillis = 180, easing = FastOutSlowInEasing)
+            },
+            label = "fab-add-rotation"
+        ) { showClose ->
+            if (showClose) 90f else 0f
+        }
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier

@@ -4,7 +4,6 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import tech.zhifu.app.myhub.datastore.repository.store.createMutableStore
 import tech.zhifu.app.myhub.datastore.repository.sync.SyncChangeApplier
-import tech.zhifu.app.myhub.datastore.repository.user.UserPreferencesSyncChangeApplier
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepositoryImpl
 import tech.zhifu.app.myhub.datastore.repository.user.UserSyncChangeApplier
@@ -44,14 +43,6 @@ fun userRepositoryModule() = module {
         qualifier = named(SyncEntityType.User.value)
     ) {
         UserSyncChangeApplier(
-            userRepo = get(),
-            syncRepo = get(),
-        )
-    }
-    factory<SyncChangeApplier>(
-        qualifier = named(SyncEntityType.UserPreferences.value)
-    ) {
-        UserPreferencesSyncChangeApplier(
             userRepo = get(),
             syncRepo = get(),
         )

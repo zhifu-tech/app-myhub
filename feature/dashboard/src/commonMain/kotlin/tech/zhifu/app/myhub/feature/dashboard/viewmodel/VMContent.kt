@@ -20,19 +20,6 @@ fun DashboardViewModel.collectContentFieldItems() =
     }
 
 @Composable
-fun DashboardViewModel.collectContentAsSearching() =
-    collectFieldAsState {
-        (it as? DashboardUiState.Content)?.searchQuery?.isNotEmpty()
-            ?: false
-    }
-
-@Composable
-fun DashboardViewModel.collectContentSearchQuery() =
-    collectFieldAsState {
-        (it as? DashboardUiState.Content)?.searchQuery.orEmpty()
-    }
-
-@Composable
 fun DashboardViewModel.CollectSideEffectShowSnack(
     block: (DashboardSideEffect.ShowSnack) -> Unit
 ) = collectSharedSideEffect {

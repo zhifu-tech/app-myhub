@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Composable
 fun ContentGridItem(
@@ -47,7 +48,7 @@ fun ContentGridItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                action.icon.let { icon ->
+                action.iconKey.toImageVector()?.let { icon ->
                     Icon(
                         imageVector = icon,
                         contentDescription = null,

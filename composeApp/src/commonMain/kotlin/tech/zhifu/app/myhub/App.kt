@@ -7,12 +7,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.LocalAnalyticsService
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
@@ -29,17 +31,20 @@ import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
+import tech.zhifu.app.myhub.ui.state.theme.collectDarkThemeState
 
 @Composable
 fun App(
+    appViewModel: AppViewModel = koinViewModel(),
     analyticsService: AnalyticsService = koinInject(),
 ) {
     val windowSizeClass = rememberWindowSizeClass()
+    val darkTheme by appViewModel.collectDarkThemeState()
     CompositionLocalProvider(
         LocalAnalyticsService provides analyticsService,
         LocalWindowSizeClass provides windowSizeClass
     ) {
-        AppTheme {
+        AppTheme(darkTheme = darkTheme) {
             AppContent()
         }
     }

@@ -48,7 +48,7 @@ class LocalCardDataSourceImpl(
                     created_at = createdEpoch,
                     updated_at = updatedEpoch,
                     version = 1,
-                    deleted = 0,
+                    deleted_at = card.deletedAt?.toEpochMilliseconds(),
                 )
                 database.user_cardQueries.insertUserCard(
                     user_id = userId,

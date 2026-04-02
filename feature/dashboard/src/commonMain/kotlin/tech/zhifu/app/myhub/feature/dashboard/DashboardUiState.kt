@@ -1,21 +1,23 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
-import tech.zhifu.app.myhub.datastore.model.domain.User
-import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
+import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import tech.zhifu.app.myhub.ui.model.ContentCard
 
+@Immutable
 sealed class DashboardUiState(
     val state: State,
 ) {
+    @Immutable
     object Idle : DashboardUiState(state = State.IDLE)
 
+    @Immutable
     object Loading : DashboardUiState(state = State.LOADING)
 
+    @Immutable
     data class Content(
-        val user: User,
-        val userPreferences: UserPreferences,
-        val searchQuery: String? = null,
-        val items: List<ContentCard> = emptyList(),
+        val items: PersistentList<ContentCard> = persistentListOf(),
         val hasMore: Boolean = false,
         val isLoadingMore: Boolean = false,
         val errorMessage: String = "",
@@ -25,6 +27,7 @@ sealed class DashboardUiState(
         }
     }
 
+    @Immutable
     data class Error(
         val message: String = "",
     ) : DashboardUiState(state = State.ERROR)

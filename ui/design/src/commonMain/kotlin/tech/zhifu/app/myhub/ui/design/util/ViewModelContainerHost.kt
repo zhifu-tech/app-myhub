@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -21,8 +22,8 @@ import org.orbitmvi.orbit.ContainerHost
 abstract class ViewModelContainerHost<STATE : Any, SIDE_EFFECT : Any>
     : ContainerHost<STATE, SIDE_EFFECT>, ViewModel() {
 
-    val uiState: STATE
-        get() = container.refCountStateFlow.value
+    val uiState: StateFlow<STATE>
+        get() = container.refCountStateFlow
 
     val sharedSideEffect: Flow<SIDE_EFFECT> by lazy {
         container.refCountSideEffectFlow.shareIn(
@@ -40,7 +41,7 @@ abstract class ViewModelContainerHost<STATE : Any, SIDE_EFFECT : Any>
         .map(selector)
         .distinctUntilChanged()
         .collectAsStateWithLifecycle(
-            initialValue = selector(uiState),
+            initialValue = selector(uiState.value),
             minActiveState = lifecycleState
         )
 

@@ -1,5 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai
 
+import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
+
 sealed class AIUiState(
     val state: State,
 ) {
@@ -8,10 +10,15 @@ sealed class AIUiState(
     object Loading : AIUiState(state = State.LOADING)
 
     data class Content(
-        val messages: List<AIMessage> = emptyList(),
-        val tags: List<String> = emptyList(),
-        val isTagInputMode: Boolean = false,
-        val newTag: String = "",
+        val captureState: CaptureState = CaptureState.IDLE,
+        val sessionId: String? = null,
+        val messages: List<AIMsg> = emptyList(),
+        val draft: CaptureDraft? = null,
+        val missingFields: List<String> = emptyList(),
+        val actionComponents: List<ActionComponentSchema> = emptyList(),
+        val providerMode: ProviderMode = ProviderMode.DISABLED,
+        val input: String = "",
+        val isPublishing: Boolean = false,
     ) : AIUiState(state = State.CONTENT)
 
     data class Error(

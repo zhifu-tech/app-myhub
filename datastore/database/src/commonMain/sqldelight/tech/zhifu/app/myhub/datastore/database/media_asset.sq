@@ -52,3 +52,9 @@ SELECT *
 FROM media_asset
 WHERE card_id = ?
 ORDER BY created_at DESC;
+
+selectAllMediaAssets:
+SELECT *
+FROM media_asset
+ORDER BY created_at DESC
+LIMIT :limit OFFSET :offset;

@@ -16,17 +16,19 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
+import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAiCapture
 import tech.zhifu.app.myhub.feature.dashboard.content.Content
 import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
-import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAiCapture
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
 import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.feature.preview.Preview
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
+import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
+import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.logger.warn
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -36,53 +38,14 @@ fun DashboardScreen(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
+    val previewState = rememberPreviewState()
     DashboardSideEffect(
         navigator = navigator,
         viewModel = viewModel
     )
-    DashboardScreen(
-        viewModel = viewModel,
-        topBar = {
-            TopBar(modifier = it, viewModel = viewModel)
-        },
-        bottomBar = {
-            BottomBar(modifier = it, viewModel = viewModel)
-        },
-        loading = {
-            Loading(modifier = it, viewModel = viewModel)
-        },
-        error = {
-            Error(modifier = it, viewModel = viewModel)
-        },
-        content = { paddingValues, modifier, predicate ->
-            Content(
-                paddingValues = paddingValues,
-                modifier = modifier,
-                viewModel = viewModel,
-                previewState = predicate,
-            )
-        },
-    )
-}
-
-@Composable
-fun DashboardScreen(
-    viewModel: DashboardViewModel,
-    topBar: @Composable (Modifier) -> Unit,
-    bottomBar: @Composable (Modifier) -> Unit,
-    loading: @Composable (Modifier) -> Unit,
-    error: @Composable (Modifier) -> Unit,
-    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
-) {
-    val previewState = rememberPreviewState()
     DashboardScaffold(
         viewModel = viewModel,
-        topBar = topBar,
-        bottomBar = bottomBar,
-        loading = loading,
-        error = error,
         previewState = previewState,
-        content = content,
     )
     Preview(
         state = previewState,
@@ -92,12 +55,7 @@ fun DashboardScreen(
 @Composable
 internal fun DashboardScaffold(
     viewModel: DashboardViewModel,
-    topBar: @Composable (Modifier) -> Unit,
-    bottomBar: @Composable (Modifier) -> Unit,
-    loading: @Composable (Modifier) -> Unit,
-    error: @Composable (Modifier) -> Unit,
     previewState: PreviewState,
-    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
 ) {
     val hazeState = rememberHazeState()
     val hazeStyle = HazeMaterials.regular(
@@ -107,27 +65,25 @@ internal fun DashboardScaffold(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            topBar(
-                Modifier.hazeEffect(state = hazeState, style = hazeStyle) {
+            TopBar(
+                modifier = Modifier.hazeEffect(state = hazeState, style = hazeStyle) {
                     inputScale = hazeInputScale
                     progressive = HazeProgressive.verticalGradient(
                         startIntensity = 1f,
                         endIntensity = 0f
                     )
-                }
+                },
+                viewModel = viewModel,
             )
         },
         bottomBar = {
-            bottomBar(Modifier)
+            BottomBar(modifier = Modifier, viewModel = viewModel)
         },
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) { contentPadding ->
         DashboardContent(
             viewModel = viewModel,
-            loading = loading,
             contentPadding = contentPadding,
-            error = error,
-            content = content,
             hazeState = hazeState,
             previewState = previewState,
         )
@@ -137,25 +93,36 @@ internal fun DashboardScaffold(
 @Composable
 private fun DashboardContent(
     viewModel: DashboardViewModel,
-    loading: @Composable ((Modifier) -> Unit),
     contentPadding: PaddingValues,
-    error: @Composable ((Modifier) -> Unit),
-    content: @Composable (PaddingValues, Modifier, PreviewState) -> Unit,
     hazeState: HazeState,
     previewState: PreviewState,
 ) {
     val state by viewModel.collectFieldAsState { it.state }
+    logger.debug {
+        "DashboardContent uiState is $state"
+    }
     when (state) {
         DashboardUiState.State.LOADING -> {
-            loading(Modifier.padding(paddingValues = contentPadding))
+            Loading(
+                modifier = Modifier.padding(paddingValues = contentPadding),
+                viewModel = viewModel
+            )
         }
 
         DashboardUiState.State.ERROR -> {
-            error(Modifier.padding(paddingValues = contentPadding))
+            Error(
+                modifier = Modifier.padding(paddingValues = contentPadding),
+                viewModel = viewModel
+            )
         }
 
         DashboardUiState.State.CONTENT -> {
-            content(contentPadding, Modifier.hazeSource(state = hazeState), previewState)
+            Content(
+                paddingValues = contentPadding,
+                modifier = Modifier.hazeSource(state = hazeState),
+                viewModel = viewModel,
+                previewState = previewState,
+            )
         }
 
         else -> {}
@@ -181,6 +148,10 @@ private fun DashboardSideEffect(
 
             DashboardSideEffect.NavigateToAiCapture -> {
                 navigator.navigateToAiCapture()
+            }
+
+            DashboardSideEffect.NavigateToSettings -> {
+                navigator.navigateToSettings()
             }
 
             else -> Unit

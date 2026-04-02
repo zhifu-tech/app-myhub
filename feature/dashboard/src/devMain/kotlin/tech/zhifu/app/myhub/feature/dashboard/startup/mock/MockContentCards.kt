@@ -4,14 +4,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.ui.graphics.Color
+import kotlinx.collections.immutable.persistentListOf
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.model.ContentCardAction
 import tech.zhifu.app.myhub.ui.model.ContentCardCover
+import tech.zhifu.app.myhub.ui.model.ContentCardIcon
 
 internal fun mockContentCards() = listOf(
     ContentCard(
@@ -20,16 +21,15 @@ internal fun mockContentCards() = listOf(
         summary = "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = "visibility",
-            icon = ContentItemTokens.reviewIcon,
             background = ContentItemTokens.reviewBackground,
             tint = ContentItemTokens.reviewColor,
         ),
         action = ContentCardAction(
             label = ContentItemTokens.reviewLabel,
-            icon = ContentItemTokens.reviewIcon,
+            iconKey = ContentCardIcon.Visibility.name,
             color = ContentItemTokens.reviewColor,
         ),
     ),
@@ -39,16 +39,15 @@ internal fun mockContentCards() = listOf(
         summary = "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = "psychology",
-            icon = ContentItemTokens.voiceMemoCoverIcon,
             background = ContentItemTokens.voiceMemoCoverBackground,
             tint = ContentItemTokens.voiceMemoCoverTint,
         ),
         action = ContentCardAction(
             label = ContentItemTokens.voiceMemoActionLabel,
-            icon = ContentItemTokens.voiceMemoActionIcon,
+            iconKey = ContentCardIcon.AutoAwesome.name,
             color = ContentItemTokens.voiceMemoActionColor,
         ),
     ),
@@ -58,16 +57,15 @@ internal fun mockContentCards() = listOf(
         summary = "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = "edit_note",
-            icon = ContentItemTokens.draftCoverIcon,
             background = ContentItemTokens.draftCoverBackground,
             tint = ContentItemTokens.draftCoverTint,
         ),
         action = ContentCardAction(
             label = ContentItemTokens.draftActionLabel,
-            icon = ContentItemTokens.draftActionIcon,
+            iconKey = ContentCardIcon.EditNote.name,
             color = ContentItemTokens.draftActionColor,
         ),
     ),
@@ -77,16 +75,15 @@ internal fun mockContentCards() = listOf(
         summary = "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = "rocket_launch",
-            icon = ContentItemTokens.bestPracticesCoverIcon,
             background = ContentItemTokens.bestPracticesCoverBackground,
             tint = ContentItemTokens.bestPracticesCoverTint,
         ),
         action = ContentCardAction(
             label = ContentItemTokens.bestPracticesActionLabel,
-            icon = ContentItemTokens.bestPracticesActionIcon,
+            iconKey = ContentCardIcon.RocketLaunch.name,
             color = ContentItemTokens.bestPracticesActionColor,
         ),
     ),
@@ -96,7 +93,7 @@ internal fun mockContentCards() = listOf(
         summary = "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = null,
             background = ContentItemTokens.quantumCoverBackground,
@@ -104,7 +101,7 @@ internal fun mockContentCards() = listOf(
         ),
         action = ContentCardAction(
             label = ContentItemTokens.quantumActionLabel,
-            icon = Icons.Outlined.EditNote,
+            iconKey = ContentCardIcon.EditNote.name,
             color = ContentItemTokens.quantumActionColor,
         ),
     ),
@@ -115,17 +112,16 @@ internal fun mockContentCards() = listOf(
             "这家店的拉面汤头非常浓郁，推荐加一份叉烧。在繁华的上海街头寻找这一抹地道的烟火气，是一次难得的味蕾慰藉。",
         location = "青岛",
         updatedAt = 1654520000000,
-        tags = listOf("Meeting", "Insights", "Q3"),
+        tags = persistentListOf("Meeting", "Insights", "Q3"),
         cover = ContentCardCover(
             iconKey = "play_circle",
-            icon = Icons.Outlined.PlayCircle,
             tint = Color.White,
             background = ContentItemTokens.weeklySyncCoverBackground,
             url = ContentItemTokens.weeklySyncCoverUrl,
         ),
         action = ContentCardAction(
             label = ContentItemTokens.weeklySyncActionLabel,
-            icon = Icons.Outlined.EditNote,
+            iconKey = ContentCardIcon.EditNote.name,
             color = ContentItemTokens.weeklySyncActionColor,
         ),
     ),

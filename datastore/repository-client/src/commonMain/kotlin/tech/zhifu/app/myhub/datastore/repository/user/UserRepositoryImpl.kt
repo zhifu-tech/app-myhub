@@ -14,6 +14,7 @@ import tech.zhifu.app.myhub.datastore.repository.sync.SyncRepository
 import tech.zhifu.app.myhub.datastore.repository.sync.recordInsertOperation
 import tech.zhifu.app.myhub.logger.Logger
 import tech.zhifu.app.myhub.logger.error
+import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.sync.SyncEntityType
 
 class UserRepositoryImpl(
@@ -52,10 +53,9 @@ class UserRepositoryImpl(
     override suspend fun getUserOrNull(): User? =
         store
             .stream<StoreReadRequest<UserStoreData>>(
-                request = StoreReadRequest.skipMemory(
+                request = StoreReadRequest.localOnly(
                     // 约定：空 id 表示当前登录用户
                     key = UserStoreKey.ById(""),
-                    refresh = false,
                 )
             )
             .filterNot { it is StoreReadResponse.Loading || it is StoreReadResponse.NoNewData }
@@ -63,7 +63,7 @@ class UserRepositoryImpl(
             .dataOrNull()
             ?.user
 
-    override fun streamUser(): Flow<User?> =
+    override fun userFlow(): Flow<User?> =
         store
             .stream<StoreReadResponse<User>>(
                 request = StoreReadRequest.localOnly(
@@ -73,7 +73,7 @@ class UserRepositoryImpl(
             )
             .map { it.dataOrNull()?.user }
 
-    override fun streamUserPreferences(
+    override fun userPreferencesFlow(
         userId: String,
     ): Flow<UserPreferences?> =
         store
@@ -84,26 +84,91 @@ class UserRepositoryImpl(
             )
             .map { it.dataOrNull()?.preferences }
 
-
-    override suspend fun insertUserPreferences(
-        preferences: UserPreferences,
-        needSync: Boolean,
-    ) {
+    override suspend fun getUserPreferences(
+        userId: String,
+    ): UserPreferences? =
         store
-            .write(
-                request = StoreWriteRequest.of(
-                    key = UserStoreKey.PreferencesById(id = preferences.userId),
-                    value = UserStoreData.PreferencesData(preferences = preferences)
+            .stream<StoreWriteResponse>(
+                request = StoreReadRequest.localOnly(
+                    key = UserStoreKey.PreferencesById(id = userId),
                 )
             )
+            .first()
+            .dataOrNull()?.preferences
 
-        if (needSync) {
-            syncRepository.recordInsertOperation(
-                userId = preferences.userId,
-                entityType = SyncEntityType.UserPreferences,
-                entityId = preferences.userId,
-                payload = preferences,
+    override suspend fun upsertUserPreferences(
+        preferences: UserPreferences,
+    ): Long {
+        val userId = preferences.userId
+        val res = store
+            .write(
+                request = StoreWriteRequest.of(
+                    key = UserStoreKey.PreferencesById(id = userId),
+                    value = UserStoreData.PreferencesData(
+                        id = userId,
+                        preferences = preferences,
+                    )
+                )
             )
-        }
+        return if (res is StoreWriteResponse.Success) 1L else 0L
+    }
+
+    override suspend fun updateUserPreferencesTheme(
+        userId: String,
+        theme: String,
+    ): Long {
+        logger.info { "updateUserPreferencesTheme: $theme" }
+        val userId = getUserOrNull()?.id ?: return 0L
+        val res = store
+            .write(
+                request = StoreWriteRequest.of(
+                    key = UserStoreKey.PreferencesById(id = userId),
+                    value = UserStoreData.PreferencesData(
+                        id = userId,
+                        themeToWrite = theme,
+                    )
+                )
+            )
+        logger.info { "updateUserPreferencesTheme: ${res is StoreWriteResponse.Success}" }
+        return if (res is StoreWriteResponse.Success) 1L else 0L
+    }
+
+
+    override suspend fun updateUserPreferencesSort(
+        userId: String,
+        sortAsDate: Boolean,
+        sortAsName: Boolean,
+    ): Long {
+        val userId = getUserOrNull()?.id ?: return 0L
+        val res = store
+            .write(
+                request = StoreWriteRequest.of(
+                    key = UserStoreKey.PreferencesById(id = userId),
+                    value = UserStoreData.PreferencesData(
+                        id = userId,
+                        sortAsDateToWrite = sortAsDate,
+                        sortAsNameToWrite = sortAsName,
+                    )
+                )
+            )
+        return if (res is StoreWriteResponse.Success) 1L else 0L
+    }
+
+    override suspend fun updateUserPreferencesLayout(
+        userId: String,
+        layoutAsList: Boolean,
+    ): Long {
+        val userId = getUserOrNull()?.id ?: return 0L
+        val res = store
+            .write(
+                request = StoreWriteRequest.of(
+                    key = UserStoreKey.PreferencesById(id = userId),
+                    value = UserStoreData.PreferencesData(
+                        id = userId,
+                        layoutAsListToWrite = layoutAsList,
+                    )
+                )
+            )
+        return if (res is StoreWriteResponse.Success) 1L else 0L
     }
 }

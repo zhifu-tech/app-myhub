@@ -15,6 +15,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Composable
 internal fun PreviewContentCover(
@@ -23,7 +24,7 @@ internal fun PreviewContentCover(
 ) {
     val background = card.cover.background
     val coverUrl = card.cover.url
-    val coverIcon = card.cover.icon
+    val coverIcon = card.cover.iconKey?.toImageVector()
     val coverIconTint = card.cover.tint
 
     Box(

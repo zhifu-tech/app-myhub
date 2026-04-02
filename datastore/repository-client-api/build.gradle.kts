@@ -17,6 +17,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.datastore.model)
+            api(projects.datastore.operations)
             implementation(projects.datastore.sync)
 
             implementation(libs.kotlinx.coroutines.core)

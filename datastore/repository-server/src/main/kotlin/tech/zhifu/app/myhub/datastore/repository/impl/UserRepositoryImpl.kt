@@ -60,28 +60,13 @@ class UserRepositoryImpl(
     }
 
     override suspend fun upsertUserPreferences(preferences: UserPreferences): UserPreferences {
-        // 检查偏好设置是否存在
-        val existing = localDataSource.getUserPreferences(preferences.userId)
-        if (existing != null) {
-            // 如果存在，更新
-            try {
-                localDataSource.updateUserPreferences(preferences)
-            } catch (e: Exception) {
-                logger.error("user-repo", e) {
-                    "Failed to update user preferences: ${e.message}"
-                }
-                throw IllegalArgumentException("Failed to update user preferences: ${e.message}", e)
+        try {
+            localDataSource.upsertUserPreferences(preferences)
+        } catch (e: Exception) {
+            logger.error("user-repo", e) {
+                "Failed to update user preferences: ${e.message}"
             }
-        } else {
-            // 如果不存在，创建
-            try {
-                localDataSource.insertUserPreferences(preferences)
-            } catch (e: Exception) {
-                logger.error("user-repo", e) {
-                    "Failed to create user preferences: ${e.message}"
-                }
-                throw IllegalArgumentException("Failed to create user preferences: ${e.message}", e)
-            }
+            throw IllegalArgumentException("Failed to update user preferences: ${e.message}", e)
         }
         return preferences
     }

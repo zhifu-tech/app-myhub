@@ -8,6 +8,8 @@ sealed class DashboardSideEffect {
 
     object NavigateToSupport : DashboardSideEffect()
 
+    object NavigateToSettings : DashboardSideEffect()
+
     object NavigateToAiCapture : DashboardSideEffect()
 
     data class ShowSnack(val message: String) : DashboardSideEffect()

@@ -3,6 +3,8 @@ package tech.zhifu.app.myhub.datastore.repository.user
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.store5.SourceOfTruth
 import tech.zhifu.app.myhub.datastore.datasource.user.LocalUserDataSource
+import tech.zhifu.app.myhub.logger.info
+import tech.zhifu.app.myhub.logger.logger
 
 fun createUserStoreSourceOfTruth(
     localUserDataSource: LocalUserDataSource,
@@ -20,8 +22,13 @@ fun createUserStoreSourceOfTruth(
             }
 
             is UserStoreKey.PreferencesById -> {
-                localUserDataSource.flowUserPreferences(userId = key.id)
-                    .map { UserStoreData.PreferencesData(it) }
+                localUserDataSource.userPreferencesFlow(userId = key.id)
+                    .map {
+                        UserStoreData.PreferencesData(
+                            id = key.id,
+                            preferences = it
+                        )
+                    }
             }
         }
     },
@@ -33,7 +40,34 @@ fun createUserStoreSourceOfTruth(
             }
 
             is UserStoreKey.PreferencesById if data is UserStoreData.PreferencesData -> {
-                localUserDataSource.insertUserPreferences(data.preferences)
+                when {
+                    data.preferences != null -> {
+                        localUserDataSource.upsertUserPreferences(data.preferences)
+                    }
+
+                    data.themeToWrite != null -> {
+                        logger.info { "updateUserPreferencesTheme: ${data.themeToWrite}" }
+                        localUserDataSource.updateUserPreferencesTheme(
+                            userId = data.id,
+                            theme = data.themeToWrite
+                        )
+                    }
+
+                    data.sortAsDateToWrite != null && data.sortAsNameToWrite != null -> {
+                        localUserDataSource.updateUserPreferencesSort(
+                            userId = data.id,
+                            sortAsDate = data.sortAsDateToWrite,
+                            sortAsName = data.sortAsNameToWrite,
+                        )
+                    }
+
+                    data.layoutAsListToWrite != null -> {
+                        localUserDataSource.updateUserPreferencesLayout(
+                            userId = data.id,
+                            layoutAsList = data.layoutAsListToWrite,
+                        )
+                    }
+                }
             }
 
             else -> {}

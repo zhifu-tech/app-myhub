@@ -17,6 +17,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.datastore.model)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.jb.compose.material.materialIconsExtend)
         }

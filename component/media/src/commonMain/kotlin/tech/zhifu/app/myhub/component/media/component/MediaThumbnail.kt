@@ -41,6 +41,7 @@ fun MediaThumbnail(
     enabled: Boolean
 ) {
     val thumbShape = RoundedCornerShape(16.dp)
+
     Box(
         modifier = Modifier.size(80.dp)
     ) {

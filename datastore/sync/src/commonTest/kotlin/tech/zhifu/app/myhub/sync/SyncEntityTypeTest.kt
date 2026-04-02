@@ -11,7 +11,6 @@ class SyncEntityTypeTest {
     @Test
     fun `SyncEntityType values`() {
         assertEquals("user", SyncEntityType.User.value)
-        assertEquals("user_preferences", SyncEntityType.UserPreferences.value)
     }
 
     @Test

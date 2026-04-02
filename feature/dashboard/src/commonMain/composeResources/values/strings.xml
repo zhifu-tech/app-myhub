@@ -15,5 +15,6 @@
   <string name="feature_dashboard_menu_support">Feedback &amp; Support</string>
   <string name="feature_dashboard_menu_license">Open source licenses</string>
   <string name="feature_dashboard_menu_logout">Log out</string>
+  <string name="feature_dashboard_menu_settings">Settings</string>
 
 </resources>

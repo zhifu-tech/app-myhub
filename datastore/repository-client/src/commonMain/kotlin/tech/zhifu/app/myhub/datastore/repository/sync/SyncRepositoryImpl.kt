@@ -49,7 +49,7 @@ class SyncRepositoryImpl(
     override fun startAutoSync(userId: String) {
         autoSyncJob?.cancel()
         autoSyncJob = syncScope.launch {
-            userRepository.value.streamUserPreferences(userId)
+            userRepository.value.userPreferencesFlow(userId)
                 .filterIsInstance<StoreReadResponse.Data<UserStoreData>>()
                 .mapNotNull { response -> response.value.preferences }
                 .map { pref: UserPreferences ->

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.sharedElement
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Composable
 fun ContentListItem(
@@ -64,7 +65,7 @@ fun ContentListItem(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    action.icon.let { icon ->
+                    action.iconKey.toImageVector()?.let { icon ->
                         Icon(
                             imageVector = icon,
                             contentDescription = null,

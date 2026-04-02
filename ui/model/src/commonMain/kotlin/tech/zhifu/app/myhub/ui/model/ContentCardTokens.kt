@@ -1,10 +1,15 @@
 package tech.zhifu.app.myhub.ui.model
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 
 internal object ContentCardTokens {
     val draftActionLabel = "Continue Inputting"
@@ -18,6 +23,23 @@ internal object ContentCardTokens {
     val archivedLabel = "Archived"
     val archivedIcon = Icons.Outlined.EditNote
     val archivedColor = ContentCardColors.slate500
+}
+
+enum class ContentCardIcon(
+    val key: String,
+    val icon: ImageVector,
+) {
+    Psychology("psychology", Icons.Outlined.Psychology),
+    Visibility("visibility", Icons.Outlined.Visibility),
+    EditNote("edit_note", Icons.Outlined.EditNote),
+    Edit("edit", Icons.Outlined.Edit),
+    PlayCircle("play_circle", Icons.Outlined.PlayCircle),
+    AutoAwesome("auto_awesome", Icons.Outlined.AutoAwesome),
+    RocketLaunch("rocket_launch", Icons.Outlined.RocketLaunch);
+
+    companion object {
+        fun fromKey(key: String): ContentCardIcon? = entries.find { it.key == key }
+    }
 }
 
 internal object ContentCardColors {

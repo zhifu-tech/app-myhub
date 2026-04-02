@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.map
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 
 class LocalUserDataSourceImpl(
     private val database: MyHubDatabase
@@ -71,40 +73,64 @@ class LocalUserDataSourceImpl(
         database.userQueries.deleteUser(userId)
     }
 
-    override suspend fun insertUserPreferences(preferences: UserPreferences) {
-        database.user_preferencesQueries.insertUserPreferences(
-            user_id = preferences.userId,
-            layout_as_list = if (preferences.layoutAsList) 1L else 0L,
-            sort_as_date = if (preferences.sortAsDate) 1L else 0L,
-            sort_as_name = if (preferences.sortAsName) 1L else 0L,
-            auto_sync = if (preferences.autoSync) 1L else 0L,
-            sync_interval = preferences.syncInterval
-        )
-    }
-
-    override suspend fun updateUserPreferences(preferences: UserPreferences) {
-        database.user_preferencesQueries.updateUserPreferences(
-            layout_as_list = if (preferences.layoutAsList) 1L else 0L,
-            sort_as_date = if (preferences.sortAsDate) 1L else 0L,
-            sort_as_name = if (preferences.sortAsName) 1L else 0L,
-            auto_sync = if (preferences.autoSync) 1L else 0L,
-            sync_interval = preferences.syncInterval,
-            user_id = preferences.userId
-        )
-    }
+    override fun userPreferencesFlow(
+        userId: String,
+    ): Flow<UserPreferences?> =
+        database.user_preferencesQueries
+            .selectByUserId(user_id = userId)
+            .asFlow()
+            .mapToOneOrNull(context = Dispatchers.Default)
+            .map { it?.toDomain() }
 
     override suspend fun getUserPreferences(
         userId: String
     ): UserPreferences? = database.user_preferencesQueries
-        .selectUserPreferencesByUserId(userId)
+        .selectByUserId(userId)
         .executeAsOneOrNull()
         ?.toDomain()
 
-    override fun flowUserPreferences(
+    override suspend fun upsertUserPreferences(
+        preferences: UserPreferences,
+    ) = database.user_preferencesQueries.upsert(
+        user_id = preferences.userId,
+        theme = preferences.theme.orEmpty(),
+        language = preferences.language.orEmpty(),
+        layout_as_list = if (preferences.layoutAsList) 1L else 0L,
+        sort_as_date = if (preferences.sortAsDate) 1L else 0L,
+        sort_as_name = if (preferences.sortAsName) 1L else 0L,
+        auto_sync = if (preferences.autoSync) 1L else 0L,
+        sync_interval = preferences.syncInterval
+    ).also {
+        logger.debug { "upsertUserPreferences: $it" }
+    }
+
+    override suspend fun updateUserPreferencesTheme(
         userId: String,
-    ): Flow<UserPreferences> = database.user_preferencesQueries
-        .selectUserPreferencesByUserId(userId)
-        .asFlow()
-        .mapToOneOrNull(Dispatchers.Default)
-        .map { it?.toDomain() ?: UserPreferences(userId = userId) }
+        theme: String,
+    ) = database.user_preferencesQueries.updateTheme(
+        theme = theme,
+        user_id = userId
+    ).also {
+        logger.debug { "updateUserPreferencesTheme: $it, $userId, $theme" }
+    }
+
+    override suspend fun updateUserPreferencesSort(
+        userId: String,
+        sortAsDate: Boolean,
+        sortAsName: Boolean
+    ) = database.user_preferencesQueries
+        .updateSort(
+            sort_as_date = if (sortAsDate) 1L else 0L,
+            sort_as_name = if (sortAsName) 1L else 0L,
+            user_id = userId
+        )
+
+    override suspend fun updateUserPreferencesLayout(
+        userId: String,
+        layoutAsList: Boolean
+    ): Long = database.user_preferencesQueries
+        .updateLayout(
+            layout_as_list = if (layoutAsList) 1L else 0L,
+            user_id = userId
+        )
 }

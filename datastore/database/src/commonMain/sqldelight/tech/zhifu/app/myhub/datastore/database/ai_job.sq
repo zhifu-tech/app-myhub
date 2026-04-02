@@ -40,7 +40,7 @@ SELECT *
 FROM ai_job
 WHERE status = ?
 ORDER BY updated_at DESC
-LIMIT ? OFFSET ?;
+LIMIT :limit OFFSET :offset;
 
 selectPendingAiJobs:
 SELECT *

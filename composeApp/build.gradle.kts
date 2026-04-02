@@ -126,7 +126,10 @@ kotlin {
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.mixed)
             implementation(projects.feature.mixedApi)
+            implementation(projects.feature.settings)
+            implementation(projects.feature.settingsApi)
             implementation(projects.ui.design)
+            implementation(projects.ui.state)
 
             implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
             implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)

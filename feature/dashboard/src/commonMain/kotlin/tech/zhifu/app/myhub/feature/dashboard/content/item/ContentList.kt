@@ -9,28 +9,34 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentListContent(
+    viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    items: List<ContentCard>,
     previewState: PreviewState,
     onLoadMore: () -> Unit,
     onClickItem: (ContentCard) -> Unit,
 ) {
+    val items by viewModel.collectContentFieldItems()
     val listState = rememberLazyListState()
+
     AutoLoadMoreList(
         listState = listState,
         totalCount = items.size,
         onLoadMore = onLoadMore
     )
+
     LazyColumn(
         modifier = modifier.padding(top = 24.dp),
         contentPadding = paddingValues,

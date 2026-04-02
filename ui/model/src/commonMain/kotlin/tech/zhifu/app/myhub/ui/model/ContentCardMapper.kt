@@ -1,14 +1,8 @@
 package tech.zhifu.app.myhub.ui.model
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Psychology
-import androidx.compose.material.icons.outlined.RocketLaunch
-import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.collections.immutable.toImmutableList
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.location
@@ -22,9 +16,9 @@ fun Card.toDashboardContentCard(): ContentCard =
         summary = summary,
         location = location?.name.orEmpty(),
         updatedAt = updatedAt.toEpochMilliseconds(),
-        tags = tags,
+        tags = tags.toImmutableList(),
         cover = ContentCardCover(
-            icon = ui?.cover?.iconKey?.let(::iconFromKey),
+            iconKey = ui?.cover?.iconKey,
             background = ui?.cover?.bgColor?.let(::parseHexColor)
                 ?: ContentCardColors.slate100,
             tint = ui?.cover?.tintColor?.let(::parseHexColor),
@@ -38,35 +32,24 @@ internal fun actionForStatus(
 ) = when (status) {
     CardStatus.DRAFT -> ContentCardAction(
         label = ContentCardTokens.draftActionLabel,
-        icon = ContentCardTokens.draftActionIcon,
+        iconKey = ContentCardTokens.draftActionIcon.name,
         color = ContentCardTokens.draftActionColor,
     )
 
     CardStatus.PUBLISHED -> ContentCardAction(
         label = ContentCardTokens.reviewLabel,
-        icon = ContentCardTokens.reviewIcon,
+        iconKey = ContentCardTokens.reviewIcon.name,
         color = ContentCardTokens.reviewColor,
     )
 
     CardStatus.ARCHIVED -> ContentCardAction(
         label = ContentCardTokens.archivedLabel,
-        icon = ContentCardTokens.archivedIcon,
+        iconKey = ContentCardTokens.archivedIcon.name,
         color = ContentCardTokens.archivedColor,
     )
 }
 
-internal fun iconFromKey(
-    key: String
-): ImageVector? =
-    when (key.lowercase()) {
-        "psychology" -> Icons.Outlined.Psychology
-        "visibility" -> Icons.Outlined.Visibility
-        "edit_note" -> Icons.Outlined.EditNote
-        "edit" -> Icons.Outlined.Edit
-        "rocket_launch" -> Icons.Outlined.RocketLaunch
-        "play_circle" -> Icons.Outlined.PlayCircle
-        else -> null
-    }
+fun String.toImageVector(): ImageVector? = ContentCardIcon.fromKey(this)?.icon
 
 internal fun parseHexColor(hex: String): Color {
     val normalized = hex.removePrefix("#")

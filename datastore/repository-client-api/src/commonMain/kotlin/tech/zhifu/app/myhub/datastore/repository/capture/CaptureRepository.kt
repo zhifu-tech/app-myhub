@@ -3,6 +3,9 @@ package tech.zhifu.app.myhub.datastore.repository.capture
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Deprecated(
+    message = "Legacy server-first capture repository. Use client-first capture flow in feature/ai instead."
+)
 interface CaptureRepository {
     suspend fun createUploadSession(request: CreateUploadSessionRequest): MediaUploadSessionResult
     suspend fun uploadBinary(uploadUrl: String, mimeType: String, bytes: ByteArray): UploadBinaryResult
