@@ -12,9 +12,6 @@
   <string name="feature_dashboard_search_placeholder">Search</string>
   <string name="feature_dashboard_menu_sort_by_date">Sort by date</string>
   <string name="feature_dashboard_menu_sort_by_name">Sort by name</string>
-  <string name="feature_dashboard_menu_support">Feedback &amp; Support</string>
-  <string name="feature_dashboard_menu_license">Open source licenses</string>
-  <string name="feature_dashboard_menu_logout">Log out</string>
   <string name="feature_dashboard_menu_settings">Settings</string>
 
 </resources>

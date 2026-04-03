@@ -15,6 +15,10 @@
   <string name="feature_settings_on">開啟</string>
   <string name="feature_settings_off">關閉</string>
   <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_more">更多</string>
+  <string name="feature_settings_support">回饋與幫助</string>
+  <string name="feature_settings_license">開源程式碼授權</string>
+  <string name="feature_settings_logout">登出</string>
   <string name="feature_settings_ai_config">AI Provider 設定</string>
   <string name="feature_settings_ai_mode">模式</string>
   <string name="feature_settings_select_ai_mode">選擇 AI 模式</string>

@@ -19,6 +19,10 @@
   <string name="feature_settings_off">Off</string>
 
   <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_more">More</string>
+  <string name="feature_settings_support">Feedback &amp; Support</string>
+  <string name="feature_settings_license">Open source licenses</string>
+  <string name="feature_settings_logout">Log out</string>
   <string name="feature_settings_ai_config">AI Provider Config</string>
   <string name="feature_settings_ai_mode">Mode</string>
   <string name="feature_settings_select_ai_mode">Select AI Mode</string>

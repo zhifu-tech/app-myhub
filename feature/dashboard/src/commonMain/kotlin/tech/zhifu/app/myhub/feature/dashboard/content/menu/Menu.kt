@@ -32,12 +32,7 @@ fun Menu(
             MenuItemSort(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
 
             MenuItemDivider()
-            MenuItemLicense(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
-            MenuItemSupport(viewModel = viewModel, onBeforeNavigate = onDismissRequest)
-
-            MenuItemDivider()
             MenuItemSettings(viewModel = viewModel)
-            MenuItemLogout(viewModel = viewModel)
         },
     )
 }

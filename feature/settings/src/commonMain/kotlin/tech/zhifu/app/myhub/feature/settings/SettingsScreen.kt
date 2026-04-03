@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
+import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
+import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.feature.settings.content.Content
 import tech.zhifu.app.myhub.feature.settings.content.TopBar
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -72,6 +74,12 @@ private fun SettingsSideEffect(
         when (effect) {
             SettingsSideEffect.NavigateBack -> {
                 navigator.goBack()
+            }
+            SettingsSideEffect.NavigateToOpenSourceLicenses -> {
+                navigator.navigateToOpenSourceLicenses()
+            }
+            SettingsSideEffect.NavigateToSupport -> {
+                navigator.navigateToSupport()
             }
         }
     }

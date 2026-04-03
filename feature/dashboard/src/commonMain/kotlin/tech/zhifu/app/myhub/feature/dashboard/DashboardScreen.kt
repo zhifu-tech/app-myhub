@@ -22,8 +22,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
-import tech.zhifu.app.myhub.feature.mixed.api.navigateToOpenSourceLicenses
-import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.feature.preview.Preview
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
@@ -130,15 +128,6 @@ private fun DashboardSideEffect(
 ) {
     viewModel.collectSharedSideEffect { effect ->
         when (effect) {
-
-            DashboardSideEffect.NavigateToOpenSourceLicenses -> {
-                navigator.navigateToOpenSourceLicenses()
-            }
-
-            DashboardSideEffect.NavigateToSupport -> {
-                navigator.navigateToSupport()
-            }
-
             DashboardSideEffect.NavigateToAiCapture -> {
                 navigator.navigateToAiCapture()
             }

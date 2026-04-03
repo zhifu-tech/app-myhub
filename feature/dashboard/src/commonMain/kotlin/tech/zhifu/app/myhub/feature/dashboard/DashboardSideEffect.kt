@@ -4,10 +4,6 @@ sealed class DashboardSideEffect {
 
     object ResetSearch : DashboardSideEffect()
 
-    object NavigateToOpenSourceLicenses : DashboardSideEffect()
-
-    object NavigateToSupport : DashboardSideEffect()
-
     object NavigateToSettings : DashboardSideEffect()
 
     object NavigateToAiCapture : DashboardSideEffect()

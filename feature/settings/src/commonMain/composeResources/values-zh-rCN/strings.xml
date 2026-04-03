@@ -19,6 +19,10 @@
   <string name="feature_settings_off">关闭</string>
 
   <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_more">更多</string>
+  <string name="feature_settings_support">反馈与帮助</string>
+  <string name="feature_settings_license">开源代码许可</string>
+  <string name="feature_settings_logout">退出登录</string>
   <string name="feature_settings_ai_config">AI Provider 配置</string>
   <string name="feature_settings_ai_mode">模式</string>
   <string name="feature_settings_select_ai_mode">选择 AI 模式</string>

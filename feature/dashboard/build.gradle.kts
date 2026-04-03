@@ -30,7 +30,6 @@ kotlin {
             implementation(projects.feature.aiApi)
             implementation(projects.feature.dashboardApi)
             implementation(projects.feature.settingsApi)
-            implementation(projects.feature.mixedApi)
             implementation(projects.feature.preview)
             implementation(projects.ui.design)
             implementation(projects.ui.model)
