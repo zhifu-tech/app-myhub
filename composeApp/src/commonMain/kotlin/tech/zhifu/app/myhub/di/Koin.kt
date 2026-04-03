@@ -4,6 +4,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
+import tech.zhifu.app.myhub.config.AppBuildConfig
 import tech.zhifu.app.myhub.AppViewModel
 import tech.zhifu.app.myhub.analytics.di.analyticsModule
 import tech.zhifu.app.myhub.component.media.di.mediaModule
@@ -24,7 +25,10 @@ fun initKoin(
 
     modules(
         loggerModule {
-            LoggerConfig(appName = "Myhub")
+            LoggerConfig(
+                appName = "Myhub",
+                enableDebugLogs = AppBuildConfig.enableDebugFeatures
+            )
         },
 
         module {
