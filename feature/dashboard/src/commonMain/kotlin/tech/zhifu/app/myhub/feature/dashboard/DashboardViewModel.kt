@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.viewmodel.container
-import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
@@ -28,7 +27,6 @@ import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
 
 class DashboardViewModel(
-    internal val bootstrap: Bootstrap,
     internal val cardRepository: CardRepository,
     override val userRepository: UserRepository,
 ) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>(),
@@ -48,7 +46,7 @@ class DashboardViewModel(
     fun refresh() = intent {
         run {
             userStateFlow.value ?: run {
-                logger.debug { "用户不存在，等待静默登陆" }
+                logger.debug { "用户尚未加载，等待加载" }
                 return@intent
             }
             val currentState = state as? DashboardUiState.Loading
@@ -183,14 +181,6 @@ class DashboardViewModel(
 
     @OptIn(FlowPreview::class)
     private fun observeUiStateFlow() = intent {
-        userStateFlow
-            .onEach { user ->
-                if (user == null) {
-                    logger.debug { "用户不存在，静默登陆" }
-                    bootstrap.initialize("default")
-                }
-            }
-            .launchIn(viewModelScope)
         layoutStateFlow
             .onEach {
                 logger.debug { "更新用户偏好发生变化，刷新UI" }

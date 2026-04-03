@@ -16,11 +16,14 @@ internal class BootstrapStartupTask(
     override val dependencies: Set<String> = emptySet()
 
     override suspend fun run() {
-        if (!userRepository.hasUser()) {
-            val logger = logger("BootstrapStartupTask")
+        val logger = logger("BootstrapStartupTask")
+        val hasUser = userRepository.hasUser()
+        if (!hasUser) {
             logger.info { "First launch detected, initializing bootstrap..." }
             bootstrap.initialize("default")
             logger.info { "Bootstrap initialization completed" }
+        } else {
+            logger.info { "Bootstrap skipped: existing user detected." }
         }
     }
 }

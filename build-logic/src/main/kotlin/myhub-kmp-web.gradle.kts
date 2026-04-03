@@ -1,14 +1,16 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
+import java.nio.file.Files
+import java.nio.file.LinkOption
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
 }
 
-// 如果项目启用了 webpack（配置了 JS 或 WASM 目标），则复制 rootProject 的 webpack 和 karma 配置文件
-// 使用独立的复制任务，通过输入/输出声明实现增量构建
-// 只有当源文件变化或目标文件不存在时才复制
+// 如果项目启用了 webpack（配置了 JS 或 WASM 目标），
+// 则将 project 下的 webpack.config.d / karma.config.d 软链接到 rootProject/webApp 对应目录。
+// 这样全项目共享同一份配置，不再拷贝多份文件。
 
 afterEvaluate {
     val kotlinExtension = project.extensions.findByType<KotlinMultiplatformExtension>()
@@ -35,64 +37,58 @@ afterEvaluate {
     val webpackConfigTargetDir = projectDir.resolve("webpack.config.d")
     val karmaConfigTargetDir = projectDir.resolve("karma.config.d")
 
-    // 创建复制 webpack 配置文件的任务
-    val copyWebpackConfigTask = tasks.register("copyWebpackConfigFiles", Copy::class.java) {
+    fun ensureSymlink(sourceDir: File, targetDir: File) {
+        if (!sourceDir.exists() || !sourceDir.isDirectory) return
+
+        val targetPath = targetDir.toPath()
+        val sourcePath = sourceDir.toPath()
+        targetDir.parentFile?.mkdirs()
+
+        if (Files.exists(targetPath, LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(targetPath)) {
+                val rawLinkedPath = Files.readSymbolicLink(targetPath)
+                val resolvedLinkedPath = targetPath.parent.resolve(rawLinkedPath).normalize()
+                if (resolvedLinkedPath.toFile().canonicalFile == sourceDir.canonicalFile) return
+            }
+            targetDir.deleteRecursively()
+        }
+
+        Files.createSymbolicLink(targetPath, sourcePath)
+    }
+
+    // 创建链接 webpack 配置目录的任务
+    val linkWebpackConfigTask = tasks.register("linkWebpackConfigDir") {
         group = "webpack"
-        description =
-            "Copy webpack configuration files from rootProject/webApp/webpack.config.d to project directory"
-
-        // 输入：源目录中的所有文件
-        from(webpackConfigSourceDir) {
-            include("**/*")
-            includeEmptyDirs = false
-        }
-
-        // 输出：目标目录
-        into(webpackConfigTargetDir)
-
-        // 只复制文件，不复制子目录结构（在任务级别处理）
-        eachFile {
-            // 将文件直接放在目标目录下，不保留子目录结构
-            path = name
-        }
-
-        // 只有当源目录存在时才执行
+        description = "Link project webpack.config.d to rootProject/webApp/webpack.config.d"
+        inputs.dir(webpackConfigSourceDir)
+        outputs.dir(webpackConfigTargetDir)
         onlyIf {
             webpackConfigSourceDir.exists() && webpackConfigSourceDir.isDirectory
         }
+        doLast {
+            ensureSymlink(webpackConfigSourceDir, webpackConfigTargetDir)
+        }
     }
 
-    // 创建复制 karma 配置文件的任务
-    val copyKarmaConfigTask = tasks.register("copyKarmaConfigFiles", Copy::class.java) {
+    // 创建链接 karma 配置目录的任务
+    val linkKarmaConfigTask = tasks.register("linkKarmaConfigDir") {
         group = "karma"
-        description = "Copy karma configuration files from rootProject/webApp/karma.config.d to project directory"
-
-        // 输入：源目录中的所有文件
-        from(karmaConfigSourceDir) {
-            include("**/*")
-            includeEmptyDirs = false
-        }
-
-        // 输出：目标目录
-        into(karmaConfigTargetDir)
-
-        // 只复制文件，不复制子目录结构（在任务级别处理）
-        eachFile {
-            // 将文件直接放在目标目录下，不保留子目录结构
-            path = name
-        }
-
-        // 只有当源目录存在时才执行
+        description = "Link project karma.config.d to rootProject/webApp/karma.config.d"
+        inputs.dir(karmaConfigSourceDir)
+        outputs.dir(karmaConfigTargetDir)
         onlyIf {
             karmaConfigSourceDir.exists() && karmaConfigSourceDir.isDirectory
         }
+        doLast {
+            ensureSymlink(karmaConfigSourceDir, karmaConfigTargetDir)
+        }
     }
 
-    // 创建组合任务，复制所有配置文件
-    val copyAllConfigFilesTask = tasks.register("copyWebpackAndKarmaConfigFiles") {
+    // 创建组合任务，链接所有配置目录
+    val linkAllConfigDirsTask = tasks.register("linkWebpackAndKarmaConfigDirs") {
         group = "webpack"
-        description = "Copy all webpack and karma configuration files"
-        dependsOn(copyWebpackConfigTask, copyKarmaConfigTask)
+        description = "Link webpack and karma config directories from root webApp"
+        dependsOn(linkWebpackConfigTask, linkKarmaConfigTask)
     }
 
     // 让编译任务依赖复制任务
@@ -102,12 +98,12 @@ afterEvaluate {
             task.name.startsWith("compileKotlinWasmJs") ||
             task.name.startsWith("compileTestKotlinWasmJs")
     }.configureEach {
-        dependsOn(copyAllConfigFilesTask)
+        dependsOn(linkAllConfigDirsTask)
     }
 
     // 让 webpack 任务依赖复制任务
     tasks.withType<KotlinWebpack>().configureEach {
-        dependsOn(copyAllConfigFilesTask)
+        dependsOn(linkAllConfigDirsTask)
     }
 
     // 让测试任务依赖复制任务
@@ -117,6 +113,6 @@ afterEvaluate {
             task.name.contains("jsTest") ||
             task.name.contains("wasmJsTest")
     }.configureEach {
-        dependsOn(copyAllConfigFilesTask)
+        dependsOn(linkAllConfigDirsTask)
     }
 }

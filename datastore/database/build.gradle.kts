@@ -20,7 +20,7 @@ sqldelight {
             packageName.set("tech.zhifu.app.myhub.datastore.database")
             dialect("app.cash.sqldelight:sqlite-3-35-dialect:2.2.1")
             generateAsync.set(true)
-            version = 3
+            version = 0
         }
     }
     linkSqlite = true

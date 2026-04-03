@@ -25,7 +25,6 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platform)
-            implementation(projects.datastore.bootstrap)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.aiApi)

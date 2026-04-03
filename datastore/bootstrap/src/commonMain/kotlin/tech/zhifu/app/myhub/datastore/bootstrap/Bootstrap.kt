@@ -1,10 +1,14 @@
 package tech.zhifu.app.myhub.datastore.bootstrap
 
+import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 import kotlin.random.Random
 
 class Bootstrap(
     private val userRepository: UserRepository,
+    private val cardRepository: CardRepository,
 ) {
     suspend fun initialize(localeTag: String) {
         val config =
@@ -12,7 +16,15 @@ class Bootstrap(
                 userId = generateUUId(),
                 localeTag = localeTag,
             )
-        userRepository.insertUser(config.user)
+        val res = userRepository.insertUser(config.user)
+        logger.debug { "Bootstrap insertUser res: $res" }
+        config.cards.forEach { card ->
+            cardRepository.insertCard(
+                card = card,
+                userId = config.userId,
+            )
+        }
+        logger.debug { "Bootstrap inserted cards count=${config.cards.size}" }
     }
 }
 
