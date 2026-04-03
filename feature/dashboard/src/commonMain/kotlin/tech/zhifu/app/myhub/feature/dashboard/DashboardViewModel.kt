@@ -14,8 +14,7 @@ import tech.zhifu.app.myhub.datastore.bootstrap.Bootstrap
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
-import tech.zhifu.app.myhub.feature.dashboard.content.search.initSearchStateFlow
-import tech.zhifu.app.myhub.logger.Logger
+import tech.zhifu.app.myhub.feature.dashboard.content.search.createSearchStateFlow
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
@@ -37,22 +36,21 @@ class DashboardViewModel(
     UserPreferencesState,
     LayoutState,
     SearchState {
-
-    val logger: Logger = logger("Dashboard")
-
     override val container: Container<DashboardUiState, DashboardSideEffect> =
-        container(
-            initialState = DashboardUiState.Idle,
-        ) {
+        container(initialState = DashboardUiState.Idle) {
             observeUiStateFlow()
         }
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val layoutStateFlow = createLayoutStateFlow()
-    override val searchStateFlow = initSearchStateFlow()
+    override val searchStateFlow = createSearchStateFlow()
 
     fun refresh() = intent {
         run {
+            userStateFlow.value ?: run {
+                logger.debug { "用户不存在，等待静默登陆" }
+                return@intent
+            }
             val currentState = state as? DashboardUiState.Loading
             if (currentState != null) {
                 logger.debug { "正在刷新，忽略本次刷新请求" }
@@ -180,15 +178,6 @@ class DashboardViewModel(
             }
         }.onFailure { e ->
             handleError(e, "加载异常，请稍后重试")
-        }
-    }
-
-    fun search(query: String = "", reset: Boolean = false) {
-        searchStateFlow.value = query
-        if (reset) {
-            intent {
-                postSideEffect(DashboardSideEffect.ResetSearch)
-            }
         }
     }
 

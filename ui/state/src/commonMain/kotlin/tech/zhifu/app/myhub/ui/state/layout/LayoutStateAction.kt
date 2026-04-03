@@ -16,11 +16,11 @@ fun <VH> VH.createLayoutStateFlow(): StateFlow<Layout>
           VH : UserPreferencesState,
           VH : LayoutState {
     return userPreferencesStateFlow
-        .map { prefs: UserPreferences? ->
+        .map { prefs: UserPreferences ->
             Layout(
-                layoutAsList = prefs?.layoutAsList ?: true,
-                sortAsDate = prefs?.sortAsDate ?: true,
-                sortAsName = prefs?.sortAsName ?: false,
+                layoutAsList = prefs.layoutAsList,
+                sortAsDate = prefs.sortAsDate,
+                sortAsName = prefs.sortAsName,
             )
         }
         .distinctUntilChanged()
@@ -35,7 +35,7 @@ fun <VH> VH.updateLayoutAsList(layoutAsList: Boolean)
     where VH : ViewModel,
           VH : UserPreferencesState,
           VH : LayoutState {
-    val userId = userPreferencesStateFlow.value?.userId ?: return
+    val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository
             .updateUserPreferencesLayout(
@@ -49,7 +49,7 @@ fun <VH> VH.updateSortAsDate(sortAsDate: Boolean)
     where VH : ViewModel,
           VH : UserPreferencesState,
           VH : LayoutState {
-    val userId = userPreferencesStateFlow.value?.userId ?: return
+    val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository
             .updateUserPreferencesSort(

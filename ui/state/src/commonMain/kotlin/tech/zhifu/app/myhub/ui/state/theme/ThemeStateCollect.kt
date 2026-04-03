@@ -4,21 +4,27 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.map
 
 @Composable
-fun <VH> VH.collectDarkThemeState(): State<Boolean>
+fun <VH> VH.collectThemeState(): State<Theme>
     where VH : ViewModel,
           VH : ThemeState {
-    val isSystemInDarkTheme = isSystemInDarkTheme()
     return themeStateFlow
-        .map { state ->
-            when (state) {
-                Theme.Light -> false
-                Theme.Dark -> true
-                else -> isSystemInDarkTheme
-            }
-        }
-        .collectAsState(initial = isSystemInDarkTheme)
+        .collectAsState(initial = Theme.System)
+}
+
+@Composable
+fun <VH> VH.collectThemeDarkState(): Boolean
+    where VH : ViewModel,
+          VH : ThemeState {
+
+    val theme by themeStateFlow.collectAsState()
+    val systemDark = isSystemInDarkTheme()
+    return when (theme) {
+        Theme.Light -> false
+        Theme.Dark -> true
+        Theme.System -> systemDark
+    }
 }

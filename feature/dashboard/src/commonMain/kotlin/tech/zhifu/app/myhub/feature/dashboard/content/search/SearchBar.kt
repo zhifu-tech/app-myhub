@@ -34,7 +34,6 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectResetSearch
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
@@ -45,12 +44,10 @@ fun SearchBar(
     viewModel: DashboardViewModel
 ) {
     // 1. 监听重置搜索事件
-    val focusManager = LocalFocusManager.current
-    viewModel.CollectSideEffectResetSearch { effect ->
-        logger.debug { "SearchBarRoute collectSideEffect is  $effect" }
-        focusManager.clearFocus()
+    val resetSearch by viewModel.collectResetSearch()
+    if (resetSearch) {
+        LocalFocusManager.current.clearFocus()
     }
-
     // 2. 监听内容为空，且搜索状态为false时，隐藏搜索框
     val isContentEmpty by viewModel.collectContentAsEmpty()
     if (isContentEmpty) {

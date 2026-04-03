@@ -26,12 +26,14 @@ import tech.zhifu.app.myhub.navigation.navKeySerializerModule
 import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
 import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.navigation.toEntries
+import tech.zhifu.app.myhub.ui.design.language.LocalAppLocale
 import tech.zhifu.app.myhub.ui.design.theme.AppTheme
 import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
-import tech.zhifu.app.myhub.ui.state.theme.collectDarkThemeState
+import tech.zhifu.app.myhub.ui.state.language.collectLanguage
+import tech.zhifu.app.myhub.ui.state.theme.collectThemeDarkState
 
 @Composable
 fun App(
@@ -39,10 +41,12 @@ fun App(
     analyticsService: AnalyticsService = koinInject(),
 ) {
     val windowSizeClass = rememberWindowSizeClass()
-    val darkTheme by appViewModel.collectDarkThemeState()
+    val darkTheme = appViewModel.collectThemeDarkState()
+    val appLanguage by appViewModel.collectLanguage()
     CompositionLocalProvider(
         LocalAnalyticsService provides analyticsService,
-        LocalWindowSizeClass provides windowSizeClass
+        LocalWindowSizeClass provides windowSizeClass,
+        LocalAppLocale provides appLanguage.languageTag
     ) {
         AppTheme(darkTheme = darkTheme) {
             AppContent()

@@ -6,5 +6,5 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 interface UserPreferencesState {
     val userRepository: UserRepository
-    val userPreferencesStateFlow: StateFlow<UserPreferences?>
+    val userPreferencesStateFlow: StateFlow<UserPreferences>
 }

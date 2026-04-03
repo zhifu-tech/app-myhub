@@ -52,7 +52,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun deleteUser(userId: String) {
-        localDataSource.deleteUser(userId)
+//        localDataSource.deleteUser(userId)
     }
 
     override suspend fun getUserPreferences(userId: String): UserPreferences? {
@@ -61,7 +61,10 @@ class UserRepositoryImpl(
 
     override suspend fun upsertUserPreferences(preferences: UserPreferences): UserPreferences {
         try {
-            localDataSource.upsertUserPreferences(preferences)
+            localDataSource.upsertUserPreferences(
+                userId = preferences.userId,
+                preferences = preferences
+            )
         } catch (e: Exception) {
             logger.error("user-repo", e) {
                 "Failed to update user preferences: ${e.message}"

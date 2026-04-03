@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
+import tech.zhifu.app.myhub.ui.design.util.isHeightCompact
 
 @Composable
 fun StaticContent(
@@ -30,6 +32,7 @@ fun StaticContent(
         contentAlignment = Alignment.Center,
     ) {
         val isLandscape = maxWidth > maxHeight
+            && LocalWindowSizeClass.current.isHeightCompact()
         if (isLandscape) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

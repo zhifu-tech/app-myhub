@@ -27,12 +27,3 @@ fun DashboardViewModel.CollectSideEffectShowSnack(
         block(effect)
     }
 }
-
-@Composable
-fun DashboardViewModel.CollectSideEffectResetSearch(
-    block: (DashboardSideEffect.ResetSearch) -> Unit
-) = collectSharedSideEffect {
-    (it as? DashboardSideEffect.ResetSearch)?.let { effect ->
-        block(effect)
-    }
-}

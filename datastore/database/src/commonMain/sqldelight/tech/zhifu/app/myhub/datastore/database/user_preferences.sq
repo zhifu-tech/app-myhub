@@ -2,8 +2,8 @@
 CREATE TABLE user_preferences (
     user_id TEXT NOT NULL,
 
-    theme TEXT NOT NULL DEFAULT 'dark',           -- light / dark / system
-    language TEXT NOT NULL DEFAULT 'zh',          -- UI language (BCP-47)
+    theme TEXT NOT NULL DEFAULT 'system',           -- light / dark / system
+    language TEXT NOT NULL DEFAULT 'zh-CN',          -- UI language (BCP-47)
 
     layout_as_list INTEGER NOT NULL DEFAULT 1,    -- 0=false, 1=true
     sort_as_date INTEGER NOT NULL DEFAULT 1,      -- 0=false, 1=true
@@ -40,17 +40,52 @@ INSERT OR REPLACE INTO user_preferences (
 VALUES (?, ?, ?,?, ?, ?, ?, ?);
 
 updateTheme:
-UPDATE user_preferences
-SET theme = :theme
-WHERE user_id = :user_id;
+INSERT INTO user_preferences (
+    user_id,
+    theme
+)
+VALUES (
+    :user_id,
+    :theme
+)
+ON CONFLICT(user_id) DO UPDATE SET
+    theme = excluded.theme;
+
+updateLanguage:
+INSERT INTO user_preferences (
+    user_id,
+    language
+)
+VALUES (
+    :user_id,
+    :language
+)
+ON CONFLICT(user_id) DO UPDATE SET
+    language = excluded.language;
 
 updateSort:
-UPDATE user_preferences
-SET sort_as_date = :sort_as_date,
-    sort_as_name = :sort_as_name
-WHERE user_id = :user_id;
+INSERT INTO user_preferences (
+    user_id,
+    sort_as_date,
+    sort_as_name
+)
+VALUES (
+    :user_id,
+    :sort_as_date,
+    :sort_as_name
+)
+ON CONFLICT(user_id) DO UPDATE SET
+    sort_as_date = excluded.sort_as_date,
+    sort_as_name = excluded.sort_as_name;
 
 updateLayout:
-UPDATE user_preferences
-SET layout_as_list = :layout_as_list
-WHERE user_id = :user_id;
+INSERT INTO user_preferences (
+    user_id,
+    layout_as_list
+)
+VALUES (
+    :user_id,
+    :layout_as_list
+)
+ON CONFLICT(user_id) DO UPDATE SET
+    layout_as_list = excluded.layout_as_list;

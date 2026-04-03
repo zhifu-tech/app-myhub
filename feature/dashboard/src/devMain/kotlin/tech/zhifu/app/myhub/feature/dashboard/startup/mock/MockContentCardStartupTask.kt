@@ -27,7 +27,7 @@ internal class MockContentCardStartupTask(
     override val dependencies: Set<String> = setOf(StartupTaskIds.BOOTSTRAP)
 
     override suspend fun run() {
-        val userId = userRepository.getUserOrNull()?.id
+        val userId = userRepository.getUser()?.id
             ?: run {
                 logger.error { "MockContentCardStartupTask: failed as user not found" }
                 return

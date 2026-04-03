@@ -14,12 +14,18 @@ interface UserPreferencesOperations {
     ): UserPreferences?
 
     suspend fun upsertUserPreferences(
+        userId: String,
         preferences: UserPreferences,
     ): Long
 
     suspend fun updateUserPreferencesTheme(
         userId: String,
         theme: String
+    ): Long
+
+    suspend fun updateUserPreferencesLanguage(
+        userId: String,
+        language: String
     ): Long
 
     suspend fun updateUserPreferencesSort(

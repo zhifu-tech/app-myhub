@@ -2,11 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.layer.storage
 
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import tech.zhifu.app.myhub.feature.ai.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.CaptureState
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
@@ -14,6 +10,8 @@ import tech.zhifu.app.myhub.datastore.repository.capture.DraftSessionSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.MediaAssetSnapshot
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
+import tech.zhifu.app.myhub.feature.ai.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.CaptureState
 import kotlin.time.Clock
 
 class RepositoryCaptureStorageGateway(
@@ -90,7 +88,7 @@ class RepositoryCaptureStorageGateway(
     }
 
     override suspend fun savePublishedCard(card: Card, draft: CaptureDraft) {
-        val user = userRepository.getUser()
+        val user = userRepository.requireUser()
         runCatching {
             cardRepository.insertCard(card = card, userId = user.id)
             draft.mediaAssets.forEachIndexed { index, media ->

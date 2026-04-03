@@ -4,6 +4,8 @@ import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
+import tech.zhifu.app.myhub.ui.state.language.LanguageState
+import tech.zhifu.app.myhub.ui.state.language.createLanguageStateFlow
 import tech.zhifu.app.myhub.ui.state.theme.ThemeState
 import tech.zhifu.app.myhub.ui.state.theme.createThemeStateFlow
 import tech.zhifu.app.myhub.ui.state.user.UserState
@@ -16,18 +18,16 @@ class SettingsViewModel(
 ) : ViewModelContainerHost<SettingsUiState, SettingsSideEffect>(),
     UserState,
     UserPreferencesState,
-    ThemeState {
+    ThemeState,
+    LanguageState {
 
     override val container: Container<SettingsUiState, SettingsSideEffect> =
-        container(
-            initialState = SettingsUiState.Content
-        )
+        container(initialState = SettingsUiState.Content)
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
+    override val languageStateFlow = createLanguageStateFlow()
     override val themeStateFlow = createThemeStateFlow()
 
-//    //    private val themeSetting = settingsRepository.themeSetting
-////    private val languageSetting = settingsRepository.languageSetting
 //    private val aiModeSetting = settingsRepository.aiModeSetting
 //    private val aiDirectEndpointSetting = settingsRepository.aiDirectEndpointSetting
 //    private val aiDirectModelSetting = settingsRepository.aiDirectModelSetting
@@ -52,30 +52,6 @@ class SettingsViewModel(
 //        }
 //    }
 
-//    fun update(language: Language) {
-//        val state = (uiState as? SettingsUiState.Content)
-//            ?.languageSettingState
-//            ?.takeIf { it.isSubmitting.not() }
-//            ?: return
-//        if (state.language != language) {
-//            viewModelScope.launch {
-//                updateLanguageInternal(language)
-//            }
-//        }
-//    }
-
-//    fun updateTheme(isDarkMode: Boolean) {
-//        val state = (uiState as? SettingsUiState.Content)
-//            ?.themeSettingState
-//            ?.takeIf { it.isSubmitting.not() }
-//            ?: return
-//        if (state.isDarkMode != isDarkMode) {
-//            viewModelScope.launch {
-//                updateThemeInternal(isDarkMode)
-//            }
-//        }
-//    }
-//
 //    fun updateAiMode(mode: String) = intent {
 //        reduce {
 //            val state = (state as? SettingsUiState.Content) ?: return@reduce state
@@ -168,36 +144,7 @@ class SettingsViewModel(
 //            saveAiProviderSettingsInternal(current)
 //        }
 //    }
-//
-//    /**
-//     * 显示语言选择对话框
-//     */
-//    fun showLanguageDialog() = intent {
-//        reduce {
-//            val state = (state as? SettingsUiState.Content)
-//                ?: return@reduce state
-//            state.copy(
-//                languageSettingState = state.languageSettingState.copy(
-//                    showLanguageDialog = true
-//                )
-//            )
-//        }
-//    }
-//
-////    /**
-////     * 隐藏语言选择对话框
-////     */
-////    fun hideLanguageDialog() = intent {
-////        reduce {
-////            val state = (state as? SettingsUiState.Content)
-////                ?: return@reduce state
-////            state.copy(
-////                languageSettingState = state.languageSettingState.copy(
-////                    showLanguageDialog = false
-////                )
-////            )
-////        }
-////    }
+
 //
 //    /**
 //     * 清除完成态内联错误
@@ -255,104 +202,7 @@ class SettingsViewModel(
 //            }
 //        }
 //    }
-//
-//    private suspend fun updateLanguageInternal(language: Language) {
-//        intent {
-//            reduce {
-//                val state = (state as? SettingsUiState.Content)
-//                    ?: return@reduce state
-//                state.copy(
-//                    languageSettingState = state.languageSettingState.copy(
-//                        isSubmitting = true,
-//                    ),
-//                    inlineMessage = "",
-//                )
-//            }
-//        }
-//        runCatching {
-//            languageSetting.set(language.code)
-//        }.onSuccess {
-//            intent {
-//                reduce {
-//                    val state = (state as? SettingsUiState.Content)
-//                        ?: return@reduce state
-//                    state.copy(
-//                        languageSettingState = state.languageSettingState.copy(
-//                            language = language,
-//                            isSubmitting = false,
-//                        ),
-//                        inlineMessage = "",
-//                    )
-//                }
-//            }
-//        }.onFailure { throwable ->
-//            logger.error(throwable) {
-//                "Failed to update language: ${throwable.message}"
-//            }
-//            intent {
-//                reduce {
-//                    val state = (state as? SettingsUiState.Content)
-//                        ?: return@reduce state
-//                    state.copy(
-//                        languageSettingState = state.languageSettingState.copy(
-//                            isSubmitting = false
-//                        ),
-//                        inlineMessage = throwable.message ?: "Failed to update language"
-//                    )
-//                }
-//            }
-//        }
-//    }
-//
-//    private suspend fun updateThemeInternal(isDarkMode: Boolean) {
-//        intent {
-//            reduce {
-//                val state = (state as? SettingsUiState.Content)
-//                    ?: return@reduce state
-//                state.copy(
-//                    themeSettingState = state.themeSettingState.copy(
-//                        isSubmitting = true
-//                    ),
-//                    inlineMessage = ""
-//                )
-//            }
-//        }
-//
-//        runCatching {
-//            themeSetting.set(isDarkMode)
-//        }.onSuccess {
-//            logger.info { "Theme updated successfully" }
-//            intent {
-//                reduce {
-//                    val state = (state as? SettingsUiState.Content)
-//                        ?: return@reduce state
-//                    state.copy(
-//                        themeSettingState = state.themeSettingState.copy(
-//                            isDarkMode = isDarkMode,
-//                            isSubmitting = false,
-//                        ),
-//                        inlineMessage = "",
-//                    )
-//                }
-//            }
-//        }.onFailure { throwable ->
-//            logger.error(throwable) {
-//                "Failed to update theme: ${throwable.message}"
-//            }
-//            intent {
-//                reduce {
-//                    val state = (state as? SettingsUiState.Content)
-//                        ?: return@reduce state
-//                    state.copy(
-//                        themeSettingState = state.themeSettingState.copy(
-//                            isSubmitting = false,
-//                        ),
-//                        inlineMessage = throwable.message ?: "Failed to update theme"
-//                    )
-//                }
-//            }
-//        }
-//    }
+
 //
 //    private suspend fun saveAiProviderSettingsInternal(current: AiProviderSettingState) {
 //        intent {

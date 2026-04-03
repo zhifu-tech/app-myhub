@@ -14,7 +14,7 @@ fun repositoryCardModule() = module {
     single<CardRepository> {
         CardRepositoryImpl(
             store = createMutableStore(
-                cache = createCardStoreCache(),
+                memoryCache = createCardStoreCache(),
                 sourceOfTruth = createCardStoreSourceOfTruth(
                     localCardDataSource = get(),
                 ),

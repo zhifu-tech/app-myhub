@@ -11,24 +11,35 @@ import org.mobilenativefoundation.store.store5.SourceOfTruth
 import org.mobilenativefoundation.store.store5.StoreBuilder
 import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.Updater
+import org.mobilenativefoundation.store.store5.Validator
 
 fun <K : StoreKey<*>, D : StoreData<String>> createMutableStore(
-    cache: Cache<K, D>,
+    memoryCache: Cache<K, D>,
     sourceOfTruth: SourceOfTruth<K, D, D>,
     bookkeeper: Bookkeeper<K>,
     fetcher: Fetcher<K, D>,
     updater: Updater<K, D, StoreWriteResponse>,
+    validator: Validator<D>? = null,
     converter: Converter<D, D, D> = Converter.Builder<D, D, D>()
         .fromNetworkToLocal { it }
         .fromOutputToLocal { it }
         .build()
-): MutableStore<K, D> = StoreBuilder.from(
-    memoryCache = cache,
-    sourceOfTruth = sourceOfTruth,
-    fetcher = fetcher,
-).toMutableStoreBuilder(
-    converter = converter,
-).build(
-    updater = updater,
-    bookkeeper = bookkeeper
-)
+): MutableStore<K, D> =
+    StoreBuilder
+        .from(
+            memoryCache = memoryCache,
+            sourceOfTruth = sourceOfTruth,
+            fetcher = fetcher,
+        )
+        .also {
+            if (validator != null) {
+                it.validator(validator)
+            }
+        }
+        .toMutableStoreBuilder(
+            converter = converter,
+        )
+        .build(
+            updater = updater,
+            bookkeeper = bookkeeper
+        )

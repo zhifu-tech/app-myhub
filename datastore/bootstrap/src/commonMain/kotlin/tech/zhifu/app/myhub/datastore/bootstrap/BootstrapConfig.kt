@@ -42,8 +42,9 @@ suspend fun buildBootstrapConfig(
 private suspend fun readResource(
     fileName: String,
     localeDir: String
-): String = Res.readBytes(path = "files/$localeDir/$fileName")
-    .decodeToString()
+): String =
+    Res.readBytes(path = "files/$localeDir/$fileName")
+        .decodeToString()
 
 private fun resolveLocaleDir(
     localeTag: String

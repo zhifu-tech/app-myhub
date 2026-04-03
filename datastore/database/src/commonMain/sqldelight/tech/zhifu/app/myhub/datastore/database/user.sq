@@ -51,10 +51,6 @@ SET username = ?,
     last_login_at = ?
 WHERE id = ?;
 
-deleteUser:
-DELETE FROM user
-WHERE id = ?;
-
 selectCurrentUser:
 SELECT *
 FROM user

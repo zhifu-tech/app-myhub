@@ -1,0 +1,23 @@
+<resources>
+  <string name="feature_settings_appearance_language">外觀與語言</string>
+  <string name="feature_settings_theme_mode">主題模式</string>
+  <string name="feature_settings_select_theme">選擇主題</string>
+  <string name="feature_settings_theme_light">淺色</string>
+  <string name="feature_settings_theme_dark">深色</string>
+  <string name="feature_settings_theme_system">跟隨系統</string>
+  <string name="feature_settings_display_language">顯示語言</string>
+  <string name="feature_settings_select_language">選擇語言</string>
+  <string name="feature_settings_close">關閉</string>
+  <string name="feature_settings_retry">重試</string>
+  <string name="feature_settings_on">開啟</string>
+  <string name="feature_settings_off">關閉</string>
+  <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_ai_config">AI Provider 設定</string>
+  <string name="feature_settings_ai_mode">模式</string>
+  <string name="feature_settings_ai_direct_endpoint">直連 Endpoint</string>
+  <string name="feature_settings_ai_direct_model">直連 Model</string>
+  <string name="feature_settings_ai_direct_api_key">直連 API Key</string>
+  <string name="feature_settings_ai_timeout_ms">逾時（毫秒）</string>
+  <string name="feature_settings_ai_retries">最大重試次數</string>
+  <string name="feature_settings_ai_save">儲存 AI 設定</string>
+</resources>

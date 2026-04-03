@@ -89,7 +89,6 @@ class LocalCardDataSourceImpl(
         val query = when {
             orderByUpdated -> {
                 val hasCursor = cursorCardId != null && cursorUpdatedAt != null
-                logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
                 if (normalizedQuery != null) {
                     if (hasCursor) {
                         database.cardQueries.selectCardsByUserIdWithUpdatedDescSearchNext(
@@ -115,7 +114,6 @@ class LocalCardDataSourceImpl(
                             limit = limit.toLong()
                         )
                     } else {
-                        logger.debug { "orderByUpdated hasCursor=$hasCursor, cursorCardId=$cursorCardId, cursorUpdatedAt=$cursorUpdatedAt" }
                         database.cardQueries.selectCardsByUserIdWithUpdatedDescFirst(
                             userId = userId,
                             limit = limit.toLong()

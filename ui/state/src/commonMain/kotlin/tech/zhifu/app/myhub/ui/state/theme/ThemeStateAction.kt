@@ -15,7 +15,7 @@ fun <VH> VH.createThemeStateFlow(): StateFlow<Theme>
           VH : UserPreferencesState,
           VH : ThemeState {
     return userPreferencesStateFlow
-        .map { prefs -> Theme.fromWire(prefs?.theme) ?: Theme.System }
+        .map { prefs -> Theme.fromWire(prefs.theme) ?: Theme.System }
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
@@ -29,7 +29,7 @@ fun <VH> VH.updateTheme(theme: String)
           VH : UserPreferencesState,
           VH : ThemeState {
     val targetTheme = Theme.fromWire(theme) ?: return
-    val userId = userPreferencesStateFlow.value?.userId ?: return
+    val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository
             .updateUserPreferencesTheme(

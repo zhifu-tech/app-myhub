@@ -17,10 +17,10 @@ internal class BootstrapStartupTask(
 
     override suspend fun run() {
         if (!userRepository.hasUser()) {
-            val taskLogger = logger("BootstrapStartupTask")
-            taskLogger.info { "First launch detected, initializing bootstrap..." }
+            val logger = logger("BootstrapStartupTask")
+            logger.info { "First launch detected, initializing bootstrap..." }
             bootstrap.initialize("default")
-            taskLogger.info { "Bootstrap initialization completed" }
+            logger.info { "Bootstrap initialization completed" }
         }
     }
 }

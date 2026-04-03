@@ -23,10 +23,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
+import tech.zhifu.app.myhub.feature.dashboard.content.search.resetSearch
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
 
 @Composable
@@ -44,18 +43,8 @@ fun Fab(
     FabContent(
         modifier = modifier,
         isSearching = isSearching,
-        onClickAdd = {
-            logger.debug {
-                "FabRoute onClickAdd is called"
-            }
-            viewModel.navigateToAiCapture()
-        },
-        onClickClose = {
-            logger.debug {
-                "FabRoute onClickClear is called"
-            }
-            viewModel.search(reset = true)
-        }
+        onClickAdd = viewModel::navigateToAiCapture,
+        onClickClose = viewModel::resetSearch
     )
 }
 
