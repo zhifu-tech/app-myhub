@@ -143,6 +143,15 @@ class UserRepositoryImpl(
             language = language,
         )
 
+    override suspend fun updateUserPreferencesAiProvider(
+        userId: String,
+        aiProvider: String,
+    ): Long =
+        upsertUserPreferencesInternal(
+            userId = userId,
+            aiProvider = aiProvider,
+        )
+
     override suspend fun updateUserPreferencesSort(
         userId: String,
         sortAsDate: Boolean,
@@ -168,6 +177,7 @@ class UserRepositoryImpl(
         preferences: UserPreferences? = null,
         theme: String? = null,
         language: String? = null,
+        aiProvider: String? = null,
         sortAsDate: Boolean? = null,
         sortAsName: Boolean? = null,
         layoutAsList: Boolean? = null,
@@ -181,6 +191,7 @@ class UserRepositoryImpl(
                         preferences = preferences,
                         themeToWrite = theme,
                         languageToWrite = language,
+                        aiProviderToWrite = aiProvider,
                         sortAsDateToWrite = sortAsDate,
                         sortAsNameToWrite = sortAsName,
                         layoutAsListToWrite = layoutAsList,

@@ -103,6 +103,7 @@ class LocalUserDataSourceImpl(
                 user_id = userId,
                 theme = preferences.theme.orEmpty(),
                 language = preferences.language.orEmpty(),
+                ai_provider = preferences.aiProvider,
                 layout_as_list = if (preferences.layoutAsList) 1L else 0L,
                 sort_as_date = if (preferences.sortAsDate) 1L else 0L,
                 sort_as_name = if (preferences.sortAsName) 1L else 0L,
@@ -127,6 +128,16 @@ class LocalUserDataSourceImpl(
         database.user_preferencesQueries
             .updateLanguage(
                 language = language,
+                user_id = userId
+            )
+
+    override suspend fun updateUserPreferencesAiProvider(
+        userId: String,
+        aiProvider: String,
+    ): Long =
+        database.user_preferencesQueries
+            .updateAiProvider(
+                ai_provider = aiProvider,
                 user_id = userId
             )
 

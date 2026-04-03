@@ -43,6 +43,7 @@ internal fun DbUserPreferences.toDomain() = UserPreferences(
     userId = user_id,
     theme = theme,
     language = language,
+    aiProvider = ai_provider,
     layoutAsList = layout_as_list.toBoolean(def = true),
     sortAsDate = sort_as_date.toBoolean(def = true),
     sortAsName = sort_as_name.toBoolean(def = true),

@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.jb.compose.foundation.foundation)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.orbit.core)
         }
     }

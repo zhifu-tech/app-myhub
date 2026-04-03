@@ -28,6 +28,11 @@ interface UserPreferencesOperations {
         language: String
     ): Long
 
+    suspend fun updateUserPreferencesAiProvider(
+        userId: String,
+        aiProvider: String
+    ): Long
+
     suspend fun updateUserPreferencesSort(
         userId: String,
         sortAsDate: Boolean,

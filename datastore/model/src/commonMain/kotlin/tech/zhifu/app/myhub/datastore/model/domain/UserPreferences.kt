@@ -7,6 +7,7 @@ data class UserPreferences(
     val userId: String,
     val theme: String? = null,
     val language: String? = null,
+    val aiProvider: String = "{}",
     val layoutAsList: Boolean = true,
     val sortAsDate: Boolean = true,
     val sortAsName: Boolean = true,

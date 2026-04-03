@@ -60,6 +60,14 @@ fun createUserStoreSourceOfTruth(
                             )
                     }
 
+                    data.aiProviderToWrite != null -> {
+                        localUserDataSource
+                            .updateUserPreferencesAiProvider(
+                                userId = data.id,
+                                aiProvider = data.aiProviderToWrite,
+                            )
+                    }
+
                     data.sortAsDateToWrite != null && data.sortAsNameToWrite != null -> {
                         localUserDataSource
                             .updateUserPreferencesSort(

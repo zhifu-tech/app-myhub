@@ -64,7 +64,7 @@ fun aiModule() = module {
             outputGuard = get(),
         )
     }
-    single<MutableProviderConfigSource> { SettingsProviderConfigSource(localSettingStore = get()) }
+    single<MutableProviderConfigSource> { SettingsProviderConfigSource(userRepository = get()) }
     single<ProviderConfigSource> { get<MutableProviderConfigSource>() }
     single { createHttpClient() }
     single { RealServerGatewayHealthChecker(httpClient = get()) }

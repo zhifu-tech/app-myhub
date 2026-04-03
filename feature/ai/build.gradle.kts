@@ -27,6 +27,7 @@ kotlin {
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.aiApi)
             implementation(projects.ui.design)
+            implementation(projects.ui.state)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

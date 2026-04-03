@@ -16,6 +16,7 @@ sealed class UserStoreData : StoreData<String> {
         val preferences: UserPreferences? = null,
         val themeToWrite: String? = null,
         val languageToWrite: String? = null,
+        val aiProviderToWrite: String? = null,
         val sortAsNameToWrite: Boolean? = null,
         val sortAsDateToWrite: Boolean? = null,
         val layoutAsListToWrite: Boolean? = null,
