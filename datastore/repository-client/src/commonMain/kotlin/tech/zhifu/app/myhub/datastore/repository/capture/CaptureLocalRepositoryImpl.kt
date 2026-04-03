@@ -1,5 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.capture
 
+import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 
 class CaptureLocalRepositoryImpl(
@@ -19,7 +21,7 @@ class CaptureLocalRepositoryImpl(
     override suspend fun getLatestDraftSession(): DraftSessionSnapshot? {
         val row = database.draft_sessionQueries
             .selectLatestDraftSessions(limit = 1, offset = 0)
-            .executeAsOneOrNull() ?: return null
+            .awaitAsOneOrNull() ?: return null
         return DraftSessionSnapshot(
             id = row.id,
             cardId = row.card_id,
@@ -48,7 +50,7 @@ class CaptureLocalRepositoryImpl(
     }
 
     override suspend fun getAiJob(jobId: String): AiJobSnapshot? {
-        val row = database.ai_jobQueries.selectAiJobById(jobId).executeAsOneOrNull() ?: return null
+        val row = database.ai_jobQueries.selectAiJobById(jobId).awaitAsOneOrNull() ?: return null
         return AiJobSnapshot(
             id = row.id,
             provider = row.provider,
@@ -64,7 +66,7 @@ class CaptureLocalRepositoryImpl(
     override suspend fun listPendingAiJobs(limit: Int): List<AiJobSnapshot> {
         return database.ai_jobQueries
             .selectPendingAiJobs()
-            .executeAsList()
+            .awaitAsList()
             .take(limit)
             .map { row ->
                 AiJobSnapshot(
@@ -83,7 +85,7 @@ class CaptureLocalRepositoryImpl(
     override suspend fun listAiJobsByStatus(status: String, limit: Int, offset: Int): List<AiJobSnapshot> {
         return database.ai_jobQueries
             .selectAiJobsByStatus(status = status, limit = limit.toLong(), offset = offset.toLong())
-            .executeAsList()
+            .awaitAsList()
             .map { row ->
                 AiJobSnapshot(
                     id = row.id,
@@ -119,7 +121,7 @@ class CaptureLocalRepositoryImpl(
     }
 
     override suspend fun getMediaAsset(id: String): MediaAssetSnapshot? {
-        val row = database.media_assetQueries.selectMediaAssetById(id).executeAsOneOrNull() ?: return null
+        val row = database.media_assetQueries.selectMediaAssetById(id).awaitAsOneOrNull() ?: return null
         return MediaAssetSnapshot(
             id = row.id,
             cardId = row.card_id,
@@ -138,7 +140,7 @@ class CaptureLocalRepositoryImpl(
     override suspend fun listAllMediaAssets(limit: Int, offset: Int): List<MediaAssetSnapshot> {
         return database.media_assetQueries
             .selectAllMediaAssets(limit = limit.toLong(), offset = offset.toLong())
-            .executeAsList()
+            .awaitAsList()
             .map { row ->
                 MediaAssetSnapshot(
                     id = row.id,
@@ -161,6 +163,6 @@ class CaptureLocalRepositoryImpl(
     }
 
     override suspend fun hasCard(cardId: String): Boolean {
-        return database.cardQueries.selectCardById(cardId).executeAsOneOrNull() != null
+        return database.cardQueries.selectCardById(cardId).awaitAsOneOrNull() != null
     }
 }

@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.datastore.datasource.user
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -67,12 +68,12 @@ class LocalUserDataSourceImpl(
         if (userId.isEmpty()) {
             database.userQueries
                 .selectCurrentUser()
-                .executeAsOneOrNull()
+                .awaitAsOneOrNull()
                 ?.toDomain()
         } else {
             database.userQueries
                 .selectUserById(userId)
-                .executeAsOneOrNull()
+                .awaitAsOneOrNull()
                 ?.toDomain()
         }
 
@@ -90,7 +91,7 @@ class LocalUserDataSourceImpl(
     ): UserPreferences? =
         database.user_preferencesQueries
             .selectByUserId(userId)
-            .executeAsOneOrNull()
+            .awaitAsOneOrNull()
             ?.toDomain()
 
     override suspend fun upsertUserPreferences(
