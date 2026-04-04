@@ -6,9 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 
 @Composable
-fun <VM> VM.collectAIProviderState(): State<AIProvider>
+fun <VM> VM.collectAIProviderState(): State<ProviderRoutingConfig>
     where VM : ViewModel,
-          VM : AIProviderState {
-    return aiProviderStateFlow
-        .collectAsState(initial = AIProvider())
+          VM : ProviderState {
+    return providerRoutingConfigStateFlow
+        .collectAsState(initial = ProviderRoutingConfig())
 }

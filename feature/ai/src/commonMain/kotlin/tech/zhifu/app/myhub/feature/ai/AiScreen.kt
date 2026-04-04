@@ -35,8 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
 import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
@@ -44,6 +44,7 @@ fun AiScreen(
     navigator: AppNavigator,
     viewModel: AIViewModel = koinViewModel<AIViewModel>(),
 ) {
+
     val state by viewModel.collectAsState { it }
     when (val uiState = state) {
         AIUiState.Idle,
@@ -116,7 +117,7 @@ private fun CaptureContent(
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ProviderMode.values().forEach { mode ->
+            ProviderMode.entries.forEach { mode ->
                 AssistChip(
                     onClick = { onProviderModeChange(mode) },
                     label = {

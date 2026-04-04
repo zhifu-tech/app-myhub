@@ -29,6 +29,7 @@ kotlin {
             implementation(projects.core.settings)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.feature.ai)
             implementation(projects.feature.mixedApi)
             implementation(projects.feature.settingsApi)
             implementation(projects.ui.design)

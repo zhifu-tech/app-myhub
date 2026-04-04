@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai
 
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 
 sealed class AIUiState(
     val state: State,

@@ -8,80 +8,80 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-fun <VM> VM.createAIProviderStateFlow(): StateFlow<AIProvider>
+fun <VM> VM.createAIProviderStateFlow(): StateFlow<ProviderRoutingConfig>
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
+          VM : ProviderState {
     return userPreferencesStateFlow
         .map { prefs ->
-            logger.info { "createAIProviderStateFlow: $prefs" }
-            AIProvider.fromJsonText(prefs.aiProvider)
+            Json.decodeFromString<ProviderRoutingConfig>(prefs.aiProvider)
         }
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = AIProvider()
+            initialValue = ProviderRoutingConfig()
         )
 }
 
-fun <VM> VM.updateAIProvider(provider: AIProvider)
+fun <VM> VM.updateAIProvider(providerRoutingConfig: ProviderRoutingConfig)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
+          VM : ProviderState {
 
-    logger.info { "updateAIProvider: $provider" }
+    logger.info { "updateAIProvider: $providerRoutingConfig" }
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository.updateUserPreferencesAiProvider(
             userId = userId,
-            aiProvider = provider.toJsonText(),
+            aiProvider = Json.encodeToString(providerRoutingConfig)
         )
     }
 }
 
-fun <VM> VM.updateAIProviderMode(mode: AIProviderMode)
+fun <VM> VM.updateAIProviderMode(mode: ProviderMode)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(mode = mode))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(mode = mode))
 }
 
 fun <VM> VM.updateAIProviderDirectEndpoint(directEndpoint: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(directEndpoint = directEndpoint))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directEndpoint = directEndpoint))
 }
 
 fun <VM> VM.updateAIProviderDirectModel(directModel: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(directModel = directModel))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directModel = directModel))
 }
 
 fun <VM> VM.updateAIProviderDirectApiKey(directApiKey: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(directApiKey = directApiKey))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directApiKey = directApiKey))
 }
 
 fun <VM> VM.updateAIProviderTimeoutMs(timeoutMs: Long)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(timeoutMs = timeoutMs))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(timeoutMs = timeoutMs))
 }
 
 fun <VM> VM.updateAIProviderMaxRetries(maxRetries: Int)
     where VM : ViewModel,
           VM : UserPreferencesState,
-          VM : AIProviderState {
-    updateAIProvider(aiProviderStateFlow.value.copy(maxRetries = maxRetries))
+          VM : ProviderState {
+    updateAIProvider(providerRoutingConfigStateFlow.value.copy(maxRetries = maxRetries))
 }

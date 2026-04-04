@@ -1,16 +1,15 @@
 package tech.zhifu.app.myhub.feature.ai
 
 import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderAnalysisContext
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderAnalysisExecutor
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderAnalysisInput
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderAnalysisRequest
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderAnalysisResult
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderErrorCategory
-import tech.zhifu.app.myhub.feature.ai.layer.agent.MutableProviderConfigSource
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderTelemetry
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderRouter
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisContext
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisInput
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.MutableProviderConfigSource
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationContext
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationEngine
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.StateGuard
@@ -19,6 +18,8 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
 import tech.zhifu.app.myhub.feature.ai.layer.tool.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.ToolDispatcher
 import tech.zhifu.app.myhub.feature.ai.layer.tool.ToolResult
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import kotlin.time.Clock
 
 class CaptureOrchestrator(
@@ -171,7 +172,11 @@ class CaptureOrchestrator(
                 val draft = context.draft ?: return context
                 when (val result = toolDispatcher.execute(ToolCommand.AddTag(draft, text))) {
                     is ToolResult.DraftUpdated -> conversationEngine.onTagUpdated(context, text, result.draft)
-                    is ToolResult.Failed -> conversationEngine.onBlockedAction(context, "add_tag:${result.code}:${result.message}")
+                    is ToolResult.Failed -> conversationEngine.onBlockedAction(
+                        context,
+                        "add_tag:${result.code}:${result.message}"
+                    )
+
                     else -> context
                 }
             }
@@ -181,7 +186,11 @@ class CaptureOrchestrator(
                 val draft = context.draft ?: return context
                 when (val result = toolDispatcher.execute(ToolCommand.UpdateTitle(draft, text))) {
                     is ToolResult.DraftUpdated -> conversationEngine.onTitleUpdated(context, text, result.draft)
-                    is ToolResult.Failed -> conversationEngine.onBlockedAction(context, "update_title:${result.code}:${result.message}")
+                    is ToolResult.Failed -> conversationEngine.onBlockedAction(
+                        context,
+                        "update_title:${result.code}:${result.message}"
+                    )
+
                     else -> context
                 }
             }
@@ -214,10 +223,16 @@ class CaptureOrchestrator(
                             )
                         ).let { conversationEngine.refreshActionComponents(it) }
                     }
-                    is ToolResult.Failed -> conversationEngine.onBlockedAction(context, "attach_media:${result.code}:${result.message}")
+
+                    is ToolResult.Failed -> conversationEngine.onBlockedAction(
+                        context,
+                        "attach_media:${result.code}:${result.message}"
+                    )
+
                     else -> context
                 }
             }
+
             in listOf("skip_tags", "review") -> conversationEngine.onMoveToReview(context)
             "edit_title" -> conversationEngine.onManualEdit(context)
             "publish" -> {
@@ -228,7 +243,12 @@ class CaptureOrchestrator(
                         storageGateway.clearDraftSession(publishing.sessionId.orEmpty())
                         conversationEngine.onPublished(publishing, result.title)
                     }
-                    is ToolResult.Failed -> conversationEngine.onBlockedAction(context, "publish:${result.code}:${result.message}")
+
+                    is ToolResult.Failed -> conversationEngine.onBlockedAction(
+                        context,
+                        "publish:${result.code}:${result.message}"
+                    )
+
                     else -> context
                 }
             }
@@ -243,7 +263,11 @@ class CaptureOrchestrator(
                         val draft = context.draft ?: return context
                         when (val result = toolDispatcher.execute(ToolCommand.AddTag(draft, tag))) {
                             is ToolResult.DraftUpdated -> conversationEngine.onTagUpdated(context, tag, result.draft)
-                            is ToolResult.Failed -> conversationEngine.onBlockedAction(context, "add_tag:${result.code}:${result.message}")
+                            is ToolResult.Failed -> conversationEngine.onBlockedAction(
+                                context,
+                                "add_tag:${result.code}:${result.message}"
+                            )
+
                             else -> context
                         }
                     }
@@ -258,9 +282,8 @@ class CaptureOrchestrator(
 
     fun providerMode(): ProviderMode = providerRouter.mode
 
-    suspend fun updateProviderMode(mode: ProviderMode) {
-        val current = providerConfigSource.current()
-        providerConfigSource.update(current.copy(mode = mode))
+    suspend fun updateProviderConfig(config: ProviderRoutingConfig) {
+        providerConfigSource.update(config)
     }
 
     private suspend fun persistDraftSession(context: ConversationContext) {

@@ -1,17 +1,35 @@
 package tech.zhifu.app.myhub.feature.ai
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
-import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
+import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationContext
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderState
+import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
+import tech.zhifu.app.myhub.ui.state.ai.updateAIProviderMode
+import tech.zhifu.app.myhub.ui.state.user.UserState
+import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
+import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
+import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
 
 class AIViewModel(
+    override val userRepository: UserRepository,
     private val orchestrator: CaptureOrchestrator,
 ) : ViewModel(),
-    ContainerHost<AIUiState, AISideEffect> {
+    ContainerHost<AIUiState, AISideEffect>,
+    UserState,
+    UserPreferencesState,
+    ProviderState {
 
     private var context: ConversationContext? = null
+    override val userStateFlow = createUserStateFlow()
+    override val userPreferencesStateFlow = createUserPreferencesStatFlow()
+    override val providerRoutingConfigStateFlow = createAIProviderStateFlow()
 
     override val container = container<AIUiState, AISideEffect>(
         initialState = AIUiState.Loading,
@@ -20,9 +38,20 @@ class AIViewModel(
     }
 
     private fun bootstrap() = intent {
-        val initial = orchestrator.bootstrap()
-        context = initial
-        reduce { initial.toUiState(input = "") }
+        providerRoutingConfigStateFlow
+            .onEach { stateProvider ->
+                // 首先加载初始化配置
+                orchestrator.updateProviderConfig(stateProvider)
+                // fixme 当用户切换了AI提供商，需要重置上下文 ？？？
+
+                // 然后加载上下文
+                if (context == null) {
+                    val initial = orchestrator.bootstrap()
+                    context = initial
+                    reduce { initial.toUiState(input = "") }
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun updateInput(value: String) = intent {
@@ -49,7 +78,7 @@ class AIViewModel(
     }
 
     fun updateProviderMode(mode: ProviderMode) = intent {
-        orchestrator.updateProviderMode(mode)
+        updateAIProviderMode(mode)
         val current = state as? AIUiState.Content ?: return@intent
         reduce { current.copy(providerMode = mode) }
     }

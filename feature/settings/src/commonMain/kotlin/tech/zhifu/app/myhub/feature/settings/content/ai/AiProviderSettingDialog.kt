@@ -26,19 +26,19 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_retri
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_save
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_timeout_ms
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
-import tech.zhifu.app.myhub.ui.state.ai.AIProvider
-import tech.zhifu.app.myhub.ui.state.ai.AIProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 
 @Composable
 fun AiProviderSettingDialog(
-    provider: AIProvider,
+    providerRoutingConfig: ProviderRoutingConfig,
     timeoutInput: String,
     maxRetriesInput: String,
     validationMessageRes: StringResource?,
     visible: Boolean,
     onDismiss: () -> Unit,
     onSave: () -> Unit,
-    onModeChanged: (AIProviderMode) -> Unit,
+    onModeChanged: (ProviderMode) -> Unit,
     onEndpointChanged: (String) -> Unit,
     onModelChanged: (String) -> Unit,
     onApiKeyChanged: (String) -> Unit,
@@ -61,8 +61,8 @@ fun AiProviderSettingDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    AIProviderMode.entries.forEach { mode ->
-                        val isSelected = mode == provider.mode
+                    ProviderMode.entries.forEach { mode ->
+                        val isSelected = mode == providerRoutingConfig.mode
                         AssistChip(
                             onClick = { onModeChanged(mode) },
                             label = {
@@ -73,22 +73,22 @@ fun AiProviderSettingDialog(
                     }
                 }
 
-                if (provider.mode == AIProviderMode.DirectApi) {
+                if (providerRoutingConfig.mode == ProviderMode.DIRECT_API) {
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = provider.directEndpoint,
+                        value = providerRoutingConfig.directEndpoint,
                         onValueChange = onEndpointChanged,
                         label = { Text(stringResource(Res.string.feature_settings_ai_direct_endpoint)) },
                     )
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = provider.directModel,
+                        value = providerRoutingConfig.directModel,
                         onValueChange = onModelChanged,
                         label = { Text(stringResource(Res.string.feature_settings_ai_direct_model)) },
                     )
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = provider.directApiKey,
+                        value = providerRoutingConfig.directApiKey,
                         onValueChange = onApiKeyChanged,
                         label = { Text(stringResource(Res.string.feature_settings_ai_direct_api_key)) },
                     )

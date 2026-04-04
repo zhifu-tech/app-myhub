@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.myhub.kmp.wasmJs)
     alias(libs.plugins.jb.composeMultiplatform)
     alias(libs.plugins.jb.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {

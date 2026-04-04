@@ -5,7 +5,7 @@ import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.ui.state.ai.AIProviderState
+import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
 import tech.zhifu.app.myhub.ui.state.language.LanguageState
 import tech.zhifu.app.myhub.ui.state.language.createLanguageStateFlow
@@ -24,7 +24,7 @@ class SettingsViewModel(
     UserPreferencesState,
     ThemeState,
     LanguageState,
-    AIProviderState {
+    ProviderState {
 
     override val container: Container<SettingsUiState, SettingsSideEffect> =
         container(initialState = SettingsUiState.Content)
@@ -32,5 +32,5 @@ class SettingsViewModel(
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val languageStateFlow = createLanguageStateFlow()
     override val themeStateFlow = createThemeStateFlow()
-    override val aiProviderStateFlow = createAIProviderStateFlow()
+    override val providerRoutingConfigStateFlow = createAIProviderStateFlow()
 }

@@ -21,7 +21,6 @@ kotlin {
             implementation(projects.core.analytics)
             implementation(projects.core.network)
             implementation(projects.core.navigation)
-            implementation(projects.core.settings)
             implementation(projects.core.startup)
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)

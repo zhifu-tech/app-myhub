@@ -24,8 +24,8 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_valid
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_model_required
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_max_retries_invalid
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_timeout_invalid
-import tech.zhifu.app.myhub.ui.state.ai.AIProvider
-import tech.zhifu.app.myhub.ui.state.ai.AIProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
+import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.collectAIProviderState
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProvider
 
@@ -41,7 +41,7 @@ fun AiProviderSettingItem(
     var validationMessageRes by remember(provider, showDialog.value) { mutableStateOf<StringResource?>(null) }
 
     AiProviderSettingItemContent(
-        provider = provider,
+        providerRoutingConfig = provider,
         onClick = {
             editProvider = provider.copy()
             timeoutInput = provider.timeoutMs.toString()
@@ -52,7 +52,7 @@ fun AiProviderSettingItem(
     )
 
     AiProviderSettingDialog(
-        provider = editProvider,
+        providerRoutingConfig = editProvider,
         timeoutInput = timeoutInput,
         maxRetriesInput = maxRetriesInput,
         validationMessageRes = validationMessageRes,
@@ -62,7 +62,7 @@ fun AiProviderSettingItem(
         },
         onSave = {
             val validation = validateAiProviderState(
-                provider = editProvider,
+                providerRoutingConfig = editProvider,
                 timeoutInput = timeoutInput,
                 maxRetriesInput = maxRetriesInput,
             )
@@ -109,7 +109,7 @@ fun AiProviderSettingItem(
 
 @Composable
 private fun AiProviderSettingItemContent(
-    provider: AIProvider,
+    providerRoutingConfig: ProviderRoutingConfig,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -122,7 +122,7 @@ private fun AiProviderSettingItemContent(
                 Text(text = stringResource(Res.string.feature_settings_ai_config))
             },
             supportingContent = {
-                Text(text = stringResource(provider.mode.labelToken()))
+                Text(text = stringResource(providerRoutingConfig.mode.labelToken()))
             },
             leadingContent = {
                 Icon(
@@ -138,7 +138,7 @@ private fun AiProviderSettingItemContent(
 }
 
 private fun validateAiProviderState(
-    provider: AIProvider,
+    providerRoutingConfig: ProviderRoutingConfig,
     timeoutInput: String,
     maxRetriesInput: String,
 ): StringResource? {
@@ -152,14 +152,14 @@ private fun validateAiProviderState(
         return Res.string.feature_settings_ai_validation_max_retries_invalid
     }
 
-    if (provider.mode == AIProviderMode.DirectApi) {
-        if (provider.directEndpoint.isBlank()) {
+    if (providerRoutingConfig.mode == ProviderMode.DIRECT_API) {
+        if (providerRoutingConfig.directEndpoint.isBlank()) {
             return Res.string.feature_settings_ai_validation_direct_endpoint_required
         }
-        if (provider.directModel.isBlank()) {
+        if (providerRoutingConfig.directModel.isBlank()) {
             return Res.string.feature_settings_ai_validation_direct_model_required
         }
-        if (provider.directApiKey.isBlank()) {
+        if (providerRoutingConfig.directApiKey.isBlank()) {
             return Res.string.feature_settings_ai_validation_direct_api_key_required
         }
     }
