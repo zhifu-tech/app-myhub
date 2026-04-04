@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import tech.zhifu.app.myhub.datastore.model.domain.User
 
-fun <VH> VH.createUserStateFlow(): StateFlow<User?>
-    where VH : ViewModel,
-          VH : UserState {
+fun <VM> VM.createUserStateFlow(): StateFlow<User?>
+    where VM : ViewModel,
+          VM : UserState {
     return userRepository
         .userFlow()
         .distinctUntilChanged()

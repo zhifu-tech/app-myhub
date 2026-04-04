@@ -11,10 +11,10 @@ import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-fun <VH> VH.createLayoutStateFlow(): StateFlow<Layout>
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : LayoutState {
+fun <VM> VM.createLayoutStateFlow(): StateFlow<Layout>
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : LayoutState {
     return userPreferencesStateFlow
         .map { prefs: UserPreferences ->
             Layout(
@@ -31,10 +31,10 @@ fun <VH> VH.createLayoutStateFlow(): StateFlow<Layout>
         )
 }
 
-fun <VH> VH.updateLayoutAsList(layoutAsList: Boolean)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : LayoutState {
+fun <VM> VM.updateLayoutAsList(layoutAsList: Boolean)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : LayoutState {
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository
@@ -45,10 +45,10 @@ fun <VH> VH.updateLayoutAsList(layoutAsList: Boolean)
     }
 }
 
-fun <VH> VH.updateSortAsDate(sortAsDate: Boolean)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : LayoutState {
+fun <VM> VM.updateSortAsDate(sortAsDate: Boolean)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : LayoutState {
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository

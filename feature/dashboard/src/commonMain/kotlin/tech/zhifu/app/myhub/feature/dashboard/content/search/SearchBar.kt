@@ -31,12 +31,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_search_placeholder
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
 
 @Composable
 fun SearchBar(
@@ -44,9 +46,11 @@ fun SearchBar(
     viewModel: DashboardViewModel
 ) {
     // 1. 监听重置搜索事件
-    val resetSearch by viewModel.collectResetSearch()
-    if (resetSearch) {
-        LocalFocusManager.current.clearFocus()
+    val lfm = LocalFocusManager.current
+    viewModel.collectSharedSideEffect(
+        predicate = { it is DashboardSideEffect.ResetSearch }
+    ) {
+        lfm.clearFocus()
     }
     // 2. 监听内容为空，且搜索状态为false时，隐藏搜索框
     val isContentEmpty by viewModel.collectContentAsEmpty()

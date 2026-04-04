@@ -35,15 +35,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
-import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
+import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
 fun AiScreen(
     navigator: AppNavigator,
     viewModel: AIViewModel = koinViewModel<AIViewModel>(),
 ) {
-    val state by viewModel.collectFieldAsState { it }
+    val state by viewModel.collectAsState { it }
     when (val uiState = state) {
         AIUiState.Idle,
         AIUiState.Loading -> {
@@ -290,6 +291,7 @@ private fun ActionSection(
                         )
                     }
                 }
+
                 "input" -> {
                     Text(
                         text = component.options.firstOrNull()?.label ?: "请在输入框输入内容",

@@ -1,29 +1,20 @@
 package tech.zhifu.app.myhub.feature.dashboard.viewmodel
 
 import androidx.compose.runtime.Composable
-import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
 fun DashboardViewModel.collectContentAsEmpty() =
-    collectFieldAsState {
+    collectAsState {
         (it as? DashboardUiState.Content)
             ?.items?.isEmpty() ?: true
     }
 
 @Composable
 fun DashboardViewModel.collectContentFieldItems() =
-    collectFieldAsState {
+    collectAsState {
         (it as? DashboardUiState.Content)
             ?.items ?: emptyList()
     }
-
-@Composable
-fun DashboardViewModel.CollectSideEffectShowSnack(
-    block: (DashboardSideEffect.ShowSnack) -> Unit
-) = collectSharedSideEffect {
-    (it as? DashboardSideEffect.ShowSnack)?.let { effect ->
-        block(effect)
-    }
-}

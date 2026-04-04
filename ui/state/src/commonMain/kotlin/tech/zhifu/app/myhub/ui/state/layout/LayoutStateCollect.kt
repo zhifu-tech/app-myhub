@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 @Composable
-fun <VH> VH.collectLayoutAsList(): State<Boolean>
-    where VH : ViewModel,
-          VH : LayoutState {
+fun <VM> VM.collectLayoutAsList(): State<Boolean>
+    where VM : ViewModel,
+          VM : LayoutState {
     return layoutStateFlow
         .map { it.layoutAsList }
         .distinctUntilChanged()
@@ -18,9 +18,9 @@ fun <VH> VH.collectLayoutAsList(): State<Boolean>
 }
 
 @Composable
-fun <VH> VH.collectSortAsDate(): State<Boolean>
-    where VH : ViewModel,
-          VH : LayoutState {
+fun <VM> VM.collectSortAsDate(): State<Boolean>
+    where VM : ViewModel,
+          VM : LayoutState {
     return layoutStateFlow
         .map { it.sortAsDate }
         .distinctUntilChanged()

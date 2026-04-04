@@ -12,13 +12,14 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchBar
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
 fun BottomBar(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val bottomBarEnabled = viewModel.collectFieldAsState {
+    val bottomBarEnabled = viewModel.collectAsState {
         it is DashboardUiState.Content
     }.value
 

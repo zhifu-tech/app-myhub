@@ -12,17 +12,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.CollectSideEffectShowSnack
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.state.layout.collectLayoutAsList
+import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
 
 @Composable
 fun Content(
@@ -32,9 +33,12 @@ fun Content(
     previewState: PreviewState,
 ) {
     val snackbarState = LocalSnackbarState.current
-    viewModel.CollectSideEffectShowSnack {
+    viewModel.collectSharedSideEffect(
+        predicate = { it is DashboardSideEffect.ShowSnack },
+    ) { sideEffect ->
+        sideEffect as DashboardSideEffect.ShowSnack
         viewModel.viewModelScope.launch {
-            snackbarState.showSnackbar(it.message)
+            snackbarState.showSnackbar(sideEffect.message)
         }
     }
 

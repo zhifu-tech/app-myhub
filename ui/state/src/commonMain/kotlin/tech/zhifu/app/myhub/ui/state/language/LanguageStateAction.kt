@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-fun <VH> VH.createLanguageStateFlow(): StateFlow<Language>
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : LanguageState {
+fun <VM> VM.createLanguageStateFlow(): StateFlow<Language>
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : LanguageState {
     return userPreferencesStateFlow
         .map { it.language.toLanguage() }
         .distinctUntilChanged()
@@ -24,10 +24,10 @@ fun <VH> VH.createLanguageStateFlow(): StateFlow<Language>
         )
 }
 
-fun <VH> VH.updateLanguage(language: Language)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : LanguageState {
+fun <VM> VM.updateLanguage(language: Language)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : LanguageState {
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository.updateUserPreferencesLanguage(

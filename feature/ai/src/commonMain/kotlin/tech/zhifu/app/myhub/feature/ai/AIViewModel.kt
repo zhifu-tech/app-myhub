@@ -1,13 +1,15 @@
 package tech.zhifu.app.myhub.feature.ai
 
+import androidx.lifecycle.ViewModel
+import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationContext
 import tech.zhifu.app.myhub.feature.ai.layer.agent.ProviderMode
-import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationContext
 
 class AIViewModel(
     private val orchestrator: CaptureOrchestrator,
-) : ViewModelContainerHost<AIUiState, AISideEffect>() {
+) : ViewModel(),
+    ContainerHost<AIUiState, AISideEffect> {
 
     private var context: ConversationContext? = null
 

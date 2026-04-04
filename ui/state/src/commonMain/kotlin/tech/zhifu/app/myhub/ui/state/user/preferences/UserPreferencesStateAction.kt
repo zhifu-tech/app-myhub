@@ -14,10 +14,10 @@ import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.ui.state.user.UserState
 
-fun <VH> VH.createUserPreferencesStatFlow(): StateFlow<UserPreferences>
-    where VH : ViewModel,
-          VH : UserState,
-          VH : UserPreferencesState {
+fun <VM> VM.createUserPreferencesStatFlow(): StateFlow<UserPreferences>
+    where VM : ViewModel,
+          VM : UserState,
+          VM : UserPreferencesState {
     return userStateFlow
         .filterNotNull()
         .distinctUntilChangedBy(keySelector = User::id)

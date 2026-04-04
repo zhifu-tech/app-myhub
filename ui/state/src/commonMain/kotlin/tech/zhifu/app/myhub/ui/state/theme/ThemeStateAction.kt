@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-fun <VH> VH.createThemeStateFlow(): StateFlow<Theme>
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : ThemeState {
+fun <VM> VM.createThemeStateFlow(): StateFlow<Theme>
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : ThemeState {
     return userPreferencesStateFlow
         .map { prefs -> Theme.fromWire(prefs.theme) ?: Theme.System }
         .distinctUntilChanged()
@@ -24,10 +24,10 @@ fun <VH> VH.createThemeStateFlow(): StateFlow<Theme>
         )
 }
 
-fun <VH> VH.updateTheme(theme: String)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : ThemeState {
+fun <VM> VM.updateTheme(theme: String)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : ThemeState {
     val targetTheme = Theme.fromWire(theme) ?: return
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {

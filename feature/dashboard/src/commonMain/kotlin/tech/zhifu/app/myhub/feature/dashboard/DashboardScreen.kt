@@ -27,6 +27,8 @@ import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
 
 @Composable
 fun DashboardScreen(
@@ -92,7 +94,7 @@ private fun DashboardContent(
     hazeState: HazeState,
     previewState: PreviewState,
 ) {
-    val state by viewModel.collectFieldAsState { it.state }
+    val state by viewModel.collectAsState { it.state }
     when (state) {
         DashboardUiState.State.LOADING -> {
             Loading(

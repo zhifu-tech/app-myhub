@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.FlowPreview
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
@@ -17,7 +19,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.search.createSearchStateFl
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
 import tech.zhifu.app.myhub.ui.model.toDashboardContentCard
 import tech.zhifu.app.myhub.ui.state.layout.LayoutState
 import tech.zhifu.app.myhub.ui.state.layout.createLayoutStateFlow
@@ -29,7 +30,8 @@ import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatF
 class DashboardViewModel(
     internal val cardRepository: CardRepository,
     override val userRepository: UserRepository,
-) : ViewModelContainerHost<DashboardUiState, DashboardSideEffect>(),
+) : ViewModel(),
+    ContainerHost<DashboardUiState, DashboardSideEffect>,
     UserState,
     UserPreferencesState,
     LayoutState,

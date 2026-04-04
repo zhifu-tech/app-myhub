@@ -1,9 +1,10 @@
 package tech.zhifu.app.myhub.feature.settings
 
+import androidx.lifecycle.ViewModel
 import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.ui.design.util.ViewModelContainerHost
 import tech.zhifu.app.myhub.ui.state.ai.AIProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
 import tech.zhifu.app.myhub.ui.state.language.LanguageState
@@ -17,7 +18,8 @@ import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatF
 
 class SettingsViewModel(
     override val userRepository: UserRepository,
-) : ViewModelContainerHost<SettingsUiState, SettingsSideEffect>(),
+) : ViewModel(),
+    ContainerHost<SettingsUiState, SettingsSideEffect>,
     UserState,
     UserPreferencesState,
     ThemeState,

@@ -12,10 +12,10 @@ import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
-fun <VH> VH.createAIProviderStateFlow(): StateFlow<AIProvider>
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.createAIProviderStateFlow(): StateFlow<AIProvider>
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     return userPreferencesStateFlow
         .map { prefs ->
             logger.info { "createAIProviderStateFlow: $prefs" }
@@ -29,10 +29,10 @@ fun <VH> VH.createAIProviderStateFlow(): StateFlow<AIProvider>
         )
 }
 
-fun <VH> VH.updateAIProvider(provider: AIProvider)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProvider(provider: AIProvider)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
 
     logger.info { "updateAIProvider: $provider" }
     val userId = userPreferencesStateFlow.value.userId
@@ -44,44 +44,44 @@ fun <VH> VH.updateAIProvider(provider: AIProvider)
     }
 }
 
-fun <VH> VH.updateAIProviderMode(mode: AIProviderMode)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderMode(mode: AIProviderMode)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(mode = mode))
 }
 
-fun <VH> VH.updateAIProviderDirectEndpoint(directEndpoint: String)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderDirectEndpoint(directEndpoint: String)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(directEndpoint = directEndpoint))
 }
 
-fun <VH> VH.updateAIProviderDirectModel(directModel: String)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderDirectModel(directModel: String)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(directModel = directModel))
 }
 
-fun <VH> VH.updateAIProviderDirectApiKey(directApiKey: String)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderDirectApiKey(directApiKey: String)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(directApiKey = directApiKey))
 }
 
-fun <VH> VH.updateAIProviderTimeoutMs(timeoutMs: Long)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderTimeoutMs(timeoutMs: Long)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(timeoutMs = timeoutMs))
 }
 
-fun <VH> VH.updateAIProviderMaxRetries(maxRetries: Int)
-    where VH : ViewModel,
-          VH : UserPreferencesState,
-          VH : AIProviderState {
+fun <VM> VM.updateAIProviderMaxRetries(maxRetries: Int)
+    where VM : ViewModel,
+          VM : UserPreferencesState,
+          VM : AIProviderState {
     updateAIProvider(aiProviderStateFlow.value.copy(maxRetries = maxRetries))
 }

@@ -8,17 +8,17 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 
 @Composable
-fun <VH> VH.collectThemeState(): State<Theme>
-    where VH : ViewModel,
-          VH : ThemeState {
+fun <VM> VM.collectThemeState(): State<Theme>
+    where VM : ViewModel,
+          VM : ThemeState {
     return themeStateFlow
         .collectAsState(initial = Theme.System)
 }
 
 @Composable
-fun <VH> VH.collectThemeDarkState(): Boolean
-    where VH : ViewModel,
-          VH : ThemeState {
+fun <VM> VM.collectThemeDarkState(): Boolean
+    where VM : ViewModel,
+          VM : ThemeState {
 
     val theme by themeStateFlow.collectAsState()
     val systemDark = isSystemInDarkTheme()

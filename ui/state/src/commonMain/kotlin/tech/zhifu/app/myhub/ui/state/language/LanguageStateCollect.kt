@@ -6,9 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 
 @Composable
-fun <VH> VH.collectLanguage(): State<Language>
-    where VH : ViewModel,
-          VH : LanguageState {
+fun <VM> VM.collectLanguage(): State<Language>
+    where VM : ViewModel,
+          VM : LanguageState {
     return languageStateFlow
         .collectAsState(initial = Language.ZH_CN)
 }
