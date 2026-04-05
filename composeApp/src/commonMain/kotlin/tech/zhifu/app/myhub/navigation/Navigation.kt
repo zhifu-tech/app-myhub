@@ -7,7 +7,7 @@ import androidx.navigation3.runtime.entryProvider
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import tech.zhifu.app.myhub.feature.ai.api.navigation.AiNavKey
+import tech.zhifu.app.myhub.feature.ai.api.navigation.AINavKey
 import tech.zhifu.app.myhub.feature.ai.navigation.aiEntry
 import tech.zhifu.app.myhub.feature.dashboard.api.navigation.DashboardNavKey
 import tech.zhifu.app.myhub.feature.dashboard.navigation.dashboardEntry
@@ -26,7 +26,7 @@ fun navAppKeySet(): Set<NavKey> = setOf(
 fun navKeySerializerModule() = SerializersModule {
     polymorphic(NavKey::class) {
         subclass(DashboardNavKey::class)
-        subclass(AiNavKey::class)
+        subclass(AINavKey::class)
         subclass(OpenSourceLicensesNavKey::class)
         subclass(SupportNavKey::class)
         subclass(SettingsNavKey::class)

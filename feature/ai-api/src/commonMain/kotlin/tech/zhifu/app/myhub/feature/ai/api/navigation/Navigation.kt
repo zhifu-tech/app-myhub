@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Serializable
-object AiNavKey : NavKey
+object AINavKey : NavKey
 
-fun AppNavigator.navigateToAiCapture() {
-    navigate(AiNavKey)
+fun AppNavigator.navigateToAICapture() {
+    navigate(AINavKey)
 }

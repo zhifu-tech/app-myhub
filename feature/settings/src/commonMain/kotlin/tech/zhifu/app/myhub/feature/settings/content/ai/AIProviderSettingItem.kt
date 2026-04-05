@@ -30,7 +30,7 @@ import tech.zhifu.app.myhub.ui.state.ai.collectAIProviderState
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProvider
 
 @Composable
-fun AiProviderSettingItem(
+fun AIProviderSettingItem(
     viewModel: SettingsViewModel,
 ) {
     val provider by viewModel.collectAIProviderState()
@@ -51,7 +51,7 @@ fun AiProviderSettingItem(
         }
     )
 
-    AiProviderSettingDialog(
+    AIProviderSettingDialog(
         providerRoutingConfig = editProvider,
         timeoutInput = timeoutInput,
         maxRetriesInput = maxRetriesInput,
@@ -68,7 +68,7 @@ fun AiProviderSettingItem(
             )
             if (validation != null) {
                 validationMessageRes = validation
-                return@AiProviderSettingDialog
+                return@AIProviderSettingDialog
             }
             val timeout = timeoutInput.toLongOrNull() ?: 15_000L
             val retries = maxRetriesInput.toIntOrNull() ?: 1

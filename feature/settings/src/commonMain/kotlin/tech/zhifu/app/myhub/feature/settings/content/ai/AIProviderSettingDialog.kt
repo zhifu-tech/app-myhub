@@ -26,11 +26,11 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_retri
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_save
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_timeout_ms
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
-import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
+import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 
 @Composable
-fun AiProviderSettingDialog(
+fun AIProviderSettingDialog(
     providerRoutingConfig: ProviderRoutingConfig,
     timeoutInput: String,
     maxRetriesInput: String,

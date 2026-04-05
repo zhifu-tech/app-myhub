@@ -43,7 +43,7 @@ import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
-fun AiScreen(
+fun AIScreen(
     navigator: AppNavigator,
     viewModel: AIViewModel = koinViewModel<AIViewModel>(),
 ) {

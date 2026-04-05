@@ -16,7 +16,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
-import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAiCapture
+import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAICapture
 import tech.zhifu.app.myhub.feature.dashboard.content.Content
 import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
@@ -131,7 +131,7 @@ private fun DashboardSideEffect(
     viewModel.collectSharedSideEffect { effect ->
         when (effect) {
             DashboardSideEffect.NavigateToAiCapture -> {
-                navigator.navigateToAiCapture()
+                navigator.navigateToAICapture()
             }
 
             DashboardSideEffect.NavigateToSettings -> {

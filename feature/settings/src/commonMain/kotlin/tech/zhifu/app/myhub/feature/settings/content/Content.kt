@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
-import tech.zhifu.app.myhub.feature.settings.content.ai.AiProviderSettingItem
+import tech.zhifu.app.myhub.feature.settings.content.ai.AIProviderSettingItem
 import tech.zhifu.app.myhub.feature.settings.content.language.LanguageSettingItem
 import tech.zhifu.app.myhub.feature.settings.content.theme.ThemeSettingItem
 import tech.zhifu.app.myhub.feature.settings.resources.Res
@@ -59,7 +59,7 @@ fun Content(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        AiProviderSettingItem(viewModel = viewModel)
+        AIProviderSettingItem(viewModel = viewModel)
         Text(
             text = stringResource(Res.string.feature_settings_more),
             style = MaterialTheme.typography.titleMedium,
