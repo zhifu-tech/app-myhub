@@ -15,10 +15,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import org.orbitmvi.orbit.ContainerHost
+
+val <STATE : Any, SIDE_EFFECT : Any, VM : ContainerHost<STATE, SIDE_EFFECT>>
+    VM.uiState: StateFlow<STATE>
+    get() = container.stateFlow
+
 
 @Composable
 fun <STATE, SIDE_EFFECT, VM> VM.collectAsState(
@@ -52,7 +58,8 @@ fun <STATE, SIDE_EFFECT, VM, R> VM.collectAsState(
 }
 
 @Composable
-fun <STATE, SIDE_EFFECT, VM, R> VM.collectSharedSideEffect(
+@Suppress("ComposableNaming")
+fun <STATE, SIDE_EFFECT, VM> VM.collectSharedSideEffect(
     lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
     predicate: (SIDE_EFFECT) -> Boolean = { true },
     onSideEffect: FlowCollector<SIDE_EFFECT>
@@ -60,8 +67,7 @@ fun <STATE, SIDE_EFFECT, VM, R> VM.collectSharedSideEffect(
     STATE : Any,
     SIDE_EFFECT : Any,
     VM : ViewModel,
-    VM : ContainerHost<STATE, SIDE_EFFECT>,
-    R : SIDE_EFFECT {
+    VM : ContainerHost<STATE, SIDE_EFFECT> {
 
     val sharedSideEffect: SharedFlow<SIDE_EFFECT> = remember(this) {
         container.refCountSideEffectFlow.shareIn(

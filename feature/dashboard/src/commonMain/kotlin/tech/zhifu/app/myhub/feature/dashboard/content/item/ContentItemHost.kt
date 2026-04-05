@@ -12,28 +12,35 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
+import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.selectedCard
 import tech.zhifu.app.myhub.feature.preview.PreviewTransitionTokens
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
 fun ContentItemHost(
     item: ContentCard,
-    previewState: PreviewState,
     modifier: Modifier,
-    onClickItem: (ContentCard) -> Unit,
+    viewModel: DashboardViewModel,
     content: @Composable (AnimatedVisibilityScope) -> Unit,
 ) {
-    val onClick: () -> Unit = remember(item, onClickItem) {
-        { onClickItem(item) }
+    val onClick: () -> Unit = remember(item) {
+        { viewModel.selectedCard(item) }
     }
+    val isSelected by viewModel.collectAsState {
+        (it as? DashboardUiState.Content)?.selectedCard === item
+    }
+
     AnimatedVisibility(
-        visible = previewState.card?.id != item.id,
+        visible = isSelected.not(),
         enter = fadeIn(
             animationSpec = tween(
                 durationMillis = PreviewTransitionTokens.HOST_ENTER_DURATION_MS,

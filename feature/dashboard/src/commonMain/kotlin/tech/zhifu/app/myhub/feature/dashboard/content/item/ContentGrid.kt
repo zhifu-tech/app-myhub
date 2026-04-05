@@ -17,17 +17,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
-import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentGridContent(
     viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    previewState: PreviewState,
-    onLoadMore: () -> Unit,
-    onClickItem: (ContentCard) -> Unit,
 ) {
     val items by viewModel.collectContentFieldItems()
     val gridState = rememberLazyGridState()
@@ -35,7 +30,7 @@ fun ContentGridContent(
     AutoLoadMoreGrid(
         gridState = gridState,
         totalCount = items.size,
-        onLoadMore = onLoadMore
+        onLoadMore = viewModel::loadMore
     )
 
     LazyVerticalGrid(
@@ -53,9 +48,8 @@ fun ContentGridContent(
         ) { item ->
             ContentItemHost(
                 item = item,
-                previewState = previewState,
-                modifier = Modifier.animateItem(),
-                onClickItem = onClickItem,
+                modifier = Modifier.animateItem(), // fixme 确认效果后删除
+                viewModel = viewModel,
             ) {
                 ContentGridItem(
                     item = item,

@@ -16,17 +16,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
-import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun ContentListContent(
     viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    previewState: PreviewState,
-    onLoadMore: () -> Unit,
-    onClickItem: (ContentCard) -> Unit,
 ) {
     val items by viewModel.collectContentFieldItems()
     val listState = rememberLazyListState()
@@ -34,7 +29,7 @@ fun ContentListContent(
     AutoLoadMoreList(
         listState = listState,
         totalCount = items.size,
-        onLoadMore = onLoadMore
+        onLoadMore = viewModel::loadMore,
     )
 
     LazyColumn(
@@ -50,9 +45,8 @@ fun ContentListContent(
         ) { item ->
             ContentItemHost(
                 item = item,
-                previewState = previewState,
                 modifier = Modifier.animateItem(),
-                onClickItem = onClickItem,
+                viewModel = viewModel
             ) { animatedVisibilityScope ->
                 ContentListItem(
                     item = item,

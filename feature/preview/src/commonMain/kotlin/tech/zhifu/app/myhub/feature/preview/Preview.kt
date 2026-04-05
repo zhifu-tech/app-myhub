@@ -30,16 +30,18 @@ import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
 import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotController
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 fun Preview(
-    state: PreviewState,
+    card: ContentCard?,
     modifier: Modifier = Modifier,
+    actionHide: () -> Unit = {},
 ) {
     val snapshotController = rememberPreviewSnapshotController()
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
-        targetState = state.card,
+        targetState = card,
         transitionSpec = {
             fadeIn(
                 animationSpec = tween(
@@ -58,7 +60,7 @@ fun Preview(
         if (card == null) {
             Spacer(modifier = Modifier.fillMaxSize())
         } else {
-            PreviewOverlay(state = state)
+            PreviewOverlay(actionHide = actionHide)
             BoxWithConstraints(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -142,9 +144,8 @@ fun Preview(
 
 @Composable
 private fun PreviewOverlay(
-    state: PreviewState
+    actionHide: () -> Unit = {},
 ) {
-    val onClick = remember { { state.hide() } }
     val interactionSource = remember { MutableInteractionSource() }
     val overlayColor = if (isSystemInDarkTheme()) {
         MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)
@@ -157,7 +158,7 @@ private fun PreviewOverlay(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick,
+                onClick = actionHide,
             )
             .background(color = overlayColor)
     )

@@ -21,6 +21,7 @@ sealed class DashboardUiState(
         val hasMore: Boolean = false,
         val isLoadingMore: Boolean = false,
         val errorMessage: String = "",
+        val selectedCard: ContentCard? = null,
     ) : DashboardUiState(state = State.CONTENT) {
         companion object {
             const val PAGE_SIZE = 20

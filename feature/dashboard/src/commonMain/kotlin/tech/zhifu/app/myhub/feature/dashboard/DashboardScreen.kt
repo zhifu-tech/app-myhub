@@ -22,9 +22,8 @@ import tech.zhifu.app.myhub.feature.dashboard.content.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.Loading
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.dashboard.content.appbar.TopBar
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.selectedCard
 import tech.zhifu.app.myhub.feature.preview.Preview
-import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.feature.preview.rememberPreviewState
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
@@ -35,24 +34,21 @@ fun DashboardScreen(
     navigator: AppNavigator,
     viewModel: DashboardViewModel = koinViewModel<DashboardViewModel>(),
 ) {
-    val previewState = rememberPreviewState()
     DashboardSideEffect(
         navigator = navigator,
         viewModel = viewModel
     )
     DashboardScaffold(
         viewModel = viewModel,
-        previewState = previewState,
     )
-    Preview(
-        state = previewState,
+    DashboardPreview(
+        viewModel = viewModel,
     )
 }
 
 @Composable
 internal fun DashboardScaffold(
     viewModel: DashboardViewModel,
-    previewState: PreviewState,
 ) {
     val hazeState = rememberHazeState()
     val hazeStyle = HazeMaterials.regular(
@@ -82,7 +78,6 @@ internal fun DashboardScaffold(
             viewModel = viewModel,
             contentPadding = contentPadding,
             hazeState = hazeState,
-            previewState = previewState,
         )
     }
 }
@@ -92,7 +87,6 @@ private fun DashboardContent(
     viewModel: DashboardViewModel,
     contentPadding: PaddingValues,
     hazeState: HazeState,
-    previewState: PreviewState,
 ) {
     val state by viewModel.collectAsState { it.state }
     when (state) {
@@ -115,12 +109,27 @@ private fun DashboardContent(
                 paddingValues = contentPadding,
                 modifier = Modifier.hazeSource(state = hazeState),
                 viewModel = viewModel,
-                previewState = previewState,
             )
         }
 
         else -> {}
     }
+}
+
+@Composable
+fun DashboardPreview(
+    viewModel: DashboardViewModel
+) {
+    val selectedCard by viewModel.collectAsState {
+        (it as? DashboardUiState.Content)?.selectedCard
+    }
+
+    Preview(
+        card = selectedCard,
+        actionHide = {
+            viewModel.selectedCard(null)
+        }
+    )
 }
 
 @Composable

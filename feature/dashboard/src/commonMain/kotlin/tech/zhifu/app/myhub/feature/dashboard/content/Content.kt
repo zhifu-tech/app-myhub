@@ -18,10 +18,8 @@ import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
-import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
-import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.state.layout.collectLayoutAsList
 import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
 
@@ -30,7 +28,6 @@ fun Content(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel,
     paddingValues: PaddingValues,
-    previewState: PreviewState,
 ) {
     val snackbarState = LocalSnackbarState.current
     viewModel.collectSharedSideEffect(
@@ -55,9 +52,6 @@ fun Content(
         viewModel = viewModel,
         modifier = modifier,
         paddingValues = paddingValues,
-        previewState = previewState,
-        onLoadMore = viewModel::loadMore,
-        onClickItem = previewState::show,
     )
 }
 
@@ -66,9 +60,6 @@ private fun ContentContent(
     viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
-    previewState: PreviewState,
-    onLoadMore: () -> Unit,
-    onClickItem: (ContentCard) -> Unit,
 ) {
     val layoutAsList by viewModel.collectLayoutAsList()
 
@@ -84,18 +75,12 @@ private fun ContentContent(
             viewModel = viewModel,
             modifier = modifier,
             paddingValues = paddingValues,
-            previewState = previewState,
-            onLoadMore = onLoadMore,
-            onClickItem = onClickItem,
         )
     } else {
         ContentGridContent(
             viewModel = viewModel,
             modifier = modifier,
             paddingValues = paddingValues,
-            previewState = previewState,
-            onLoadMore = onLoadMore,
-            onClickItem = onClickItem,
         )
     }
 }
