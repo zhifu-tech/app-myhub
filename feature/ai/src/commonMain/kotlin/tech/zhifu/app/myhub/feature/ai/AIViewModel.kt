@@ -64,9 +64,26 @@ class AIViewModel(
     fun submitInput() = intent {
         val current = state as? AIUiState.Content ?: return@intent
         val currentContext = context ?: return@intent
+        reduce {
+            current.copy(
+                isThinking = true,
+                thinkingText = ""
+            )
+        }
         val updated = orchestrator.onInput(
             context = currentContext,
             input = current.input,
+            onReasoning = { thinking ->
+                val currentState = state as? AIUiState.Content
+                if (currentState != null) {
+                    reduce {
+                        currentState.copy(
+                            isThinking = true,
+                            thinkingText = thinking
+                        )
+                    }
+                }
+            },
         )
         context = updated
         reduce { updated.toUiState(input = "") }
@@ -97,5 +114,7 @@ class AIViewModel(
         providerMode = orchestrator.providerMode(),
         input = input,
         isPublishing = state == ConversationState.PUBLISH_CONFIRM,
+        thinkingText = "",
+        isThinking = false,
     )
 }

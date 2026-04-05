@@ -69,7 +69,8 @@ class CaptureOrchestrator(
 
     suspend fun onInput(
         context: ConversationContext,
-        input: String
+        input: String,
+        onReasoning: (suspend (String) -> Unit)? = null,
     ): ConversationContext {
         val text = input.trim()
         if (text.isBlank()) return context
@@ -125,6 +126,7 @@ class CaptureOrchestrator(
                                     missing_fields = context.missingFields,
                                 ),
                             ),
+                            onReasoning = onReasoning,
                         )
                     ) {
                         is ProviderAnalysisResult.Success -> {
@@ -154,6 +156,7 @@ class CaptureOrchestrator(
                                 userInput = text,
                                 intent = suggestion.intent,
                                 draft = suggestion.draft,
+                                reasoning = analysis.reasoning,
                             )
                             storageGateway.saveAiJob(
                                 snapshot = StoredAiJob(

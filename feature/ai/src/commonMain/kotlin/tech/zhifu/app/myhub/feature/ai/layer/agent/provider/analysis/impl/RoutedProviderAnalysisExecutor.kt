@@ -16,7 +16,8 @@ class RoutedProviderAnalysisExecutor(
 
     override suspend fun analyze(
         route: ProviderRouteDecision,
-        request: ProviderAnalysisRequest
+        request: ProviderAnalysisRequest,
+        onReasoning: (suspend (String) -> Unit)?,
     ): ProviderAnalysisResult {
         if (!route.available) {
             return ProviderAnalysisResult.Failed(
@@ -27,11 +28,19 @@ class RoutedProviderAnalysisExecutor(
         val config = configSource.current()
         return when (route.mode) {
             ProviderMode.SERVER_GATEWAY -> {
-                serverGatewayClient.analyze(request, config)
+                serverGatewayClient.analyze(
+                    request = request,
+                    config = config,
+                    onReasoning = onReasoning,
+                )
             }
 
             ProviderMode.DIRECT_API -> {
-                directApiClient.analyze(request, config)
+                directApiClient.analyze(
+                    request = request,
+                    config = config,
+                    onReasoning = onReasoning,
+                )
             }
 
             ProviderMode.DISABLED -> {

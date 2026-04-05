@@ -1,7 +1,5 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation
 
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPlanner
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
@@ -9,6 +7,8 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.slot.SlotManager
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.Signal
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateMachine
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Message
 
 class ConversationEngine(
     private val stateMachine: StateMachine,
@@ -44,6 +44,7 @@ class ConversationEngine(
         userInput: String,
         intent: String,
         draft: CaptureDraft,
+        reasoning: String? = null,
     ): ConversationContext {
         val missing = slotManager.missingFields(draft)
         val nextState = if (missing.isEmpty()) {
@@ -62,18 +63,31 @@ class ConversationEngine(
             sessionId = contextManager.nextSessionId(),
             draft = draft,
             missingFields = missing,
-            messages = context.messages +
-                listOf(
+            messages = context.messages + buildList {
+                add(
                     Message(
                         id = contextManager.nextMessageId(),
                         role = Message.Role.USER,
                         text = userInput
-                    ),
+                    )
+                )
+                if (reasoning.isNullOrBlank().not()) {
+                    add(
+                        Message(
+                            id = contextManager.nextMessageId(),
+                            role = Message.Role.SYSTEM,
+                            text = "AI 思考过程：\n${reasoning.trim()}",
+                        )
+                    )
+                }
+                add(
                     Message(
                         id = contextManager.nextMessageId(),
                         role = Message.Role.AI,
                         text = "意图识别：$intent"
-                    ),
+                    )
+                )
+                add(
                     Message(
                         id = contextManager.nextMessageId(),
                         role = Message.Role.AI,
@@ -82,8 +96,9 @@ class ConversationEngine(
                         } else {
                             "我已完成草稿。还缺少：${missing.joinToString("、")}。请补充标签，或点击“跳过标签”。"
                         }
-                    ),
-                ),
+                    )
+                )
+            },
             actionComponents = actionPlanner.actionsFor(
                 state = nextState,
                 draft = draft,

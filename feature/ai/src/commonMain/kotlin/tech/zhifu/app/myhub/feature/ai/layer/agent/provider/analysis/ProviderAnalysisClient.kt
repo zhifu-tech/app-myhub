@@ -6,5 +6,6 @@ interface ProviderAnalysisClient {
     suspend fun analyze(
         request: ProviderAnalysisRequest,
         config: ProviderRoutingConfig,
+        onReasoning: (suspend (String) -> Unit)? = null,
     ): ProviderAnalysisResult
 }

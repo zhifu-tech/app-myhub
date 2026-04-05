@@ -148,6 +148,13 @@ private fun CaptureContent(
                     )
                 }
             }
+            item {
+                if (state.isThinking && state.thinkingText.isNotBlank()) {
+                    ThinkingCard(
+                        text = state.thinkingText,
+                    )
+                }
+            }
             items(state.messages, key = { it.id }) { msg ->
                 MessageBubble(message = msg)
             }
@@ -191,6 +198,33 @@ private fun CaptureContent(
                 .navigationBarsPadding()
                 .imePadding()
         )
+    }
+}
+
+@Composable
+private fun ThinkingCard(
+    text: String,
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = "AI 思考中…",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color(0xFF334155),
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF0F172A),
+            )
+        }
     }
 }
 

@@ -11,8 +11,9 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAna
 internal fun parseProviderOutput(
     jsonText: String
 ): ProviderAnalysisOutput? {
+    val normalizedJson = unwrapJsonCodeFence(jsonText)
     val root = runCatching {
-        Json.parseToJsonElement(string = jsonText).jsonObject
+        Json.parseToJsonElement(string = normalizedJson).jsonObject
     }.getOrNull() ?: return null
 
     val data = root["output"] as? JsonObject ?: root
@@ -27,6 +28,26 @@ internal fun parseProviderOutput(
         summary = summary,
         tags = tags,
     )
+}
+
+private fun unwrapJsonCodeFence(text: String): String {
+    val trimmed = text.trim()
+    if (!trimmed.startsWith("```")) return trimmed
+
+    val lines = trimmed.lines()
+    if (lines.size >= 3 && lines.last().trim() == "```") {
+        return lines
+            .drop(1)
+            .dropLast(1)
+            .joinToString("\n")
+            .trim()
+    }
+
+    return trimmed
+        .removePrefix("```json")
+        .removePrefix("```")
+        .removeSuffix("```")
+        .trim()
 }
 
 private fun JsonObject.string(key: String): String? {

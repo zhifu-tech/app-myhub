@@ -2,26 +2,29 @@ package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.impl
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisClient
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 
 class DirectApiProviderClient(
@@ -30,6 +33,7 @@ class DirectApiProviderClient(
     override suspend fun analyze(
         request: ProviderAnalysisRequest,
         config: ProviderRoutingConfig,
+        onReasoning: (suspend (String) -> Unit)?,
     ): ProviderAnalysisResult {
         val endpoint = config.directEndpoint.trimEnd('/')
         if (endpoint.isBlank()) {
@@ -51,77 +55,156 @@ class DirectApiProviderClient(
             )
         }
 
-        val responseText = withTimeoutOrNull(config.timeoutMs) {
-            val response = httpClient
-                .post("$endpoint/v1/chat/completions") {
-                    contentType(ContentType.Application.Json)
-                    header(HttpHeaders.Authorization, "Bearer ${config.directApiKey}")
+        val payload = withTimeoutOrNull(
+            timeMillis = config.timeoutMs
+        ) {
+            httpClient
+                .preparePost(
+                    urlString = "$endpoint/v1/chat/completions"
+                ) {
+                    contentType(type = ContentType.Application.Json)
+                    header(
+                        key = HttpHeaders.Authorization,
+                        value = "Bearer ${config.directApiKey}"
+                    )
                     setBody(
                         buildJsonObject {
-                            put("model", JsonPrimitive(config.directModel))
-                            put("temperature", JsonPrimitive(0.2))
                             put(
-                                "messages",
-                                buildJsonArray {
-                                    add(
-                                        buildJsonObject {
-                                            put("role", JsonPrimitive("system"))
-                                            put(
-                                                "content",
-                                                JsonPrimitive(
-                                                    "Return JSON with keys intent,title,summary,tags for capture analysis."
-                                                )
+                                key = "model",
+                                element = JsonPrimitive(value = config.directModel)
+                            )
+                            put(
+                                key = "temperature",
+                                element = JsonPrimitive(value = 0.2)
+                            )
+                            put(
+                                key = "stream",
+                                element = JsonPrimitive(true)
+                            )
+                            put(
+                                key = "messages",
+                                element = buildJsonArray {
+                                    buildJsonObject {
+                                        put(
+                                            key = "role",
+                                            element = JsonPrimitive("system")
+                                        )
+                                        put(
+                                            key = "content",
+                                            element = JsonPrimitive(
+                                                value = "Return JSON with keys intent,title,summary,tags for capture analysis."
                                             )
-                                        }
-                                    )
-                                    add(
-                                        buildJsonObject {
-                                            put("role", JsonPrimitive("user"))
-                                            put("content", JsonPrimitive(request.input.text))
-                                        }
-                                    )
+                                        )
+                                    }.also { add(it) }
+
+                                    buildJsonObject {
+                                        put(
+                                            key = "role",
+                                            element = JsonPrimitive("user")
+                                        )
+                                        put(
+                                            key = "content",
+                                            element = JsonPrimitive(request.input.text)
+                                        )
+                                    }.also { add(it) }
                                 }
                             )
                         }
                     )
                 }
-            if (!response.status.isSuccess()) {
-                return@withTimeoutOrNull "__HTTP_ERROR__:${response.status.value}"
-            }
-            response.bodyAsText()
-        }
-            ?: return ProviderAnalysisResult.Failed(
-                reason = "direct_api_timeout",
-                category = ProviderErrorCategory.TIMEOUT,
-            )
-        if (responseText.startsWith("__HTTP_ERROR__")) {
+                .execute { response ->
+                    if (!response.status.isSuccess()) {
+                        return@execute StreamResponsePayload(
+                            responseText = "__HTTP_ERROR__:${response.status.value}",
+                            reasoning = null,
+                        )
+                    }
+
+                    val reasoningBuilder = StringBuilder()
+                    val contentBuilder = StringBuilder()
+                    val rawBuilder = StringBuilder()
+                    val channel = response.bodyAsChannel()
+                    while (!channel.isClosedForRead) {
+                        val line = channel.readUTF8Line() ?: break
+                        if (line.isBlank() || !line.startsWith("data:")) continue
+                        val data = line.removePrefix("data:").trim()
+                        if (data == "[DONE]") break
+
+                        rawBuilder.append(data).append('\n')
+                        val delta = parseStreamChunk(jsonText = data) ?: continue
+                        delta.reasoning?.let {
+                            reasoningBuilder.append(it)
+                            onReasoning?.invoke(reasoningBuilder.toString())
+                        }
+                        delta.content?.let {
+                            contentBuilder.append(it)
+                        }
+                    }
+
+                    val responseText = contentBuilder.toString()
+                    StreamResponsePayload(
+                        responseText = responseText.ifBlank {
+                            rawBuilder.toString().trim()
+                        },
+                        reasoning = reasoningBuilder.toString().ifBlank { null },
+                    )
+                }
+        } ?: return ProviderAnalysisResult.Failed(
+            reason = "direct_api_timeout",
+            category = ProviderErrorCategory.TIMEOUT,
+        )
+
+        logger.debug { "DirectApiProviderClient responseText: ${payload.responseText}" }
+        if (payload.responseText.startsWith("__HTTP_ERROR__")) {
             return ProviderAnalysisResult.Failed(
                 reason = "direct_api_http_error",
                 category = ProviderErrorCategory.HTTP,
             )
         }
 
-        val choiceContent = extractDirectChoiceContent(responseText)
-            ?: return ProviderAnalysisResult.Failed(
-                reason = "direct_api_invalid_response",
-                category = ProviderErrorCategory.PARSE,
-            )
-        val parsed = parseProviderOutput(choiceContent)
+        val parsed = parseProviderOutput(jsonText = payload.responseText)
             ?: return ProviderAnalysisResult.Failed(
                 reason = "direct_api_invalid_choice_content",
                 category = ProviderErrorCategory.PARSE,
             )
         return ProviderAnalysisResult.Success(
             output = parsed,
-            rawResponseJson = responseText
+            rawResponseJson = payload.responseText,
+            reasoning = payload.reasoning?.trim()?.ifBlank { null },
         )
     }
 }
 
-private fun extractDirectChoiceContent(jsonText: String): String? {
-    val root = runCatching { Json.parseToJsonElement(jsonText).jsonObject }.getOrNull() ?: return null
+private data class StreamResponsePayload(
+    val responseText: String,
+    val reasoning: String?,
+)
+
+private data class StreamChunkDelta(
+    val content: String?,
+    val reasoning: String?,
+)
+
+private fun parseStreamChunk(jsonText: String): StreamChunkDelta? {
+    val root = runCatching {
+        Json.parseToJsonElement(string = jsonText).jsonObject
+    }.getOrNull() ?: return null
     val choices = root["choices"] as? JsonArray ?: return null
     val first = choices.firstOrNull()?.jsonObject ?: return null
-    val message = first["message"]?.jsonObject ?: return null
-    return message["content"]?.jsonPrimitive?.contentOrNull
+    val delta = first["delta"]?.jsonObject ?: return null
+    return StreamChunkDelta(
+        content = delta.string("content"),
+        reasoning = delta.string("reasoning")
+            ?: delta.string("reasoning_content"),
+    )
 }
+
+private fun JsonObject.string(
+    key: String
+): String? {
+    return (this[key] as? JsonPrimitive)
+        ?.contentOrNull
+        ?.takeIf { it.isNotEmpty() }
+}
+
+private val logger = logger("DirectApiProviderClient")

@@ -32,6 +32,7 @@ sealed interface ProviderAnalysisResult {
     data class Success(
         val output: ProviderAnalysisOutput,
         val rawResponseJson: String,
+        val reasoning: String? = null,
     ) : ProviderAnalysisResult
 
     data class Failed(

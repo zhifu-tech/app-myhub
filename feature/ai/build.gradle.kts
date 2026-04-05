@@ -19,6 +19,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.component.media)
             implementation(projects.core.analytics)
+            implementation(projects.core.logger)
             implementation(projects.core.network)
             implementation(projects.core.navigation)
             implementation(projects.core.startup)

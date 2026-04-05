@@ -23,6 +23,8 @@ sealed class AIUiState(
         val providerMode: ProviderMode = ProviderMode.DISABLED,
         val input: String = "",
         val isPublishing: Boolean = false,
+        val thinkingText: String = "",
+        val isThinking: Boolean = false,
     ) : AIUiState(state = State.CONTENT)
 
     data class Error(

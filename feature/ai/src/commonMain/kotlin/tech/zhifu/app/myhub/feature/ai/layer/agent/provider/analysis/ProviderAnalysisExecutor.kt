@@ -5,7 +5,8 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRoute
 interface ProviderAnalysisExecutor {
     suspend fun analyze(
         route: ProviderRouteDecision,
-        request: ProviderAnalysisRequest
+        request: ProviderAnalysisRequest,
+        onReasoning: (suspend (String) -> Unit)? = null,
     ): ProviderAnalysisResult
 
 }
