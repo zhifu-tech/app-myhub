@@ -12,7 +12,7 @@ internal fun parseProviderOutput(
     jsonText: String
 ): ProviderAnalysisOutput? {
     val root = runCatching {
-        Json.parseToJsonElement(jsonText).jsonObject
+        Json.parseToJsonElement(string = jsonText).jsonObject
     }.getOrNull() ?: return null
 
     val data = root["output"] as? JsonObject ?: root

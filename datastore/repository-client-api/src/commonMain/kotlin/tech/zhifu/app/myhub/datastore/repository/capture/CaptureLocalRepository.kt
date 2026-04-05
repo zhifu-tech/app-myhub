@@ -3,7 +3,7 @@ package tech.zhifu.app.myhub.datastore.repository.capture
 interface CaptureLocalRepository {
     suspend fun upsertDraftSession(snapshot: DraftSessionSnapshot)
     suspend fun getLatestDraftSession(): DraftSessionSnapshot?
-    suspend fun deleteDraftSession(sessionId: String)
+    suspend fun deleteDraftSession(sessionId: String): Long
 
     suspend fun upsertAiJob(snapshot: AiJobSnapshot)
     suspend fun getAiJob(jobId: String): AiJobSnapshot?

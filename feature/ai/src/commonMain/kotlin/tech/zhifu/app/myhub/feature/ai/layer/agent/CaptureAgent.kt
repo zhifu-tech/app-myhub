@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent
 
-import tech.zhifu.app.myhub.feature.ai.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 
 interface CaptureAgent {
     fun analyzeToDraft(

@@ -1,33 +1,38 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation
 
-import tech.zhifu.app.myhub.feature.ai.AIMsg
-import tech.zhifu.app.myhub.feature.ai.ActionComponentSchema
-import tech.zhifu.app.myhub.feature.ai.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.CaptureState
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Message
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPlanner
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.slot.SlotManager
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.Signal
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateMachine
 
 class ConversationEngine(
-    private val stateMachine: ConversationStateMachine,
+    private val stateMachine: StateMachine,
     private val slotManager: SlotManager,
     private val actionPlanner: ActionPlanner,
     private val contextManager: ContextManager,
 ) {
-    fun refreshActionComponents(context: ConversationContext): ConversationContext {
-        return context.with(
-            actionComponents = actionPlanner.actionsFor(
-                state = context.state,
-                draft = context.draft,
-                missingFields = context.missingFields,
-            )
+    fun refreshActionComponents(
+        context: ConversationContext
+    ): ConversationContext = context.copy(
+        actionComponents = actionPlanner.actionsFor(
+            state = context.state,
+            draft = context.draft,
+            missingFields = context.missingFields,
         )
-    }
+    )
 
     fun bootstrap(): ConversationContext {
         val context = contextManager.newContext()
-        return context.with(
+        return context.copy(
             messages = listOf(
-                AIMsg(
+                Message(
                     id = contextManager.nextMessageId(),
-                    role = AIMsg.Role.AI,
+                    role = Message.Role.AI,
                     text = "请输入你要捕获的内容，我会在本地为你生成草稿并引导发布。",
                 )
             )
@@ -42,25 +47,48 @@ class ConversationEngine(
     ): ConversationContext {
         val missing = slotManager.missingFields(draft)
         val nextState = if (missing.isEmpty()) {
-            stateMachine.transition(context.state, CaptureSignal.DraftReady)
+            stateMachine.transition(
+                current = context.state,
+                signal = Signal.DraftReady
+            )
         } else {
-            stateMachine.transition(context.state, CaptureSignal.NeedMoreInfo)
+            stateMachine.transition(
+                current = context.state,
+                signal = Signal.NeedMoreInfo
+            )
         }
-        val prompt = if (missing.isEmpty()) {
-            "草稿已完成，是否进入发布确认？"
-        } else {
-            "我已完成草稿。还缺少：${missing.joinToString("、")}。请补充标签，或点击“跳过标签”。"
-        }
-        return context.with(
+        return context.copy(
             state = nextState,
             sessionId = contextManager.nextSessionId(),
             draft = draft,
             missingFields = missing,
             messages = context.messages +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.USER, userInput) +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.AI, "意图识别：$intent") +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.AI, prompt),
-            actionComponents = actionPlanner.actionsFor(nextState, draft = draft, missingFields = missing)
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.USER,
+                        text = userInput
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "意图识别：$intent"
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = if (missing.isEmpty()) {
+                            "草稿已完成，是否进入发布确认？"
+                        } else {
+                            "我已完成草稿。还缺少：${missing.joinToString("、")}。请补充标签，或点击“跳过标签”。"
+                        }
+                    ),
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = nextState,
+                draft = draft,
+                missingFields = missing
+            )
         )
     }
 
@@ -71,46 +99,81 @@ class ConversationEngine(
     ): ConversationContext {
         val missing = slotManager.missingFields(draft)
         val nextState = if (missing.isEmpty()) {
-            stateMachine.transition(context.state, CaptureSignal.DraftReady)
+            stateMachine.transition(
+                current = context.state,
+                signal = Signal.DraftReady
+            )
         } else {
-            stateMachine.transition(context.state, CaptureSignal.NeedMoreInfo)
+            stateMachine.transition(
+                current = context.state,
+                signal = Signal.NeedMoreInfo
+            )
         }
-        return context.with(
+        return context.copy(
             state = nextState,
             draft = draft,
             missingFields = missing,
             messages = context.messages +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.USER, tag) +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.AI, "已添加标签：$tag"),
-            actionComponents = actionPlanner.actionsFor(nextState, draft = draft, missingFields = missing)
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.USER,
+                        text = tag
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "已添加标签：$tag"
+                    )
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = nextState,
+                draft = draft,
+                missingFields = missing
+            )
         )
     }
 
-    fun onMoveToReview(context: ConversationContext): ConversationContext {
-        val nextState = stateMachine.transition(context.state, CaptureSignal.MoveToReview)
-        return context.with(
+    fun onMoveToReview(
+        context: ConversationContext
+    ): ConversationContext {
+        val nextState = stateMachine.transition(
+            current = context.state,
+            signal = Signal.MoveToReview
+        )
+        return context.copy(
             state = nextState,
             missingFields = emptyList(),
-            messages = context.messages + AIMsg(
-                id = contextManager.nextMessageId(),
-                role = AIMsg.Role.AI,
-                text = "已进入发布确认阶段。你可以直接发布，或先编辑标题。",
+            messages = context.messages +
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "已进入发布确认阶段。你可以直接发布，或先编辑标题。",
+                    ),
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = nextState,
+                draft = context.draft,
+                missingFields = emptyList()
             ),
-            actionComponents = actionPlanner.actionsFor(nextState, draft = context.draft, missingFields = emptyList()),
         )
     }
 
     fun onManualEdit(context: ConversationContext): ConversationContext {
-        val nextState = CaptureState.MANUAL_EDIT
-        return context.with(
+        val nextState = ConversationState.MANUAL_EDIT
+        return context.copy(
             state = nextState,
-            messages = context.messages + AIMsg(
-                id = contextManager.nextMessageId(),
-                role = AIMsg.Role.AI,
-                text = "请输入你希望的标题。",
-            ),
+            messages = context.messages +
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "请输入你希望的标题。",
+                    )
+                ),
             actionComponents = actionPlanner.actionsFor(
-                nextState,
+                state = nextState,
                 draft = context.draft,
                 missingFields = context.missingFields
             )
@@ -123,138 +186,154 @@ class ConversationEngine(
         reason: String,
         draft: CaptureDraft,
     ): ConversationContext {
-        val nextState = CaptureState.MANUAL_EDIT
-        return context.with(
+        val nextState = ConversationState.MANUAL_EDIT
+        return context.copy(
             state = nextState,
             sessionId = contextManager.nextSessionId(),
             draft = draft,
             missingFields = slotManager.missingFields(draft),
             messages = context.messages +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.USER, userInput) +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.SYSTEM, "AI 不可用：$reason") +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.AI, "已切换到手工编辑，请先输入标题后发布。"),
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.USER,
+                        text = userInput
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.SYSTEM,
+                        text = "AI 不可用：$reason"
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "已切换到手工编辑，请先输入标题后发布。"
+                    ),
+                ),
             actionComponents = actionPlanner.actionsFor(
-                nextState,
+                state = nextState,
                 draft = draft,
                 missingFields = slotManager.missingFields(draft)
             )
         )
     }
 
-    fun onTitleUpdated(context: ConversationContext, title: String, draft: CaptureDraft): ConversationContext {
-        val nextState = CaptureState.CARD_REVIEW
-        return context.with(
+    fun onTitleUpdated(
+        context: ConversationContext,
+        title: String,
+        draft: CaptureDraft
+    ): ConversationContext {
+        val nextState = ConversationState.CARD_REVIEW
+        return context.copy(
             state = nextState,
             draft = draft,
             messages = context.messages +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.USER, title) +
-                AIMsg(contextManager.nextMessageId(), AIMsg.Role.AI, "标题已更新，可以发布。"),
-            actionComponents = actionPlanner.actionsFor(nextState, draft = draft, missingFields = context.missingFields)
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.USER,
+                        text = title
+                    ),
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "标题已更新，可以发布。"
+                    ),
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = nextState,
+                draft = draft,
+                missingFields = context.missingFields
+            )
         )
     }
 
-    fun onPublishing(context: ConversationContext): ConversationContext {
-        val nextState = stateMachine.transition(context.state, CaptureSignal.PublishRequested)
-        return context.with(
+    fun onPublishing(
+        context: ConversationContext
+    ): ConversationContext {
+        val nextState = stateMachine.transition(
+            current = context.state,
+            signal = Signal.PublishRequested
+        )
+        return context.copy(
             state = nextState,
             actionComponents = actionPlanner.actionsFor(
-                nextState,
+                state = nextState,
                 draft = context.draft,
                 missingFields = context.missingFields
             ),
         )
     }
 
-    fun onPublished(context: ConversationContext, title: String): ConversationContext {
-        val nextState = stateMachine.transition(context.state, CaptureSignal.PublishSucceeded)
-        return context.with(
+    fun onPublished(
+        context: ConversationContext,
+        title: String
+    ): ConversationContext {
+        val nextState = stateMachine.transition(
+            current = context.state,
+            signal = Signal.PublishSucceeded
+        )
+        return context.copy(
             state = nextState,
-            messages = context.messages + AIMsg(
-                id = contextManager.nextMessageId(),
-                role = AIMsg.Role.AI,
-                text = "发布完成（本地提交）：$title",
+            messages = context.messages +
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "发布完成（本地提交）：$title",
+                    )
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = nextState,
+                draft = context.draft,
+                missingFields = emptyList()
             ),
-            actionComponents = actionPlanner.actionsFor(nextState, draft = context.draft, missingFields = emptyList()),
         )
     }
 
     fun onReset(): ConversationContext {
         val next = contextManager.newContext()
-        return next.with(
-            messages = listOf(
-                AIMsg(
-                    id = contextManager.nextMessageId(),
-                    role = AIMsg.Role.AI,
-                    text = "新会话已开始，请输入你要捕获的内容。",
-                )
+        return next.copy(
+            messages =
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.AI,
+                        text = "新会话已开始，请输入你要捕获的内容。",
+                    )
+                ),
+            actionComponents = actionPlanner.actionsFor(
+                state = next.state
             ),
-            actionComponents = actionPlanner.actionsFor(next.state),
         )
     }
 
-    fun onBlockedInput(context: ConversationContext): ConversationContext {
-        return context.with(
-            messages = context.messages + AIMsg(
-                id = contextManager.nextMessageId(),
-                role = AIMsg.Role.SYSTEM,
-                text = "当前阶段不接受自由输入，请使用下方动作。",
+    fun onBlockedInput(
+        context: ConversationContext
+    ): ConversationContext = context.copy(
+        messages = context.messages +
+            listOf(
+                Message(
+                    id = contextManager.nextMessageId(),
+                    role = Message.Role.SYSTEM,
+                    text = "当前阶段不接受自由输入，请使用下方动作。",
+                )
             )
-        )
-    }
-
-    fun onBlockedAction(context: ConversationContext, action: String): ConversationContext {
-        return context.with(
-            messages = context.messages + AIMsg(
-                id = contextManager.nextMessageId(),
-                role = AIMsg.Role.SYSTEM,
-                text = "动作不可用：$action（当前状态 ${context.state.name}）",
-            )
-        )
-    }
-}
-
-data class ConversationContext(
-    val sessionId: String? = null,
-    val state: CaptureState = CaptureState.IDLE,
-    val messages: List<AIMsg> = emptyList(),
-    val draft: CaptureDraft? = null,
-    val missingFields: List<String> = emptyList(),
-    val actionComponents: List<ActionComponentSchema> = emptyList(),
-)
-
-private fun ConversationContext.with(
-    sessionId: String? = this.sessionId,
-    state: CaptureState = this.state,
-    messages: List<AIMsg> = this.messages,
-    draft: CaptureDraft? = this.draft,
-    missingFields: List<String> = this.missingFields,
-    actionComponents: List<ActionComponentSchema> = this.actionComponents,
-): ConversationContext = copy(
-    sessionId = sessionId,
-    state = state,
-    messages = messages,
-    draft = draft,
-    missingFields = missingFields,
-    actionComponents = actionComponents,
-)
-
-class ContextManager {
-    private var sessionSeq = 0L
-    private var messageSeq = 0L
-
-    fun newContext(): ConversationContext = ConversationContext(
-        sessionId = nextSessionId(),
-        state = CaptureState.IDLE,
-        actionComponents = emptyList(),
     )
 
-    fun nextSessionId(): String {
-        sessionSeq += 1
-        return "capture_session_$sessionSeq"
-    }
-
-    fun nextMessageId(): String {
-        messageSeq += 1
-        return "m$messageSeq"
+    fun onBlockedAction(
+        context: ConversationContext,
+        action: String
+    ): ConversationContext {
+        return context.copy(
+            messages = context.messages +
+                listOf(
+                    Message(
+                        id = contextManager.nextMessageId(),
+                        role = Message.Role.SYSTEM,
+                        text = "动作不可用：$action（当前状态 ${context.state.name}）",
+                    )
+                )
+        )
     }
 }

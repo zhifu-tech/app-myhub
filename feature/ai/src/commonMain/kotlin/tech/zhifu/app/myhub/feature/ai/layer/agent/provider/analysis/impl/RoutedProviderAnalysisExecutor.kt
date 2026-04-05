@@ -26,12 +26,20 @@ class RoutedProviderAnalysisExecutor(
         }
         val config = configSource.current()
         return when (route.mode) {
-            ProviderMode.SERVER_GATEWAY -> serverGatewayClient.analyze(request, config)
-            ProviderMode.DIRECT_API -> directApiClient.analyze(request, config)
-            ProviderMode.DISABLED -> ProviderAnalysisResult.Failed(
-                reason = "AI_UNAVAILABLE:disabled",
-                category = ProviderErrorCategory.UNAVAILABLE,
-            )
+            ProviderMode.SERVER_GATEWAY -> {
+                serverGatewayClient.analyze(request, config)
+            }
+
+            ProviderMode.DIRECT_API -> {
+                directApiClient.analyze(request, config)
+            }
+
+            ProviderMode.DISABLED -> {
+                ProviderAnalysisResult.Failed(
+                    reason = "AI_UNAVAILABLE:disabled",
+                    category = ProviderErrorCategory.UNAVAILABLE,
+                )
+            }
         }
     }
 }

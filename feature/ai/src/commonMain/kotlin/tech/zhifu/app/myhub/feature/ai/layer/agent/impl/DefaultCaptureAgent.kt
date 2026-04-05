@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.impl
 
-import tech.zhifu.app.myhub.feature.ai.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.layer.agent.AgentDraftSuggestion
 import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
 import kotlin.time.Clock

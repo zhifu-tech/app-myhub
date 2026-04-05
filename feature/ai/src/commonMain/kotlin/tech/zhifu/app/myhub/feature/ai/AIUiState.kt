@@ -1,5 +1,9 @@
 package tech.zhifu.app.myhub.feature.ai
 
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 
 sealed class AIUiState(
@@ -10,9 +14,9 @@ sealed class AIUiState(
     object Loading : AIUiState(state = State.LOADING)
 
     data class Content(
-        val captureState: CaptureState = CaptureState.IDLE,
+        val conversationState: ConversationState = ConversationState.IDLE,
         val sessionId: String? = null,
-        val messages: List<AIMsg> = emptyList(),
+        val messages: List<Message> = emptyList(),
         val draft: CaptureDraft? = null,
         val missingFields: List<String> = emptyList(),
         val actionComponents: List<ActionComponentSchema> = emptyList(),

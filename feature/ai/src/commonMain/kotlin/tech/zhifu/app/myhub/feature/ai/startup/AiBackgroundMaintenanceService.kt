@@ -11,8 +11,8 @@ import tech.zhifu.app.myhub.analytics.AnalyticsEvent
 import tech.zhifu.app.myhub.analytics.AnalyticsService
 import tech.zhifu.app.myhub.analytics.AnalyticsValue
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
-import tech.zhifu.app.myhub.feature.ai.layer.storage.MediaGarbageCollector
-import tech.zhifu.app.myhub.feature.ai.layer.storage.MediaPostProcessExecutor
+import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaGarbageCollector
+import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessExecutor
 
 class AiBackgroundMaintenanceService(
     private val mediaPostProcessExecutor: MediaPostProcessExecutor,

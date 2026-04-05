@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationContext
+import tech.zhifu.app.myhub.feature.ai.layer.CaptureOrchestrator
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
@@ -83,17 +85,17 @@ class AIViewModel(
         reduce { current.copy(providerMode = mode) }
     }
 
-    private fun ConversationContext.toUiState(input: String): AIUiState.Content {
-        return AIUiState.Content(
-            captureState = state,
-            sessionId = sessionId,
-            messages = messages,
-            draft = draft,
-            missingFields = missingFields,
-            actionComponents = actionComponents,
-            providerMode = orchestrator.providerMode(),
-            input = input,
-            isPublishing = state == CaptureState.PUBLISH_CONFIRM,
-        )
-    }
+    private fun ConversationContext.toUiState(
+        input: String
+    ): AIUiState.Content = AIUiState.Content(
+        conversationState = state,
+        sessionId = sessionId,
+        messages = messages,
+        draft = draft,
+        missingFields = missingFields,
+        actionComponents = actionComponents,
+        providerMode = orchestrator.providerMode(),
+        input = input,
+        isPublishing = state == ConversationState.PUBLISH_CONFIRM,
+    )
 }

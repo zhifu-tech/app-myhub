@@ -8,7 +8,10 @@ internal class AiBackgroundStartupTask(
 ) : StartupTask {
     override val id: String = StartupTaskIds.AI_BACKGROUND_MAINTENANCE
     override val critical: Boolean = false
-    override val dependencies: Set<String> = setOf(StartupTaskIds.BOOTSTRAP, StartupTaskIds.ANALYTICS)
+    override val dependencies: Set<String> = setOf(
+        StartupTaskIds.BOOTSTRAP,
+        StartupTaskIds.ANALYTICS
+    )
 
     override suspend fun run() {
         service.start()

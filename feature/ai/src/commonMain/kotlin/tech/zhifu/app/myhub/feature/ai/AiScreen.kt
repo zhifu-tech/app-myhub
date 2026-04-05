@@ -35,6 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
@@ -141,7 +144,7 @@ private fun CaptureContent(
                         summary = state.draft.summary,
                         tags = state.draft.tags,
                         mediaCount = state.draft.mediaAssets.size,
-                        captureState = state.captureState,
+                        conversationState = state.conversationState,
                     )
                 }
             }
@@ -164,9 +167,9 @@ private fun CaptureContent(
             onValueChange = onInputChange,
             placeholder = {
                 Text(
-                    when (state.captureState) {
-                        CaptureState.INFO_COLLECT -> "输入标签后发送，例如：美食"
-                        CaptureState.CARD_REVIEW, CaptureState.MANUAL_EDIT -> "输入新标题后发送"
+                    when (state.conversationState) {
+                        ConversationState.INFO_COLLECT -> "输入标签后发送，例如：美食"
+                        ConversationState.CARD_REVIEW, ConversationState.MANUAL_EDIT -> "输入新标题后发送"
                         else -> "输入要捕获的内容"
                     }
                 )
@@ -197,7 +200,7 @@ private fun DraftPreviewCard(
     summary: String,
     tags: List<String>,
     mediaCount: Int,
-    captureState: CaptureState,
+    conversationState: ConversationState,
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -209,7 +212,7 @@ private fun DraftPreviewCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "草稿预览 · ${captureState.name}",
+                text = "草稿预览 · ${conversationState.name}",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF64748B),
             )
@@ -240,8 +243,8 @@ private fun DraftPreviewCard(
 }
 
 @Composable
-private fun MessageBubble(message: AIMsg) {
-    val isUser = message.role == AIMsg.Role.USER
+private fun MessageBubble(message: Message) {
+    val isUser = message.role == Message.Role.USER
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -253,9 +256,9 @@ private fun MessageBubble(message: AIMsg) {
                 .fillMaxWidth(0.88f)
                 .background(
                     color = when (message.role) {
-                        AIMsg.Role.AI -> Color(0xFFEFF6FF)
-                        AIMsg.Role.USER -> Color(0xFF1D4ED8)
-                        AIMsg.Role.SYSTEM -> Color(0xFFE2E8F0)
+                        Message.Role.AI -> Color(0xFFEFF6FF)
+                        Message.Role.USER -> Color(0xFF1D4ED8)
+                        Message.Role.SYSTEM -> Color(0xFFE2E8F0)
                     },
                     shape = RoundedCornerShape(14.dp),
                 )

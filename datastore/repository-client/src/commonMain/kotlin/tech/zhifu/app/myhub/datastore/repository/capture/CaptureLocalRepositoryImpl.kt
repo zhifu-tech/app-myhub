@@ -7,7 +7,10 @@ import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 class CaptureLocalRepositoryImpl(
     private val database: MyHubDatabase,
 ) : CaptureLocalRepository {
-    override suspend fun upsertDraftSession(snapshot: DraftSessionSnapshot) {
+
+    override suspend fun upsertDraftSession(
+        snapshot: DraftSessionSnapshot
+    ) {
         database.draft_sessionQueries.upsertDraftSession(
             id = snapshot.id,
             card_id = snapshot.cardId,
@@ -21,7 +24,8 @@ class CaptureLocalRepositoryImpl(
     override suspend fun getLatestDraftSession(): DraftSessionSnapshot? {
         val row = database.draft_sessionQueries
             .selectLatestDraftSessions(limit = 1, offset = 0)
-            .awaitAsOneOrNull() ?: return null
+            .awaitAsOneOrNull()
+            ?: return null
         return DraftSessionSnapshot(
             id = row.id,
             cardId = row.card_id,
@@ -32,9 +36,10 @@ class CaptureLocalRepositoryImpl(
         )
     }
 
-    override suspend fun deleteDraftSession(sessionId: String) {
-        database.draft_sessionQueries.deleteDraftSessionById(sessionId)
-    }
+    override suspend fun deleteDraftSession(
+        sessionId: String
+    ): Long = database.draft_sessionQueries
+        .deleteDraftSessionById(sessionId)
 
     override suspend fun upsertAiJob(snapshot: AiJobSnapshot) {
         database.ai_jobQueries.upsertAiJob(
@@ -162,7 +167,9 @@ class CaptureLocalRepositoryImpl(
         database.media_assetQueries.deleteMediaAssetById(id)
     }
 
-    override suspend fun hasCard(cardId: String): Boolean {
-        return database.cardQueries.selectCardById(cardId).awaitAsOneOrNull() != null
-    }
+    override suspend fun hasCard(
+        cardId: String
+    ): Boolean = database.cardQueries
+        .selectCardById(cardId)
+        .awaitAsOneOrNull() != null
 }
