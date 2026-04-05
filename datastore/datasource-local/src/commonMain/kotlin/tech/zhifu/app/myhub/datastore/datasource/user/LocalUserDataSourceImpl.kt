@@ -1,8 +1,8 @@
 package tech.zhifu.app.myhub.datastore.datasource.user
 
+import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
-import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -103,7 +103,7 @@ class LocalUserDataSourceImpl(
                 user_id = userId,
                 theme = preferences.theme.orEmpty(),
                 language = preferences.language.orEmpty(),
-                ai_provider = preferences.aiProvider,
+                ai_provider = preferences.aiProvider.orEmpty(),
                 layout_as_list = if (preferences.layoutAsList) 1L else 0L,
                 sort_as_date = if (preferences.sortAsDate) 1L else 0L,
                 sort_as_name = if (preferences.sortAsName) 1L else 0L,

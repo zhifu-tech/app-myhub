@@ -1,8 +1,5 @@
 package tech.zhifu.app.myhub.feature.ai.layer.card.impl
 
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardContent
 import tech.zhifu.app.myhub.datastore.model.domain.CardContentType
@@ -10,12 +7,13 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardSourceKind
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.feature.ai.layer.card.CardEngine
 import tech.zhifu.app.myhub.feature.ai.layer.card.PrePublishCheckResult
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardFieldFormatter
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardPrePublishChecker
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardValidator
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import kotlin.time.Clock
 
 class LocalCardEngine(
@@ -23,11 +21,6 @@ class LocalCardEngine(
     private val prePublishChecker: CardPrePublishChecker,
     private val validator: CardValidator,
 ) : CardEngine {
-    private val json = Json {
-        explicitNulls = false
-        encodeDefaults = true
-    }
-
     override fun updateDraftTitle(
         draft: CaptureDraft,
         title: String
@@ -64,7 +57,7 @@ class LocalCardEngine(
     ): Card {
         val check = prePublishCheck(draft)
         if (!check.ok) {
-            throw IllegalStateException(
+            error(
                 "pre_publish_check_failed:${check.issues.joinToString(",")}"
             )
         }
@@ -81,26 +74,16 @@ class LocalCardEngine(
             createdAt = now,
             updatedAt = now,
             locationRaw = null,
-            tagsRaw = json.encodeToString(
-                serializer = ListSerializer(elementSerializer = String.serializer()),
-                value = safe.tags
-            ),
+            tagsRaw = safe.tags.serialize().orEmpty(),
             uiRaw = null,
-            contentRaw = json.encodeToString(
+            contentRaw = CardContent(
                 // fixme ? 为什么写死, 这里还有UI的元素的
-                serializer = CardContent.serializer(),
-                value = CardContent(
-                    type = CardContentType.TEXT, // fixme ? 为什么写死
-                    value = safe.summary
-                ),
-            ),
-            sourceRaw = json.encodeToString(
-                serializer = CardSource.serializer(),
-                value = CardSource(
-                    kind = CardSourceKind.MANUAL, // fixme ? 为什么写死
-                )
-            ),
+                type = CardContentType.TEXT, // fixme ? 为什么写死
+                value = safe.summary
+            ).serialize().orEmpty(),
+            sourceRaw = CardSource(
+                kind = CardSourceKind.MANUAL, // fixme ? 为什么写死
+            ).serialize().orEmpty(),
         )
     }
 }
-

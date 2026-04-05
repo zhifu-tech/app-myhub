@@ -1,9 +1,6 @@
 package tech.zhifu.app.myhub.datastore.bootstrap.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardContent
 import tech.zhifu.app.myhub.datastore.model.domain.CardContentType
@@ -14,6 +11,7 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.CardUi
 import tech.zhifu.app.myhub.datastore.model.domain.Cover
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import kotlin.time.Instant
 
 
@@ -39,7 +37,6 @@ data class BootstrapCardSeedCover(
 
 internal fun BootstrapCardSeed.toCard(
     now: Instant,
-    json: Json,
 ): Card {
     val cardUi = CardUi(
         cover = Cover(
@@ -59,35 +56,20 @@ internal fun BootstrapCardSeed.toCard(
         createdAt = now,
         updatedAt = Instant.fromEpochMilliseconds(updatedAt),
         deletedAt = null,
-        locationRaw = json.encodeToString(
-            serializer = CardLocation.serializer(),
-            value = CardLocation(
-                latitude = 0.0,
-                longitude = 0.0,
-                name = location,
-                address = null,
-            ),
-        ),
-        tagsRaw = json.encodeToString(
-            serializer = ListSerializer(String.serializer()),
-            value = tags,
-        ),
-        uiRaw = json.encodeToString(
-            serializer = CardUi.serializer(),
-            value = cardUi,
-        ),
-        contentRaw = json.encodeToString(
-            serializer = CardContent.serializer(),
-            value = CardContent(
-                type = CardContentType.TEXT,
-                value = summary,
-            )
-        ),
-        sourceRaw = json.encodeToString(
-            serializer = CardSource.serializer(),
-            value = CardSource(
-                kind = CardSourceKind.MANUAL,
-            )
-        ),
+        locationRaw = CardLocation(
+            latitude = 0.0,
+            longitude = 0.0,
+            name = location,
+            address = null,
+        ).serialize(),
+        tagsRaw = tags.serialize(),
+        uiRaw = cardUi.serialize(),
+        contentRaw = CardContent(
+            type = CardContentType.TEXT,
+            value = summary,
+        ).serialize(),
+        sourceRaw = CardSource(
+            kind = CardSourceKind.MANUAL,
+        ).serialize(),
     )
 }

@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.logger.info
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
@@ -19,8 +21,10 @@ fun <VM> VM.createAIProviderStateFlow(): StateFlow<ProviderRoutingConfig>
           VM : ProviderState {
     return userPreferencesStateFlow
         .map { prefs ->
-            Json.decodeFromString<ProviderRoutingConfig>(prefs.aiProvider)
+            prefs.aiProvider.deserialize<ProviderRoutingConfig>()
+                .getOrNull()
         }
+        .filterNotNull()
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
@@ -39,7 +43,7 @@ fun <VM> VM.updateAIProvider(providerRoutingConfig: ProviderRoutingConfig)
     viewModelScope.launch {
         userRepository.updateUserPreferencesAiProvider(
             userId = userId,
-            aiProvider = Json.encodeToString(providerRoutingConfig)
+            aiProvider = providerRoutingConfig.serialize().orEmpty()
         )
     }
 }

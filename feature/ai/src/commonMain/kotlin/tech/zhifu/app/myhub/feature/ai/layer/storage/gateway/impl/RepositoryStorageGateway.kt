@@ -1,8 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.gateway.impl
 
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
+import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
@@ -29,13 +28,6 @@ class RepositoryStorageGateway(
     private val mediaPostProcessExecutor: MediaPostProcessExecutor,
     private val mediaGarbageCollector: MediaGarbageCollector,
 ) : StorageGateway {
-    private val json by lazy {
-        Json {
-            explicitNulls = false
-            encodeDefaults = true
-        }
-    }
-
     override suspend fun loadLatestDraftSession(): StoredDraftSession? {
         val snapshot = captureLocalRepository.getLatestDraftSession()
             ?: return null
@@ -47,22 +39,12 @@ class RepositoryStorageGateway(
                 )
             }
             ?: ConversationState.IDLE
-        val draft = runCatching {
-            json.decodeFromString(
-                deserializer = CaptureDraft.serializer(),
-                string = snapshot.draftJson
-            )
-        }.getOrNull()
+        val draft = snapshot.draftJson
+            .deserialize<CaptureDraft>()
+            .getOrNull()
         val missingFields = snapshot.missingFieldsJson
             ?.let {
-                runCatching {
-                    json.decodeFromString(
-                        deserializer = ListSerializer(
-                            elementSerializer = String.serializer()
-                        ),
-                        string = it
-                    )
-                }.getOrNull()
+                it.deserialize<List<String>>().getOrNull()
             }
             ?: emptyList()
         return StoredDraftSession(
@@ -90,16 +72,8 @@ class RepositoryStorageGateway(
         val snapshot = DraftSessionSnapshot(
             id = sessionId,
             state = state.name,
-            draftJson = json.encodeToString(
-                serializer = CaptureDraft.serializer(),
-                value = safeDraft
-            ),
-            missingFieldsJson = json.encodeToString(
-                serializer = ListSerializer(
-                    elementSerializer = String.serializer()
-                ),
-                value = missingFields
-            ),
+            draftJson = safeDraft.serialize().orEmpty(),
+            missingFieldsJson = missingFields.serialize().orEmpty(),
             updatedAt = Clock.System.now().toEpochMilliseconds(),
         )
         captureLocalRepository.upsertDraftSession(snapshot)
@@ -151,13 +125,11 @@ class RepositoryStorageGateway(
                     snapshot = AiJobSnapshot(
                         id = "media_postprocess_${card.id}_$index",
                         provider = "local_media_pipeline",
-                        requestJson = json.encodeToString(
-                            value = MediaPostProcessRequest(
-                                cardId = card.id,
-                                mediaId = "media_${card.id}_$index",
-                                mediaUri = media.localUri,
-                            )
-                        ),
+                        requestJson = MediaPostProcessRequest(
+                            cardId = card.id,
+                            mediaId = "media_${card.id}_$index",
+                            mediaUri = media.localUri,
+                        ).serialize().orEmpty(),
                         responseJson = null,
                         status = "queued",
                         errorMessage = null,

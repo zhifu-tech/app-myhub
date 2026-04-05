@@ -6,7 +6,7 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.json.Json
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.content
@@ -21,11 +21,6 @@ import tech.zhifu.app.myhub.logger.logger
 class LocalCardDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalCardDataSource {
-    private val json = Json {
-        explicitNulls = false
-        encodeDefaults = false
-    }
-
     override suspend fun insertCard(
         userId: String,
         card: Card,
@@ -39,12 +34,12 @@ class LocalCardDataSourceImpl(
                     type = card.type.value,
                     title = card.title,
                     summary = card.summary,
-                    content = card.content?.let { json.encodeToString(it) },
-                    ui = card.ui?.let { json.encodeToString(it) },
-                    location = card.location?.let { json.encodeToString(it) },
-                    tags = json.encodeToString(card.tags),
+                    content = card.content.serialize(),
+                    ui = card.ui.serialize(),
+                    location = card.location.serialize(),
+                    tags = card.tags.serialize().orEmpty(),
                     status = card.status.wire,
-                    source = card.source?.let { json.encodeToString(it) },
+                    source = card.source.serialize(),
                     created_at = createdEpoch,
                     updated_at = updatedEpoch,
                     version = 1,

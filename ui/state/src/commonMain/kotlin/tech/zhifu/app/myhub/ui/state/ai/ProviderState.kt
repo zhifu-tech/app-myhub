@@ -13,9 +13,9 @@ interface ProviderState {
 @Serializable
 data class ProviderRoutingConfig(
     val mode: ProviderMode = ProviderMode.DISABLED,
-    val directEndpoint: String = "",
-    val directModel: String = "",
-    val directApiKey: String = "",
+    val directEndpoint: String = "http://localhost:11434",
+    val directModel: String = "qwen3:0.6b",
+    val directApiKey: String = "ollama",
     val timeoutMs: Long = 15_000L,
     val maxRetries: Int = 1,
     val healthFailThreshold: Int = 3,

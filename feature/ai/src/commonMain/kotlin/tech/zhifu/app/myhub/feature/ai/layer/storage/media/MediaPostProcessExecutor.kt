@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.media
 
-import kotlinx.serialization.json.Json
+import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
 import kotlin.time.Clock
@@ -8,13 +9,6 @@ import kotlin.time.Clock
 class MediaPostProcessExecutor(
     private val captureLocalRepository: CaptureLocalRepository,
 ) {
-    private val json by lazy {
-        Json {
-            explicitNulls = false
-            ignoreUnknownKeys = true
-        }
-    }
-
     suspend fun processQueuedJobs(
         limit: Int = 20
     ) = captureLocalRepository
@@ -28,12 +22,9 @@ class MediaPostProcessExecutor(
         job: AiJobSnapshot
     ) {
         val now = Clock.System.now().toEpochMilliseconds()
-        val request = runCatching {
-            json.decodeFromString(
-                deserializer = MediaPostProcessRequest.serializer(),
-                string = job.requestJson
-            )
-        }.getOrNull()
+        val request = job.requestJson
+            .deserialize<MediaPostProcessRequest>()
+            .getOrNull()
 
         if (request == null) {
             captureLocalRepository.upsertAiJob(
@@ -69,12 +60,10 @@ class MediaPostProcessExecutor(
         captureLocalRepository.upsertAiJob(
             snapshot = job.copy(
                 status = "succeeded",
-                responseJson = json.encodeToString(
-                    value = MediaPostProcessResponse(
-                        thumbUri = thumbUri ?: "",
-                        durationMs = duration,
-                    ),
-                ),
+                responseJson = MediaPostProcessResponse(
+                    thumbUri = thumbUri ?: "",
+                    durationMs = duration,
+                ).serialize().orEmpty(),
                 updatedAt = now,
             )
         )

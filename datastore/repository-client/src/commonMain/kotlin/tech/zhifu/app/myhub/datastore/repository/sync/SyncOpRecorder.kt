@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.datastore.repository.sync
 
 import kotlinx.serialization.DeserializationStrategy
 import tech.zhifu.app.myhub.datastore.datasource.sync.SyncOutboxStatus
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.sync.SyncEntityType
 import tech.zhifu.app.myhub.sync.SyncOperations
 import kotlin.time.Clock
@@ -28,7 +29,7 @@ internal suspend inline fun <reified T> SyncRepository.recordInsertOperation(
     entityType = entityType,
     entityId = entityId,
     operation = SyncOperations.Insert,
-    payload = json.encodeToString(payload),
+    payload = payload.serialize().orEmpty(),
     now = now
 )
 
@@ -43,7 +44,7 @@ internal suspend inline fun <reified T> SyncRepository.recordDeleteOperation(
     entityType = entityType,
     entityId = entityId,
     operation = SyncOperations.Delete,
-    payload = json.encodeToString(payload),
+    payload = payload.serialize().orEmpty(),
     now = now
 )
 
