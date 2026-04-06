@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content
+package tech.zhifu.app.myhub.component.statics.page
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -13,20 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContent
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentCard
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentTexts
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticQuote
-import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.drawables.MaterialSymbolsProgress_activity
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_subtitle
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_title
+import tech.zhifu.app.myhub.component.statics.StaticContent
+import tech.zhifu.app.myhub.component.statics.StaticContentCard
+import tech.zhifu.app.myhub.component.statics.StaticContentState
+import tech.zhifu.app.myhub.component.statics.StaticContentTexts
+import tech.zhifu.app.myhub.component.statics.StaticQuote
+import tech.zhifu.app.myhub.component.statics.resources.drawables.MaterialSymbolsProgress_activity
 
 @Composable
-fun Loading(
-    modifier: Modifier = Modifier,
+fun LoadingContent(
+    modifier: Modifier,
+    title: String,
+    subTitle: String?,
 ) {
     StaticContent(
         modifier = modifier,
@@ -43,8 +41,8 @@ fun Loading(
         },
         contentTexts = { isLandscape ->
             StaticContentTexts(
-                title = stringResource(Res.string.feature_dashboard_loading_title),
-                subtitle = stringResource(Res.string.feature_dashboard_loading_subtitle),
+                title = title,
+                subtitle = subTitle,
                 staticContentQuote = {
                     if (isLandscape.not()) {
                         StaticQuote()

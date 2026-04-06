@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -51,6 +52,7 @@ fun <STATE, SIDE_EFFECT, VM, R> VM.collectAsState(
           VM : ContainerHost<STATE, SIDE_EFFECT> {
     return container.refCountStateFlow
         .map(selector)
+        .distinctUntilChanged()
         .collectAsStateWithLifecycle(
             initialValue = selector(container.refCountStateFlow.value),
             minActiveState = lifecycleState

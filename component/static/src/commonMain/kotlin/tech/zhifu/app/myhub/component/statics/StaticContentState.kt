@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.statics
+package tech.zhifu.app.myhub.component.statics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

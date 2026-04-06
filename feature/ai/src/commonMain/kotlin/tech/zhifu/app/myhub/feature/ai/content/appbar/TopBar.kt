@@ -1,10 +1,14 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.appbar
+package tech.zhifu.app.myhub.feature.ai.content.appbar
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,24 +24,26 @@ import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.HazeMaterials
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.ui.design.resources.app_logo
-import tech.zhifu.app.myhub.ui.design.resources.app_name
-import tech.zhifu.app.myhub.ui.design.resources.Res as PlatformRes
+import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
+import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Composable
-internal fun TopBar(
-    viewModel: DashboardViewModel,
+fun TopBar(
+    navigator: AppNavigator,
     hazeState: HazeState,
 ) {
     TopBarContent(
         hazeState = hazeState,
+        onClickBack = navigator::goBack,
         actions = {
-            TopBarAvatar(
-                viewModel = viewModel
-            )
+            IconButton(
+                onClick = navigator::navigateToSettings
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = "设置"
+                )
+            }
         }
     )
 }
@@ -46,6 +52,7 @@ internal fun TopBar(
 internal fun TopBarContent(
     hazeState: HazeState,
     actions: @Composable RowScope.() -> Unit = {},
+    onClickBack: () -> Unit,
 ) {
     TopAppBar(
         modifier = Modifier
@@ -56,10 +63,11 @@ internal fun TopBarContent(
                 )
             ) {
                 inputScale = HazeInputScale.Default
-                progressive = HazeProgressive.verticalGradient(
-                    startIntensity = 1f,
-                    endIntensity = 0f
-                )
+                progressive = HazeProgressive
+                    .verticalGradient(
+                        startIntensity = 1f,
+                        endIntensity = 0f
+                    )
             }
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
@@ -68,15 +76,19 @@ internal fun TopBarContent(
             scrolledContainerColor = Color.Transparent,
         ),
         navigationIcon = {
-            Image(
-                painter = painterResource(PlatformRes.drawable.app_logo),
-                contentDescription = stringResource(PlatformRes.string.app_name),
+            IconButton(
+                onClick = onClickBack,
                 modifier = Modifier.size(36.dp)
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = "AI 捕获",
+                )
+            }
         },
         title = {
             Text(
-                text = stringResource(PlatformRes.string.app_name),
+                text = "AI 捕获",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )

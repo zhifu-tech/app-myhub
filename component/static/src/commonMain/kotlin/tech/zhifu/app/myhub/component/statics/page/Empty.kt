@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content
+package tech.zhifu.app.myhub.component.statics.page
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -8,22 +8,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContent
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentCard
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentTexts
-import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticQuote
-import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_empty_subtitle
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_empty_title
+import tech.zhifu.app.myhub.component.statics.StaticContent
+import tech.zhifu.app.myhub.component.statics.StaticContentCard
+import tech.zhifu.app.myhub.component.statics.StaticContentState
+import tech.zhifu.app.myhub.component.statics.StaticContentTexts
+import tech.zhifu.app.myhub.component.statics.StaticQuote
 
 @Composable
-fun Empty(
-    modifier: Modifier = Modifier
+fun EmptyContent(
+    modifier: Modifier = Modifier,
+    title: String,
+    subTitle: String?,
 ) {
-    val title = stringResource(Res.string.feature_dashboard_empty_title)
-    val subtitle = stringResource(Res.string.feature_dashboard_empty_subtitle)
 
     StaticContent(
         modifier = modifier,
@@ -44,7 +40,7 @@ fun Empty(
         contentTexts = { isLandscape ->
             StaticContentTexts(
                 title = title,
-                subtitle = subtitle,
+                subtitle = subTitle,
                 staticContentQuote = {
                     if (isLandscape.not()) {
                         StaticQuote()

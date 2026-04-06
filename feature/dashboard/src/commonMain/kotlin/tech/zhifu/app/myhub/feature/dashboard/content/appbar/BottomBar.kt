@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchBar
+import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
+import tech.zhifu.app.myhub.ui.design.util.isWidthCompact
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
 
 @Composable
@@ -54,11 +57,20 @@ fun BottomBarContent(
         modifier = modifier
             .fillMaxWidth()
             .imePadding()
-            .padding(32.dp), // 保持 SearchBar 与键盘间距
+            .padding(32.dp), // 保持与键盘间距
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 12.dp,
+            alignment = Alignment.CenterHorizontally
+        )
     ) {
-        searchBar(Modifier.weight(1f))
+        val windowSizeClass = LocalWindowSizeClass.current
+        val modifier = if (windowSizeClass.isWidthCompact()) {
+            Modifier.weight(1f)
+        } else {
+            Modifier.widthIn(max = 500.dp)
+        }
+        searchBar(modifier)
         fab(Modifier)
     }
 }

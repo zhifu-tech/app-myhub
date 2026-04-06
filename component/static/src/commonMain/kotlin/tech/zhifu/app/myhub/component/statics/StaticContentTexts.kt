@@ -1,5 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.statics
-
+package tech.zhifu.app.myhub.component.statics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StaticContentTexts(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     staticContentQuote: @Composable () -> Unit,
 ) {
     Column(
@@ -30,12 +29,14 @@ fun StaticContentTexts(
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
             )
-            Text(
-                text = subtitle,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-            )
+            if (subtitle.isNullOrBlank().not()) {
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
         staticContentQuote()
     }

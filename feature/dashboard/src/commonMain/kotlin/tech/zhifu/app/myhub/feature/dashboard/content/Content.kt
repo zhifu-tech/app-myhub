@@ -11,12 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGrid
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentList
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
+import tech.zhifu.app.myhub.feature.dashboard.content.statics.Empty
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
@@ -25,9 +28,9 @@ import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
 
 @Composable
 fun Content(
-    modifier: Modifier = Modifier,
     viewModel: DashboardViewModel,
     paddingValues: PaddingValues,
+    hazeState: HazeState,
 ) {
     val snackbarState = LocalSnackbarState.current
     viewModel.collectSharedSideEffect(
@@ -43,12 +46,12 @@ fun Content(
     val isSearching by viewModel.collectSearchingState()
     val layoutAsList by viewModel.collectLayoutAsList()
     ContentContent(
-        modifier = modifier,
+        modifier = Modifier.hazeSource(hazeState),
         layoutAsList = layoutAsList,
         isContentEmpty = isContentEmpty,
         isSearching = isSearching,
         contentEmpty = {
-            Empty(modifier = modifier)
+            Empty(contentPadding = paddingValues, viewModel = viewModel)
         },
         contentList = { modifier ->
             ContentList(

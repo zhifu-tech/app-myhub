@@ -1,4 +1,4 @@
-package tech.zhifu.app.myhub.feature.dashboard.content.statics
+package tech.zhifu.app.myhub.component.statics
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,15 +20,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.resources.Res
-import tech.zhifu.app.myhub.feature.dashboard.resources.drawables.QuoteIcon
-import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_quote
+import tech.zhifu.app.myhub.component.statics.resources.Res
+import tech.zhifu.app.myhub.component.statics.resources.component_static_loading_quote
+import tech.zhifu.app.myhub.component.statics.resources.drawables.QuoteIcon
 
 @Composable
 fun StaticQuote() {
-    val quote = stringResource(Res.string.feature_dashboard_loading_quote)
+    val quote = stringResource(Res.string.component_static_loading_quote)
     Column(
-        modifier = Modifier.widthIn(max = 360.dp)
+        modifier = Modifier
+            .widthIn(max = 360.dp)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

@@ -22,6 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.component.static)
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.platform)

@@ -10,6 +10,12 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "tech.zhifu.app.myhub.feature.ai.resources"
+    generateResClass = always
+}
+
 kotlin {
     android {
         namespace = "tech.zhifu.app.myhub.feature.ai"
@@ -18,6 +24,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.component.media)
+            implementation(projects.component.static)
             implementation(projects.core.analytics)
             implementation(projects.core.logger)
             implementation(projects.core.network)
@@ -26,9 +33,14 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.aiApi)
+            implementation(projects.feature.settingsApi)
+            implementation(projects.feature.preview)
             implementation(projects.ui.design)
             implementation(projects.ui.state)
 
+            implementation(libs.chrisbanes.haze)
+            implementation(libs.chrisbanes.haze.materials)
+            implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
             implementation(libs.jb.compose.material.materialIconsExtend)
