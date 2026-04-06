@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContent
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentCard
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
@@ -21,7 +20,6 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_empty_
 
 @Composable
 fun Empty(
-    viewModel: DashboardViewModel,
     modifier: Modifier = Modifier
 ) {
     val title = stringResource(Res.string.feature_dashboard_empty_title)

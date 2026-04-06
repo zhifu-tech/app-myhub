@@ -14,8 +14,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGridContent
-import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentListContent
+import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGrid
+import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentList
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
@@ -40,29 +40,50 @@ fun Content(
     }
 
     val isContentEmpty by viewModel.collectContentAsEmpty()
-    if (isContentEmpty) {
-        val isSearching by viewModel.collectSearchingState()
-        if (isSearching.not()) {
-            Empty(viewModel = viewModel, modifier = modifier)
-            return
-        }
-        return
-    }
+    val isSearching by viewModel.collectSearchingState()
+    val layoutAsList by viewModel.collectLayoutAsList()
     ContentContent(
-        viewModel = viewModel,
         modifier = modifier,
-        paddingValues = paddingValues,
+        layoutAsList = layoutAsList,
+        isContentEmpty = isContentEmpty,
+        isSearching = isSearching,
+        contentEmpty = {
+            Empty(modifier = modifier)
+        },
+        contentList = { modifier ->
+            ContentList(
+                viewModel = viewModel,
+                modifier = modifier,
+                paddingValues = paddingValues,
+            )
+        },
+        contentGrid = { modifier ->
+            ContentGrid(
+                viewModel = viewModel,
+                modifier = modifier,
+                paddingValues = paddingValues,
+            )
+        }
     )
 }
 
 @Composable
 private fun ContentContent(
-    viewModel: DashboardViewModel,
     modifier: Modifier,
-    paddingValues: PaddingValues,
+    layoutAsList: Boolean,
+    isContentEmpty: Boolean,
+    isSearching: Boolean,
+    contentEmpty: @Composable () -> Unit,
+    contentList: @Composable (Modifier) -> Unit,
+    contentGrid: @Composable (Modifier) -> Unit,
 ) {
-    val layoutAsList by viewModel.collectLayoutAsList()
-
+    if (isContentEmpty) {
+        if (isSearching.not()) {
+            contentEmpty()
+            return
+        }
+        return
+    }
     val modifier = modifier
         .fillMaxSize()
         .tapToClearFocus()
@@ -71,16 +92,8 @@ private fun ContentContent(
         .background(color = MaterialTheme.colorScheme.surfaceVariant)
 
     if (layoutAsList) {
-        ContentListContent(
-            viewModel = viewModel,
-            modifier = modifier,
-            paddingValues = paddingValues,
-        )
+        contentList(modifier)
     } else {
-        ContentGridContent(
-            viewModel = viewModel,
-            modifier = modifier,
-            paddingValues = paddingValues,
-        )
+        contentGrid(modifier)
     }
 }

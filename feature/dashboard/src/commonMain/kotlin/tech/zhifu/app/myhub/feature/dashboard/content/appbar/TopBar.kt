@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -13,6 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.HazeMaterials
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
@@ -22,11 +28,11 @@ import tech.zhifu.app.myhub.ui.design.resources.Res as PlatformRes
 
 @Composable
 internal fun TopBar(
-    modifier: Modifier,
     viewModel: DashboardViewModel,
+    hazeState: HazeState,
 ) {
     TopBarContent(
-        modifier = modifier,
+        hazeState = hazeState,
         actions = {
             TopBarAvatar(
                 viewModel = viewModel
@@ -37,11 +43,23 @@ internal fun TopBar(
 
 @Composable
 internal fun TopBarContent(
-    modifier: Modifier = Modifier,
+    hazeState: HazeState,
     actions: @Composable () -> Unit = {},
 ) {
+    val hazeStyle = HazeMaterials.regular(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
+    )
+    val hazeInputScale: HazeInputScale = HazeInputScale.Default
     TopAppBar(
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier
+            .hazeEffect(state = hazeState, style = hazeStyle) {
+                inputScale = hazeInputScale
+                progressive = HazeProgressive.verticalGradient(
+                    startIntensity = 1f,
+                    endIntensity = 0f
+                )
+            }
+            .fillMaxWidth()
             .padding(horizontal = 12.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,

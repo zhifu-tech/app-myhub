@@ -8,12 +8,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import dev.chrisbanes.haze.HazeInputScale
-import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAICapture
@@ -38,80 +34,111 @@ fun DashboardScreen(
         navigator = navigator,
         viewModel = viewModel
     )
-    DashboardScaffold(
-        viewModel = viewModel,
+    DashboardScreenContent(
+        scaffold = {
+            DashboardScaffold(
+                viewModel = viewModel,
+            )
+        },
+        preview = {
+            DashboardPreview(
+                viewModel = viewModel,
+            )
+        }
     )
-    DashboardPreview(
-        viewModel = viewModel,
-    )
+}
+
+@Composable
+fun DashboardScreenContent(
+    scaffold: @Composable () -> Unit,
+    preview: @Composable () -> Unit,
+) {
+    scaffold()
+    preview()
 }
 
 @Composable
 internal fun DashboardScaffold(
     viewModel: DashboardViewModel,
 ) {
-    val hazeState = rememberHazeState()
-    val hazeStyle = HazeMaterials.regular(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant
-    )
-    val hazeInputScale: HazeInputScale = HazeInputScale.Default
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
+    DashboardScaffoldContent(
+        topBar = { hazeState ->
             TopBar(
-                modifier = Modifier.hazeEffect(state = hazeState, style = hazeStyle) {
-                    inputScale = hazeInputScale
-                    progressive = HazeProgressive.verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f
-                    )
-                },
                 viewModel = viewModel,
+                hazeState = hazeState,
             )
         },
         bottomBar = {
             BottomBar(modifier = Modifier, viewModel = viewModel)
         },
+        content = { contentPadding, hazeState ->
+            DashboardContent(
+                viewModel = viewModel,
+                contentPadding = contentPadding,
+                hazeState = hazeState,
+            )
+        }
+    )
+}
+
+@Composable
+internal fun DashboardScaffoldContent(
+    topBar: @Composable (HazeState) -> Unit,
+    bottomBar: @Composable () -> Unit,
+    content: @Composable (PaddingValues, HazeState) -> Unit
+) {
+    val hazeState = rememberHazeState()
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            topBar(hazeState)
+        },
+        bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
-    ) { contentPadding ->
-        DashboardContent(
-            viewModel = viewModel,
-            contentPadding = contentPadding,
-            hazeState = hazeState,
-        )
+    ) {
+        content(it, hazeState)
     }
 }
 
 @Composable
-private fun DashboardContent(
+internal fun DashboardContent(
     viewModel: DashboardViewModel,
     contentPadding: PaddingValues,
     hazeState: HazeState,
 ) {
     val state by viewModel.collectAsState { it.state }
-    when (state) {
-        DashboardUiState.State.LOADING -> {
-            Loading(
-                modifier = Modifier.padding(paddingValues = contentPadding),
-                viewModel = viewModel
-            )
-        }
-
-        DashboardUiState.State.ERROR -> {
+    DashboardContentContent(
+        state = state,
+        loading = {
+            Loading(modifier = Modifier.padding(paddingValues = contentPadding))
+        },
+        error = {
             Error(
                 modifier = Modifier.padding(paddingValues = contentPadding),
                 viewModel = viewModel
             )
-        }
-
-        DashboardUiState.State.CONTENT -> {
+        },
+        content = {
             Content(
                 paddingValues = contentPadding,
                 modifier = Modifier.hazeSource(state = hazeState),
                 viewModel = viewModel,
             )
         }
+    )
+}
 
+@Composable
+internal fun DashboardContentContent(
+    state: DashboardUiState.State,
+    loading: @Composable () -> Unit,
+    error: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    when (state) {
+        DashboardUiState.State.LOADING -> loading()
+        DashboardUiState.State.ERROR -> error()
+        DashboardUiState.State.CONTENT -> content()
         else -> {}
     }
 }

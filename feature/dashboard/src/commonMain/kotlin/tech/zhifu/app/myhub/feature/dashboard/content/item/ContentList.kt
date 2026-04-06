@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -16,9 +17,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
-fun ContentListContent(
+fun ContentList(
     viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
@@ -32,6 +34,33 @@ fun ContentListContent(
         onLoadMore = viewModel::loadMore,
     )
 
+    ContentListContent(
+        items = items,
+        modifier = modifier,
+        paddingValues = paddingValues,
+        listState = listState,
+    ) { item ->
+        ContentItemHost(
+            item = item,
+            modifier = Modifier.animateItem(),
+            viewModel = viewModel
+        ) { animatedVisibilityScope ->
+            ContentListItem(
+                item = item,
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
+    }
+}
+
+@Composable
+internal fun ContentListContent(
+    items: List<ContentCard>,
+    modifier: Modifier,
+    paddingValues: PaddingValues,
+    listState: LazyListState,
+    contentItem: @Composable LazyItemScope.(ContentCard) -> Unit,
+) {
     LazyColumn(
         modifier = modifier.padding(top = 24.dp),
         contentPadding = paddingValues,
@@ -41,19 +70,9 @@ fun ContentListContent(
         items(
             items = items,
             key = { it.id },
-            contentType = { "listItem" }
-        ) { item ->
-            ContentItemHost(
-                item = item,
-                modifier = Modifier.animateItem(),
-                viewModel = viewModel
-            ) { animatedVisibilityScope ->
-                ContentListItem(
-                    item = item,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                )
-            }
-        }
+            contentType = { "listItem" },
+            itemContent = contentItem,
+        )
     }
 }
 

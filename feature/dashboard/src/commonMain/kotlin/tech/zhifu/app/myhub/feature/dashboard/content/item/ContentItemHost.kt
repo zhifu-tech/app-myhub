@@ -39,6 +39,23 @@ fun ContentItemHost(
         (it as? DashboardUiState.Content)?.selectedCard === item
     }
 
+    ContentItemHostContent(
+        isSelected = isSelected,
+        modifier = modifier,
+        onClick = onClick,
+        item = item,
+        content = content
+    )
+}
+
+@Composable
+internal fun ContentItemHostContent(
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    item: ContentCard,
+    content: @Composable (AnimatedVisibilityScope) -> Unit,
+) {
     AnimatedVisibility(
         visible = isSelected.not(),
         enter = fadeIn(

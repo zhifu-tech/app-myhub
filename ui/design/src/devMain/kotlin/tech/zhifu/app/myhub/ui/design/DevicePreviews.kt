@@ -16,23 +16,27 @@ private const val TABLE_LANDSCAPE = "spec:width=1280dp,height=800dp,dpi=240,orie
 @Preview(
     name = "Phone - Light",
     group = "Phone",
+    locale = "zh-rCN",
     device = PHONE
 )
 @Preview(
     group = "Phone",
     name = "Phone - Light, Landscape",
     device = PHONE_LANDSCAPE,
+    locale = "zh-rCN",
     showSystemUi = true,
 )
 @Preview(
     group = "Phone",
     name = "Phone - Dark",
+    locale = "zh-rCN",
     device = PHONE,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL
 )
 @Preview(
     group = "Phone",
     name = "Phone - Dark, Landscape",
+    locale = "zh-rCN",
     device = PHONE_LANDSCAPE,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL
 )
@@ -43,11 +47,13 @@ annotation class PreviewPhoneLightDark
 @Preview(
     name = "Table - Light",
     group = "Table",
+    locale = "zh-rCN",
     device = TABLET
 )
 @Preview(
     group = "Table",
     name = "Table - Light, Landscape",
+    locale = "zh-rCN",
     device = TABLE_LANDSCAPE,
     showSystemUi = true,
 )
@@ -60,6 +66,7 @@ annotation class PreviewPhoneLightDark
 @Preview(
     group = "Table",
     name = "Table - Dark, Landscape",
+    locale = "zh-rCN",
     device = TABLE_LANDSCAPE,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL
 )
@@ -70,11 +77,13 @@ annotation class PreviewTabletLightDark
 @Preview(
     name = "Desktop - Light",
     group = "Desktop",
+    locale = "zh-rCN",
     device = DESKTOP
 )
 @Preview(
     group = "Desktop",
     name = "Desktop - Dark",
+    locale = "zh-rCN",
     device = DESKTOP,
     uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL
 )

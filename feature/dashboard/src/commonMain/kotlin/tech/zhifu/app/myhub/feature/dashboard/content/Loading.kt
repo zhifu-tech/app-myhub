@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContent
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentCard
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.StaticContentState
@@ -27,7 +26,6 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loadin
 
 @Composable
 fun Loading(
-    viewModel: DashboardViewModel,
     modifier: Modifier = Modifier,
 ) {
     StaticContent(

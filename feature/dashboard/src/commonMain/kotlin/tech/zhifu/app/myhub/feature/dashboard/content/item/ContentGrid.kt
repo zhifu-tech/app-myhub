@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -17,9 +18,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
+import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
-fun ContentGridContent(
+fun ContentGrid(
     viewModel: DashboardViewModel,
     modifier: Modifier,
     paddingValues: PaddingValues,
@@ -33,6 +35,32 @@ fun ContentGridContent(
         onLoadMore = viewModel::loadMore
     )
 
+    ContentGridContent(
+        items = items,
+        modifier = modifier,
+        paddingValues = paddingValues,
+        gridState = gridState,
+    ) { item ->
+        ContentItemHost(
+            item = item,
+            modifier = Modifier.animateItem(),
+            viewModel = viewModel
+        ) {
+            ContentGridItem(
+                item = item,
+            )
+        }
+    }
+}
+
+@Composable
+internal fun ContentGridContent(
+    items: List<ContentCard>,
+    modifier: Modifier,
+    paddingValues: PaddingValues,
+    gridState: LazyGridState,
+    contentItem: @Composable LazyGridItemScope.(ContentCard) -> Unit,
+) {
     LazyVerticalGrid(
         modifier = modifier.padding(top = 24.dp),
         contentPadding = paddingValues,
@@ -44,18 +72,9 @@ fun ContentGridContent(
         items(
             items = items,
             key = { it.id },
-            contentType = { "gridItem" }
-        ) { item ->
-            ContentItemHost(
-                item = item,
-                modifier = Modifier.animateItem(), // fixme 确认效果后删除
-                viewModel = viewModel,
-            ) {
-                ContentGridItem(
-                    item = item,
-                )
-            }
-        }
+            contentType = { "gridItem" },
+            itemContent = contentItem,
+        )
     }
 }
 
