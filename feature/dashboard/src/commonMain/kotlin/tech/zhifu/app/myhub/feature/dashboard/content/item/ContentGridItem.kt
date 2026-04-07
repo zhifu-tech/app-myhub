@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.item
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,16 +19,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.preview.sharedElement
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.model.toImageVector
 
 @Composable
 fun ContentGridItem(
     item: ContentCard,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     ContentItemLeading(
         item = item,
         modifier = Modifier
+            .sharedElement(
+                key = "content-image-${item.id}",
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
             .fillMaxWidth()
             .aspectRatio(4f / 3f)
     )
