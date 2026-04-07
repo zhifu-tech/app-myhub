@@ -21,8 +21,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
-import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsContentEmptyStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun SearchBar(
@@ -31,18 +33,18 @@ fun SearchBar(
 ) {
     val focusManager = LocalFocusManager.current
 
-    viewModel.collectSharedSideEffect(
+    viewModel.sideEffect.CollectPredicatedSharedSideEffect(
         predicate = { it is DashboardSideEffect.ResetSearch }
     ) {
         focusManager.clearFocus()
     }
 
-    val isContentEmpty by viewModel.collectContentAsEmpty()
+    val isContentEmpty by viewModel.uiState.collectAsContentEmptyStateWithLifecycle()
     val isSearching by viewModel.collectSearchingState()
 
     val visible = !(isContentEmpty && !isSearching)
 
-    val query by viewModel.searchStateFlow.collectAsState()
+    val query by viewModel.searchState.collectAsState()
     var queryState by remember { mutableStateOf(query) }
 
     AnimatedVisibility(

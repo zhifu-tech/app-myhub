@@ -17,15 +17,16 @@ import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.InputBox
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
-import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.design.util.isWidthCompact
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun BottomBar(
     viewModel: AIViewModel,
 ) {
-    val state by viewModel.collectAsState {
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.let { uiState ->
             BottomBarState(
                 draft = uiState.draft,
@@ -67,7 +68,7 @@ fun BottomBarContent(
             alignment = Alignment.CenterHorizontally
         )
     ) {
-        val windowSizeClass = LocalWindowSizeClass.current
+        val windowSizeClass = rememberWindowSizeClass()
         val modifier = if (windowSizeClass.isWidthCompact()) {
             Modifier.weight(1f)
         } else {

@@ -17,8 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentFieldItems
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsItemsStateWithLifecycle
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun ContentGrid(
@@ -26,7 +27,7 @@ fun ContentGrid(
     modifier: Modifier,
     paddingValues: PaddingValues,
 ) {
-    val items by viewModel.collectContentFieldItems()
+    val items by viewModel.uiState.collectAsItemsStateWithLifecycle()
     val gridState = rememberLazyGridState()
 
     AutoLoadMoreGrid(

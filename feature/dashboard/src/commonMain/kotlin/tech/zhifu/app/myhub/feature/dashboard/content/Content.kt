@@ -8,32 +8,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.feature.dashboard.DashboardSideEffect
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentGrid
 import tech.zhifu.app.myhub.feature.dashboard.content.item.ContentList
-import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
+import tech.zhifu.app.myhub.feature.dashboard.content.search.collectAsSearchingStateWithLifecycle
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.Empty
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsContentEmptyStateWithLifecycle
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
 import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
-import tech.zhifu.app.myhub.ui.state.layout.collectLayoutAsList
-import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
+import tech.zhifu.app.myhub.ui.state.layout.collectAsLayoutAsListStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun Content(
     viewModel: DashboardViewModel,
     paddingValues: PaddingValues,
-    hazeState: HazeState,
 ) {
     val snackbarState = LocalSnackbarState.current
-    viewModel.collectSharedSideEffect(
+    viewModel.sideEffect.CollectPredicatedSharedSideEffect(
         predicate = { it is DashboardSideEffect.ShowSnack },
     ) { sideEffect ->
         sideEffect as DashboardSideEffect.ShowSnack
@@ -42,11 +40,10 @@ fun Content(
         }
     }
 
-    val isContentEmpty by viewModel.collectContentAsEmpty()
-    val isSearching by viewModel.collectSearchingState()
-    val layoutAsList by viewModel.collectLayoutAsList()
+    val isContentEmpty by viewModel.uiState.collectAsContentEmptyStateWithLifecycle()
+    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
+    val layoutAsList by viewModel.layout.collectAsLayoutAsListStateWithLifecycle()
     ContentContent(
-        modifier = Modifier.hazeSource(hazeState),
         layoutAsList = layoutAsList,
         isContentEmpty = isContentEmpty,
         isSearching = isSearching,
@@ -72,7 +69,6 @@ fun Content(
 
 @Composable
 private fun ContentContent(
-    modifier: Modifier,
     layoutAsList: Boolean,
     isContentEmpty: Boolean,
     isSearching: Boolean,
@@ -87,10 +83,9 @@ private fun ContentContent(
         }
         return
     }
-    val modifier = modifier
+    val modifier = Modifier
         .fillMaxSize()
         .tapToClearFocus()
-        .testTag("content-list")
         .padding(horizontal = 16.dp)
         .background(color = MaterialTheme.colorScheme.surfaceVariant)
 

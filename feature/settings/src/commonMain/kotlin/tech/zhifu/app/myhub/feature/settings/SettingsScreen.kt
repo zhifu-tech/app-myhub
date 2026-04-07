@@ -13,8 +13,10 @@ import tech.zhifu.app.myhub.feature.mixed.api.navigateToSupport
 import tech.zhifu.app.myhub.feature.settings.content.Content
 import tech.zhifu.app.myhub.feature.settings.content.TopBar
 import tech.zhifu.app.myhub.navigation.AppNavigator
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
-import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun SettingsScreen(
@@ -55,7 +57,9 @@ fun SettingsContent(
     viewModel: SettingsViewModel,
     contentPadding: PaddingValues
 ) {
-    val state by viewModel.collectAsState { it.state }
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        it.state
+    }
     when (state) {
         SettingsUiState.State.CONTENT -> {
             Content(
@@ -72,7 +76,7 @@ private fun SettingsSideEffect(
     navigator: AppNavigator,
     viewModel: SettingsViewModel
 ) {
-    viewModel.collectSharedSideEffect { effect ->
+    viewModel.sideEffect.CollectPredicatedSharedSideEffect { effect ->
         when (effect) {
             SettingsSideEffect.NavigateBack -> {
                 navigator.goBack()

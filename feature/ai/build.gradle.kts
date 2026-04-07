@@ -38,8 +38,6 @@ kotlin {
             implementation(projects.ui.design)
             implementation(projects.ui.state)
 
-            implementation(libs.chrisbanes.haze)
-            implementation(libs.chrisbanes.haze.materials)
             implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)

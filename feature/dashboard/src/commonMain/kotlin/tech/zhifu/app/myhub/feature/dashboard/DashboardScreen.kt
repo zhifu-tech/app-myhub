@@ -1,14 +1,14 @@
 package tech.zhifu.app.myhub.feature.dashboard
 
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.feature.ai.api.navigation.navigateToAICapture
 import tech.zhifu.app.myhub.feature.dashboard.content.Content
@@ -19,8 +19,11 @@ import tech.zhifu.app.myhub.feature.dashboard.content.statics.Error
 import tech.zhifu.app.myhub.feature.dashboard.content.statics.Loading
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
-import tech.zhifu.app.myhub.ui.viewmodel.collectSharedSideEffect
+import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
+import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun DashboardScreen(
@@ -31,45 +34,52 @@ fun DashboardScreen(
         navigator = navigator,
         viewModel = viewModel
     )
-    val state by viewModel.collectAsState { it.state }
-    DashboardScreenContent(
-        state = state,
-        topBar = { hazeState ->
-            TopBar(viewModel = viewModel, hazeState = hazeState)
-        },
-        bottomBar = {
-            BottomBar(modifier = Modifier, viewModel = viewModel)
-        },
-        loading = { contentPadding ->
-            Loading(contentPadding = contentPadding, viewModel = viewModel)
-        },
-        error = { contentPadding ->
-            Error(contentPadding = contentPadding, viewModel = viewModel)
-        },
-        content = { contentPadding, hazeState ->
-            Content(
-                paddingValues = contentPadding,
-                hazeState = hazeState,
-                viewModel = viewModel,
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        it.state
+    }
+    SharedTransitionLayout {
+        CompositionLocalProvider(
+            LocalSharedTransitionScope provides this,
+        ) {
+            DashboardScreenContent(
+                state = state,
+                topBar = {
+                    TopBar(viewModel = viewModel)
+                },
+                bottomBar = {
+                    BottomBar(modifier = Modifier, viewModel = viewModel)
+                },
+                loading = { contentPadding ->
+                    Loading(contentPadding = contentPadding, viewModel = viewModel)
+                },
+                error = { contentPadding ->
+                    Error(contentPadding = contentPadding, viewModel = viewModel)
+                },
+                content = { contentPadding ->
+                    Content(
+                        paddingValues = contentPadding,
+                        viewModel = viewModel,
+                    )
+                }
             )
+            DashboardPreview(viewModel = viewModel)
         }
-    )
-    DashboardPreview(viewModel = viewModel)
+    }
 }
 
 @Composable
 internal fun DashboardScreenContent(
     state: DashboardUiState.State,
-    topBar: @Composable (HazeState) -> Unit,
+    topBar: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit,
     loading: @Composable (PaddingValues) -> Unit,
     error: @Composable (PaddingValues) -> Unit,
-    content: @Composable (PaddingValues, HazeState) -> Unit,
+    content: @Composable (PaddingValues) -> Unit,
 ) {
-    val hazeState = rememberHazeState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { topBar(hazeState) },
+        modifier = Modifier
+            .fillMaxSize(),
+        topBar = topBar,
         bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         content = { contentPadding ->
@@ -78,7 +88,7 @@ internal fun DashboardScreenContent(
                 DashboardUiState.State.LOADING -> loading(contentPadding)
 
                 DashboardUiState.State.ERROR -> error(contentPadding)
-                DashboardUiState.State.CONTENT -> content(contentPadding, hazeState)
+                DashboardUiState.State.CONTENT -> content(contentPadding)
             }
         },
     )
@@ -89,7 +99,7 @@ private fun DashboardSideEffect(
     navigator: AppNavigator,
     viewModel: DashboardViewModel
 ) {
-    viewModel.collectSharedSideEffect { effect ->
+    viewModel.sideEffect.CollectPredicatedSharedSideEffect { effect ->
         when (effect) {
             DashboardSideEffect.NavigateToAiCapture -> {
                 navigator.navigateToAICapture()

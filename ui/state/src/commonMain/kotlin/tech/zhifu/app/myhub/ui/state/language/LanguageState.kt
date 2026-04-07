@@ -6,7 +6,7 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 interface LanguageState {
     val userRepository: UserRepository
-    val languageStateFlow: StateFlow<Language>
+    val language: StateFlow<Language>
 }
 
 @Immutable

@@ -17,7 +17,7 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.resources.Res
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_grid
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_menu_layout_list
-import tech.zhifu.app.myhub.ui.state.layout.collectLayoutAsList
+import tech.zhifu.app.myhub.ui.state.layout.collectAsLayoutAsListStateWithLifecycle
 import tech.zhifu.app.myhub.ui.state.layout.updateLayoutAsList
 
 @Composable
@@ -25,7 +25,7 @@ fun MenuItemLayout(
     viewModel: DashboardViewModel,
     onBeforeNavigate: () -> Unit,
 ) {
-    val layoutAsList by viewModel.collectLayoutAsList()
+    val layoutAsList by viewModel.layout.collectAsLayoutAsListStateWithLifecycle()
     MenuItemLayoutContent(
         layoutAsList = layoutAsList,
         onActionLayout = { layoutAsList ->

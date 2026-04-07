@@ -1,20 +1,20 @@
 package tech.zhifu.app.myhub.feature.dashboard.viewmodel
 
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.StateFlow
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
-import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 
 @Composable
-fun DashboardViewModel.collectContentAsEmpty() =
-    collectAsState {
+fun StateFlow<DashboardUiState>.collectAsContentEmptyStateWithLifecycle() =
+    collectAsSelectedStateWithLifecycle {
         (it as? DashboardUiState.Content)
             ?.items?.isEmpty() ?: true
     }
 
 @Composable
-fun DashboardViewModel.collectContentFieldItems() =
-    collectAsState {
+fun StateFlow<DashboardUiState>.collectAsItemsStateWithLifecycle() =
+    collectAsSelectedStateWithLifecycle {
         (it as? DashboardUiState.Content)
             ?.items ?: emptyList()
     }

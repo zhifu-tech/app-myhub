@@ -23,7 +23,8 @@ import tech.zhifu.app.myhub.feature.dashboard.viewmodel.selectedCard
 import tech.zhifu.app.myhub.feature.preview.PreviewTransitionTokens
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.ui.model.ContentCard
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun ContentItemHost(
@@ -35,7 +36,7 @@ fun ContentItemHost(
     val onClick: () -> Unit = remember(item) {
         { viewModel.selectedCard(item) }
     }
-    val isSelected by viewModel.collectAsState {
+    val isSelected by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? DashboardUiState.Content)?.selectedCard === item
     }
 

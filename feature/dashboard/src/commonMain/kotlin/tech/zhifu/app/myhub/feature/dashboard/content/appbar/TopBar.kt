@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -15,11 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeInputScale
-import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.materials.HazeMaterials
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
@@ -30,10 +24,8 @@ import tech.zhifu.app.myhub.ui.design.resources.Res as PlatformRes
 @Composable
 internal fun TopBar(
     viewModel: DashboardViewModel,
-    hazeState: HazeState,
 ) {
     TopBarContent(
-        hazeState = hazeState,
         actions = {
             TopBarAvatar(
                 viewModel = viewModel
@@ -44,23 +36,10 @@ internal fun TopBar(
 
 @Composable
 internal fun TopBarContent(
-    hazeState: HazeState,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
         modifier = Modifier
-            .hazeEffect(
-                state = hazeState,
-                style = HazeMaterials.regular(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                inputScale = HazeInputScale.Default
-                progressive = HazeProgressive.verticalGradient(
-                    startIntensity = 1f,
-                    endIntensity = 0f
-                )
-            }
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
         colors = TopAppBarDefaults.topAppBarColors(

@@ -7,24 +7,26 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchBar
-import tech.zhifu.app.myhub.ui.design.util.LocalWindowSizeClass
 import tech.zhifu.app.myhub.ui.design.util.isWidthCompact
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun BottomBar(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val bottomBarEnabled = viewModel.collectAsState {
+    val bottomBarEnabled by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         it is DashboardUiState.Content
-    }.value
+    }
 
     if (bottomBarEnabled.not()) {
         return
@@ -64,7 +66,7 @@ fun BottomBarContent(
             alignment = Alignment.CenterHorizontally
         )
     ) {
-        val windowSizeClass = LocalWindowSizeClass.current
+        val windowSizeClass = rememberWindowSizeClass()
         val modifier = if (windowSizeClass.isWidthCompact()) {
             Modifier.weight(1f)
         } else {

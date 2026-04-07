@@ -3,28 +3,28 @@ package tech.zhifu.app.myhub.ui.state.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
-fun <VM> VM.collectThemeState(): State<Theme>
-    where VM : ViewModel,
-          VM : ThemeState {
-    return themeStateFlow
-        .collectAsState(initial = Theme.System)
+fun StateFlow<Theme>.collectAsDarkThemeStateWithLifecycle(): State<Boolean> {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    return this
+        .map {
+            it.toDarkTheme(systemInDarkTheme = isSystemInDarkTheme)
+        }
+        .distinctUntilChanged()
+        .collectAsStateWithLifecycle(
+            initialValue = this.value.toDarkTheme(isSystemInDarkTheme),
+        )
 }
 
-@Composable
-fun <VM> VM.collectThemeDarkState(): Boolean
-    where VM : ViewModel,
-          VM : ThemeState {
-
-    val theme by themeStateFlow.collectAsState()
-    val systemDark = isSystemInDarkTheme()
-    return when (theme) {
-        Theme.Light -> false
-        Theme.Dark -> true
-        Theme.System -> systemDark
-    }
+private fun Theme.toDarkTheme(
+    systemInDarkTheme: Boolean
+): Boolean = when (this) {
+    Theme.Light -> false
+    Theme.Dark -> true
+    Theme.System -> systemInDarkTheme
 }

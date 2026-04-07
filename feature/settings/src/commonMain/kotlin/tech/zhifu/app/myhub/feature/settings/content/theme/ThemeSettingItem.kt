@@ -13,19 +13,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
 import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_theme_mode
 import tech.zhifu.app.myhub.ui.state.theme.Theme
-import tech.zhifu.app.myhub.ui.state.theme.collectThemeState
 import tech.zhifu.app.myhub.ui.state.theme.updateTheme
 
 @Composable
 fun ThemeSettingItem(
     viewModel: SettingsViewModel
 ) {
-    val theme by viewModel.collectThemeState()
+    val theme by viewModel.theme.collectAsStateWithLifecycle()
     val showDialog = remember { mutableStateOf(false) }
 
     ThemeSettingItemContent(

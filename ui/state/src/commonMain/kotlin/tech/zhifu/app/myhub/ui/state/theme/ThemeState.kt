@@ -5,7 +5,7 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 interface ThemeState {
     val userRepository: UserRepository
-    val themeStateFlow: StateFlow<Theme>
+    val theme: StateFlow<Theme>
 }
 
 enum class Theme(val value: String) {

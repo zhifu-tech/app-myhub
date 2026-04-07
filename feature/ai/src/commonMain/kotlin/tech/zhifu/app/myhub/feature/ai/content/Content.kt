@@ -12,10 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.item.ActionSectionItem
@@ -23,20 +20,19 @@ import tech.zhifu.app.myhub.feature.ai.content.item.MessageBubbleItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ProviderModeItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ThinkingCardItem
 import tech.zhifu.app.myhub.feature.ai.model.Message
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun Content(
     viewModel: AIViewModel,
     contentPadding: PaddingValues,
-    hazeState: HazeState,
 ) {
-    val messages by viewModel.collectAsState {
+    val messages by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.messages.orEmpty()
     }
     ContentContent(
         messages = messages,
-        hazeState = hazeState,
         contentPadding = contentPadding,
         providerModeItem = {
             ProviderModeItem(viewModel)
@@ -53,7 +49,6 @@ fun Content(
 @Composable
 fun ContentContent(
     messages: List<Message>,
-    hazeState: HazeState,
     contentPadding: PaddingValues,
     providerModeItem: @Composable LazyItemScope.() -> Unit,
     thinkingCardItem: @Composable LazyItemScope.() -> Unit,
@@ -61,9 +56,7 @@ fun ContentContent(
 ) {
     LazyColumn(
         modifier = Modifier
-            .hazeSource(hazeState)
             .fillMaxSize()
-            .testTag("content-list")
             .padding(horizontal = 16.dp)
             .background(color = MaterialTheme.colorScheme.surfaceVariant),
         verticalArrangement = Arrangement.spacedBy(10.dp),

@@ -9,7 +9,6 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -19,21 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeInputScale
-import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.materials.HazeMaterials
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
 @Composable
 fun TopBar(
     navigator: AppNavigator,
-    hazeState: HazeState,
 ) {
     TopBarContent(
-        hazeState = hazeState,
         onClickBack = navigator::goBack,
         actions = {
             IconButton(
@@ -50,25 +42,11 @@ fun TopBar(
 
 @Composable
 internal fun TopBarContent(
-    hazeState: HazeState,
     actions: @Composable RowScope.() -> Unit = {},
     onClickBack: () -> Unit,
 ) {
     TopAppBar(
         modifier = Modifier
-            .hazeEffect(
-                state = hazeState,
-                style = HazeMaterials.regular(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                inputScale = HazeInputScale.Default
-                progressive = HazeProgressive
-                    .verticalGradient(
-                        startIntensity = 1f,
-                        endIntensity = 0f
-                    )
-            }
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
         colors = TopAppBarDefaults.topAppBarColors(

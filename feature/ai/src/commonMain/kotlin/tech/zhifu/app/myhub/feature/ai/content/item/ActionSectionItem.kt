@@ -15,13 +15,14 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun ActionSectionItem(
     viewModel: AIViewModel
 ) {
-    val components by viewModel.collectAsState {
+    val components by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.actionComponents.orEmpty()
     }
     ActionSectionItemContent(

@@ -13,11 +13,12 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun ProviderModeItem(viewModel: AIViewModel) {
-    val providerMode by viewModel.collectAsState {
+    val providerMode by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.providerMode
     }
     ProviderModeItemContent(

@@ -36,8 +36,6 @@ kotlin {
             implementation(projects.ui.model)
             implementation(projects.ui.state)
 
-            implementation(libs.chrisbanes.haze)
-            implementation(libs.chrisbanes.haze.materials)
             implementation(libs.coil.compose)
             implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)

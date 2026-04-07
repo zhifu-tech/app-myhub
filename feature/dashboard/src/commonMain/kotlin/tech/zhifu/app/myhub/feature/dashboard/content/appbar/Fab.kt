@@ -22,19 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.content.search.collectSearchingState
+import tech.zhifu.app.myhub.feature.dashboard.content.search.collectAsSearchingStateWithLifecycle
 import tech.zhifu.app.myhub.feature.dashboard.content.search.resetSearch
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectContentAsEmpty
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsContentEmptyStateWithLifecycle
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun Fab(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val isContentEmpty by viewModel.collectContentAsEmpty()
-    val isSearching by viewModel.collectSearchingState()
+    val isContentEmpty by viewModel.uiState.collectAsContentEmptyStateWithLifecycle()
+    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
     if (isContentEmpty) {
         if (isSearching.not()) {
             return

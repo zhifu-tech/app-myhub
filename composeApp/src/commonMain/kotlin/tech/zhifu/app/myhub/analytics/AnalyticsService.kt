@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.analytics
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.config.AppBuildConfig
 
 fun AnalyticsService.logAppStarted() {
@@ -18,7 +19,7 @@ fun AnalyticsService.logAppStarted() {
 
 @Composable
 fun TrackAppStartedEvent(
-    analyticsService: AnalyticsService = LocalAnalyticsService.current
+    analyticsService: AnalyticsService = koinInject()
 ) = DisposableEffect(Unit) {
     analyticsService.logAppStarted()
     onDispose {}

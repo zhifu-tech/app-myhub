@@ -23,6 +23,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.logger)
+            implementation(libs.jb.androidx.lifecycle.lifecycleRuntimeCompose)
+            implementation(libs.jb.androidx.lifecycle.lifecycleViewModelCompose)
             implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
@@ -32,7 +34,6 @@ kotlin {
             implementation(libs.jb.compose.material3.material3WindowSizeClass)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
-
             implementation(libs.orbit.core)
             implementation(libs.orbit.compose)
             implementation(libs.orbit.viewmodel)

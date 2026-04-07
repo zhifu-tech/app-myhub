@@ -9,14 +9,15 @@ import tech.zhifu.app.myhub.component.statics.page.ErrorContent
 import tech.zhifu.app.myhub.component.statics.page.LoadingContent
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun Error(
     contentPadding: PaddingValues,
     viewModel: AIViewModel
 ) {
-    val errorState by viewModel.collectAsState {
+    val errorState by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         it as? AIUiState.Error
     }
     ErrorContent(

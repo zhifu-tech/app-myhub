@@ -20,7 +20,7 @@ class AppViewModel(
     LanguageState {
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
-    override val themeStateFlow = createThemeStateFlow()
-    override val languageStateFlow = createLanguageStateFlow()
+    override val theme = createThemeStateFlow()
+    override val language = createLanguageStateFlow()
 }
 

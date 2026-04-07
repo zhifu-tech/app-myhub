@@ -7,28 +7,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.rememberHazeState
 import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.feature.ai.content.Content
-import tech.zhifu.app.myhub.feature.ai.content.statics.Error
-import tech.zhifu.app.myhub.feature.ai.content.statics.Loading
 import tech.zhifu.app.myhub.feature.ai.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.ai.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.ai.content.preview.AIPreview
+import tech.zhifu.app.myhub.feature.ai.content.statics.Error
+import tech.zhifu.app.myhub.feature.ai.content.statics.Loading
 import tech.zhifu.app.myhub.navigation.AppNavigator
-import tech.zhifu.app.myhub.ui.viewmodel.collectAsState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun AIScreen(
     navigator: AppNavigator,
     viewModel: AIViewModel = koinViewModel<AIViewModel>(),
 ) {
-    val state by viewModel.collectAsState { it.state }
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        it.state
+    }
     AIScreenContent(
         state = state,
-        topBar = { hazeState ->
-            TopBar(navigator = navigator, hazeState = hazeState)
+        topBar = {
+            TopBar(navigator = navigator)
         },
         bottomBar = {
             BottomBar(viewModel = viewModel)
@@ -42,10 +43,9 @@ fun AIScreen(
                 viewModel = viewModel,
             )
         },
-        content = { contentPadding, hazeState ->
+        content = { contentPadding ->
             Content(
                 contentPadding = contentPadding,
-                hazeState = hazeState,
                 viewModel = viewModel,
             )
         }
@@ -56,18 +56,15 @@ fun AIScreen(
 @Composable
 internal fun AIScreenContent(
     state: AIUiState.State,
-    topBar: @Composable (HazeState) -> Unit,
+    topBar: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit,
     loading: @Composable (PaddingValues) -> Unit,
     error: @Composable (PaddingValues) -> Unit,
-    content: @Composable (PaddingValues, HazeState) -> Unit,
+    content: @Composable (PaddingValues) -> Unit,
 ) {
-    val hazeState = rememberHazeState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            topBar(hazeState)
-        },
+        topBar = topBar,
         bottomBar = bottomBar,
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         content = { contentPadding ->
@@ -76,7 +73,7 @@ internal fun AIScreenContent(
                 AIUiState.State.LOADING -> loading(contentPadding)
 
                 AIUiState.State.ERROR -> error(contentPadding)
-                AIUiState.State.CONTENT -> content(contentPadding, hazeState)
+                AIUiState.State.CONTENT -> content(contentPadding)
             }
         },
     )

@@ -26,65 +26,40 @@ val <STATE : Any, SIDE_EFFECT : Any, VM : ContainerHost<STATE, SIDE_EFFECT>>
     VM.uiState: StateFlow<STATE>
     get() = container.stateFlow
 
-
-@Composable
-fun <STATE, SIDE_EFFECT, VM> VM.collectAsState(
-    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
-): State<STATE>
-    where STATE : Any,
-          SIDE_EFFECT : Any,
-          VM : ContainerHost<STATE, SIDE_EFFECT> {
-    return container.refCountStateFlow
-        .collectAsStateWithLifecycle(
-            initialValue = container.refCountStateFlow.value,
-            minActiveState = lifecycleState
-        )
-}
-
-@Composable
-fun <STATE, SIDE_EFFECT, VM, R> VM.collectAsState(
-    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
-    selector: (STATE) -> R,
-): State<R>
-    where STATE : Any,
-          SIDE_EFFECT : Any,
-          VM : ViewModel,
-          VM : ContainerHost<STATE, SIDE_EFFECT> {
-    return container.refCountStateFlow
-        .map(selector)
-        .distinctUntilChanged()
-        .collectAsStateWithLifecycle(
-            initialValue = selector(container.refCountStateFlow.value),
-            minActiveState = lifecycleState
-        )
-}
-
-@Composable
-@Suppress("ComposableNaming")
-fun <STATE, SIDE_EFFECT, VM> VM.collectSharedSideEffect(
-    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
-    predicate: (SIDE_EFFECT) -> Boolean = { true },
-    onSideEffect: FlowCollector<SIDE_EFFECT>
-) where
-    STATE : Any,
-    SIDE_EFFECT : Any,
-    VM : ViewModel,
-    VM : ContainerHost<STATE, SIDE_EFFECT> {
-
-    val sharedSideEffect: SharedFlow<SIDE_EFFECT> = remember(this) {
-        container.refCountSideEffectFlow.shareIn(
+val <STATE : Any, SIDE_EFFECT : Any, VM> VM.sideEffect: SharedFlow<SIDE_EFFECT>
+    where VM : ContainerHost<STATE, SIDE_EFFECT>,
+          VM : ViewModel
+    @Composable
+    get() = remember(this) {
+        container.sideEffectFlow.shareIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
             replay = 0
         )
     }
 
+@Composable
+fun <STATE, R> StateFlow<STATE>.collectAsSelectedStateWithLifecycle(
+    selector: (STATE) -> R,
+): State<R> = this
+    .map(selector)
+    .distinctUntilChanged()
+    .collectAsStateWithLifecycle(
+        initialValue = selector(this.value),
+    )
+
+@Composable
+fun <SIDE_EFFECT> SharedFlow<SIDE_EFFECT>.CollectPredicatedSharedSideEffect(
+    lifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
+    predicate: (SIDE_EFFECT) -> Boolean = { true },
+    onSideEffect: FlowCollector<SIDE_EFFECT>
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val collector by rememberUpdatedState(onSideEffect)
 
-    LaunchedEffect(sharedSideEffect, lifecycleOwner) {
+    LaunchedEffect(this, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(lifecycleState) {
-            sharedSideEffect
+            this@CollectPredicatedSharedSideEffect
                 .filter(predicate)
                 .collect(collector)
         }

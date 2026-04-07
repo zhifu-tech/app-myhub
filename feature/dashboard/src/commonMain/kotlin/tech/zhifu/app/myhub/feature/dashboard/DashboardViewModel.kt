@@ -42,8 +42,8 @@ class DashboardViewModel(
         }
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
-    override val layoutStateFlow = createLayoutStateFlow()
-    override val searchStateFlow = createSearchStateFlow()
+    override val layout = createLayoutStateFlow()
+    override val searchState = createSearchStateFlow()
 
     fun refresh() = intent {
         run {
@@ -72,8 +72,8 @@ class DashboardViewModel(
         }
         runCatching {
             val user = userStateFlow.value ?: return@intent
-            val layout = layoutStateFlow.value
-            val query = searchStateFlow.value
+            val layout = layout.value
+            val query = searchState.value
             cardRepository
                 .flowCards(
                     userId = user.id,
@@ -141,10 +141,10 @@ class DashboardViewModel(
         }
         runCatching {
             val user = userStateFlow.value ?: return@intent
-            val layout = layoutStateFlow.value
+            val layout = layout.value
             val currentState = state as? DashboardUiState.Content
             val cursor = currentState?.items?.lastOrNull()
-            val query = searchStateFlow.value
+            val query = searchState.value
             cardRepository
                 .flowCards(
                     userId = user.id,
@@ -183,13 +183,13 @@ class DashboardViewModel(
 
     @OptIn(FlowPreview::class)
     private fun observeUiStateFlow() = intent {
-        layoutStateFlow
+        layout
             .onEach {
                 logger.debug { "更新用户偏好发生变化，刷新UI" }
                 refresh()
             }
             .launchIn(viewModelScope)
-        searchStateFlow
+        searchState
             .debounce(timeoutMillis = 300)
             .distinctUntilChanged()
             .onEach {

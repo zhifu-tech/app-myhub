@@ -7,10 +7,10 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 fun createSearchStateFlow() = MutableStateFlow("")
 
 fun DashboardViewModel.search(query: String) {
-    searchStateFlow.value = query
+    searchState.value = query
 }
 
 fun DashboardViewModel.resetSearch() = intent {
-    searchStateFlow.value = ""
+    searchState.value = ""
     postSideEffect(DashboardSideEffect.ResetSearch)
 }
