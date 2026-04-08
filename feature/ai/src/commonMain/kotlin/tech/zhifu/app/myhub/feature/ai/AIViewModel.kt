@@ -10,6 +10,7 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.ai.layer.CaptureOrchestrator
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
@@ -29,6 +30,7 @@ class AIViewModel(
     ProviderState {
 
     private var context: ConversationContext? = null
+    private val previewState = PreviewState()
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val providerRoutingConfig = createAIProviderStateFlow()
@@ -116,5 +118,6 @@ class AIViewModel(
         isPublishing = state == ConversationState.PUBLISH_CONFIRM,
         thinkingText = "",
         isThinking = false,
+        previewState = previewState,
     )
 }

@@ -4,6 +4,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
+import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 
 sealed class AIUiState(
@@ -25,6 +26,7 @@ sealed class AIUiState(
         val isPublishing: Boolean = false,
         val thinkingText: String = "",
         val isThinking: Boolean = false,
+        val previewState: PreviewState = PreviewState(),
     ) : AIUiState(state = State.CONTENT)
 
     data class Error(

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.selectedCard
 import tech.zhifu.app.myhub.feature.preview.Preview
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
@@ -13,14 +12,9 @@ import tech.zhifu.app.myhub.ui.viewmodel.uiState
 fun DashboardPreview(
     viewModel: DashboardViewModel
 ) {
-    val selectedCard by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? DashboardUiState.Content)?.selectedCard
+    val previewState by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? DashboardUiState.Content)?.previewState
     }
-
-    Preview(
-        card = selectedCard,
-        actionHide = {
-            viewModel.selectedCard(null)
-        }
-    )
+    val safePreviewState = previewState ?: return
+    Preview(state = safePreviewState)
 }

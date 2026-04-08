@@ -1,10 +1,12 @@
 package tech.zhifu.app.myhub.feature.ai
 
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
@@ -15,6 +17,7 @@ import tech.zhifu.app.myhub.feature.ai.content.preview.AIPreview
 import tech.zhifu.app.myhub.feature.ai.content.statics.Error
 import tech.zhifu.app.myhub.feature.ai.content.statics.Loading
 import tech.zhifu.app.myhub.navigation.AppNavigator
+import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -26,31 +29,37 @@ fun AIScreen(
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         it.state
     }
-    AIScreenContent(
-        state = state,
-        topBar = {
-            TopBar(navigator = navigator)
-        },
-        bottomBar = {
-            BottomBar(viewModel = viewModel)
-        },
-        loading = { contentPadding ->
-            Loading(contentPadding = contentPadding, viewModel = viewModel)
-        },
-        error = { contentPadding ->
-            Error(
-                contentPadding = contentPadding,
-                viewModel = viewModel,
+    SharedTransitionLayout {
+        CompositionLocalProvider(
+            LocalSharedTransitionScope provides this,
+        ) {
+            AIScreenContent(
+                state = state,
+                topBar = {
+                    TopBar(navigator = navigator)
+                },
+                bottomBar = {
+                    BottomBar(viewModel = viewModel)
+                },
+                loading = { contentPadding ->
+                    Loading(contentPadding = contentPadding, viewModel = viewModel)
+                },
+                error = { contentPadding ->
+                    Error(
+                        contentPadding = contentPadding,
+                        viewModel = viewModel,
+                    )
+                },
+                content = { contentPadding ->
+                    Content(
+                        contentPadding = contentPadding,
+                        viewModel = viewModel,
+                    )
+                }
             )
-        },
-        content = { contentPadding ->
-            Content(
-                contentPadding = contentPadding,
-                viewModel = viewModel,
-            )
+            AIPreview(viewModel = viewModel)
         }
-    )
-    AIPreview(viewModel = viewModel)
+    }
 }
 
 @Composable

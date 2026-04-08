@@ -41,7 +41,7 @@ fun Modifier.sharedElement(
     )
 }
 
-object PreviewTransitionTokens {
+internal object PreviewTransitionTokens {
     const val HOST_ENTER_DURATION_MS: Int = 500
     const val HOST_EXIT_DURATION_MS: Int = 300
     const val OVERLAY_ENTER_DURATION_MS: Int = 500

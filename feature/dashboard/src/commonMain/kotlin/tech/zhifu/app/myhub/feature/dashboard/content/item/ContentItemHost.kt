@@ -1,13 +1,6 @@
 package tech.zhifu.app.myhub.feature.dashboard.content.item
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -19,9 +12,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.selectedCard
-import tech.zhifu.app.myhub.feature.preview.PreviewTransitionTokens
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
+import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
@@ -33,15 +25,14 @@ fun ContentItemHost(
     viewModel: DashboardViewModel,
     content: @Composable (AnimatedVisibilityScope) -> Unit,
 ) {
-    val onClick: () -> Unit = remember(item) {
-        { viewModel.selectedCard(item) }
+    val previewState by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? DashboardUiState.Content)?.previewState
     }
-    val isSelected by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? DashboardUiState.Content)?.selectedCard === item
+    val onClick: () -> Unit = remember(item, previewState) {
+        { previewState?.show(item) }
     }
-
     ContentItemHostContent(
-        isSelected = isSelected,
+        isSelected = previewState?.card?.value === item,
         modifier = modifier,
         onClick = onClick,
         item = item,
@@ -57,32 +48,8 @@ internal fun ContentItemHostContent(
     item: ContentCard,
     content: @Composable (AnimatedVisibilityScope) -> Unit,
 ) {
-    AnimatedVisibility(
+    PreviewAnimatedVisibility(
         visible = isSelected.not(),
-        enter = fadeIn(
-            animationSpec = tween(
-                durationMillis = PreviewTransitionTokens.HOST_ENTER_DURATION_MS,
-                easing = FastOutSlowInEasing,
-            )
-        ) + scaleIn(
-            animationSpec = tween(
-                durationMillis = PreviewTransitionTokens.HOST_ENTER_DURATION_MS,
-                easing = FastOutSlowInEasing,
-            ),
-            initialScale = PreviewTransitionTokens.HOST_SCALE_FROM,
-        ),
-        exit = fadeOut(
-            animationSpec = tween(
-                durationMillis = PreviewTransitionTokens.HOST_EXIT_DURATION_MS,
-                easing = FastOutSlowInEasing,
-            )
-        ) + scaleOut(
-            animationSpec = tween(
-                durationMillis = PreviewTransitionTokens.HOST_EXIT_DURATION_MS,
-                easing = FastOutSlowInEasing,
-            ),
-            targetScale = PreviewTransitionTokens.HOST_SCALE_TO,
-        ),
         modifier = modifier,
     ) {
         ElevatedCard(
@@ -102,9 +69,7 @@ internal fun ContentItemHostContent(
                 defaultElevation = 2.dp,
             ),
         ) {
-            content(
-                this@AnimatedVisibility,
-            )
+            content(this@PreviewAnimatedVisibility)
         }
     }
 }

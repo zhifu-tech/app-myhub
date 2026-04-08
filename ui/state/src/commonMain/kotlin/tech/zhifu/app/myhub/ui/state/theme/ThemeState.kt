@@ -1,8 +1,10 @@
 package tech.zhifu.app.myhub.ui.state.theme
 
+import androidx.compose.runtime.Stable
 import kotlinx.coroutines.flow.StateFlow
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
+@Stable
 interface ThemeState {
     val userRepository: UserRepository
     val theme: StateFlow<Theme>

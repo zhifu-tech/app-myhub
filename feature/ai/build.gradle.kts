@@ -36,6 +36,7 @@ kotlin {
             implementation(projects.feature.settingsApi)
             implementation(projects.feature.preview)
             implementation(projects.ui.design)
+            implementation(projects.ui.model)
             implementation(projects.ui.state)
 
             implementation(libs.jb.androidx.window.windowCore)
@@ -47,6 +48,7 @@ kotlin {
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.orbit.core)

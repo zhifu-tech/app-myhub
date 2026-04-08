@@ -1,9 +1,11 @@
 package tech.zhifu.app.myhub.feature.ai.content.appbar
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -15,8 +17,12 @@ import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.InputBox
+import tech.zhifu.app.myhub.feature.ai.content.preview.FloatingPreviewThumbnail
+import tech.zhifu.app.myhub.feature.ai.content.preview.toPreviewCard
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
 import tech.zhifu.app.myhub.ui.design.util.isWidthCompact
 import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
@@ -33,16 +39,21 @@ fun BottomBar(
                 input = uiState.input,
                 isPublishing = uiState.isPublishing,
                 conversationState = uiState.conversationState,
+                previewState = uiState.previewState,
             )
-        } ?: BottomBarState()
+        }
     }
+    val safeState = state ?: return
     BottomBarContent(
-        state = state,
+        state = safeState,
+        onDraftPreviewClick = { previewState, draft ->
+            previewState.show(draft.toPreviewCard())
+        },
         inputBox = { modifier ->
             InputBox(
                 modifier = modifier,
                 viewModel = viewModel,
-                state = state,
+                state = safeState,
             )
         }
     )
@@ -50,41 +61,56 @@ fun BottomBar(
 
 @Composable
 fun BottomBarContent(
-    state: BottomBarState?,
+    state: BottomBarState,
+    onDraftPreviewClick: (PreviewState, CaptureDraft) -> Unit = { _, _ -> },
     inputBox: @Composable (Modifier) -> Unit = {},
-    sendButton: @Composable (Modifier) -> Unit = {},
 ) {
-    if (state == null || state.isPublishing) {
-        return
-    }
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .imePadding()
             .padding(32.dp), // 保持与键盘间距
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(
-            space = 12.dp,
-            alignment = Alignment.CenterHorizontally
-        )
     ) {
-        val windowSizeClass = rememberWindowSizeClass()
-        val modifier = if (windowSizeClass.isWidthCompact()) {
-            Modifier.weight(1f)
-        } else {
-            Modifier.widthIn(min = 120.dp, max = 500.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 12.dp,
+                alignment = Alignment.CenterHorizontally
+            )
+        ) {
+            val windowSizeClass = rememberWindowSizeClass()
+            val modifier = if (windowSizeClass.isWidthCompact()) {
+                Modifier.weight(1f)
+            } else {
+                Modifier.widthIn(min = 120.dp, max = 500.dp)
+            }
+
+            inputBox(modifier)
         }
 
-        inputBox(modifier)
-        sendButton(Modifier)
+        PreviewAnimatedVisibility(
+            visible = state.previewState.isPreviewing().not(),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(y = (-80).dp),
+        ) {
+            val safeDraft = state.draft ?: return@PreviewAnimatedVisibility
+            FloatingPreviewThumbnail(
+                previewKey = "content-preview-${safeDraft.id}",
+                animatedVisibilityScope = this,
+                onClick = { onDraftPreviewClick(state.previewState, safeDraft) },
+            )
+        }
     }
 }
 
 
 @Immutable
 data class BottomBarState(
-    val draft: CaptureDraft? = null,
-    val input: String = "",
-    val isPublishing: Boolean = false,
-    val conversationState: ConversationState = ConversationState.IDLE,
+    val draft: CaptureDraft?,
+    val input: String,
+    val isPublishing: Boolean,
+    val conversationState: ConversationState,
+    val previewState: PreviewState,
 )
