@@ -66,7 +66,7 @@ internal fun ContentListContent(
     contentItem: @Composable LazyItemScope.(ContentCard) -> Unit,
 ) {
     LazyColumn(
-        modifier = modifier.padding(top = 24.dp),
+        modifier = modifier,
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         state = listState,

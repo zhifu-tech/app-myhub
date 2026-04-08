@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.feature.dashboard.content.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -67,7 +66,7 @@ internal fun ContentGridContent(
     contentItem: @Composable LazyGridItemScope.(ContentCard) -> Unit,
 ) {
     LazyVerticalGrid(
-        modifier = modifier.padding(top = 24.dp),
+        modifier = modifier,
         contentPadding = paddingValues,
         columns = GridCells.Adaptive(minSize = 150.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
