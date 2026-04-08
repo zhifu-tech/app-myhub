@@ -38,9 +38,7 @@ fun Error(
         modifier = Modifier.padding(paddingValues = contentPadding),
         title = stringResource(Res.string.feature_dashboard_error_title),
         subTitle = stringResource(Res.string.feature_dashboard_error_subtitle),
-        onRetry = {
-            viewModel.refresh()
-        }
+        onRetry = viewModel::refresh
     )
 }
 

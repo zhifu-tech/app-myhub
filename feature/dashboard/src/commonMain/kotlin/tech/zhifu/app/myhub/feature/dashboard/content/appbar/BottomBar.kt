@@ -24,15 +24,12 @@ fun BottomBar(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val bottomBarEnabled by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+    val showBottomBar by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         it is DashboardUiState.Content
     }
 
-    if (bottomBarEnabled.not()) {
-        return
-    }
-
     BottomBarContent(
+        showBottomBar = showBottomBar,
         modifier = modifier,
         searchBar = { modifier ->
             SearchBar(
@@ -51,10 +48,12 @@ fun BottomBar(
 
 @Composable
 fun BottomBarContent(
+    showBottomBar: Boolean,
     modifier: Modifier = Modifier,
     searchBar: @Composable (Modifier) -> Unit,
     fab: @Composable (Modifier) -> Unit,
 ) {
+    if (!showBottomBar) return
     Row(
         modifier = modifier
             .fillMaxWidth()

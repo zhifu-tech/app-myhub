@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -59,8 +58,7 @@ internal fun RowScope.StickyInputCore(
 
     val density = LocalDensity.current
 
-    @Suppress("VariableNeverRead")
-    var isFocused by remember { mutableStateOf(false) }
+    val isFocused = remember { mutableStateOf(false) }
 
     val animatedHeight by animateDpAsState(
         targetValue = with(density) {
@@ -114,7 +112,7 @@ internal fun RowScope.StickyInputCore(
                 }
                 .padding(vertical = 8.dp)
                 .onFocusChanged {
-                    isFocused = it.isFocused
+                    isFocused.value = it.isFocused
                     if (!it.isFocused) {
                         heightState.reset() // 👈 失焦收缩
                     }

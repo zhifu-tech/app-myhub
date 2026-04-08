@@ -7,7 +7,7 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 
 interface ProviderState {
     val userRepository: UserRepository
-    val providerRoutingConfigStateFlow: StateFlow<ProviderRoutingConfig>
+    val providerRoutingConfig: StateFlow<ProviderRoutingConfig>
 }
 
 @Serializable

@@ -31,7 +31,7 @@ class AIViewModel(
     private var context: ConversationContext? = null
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
-    override val providerRoutingConfigStateFlow = createAIProviderStateFlow()
+    override val providerRoutingConfig = createAIProviderStateFlow()
 
     override val container = container<AIUiState, AISideEffect>(
         initialState = AIUiState.Loading,
@@ -40,7 +40,7 @@ class AIViewModel(
     }
 
     private fun bootstrap() = intent {
-        providerRoutingConfigStateFlow
+        providerRoutingConfig
             .onEach { stateProvider ->
                 // 首先加载初始化配置
                 orchestrator.updateProviderConfig(stateProvider)

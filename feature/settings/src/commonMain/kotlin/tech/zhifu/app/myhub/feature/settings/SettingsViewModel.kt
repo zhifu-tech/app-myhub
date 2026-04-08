@@ -32,5 +32,5 @@ class SettingsViewModel(
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val language = createLanguageStateFlow()
     override val theme = createThemeStateFlow()
-    override val providerRoutingConfigStateFlow = createAIProviderStateFlow()
+    override val providerRoutingConfig = createAIProviderStateFlow()
 }

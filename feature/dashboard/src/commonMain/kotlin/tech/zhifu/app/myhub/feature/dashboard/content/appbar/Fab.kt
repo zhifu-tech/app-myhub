@@ -21,12 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.feature.dashboard.content.search.collectAsSearchingStateWithLifecycle
 import tech.zhifu.app.myhub.feature.dashboard.content.search.resetSearch
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsContentEmptyStateWithLifecycle
 import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 import tech.zhifu.app.myhub.ui.design.util.rememberKeyboardOpenState
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
@@ -34,14 +35,13 @@ fun Fab(
     modifier: Modifier,
     viewModel: DashboardViewModel,
 ) {
-    val isContentEmpty by viewModel.uiState.collectAsContentEmptyStateWithLifecycle()
-    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
-    if (isContentEmpty) {
-        if (isSearching.not()) {
-            return
-        }
+    val isContentEmpty by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? DashboardUiState.Content)?.items?.isEmpty() ?: true
     }
+    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
+    val showFab = !isContentEmpty || isSearching
     FabContent(
+        showFab = showFab,
         modifier = modifier,
         isSearching = isSearching,
         onClickAdd = viewModel::navigateToAiCapture,
@@ -55,7 +55,9 @@ fun FabContent(
     onClickAdd: () -> Unit,
     onClickClose: () -> Unit,
     isSearching: Boolean,
+    showFab: Boolean,
 ) {
+    if (!showFab) return
     val isKeyboardOpened by rememberKeyboardOpenState()
     val showAsClose = isKeyboardOpened || isSearching
 

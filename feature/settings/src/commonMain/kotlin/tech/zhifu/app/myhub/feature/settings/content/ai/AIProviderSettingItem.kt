@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
@@ -24,38 +25,57 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_valid
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_model_required
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_max_retries_invalid
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_timeout_invalid
-import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
-import tech.zhifu.app.myhub.ui.state.ai.collectAIProviderState
+import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProvider
 
 @Composable
 fun AIProviderSettingItem(
     viewModel: SettingsViewModel,
 ) {
-    val provider by viewModel.collectAIProviderState()
     val showDialog = remember { mutableStateOf(false) }
-    var editProvider by remember(provider, showDialog.value) { mutableStateOf(provider.copy()) }
-    var timeoutInput by remember(provider, showDialog.value) { mutableStateOf(provider.timeoutMs.toString()) }
-    var maxRetriesInput by remember(provider, showDialog.value) { mutableStateOf(provider.maxRetries.toString()) }
-    var validationMessageRes by remember(provider, showDialog.value) { mutableStateOf<StringResource?>(null) }
+    val providerRoutingConfig by viewModel.providerRoutingConfig.collectAsStateWithLifecycle()
+    var editProvider by remember(
+        providerRoutingConfig,
+        showDialog.value
+    ) {
+        mutableStateOf(providerRoutingConfig.copy())
+    }
+    val timeoutInput = remember(
+        providerRoutingConfig,
+        showDialog.value
+    ) {
+        mutableStateOf(providerRoutingConfig.timeoutMs.toString())
+    }
+    var maxRetriesInput by remember(
+        providerRoutingConfig,
+        showDialog.value
+    ) {
+        mutableStateOf(providerRoutingConfig.maxRetries.toString())
+    }
+    val validationMessageRes = remember(
+        providerRoutingConfig,
+        showDialog.value
+    ) {
+        mutableStateOf<StringResource?>(null)
+    }
 
     AiProviderSettingItemContent(
-        providerRoutingConfig = provider,
+        providerRoutingConfig = providerRoutingConfig,
         onClick = {
-            editProvider = provider.copy()
-            timeoutInput = provider.timeoutMs.toString()
-            maxRetriesInput = provider.maxRetries.toString()
-            validationMessageRes = null
+            editProvider = providerRoutingConfig.copy()
+            timeoutInput.value = providerRoutingConfig.timeoutMs.toString()
+            maxRetriesInput = providerRoutingConfig.maxRetries.toString()
+            validationMessageRes.value = null
             showDialog.value = true
         }
     )
 
     AIProviderSettingDialog(
         providerRoutingConfig = editProvider,
-        timeoutInput = timeoutInput,
+        timeoutInput = timeoutInput.value,
         maxRetriesInput = maxRetriesInput,
-        validationMessageRes = validationMessageRes,
+        validationMessageRes = validationMessageRes.value,
         visible = showDialog.value,
         onDismiss = {
             showDialog.value = false
@@ -63,14 +83,14 @@ fun AIProviderSettingItem(
         onSave = {
             val validation = validateAiProviderState(
                 providerRoutingConfig = editProvider,
-                timeoutInput = timeoutInput,
+                timeoutInput = timeoutInput.value,
                 maxRetriesInput = maxRetriesInput,
             )
             if (validation != null) {
-                validationMessageRes = validation
+                validationMessageRes.value = validation
                 return@AIProviderSettingDialog
             }
-            val timeout = timeoutInput.toLongOrNull() ?: 15_000L
+            val timeout = timeoutInput.value.toLongOrNull() ?: 15_000L
             val retries = maxRetriesInput.toIntOrNull() ?: 1
             viewModel.updateAIProvider(
                 editProvider.copy(
@@ -82,27 +102,27 @@ fun AIProviderSettingItem(
         },
         onModeChanged = { mode ->
             editProvider = editProvider.copy(mode = mode)
-            validationMessageRes = null
+            validationMessageRes.value = null
         },
         onEndpointChanged = { value ->
             editProvider = editProvider.copy(directEndpoint = value)
-            validationMessageRes = null
+            validationMessageRes.value = null
         },
         onModelChanged = { value ->
             editProvider = editProvider.copy(directModel = value)
-            validationMessageRes = null
+            validationMessageRes.value = null
         },
         onApiKeyChanged = { value ->
             editProvider = editProvider.copy(directApiKey = value)
-            validationMessageRes = null
+            validationMessageRes.value = null
         },
         onTimeoutChanged = { value ->
-            timeoutInput = value
-            validationMessageRes = null
+            timeoutInput.value = value
+            validationMessageRes.value = null
         },
         onRetriesChanged = { value ->
-            maxRetriesInput = value
-            validationMessageRes = null
+            timeoutInput.value = value
+            validationMessageRes.value = null
         },
     )
 }

@@ -15,9 +15,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.feature.dashboard.viewmodel.collectAsItemsStateWithLifecycle
 import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
@@ -26,7 +27,9 @@ fun ContentList(
     modifier: Modifier,
     paddingValues: PaddingValues,
 ) {
-    val items by viewModel.uiState.collectAsItemsStateWithLifecycle()
+    val items by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? DashboardUiState.Content)?.items ?: emptyList()
+    }
     val listState = rememberLazyListState()
 
     AutoLoadMoreList(

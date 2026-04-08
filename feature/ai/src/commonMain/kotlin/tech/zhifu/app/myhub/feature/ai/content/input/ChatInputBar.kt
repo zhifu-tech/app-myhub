@@ -7,10 +7,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -25,7 +23,7 @@ fun InputBox(
     viewModel: AIViewModel,
     state: BottomBarState,
 ) {
-    var input by remember { mutableStateOf(state.input) }
+    val input = remember { mutableStateOf(state.input) }
     val placeHolder = when (state.conversationState) {
         ConversationState.INFO_COLLECT -> "输入标签后发送，例如：美食"
         ConversationState.CARD_REVIEW, ConversationState.MANUAL_EDIT -> "输入新标题后发送"
@@ -34,10 +32,10 @@ fun InputBox(
     ChatInputBar(
         modifier = modifier,
         onInputChange = {
-            input = it
+            input.value = it
             viewModel.updateInput(it)
         },
-        input = input,
+        input = input.value,
         placeHolder = placeHolder,
         onSend = {
             viewModel.submitInput()

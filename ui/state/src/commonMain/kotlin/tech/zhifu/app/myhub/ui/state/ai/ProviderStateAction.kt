@@ -52,40 +52,40 @@ fun <VM> VM.updateAIProviderMode(mode: ProviderMode)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(mode = mode))
+    updateAIProvider(providerRoutingConfig.value.copy(mode = mode))
 }
 
 fun <VM> VM.updateAIProviderDirectEndpoint(directEndpoint: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directEndpoint = directEndpoint))
+    updateAIProvider(providerRoutingConfig.value.copy(directEndpoint = directEndpoint))
 }
 
 fun <VM> VM.updateAIProviderDirectModel(directModel: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directModel = directModel))
+    updateAIProvider(providerRoutingConfig.value.copy(directModel = directModel))
 }
 
 fun <VM> VM.updateAIProviderDirectApiKey(directApiKey: String)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(directApiKey = directApiKey))
+    updateAIProvider(providerRoutingConfig.value.copy(directApiKey = directApiKey))
 }
 
 fun <VM> VM.updateAIProviderTimeoutMs(timeoutMs: Long)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(timeoutMs = timeoutMs))
+    updateAIProvider(providerRoutingConfig.value.copy(timeoutMs = timeoutMs))
 }
 
 fun <VM> VM.updateAIProviderMaxRetries(maxRetries: Int)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfigStateFlow.value.copy(maxRetries = maxRetries))
+    updateAIProvider(providerRoutingConfig.value.copy(maxRetries = maxRetries))
 }
