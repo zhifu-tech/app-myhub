@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.ui.model
 
 import androidx.compose.ui.graphics.Color
 import kotlinx.collections.immutable.persistentListOf
+import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import kotlin.time.Clock
 
 fun mockContentCards() = listOf<ContentCard>(
@@ -11,6 +12,7 @@ fun mockContentCards() = listOf<ContentCard>(
         summary = "summary",
         location = "location",
         updatedAt = Clock.System.now().toEpochMilliseconds(),
+        status = CardStatus.DRAFT,
         tags = persistentListOf("tag1", "tag2"),
         cover = ContentCardCover(
             iconKey = "iconKey",
@@ -25,4 +27,3 @@ fun mockContentCards() = listOf<ContentCard>(
         )
     )
 )
-

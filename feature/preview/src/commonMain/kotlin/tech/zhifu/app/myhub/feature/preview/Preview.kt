@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
@@ -78,7 +79,7 @@ fun Preview(
                         b = minOf(maxWidth, maxHeight) * 0.92f
                     )
                 )
-                if (state.pined) {
+                if (targetCard.status == CardStatus.DRAFT) {
                     PreviewContent(
                         card = targetCard,
                         animatedVisibilityScope = this@AnimatedContent,

@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.content.preview
 
 import androidx.compose.ui.graphics.Color
 import kotlinx.collections.immutable.toImmutableList
+import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.model.ContentCardAction
@@ -14,6 +15,7 @@ fun CaptureDraft.toPreviewCard(): ContentCard = ContentCard(
     summary = summary.ifBlank { sourceText.ifBlank { "继续补充你的想法..." } },
     location = "",
     updatedAt = Clock.System.now().toEpochMilliseconds(),
+    status = CardStatus.DRAFT,
     tags = tags.toImmutableList(),
     cover = ContentCardCover(
         iconKey = "edit_note",

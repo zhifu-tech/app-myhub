@@ -16,6 +16,7 @@ fun Card.toDashboardContentCard(): ContentCard =
         summary = summary,
         location = location?.name.orEmpty(),
         updatedAt = updatedAt.toEpochMilliseconds(),
+        status = status,
         tags = tags.toImmutableList(),
         cover = ContentCardCover(
             iconKey = ui?.cover?.iconKey,
