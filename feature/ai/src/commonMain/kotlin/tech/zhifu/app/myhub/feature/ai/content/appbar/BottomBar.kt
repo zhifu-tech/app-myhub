@@ -20,11 +20,11 @@ import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_L
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.InputBox
-import tech.zhifu.app.myhub.feature.ai.content.preview.FloatingPreviewThumbnail
 import tech.zhifu.app.myhub.feature.ai.content.preview.toPreviewCard
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.preview.content.PreviewFloatThumbnail
 import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
@@ -48,6 +48,7 @@ fun BottomBar(
     BottomBarContent(
         state = safeState,
         onDraftPreviewClick = { previewState, draft ->
+
             previewState.show(draft.toPreviewCard())
         },
         inputBox = { modifier ->
@@ -95,7 +96,7 @@ fun BottomBarContent(
                         .offset(y = (-80).dp),
                 ) {
                     val safeDraft = state.draft ?: return@PreviewAnimatedVisibility
-                    FloatingPreviewThumbnail(
+                    PreviewFloatThumbnail(
                         previewKey = "content-preview-${safeDraft.id}",
                         coverKey = "content-image-${safeDraft.id}",
                         animatedVisibilityScope = this,

@@ -16,7 +16,7 @@ import tech.zhifu.app.myhub.feature.preview.PreviewTransitionTokens
 fun PreviewAnimatedVisibility(
     modifier: Modifier,
     visible: Boolean,
-    content: @Composable() AnimatedVisibilityScope.() -> Unit,
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
 ) {
     AnimatedVisibility(
         visible = visible,

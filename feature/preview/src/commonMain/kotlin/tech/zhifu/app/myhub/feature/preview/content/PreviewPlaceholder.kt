@@ -12,9 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.preview.resources.Res
+import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_placeholder_hint
 
 @Composable
 fun PreviewPlaceholder() {
+    val placeholderText = stringResource(Res.string.feature_preview_placeholder_hint)
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -30,7 +34,7 @@ fun PreviewPlaceholder() {
                 tint = MaterialTheme.colorScheme.outline,
             )
             Text(
-                text = "输入内容后，可在这里实时预览",
+                text = placeholderText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -1,5 +1,7 @@
 <resources>
   <string name="feature_preview_journal_entry">JOURNAL ENTRY</string>
+  <string name="feature_preview_placeholder_hint">Enter content to preview it here in real time</string>
+  <string name="feature_preview_float_thumbnail_description">Draft preview</string>
   <string name="feature_preview_saving_success">Saved to Photos</string>
   <string name="feature_preview_saving_permission_denied">Photo permission denied</string>
   <string name="feature_preview_saving_failure">Failed to save image</string>
