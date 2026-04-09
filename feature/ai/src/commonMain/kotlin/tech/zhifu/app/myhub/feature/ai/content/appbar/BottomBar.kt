@@ -3,17 +3,20 @@ package tech.zhifu.app.myhub.feature.ai.content.appbar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.InputBox
@@ -23,8 +26,6 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationStat
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
-import tech.zhifu.app.myhub.ui.design.util.isWidthCompact
-import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -79,30 +80,48 @@ fun BottomBarContent(
                 alignment = Alignment.CenterHorizontally
             )
         ) {
-            val windowSizeClass = rememberWindowSizeClass()
-            val modifier = if (windowSizeClass.isWidthCompact()) {
-                Modifier.weight(1f)
-            } else {
-                Modifier.widthIn(min = 120.dp, max = 500.dp)
-            }
-
-            inputBox(modifier)
+            InputBoxWrapper(inputBox)
         }
 
-        PreviewAnimatedVisibility(
-            visible = state.previewState.isPreviewing().not(),
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(y = (-80).dp),
-        ) {
-            val safeDraft = state.draft ?: return@PreviewAnimatedVisibility
-            FloatingPreviewThumbnail(
-                previewKey = "content-preview-${safeDraft.id}",
-                animatedVisibilityScope = this,
-                onClick = { onDraftPreviewClick(state.previewState, safeDraft) },
-            )
+        // 非 Pinned 模式，显示预览缩略图
+        if (!state.previewState.pined) {
+            Box(
+                modifier = Modifier.matchParentSize()
+            ) {
+                PreviewAnimatedVisibility(
+                    visible = state.previewState.isPreviewing().not(),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(y = (-80).dp),
+                ) {
+                    val safeDraft = state.draft ?: return@PreviewAnimatedVisibility
+                    FloatingPreviewThumbnail(
+                        previewKey = "content-preview-${safeDraft.id}",
+                        coverKey = "content-image-${safeDraft.id}",
+                        animatedVisibilityScope = this,
+                        onClick = { onDraftPreviewClick(state.previewState, safeDraft) },
+                    )
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun RowScope.InputBoxWrapper(inputBox: @Composable ((Modifier) -> Unit)) {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val modifier = when {
+        windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND) -> {
+            Modifier.widthIn(min = 120.dp, max = 480.dp)
+        }
+
+        else -> {
+            Modifier.weight(1f)
         }
     }
+
+    inputBox(modifier)
 }
 
 

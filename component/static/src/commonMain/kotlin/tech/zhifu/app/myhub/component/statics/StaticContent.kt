@@ -11,12 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.ui.design.util.isHeightCompact
-import tech.zhifu.app.myhub.ui.design.util.rememberWindowSizeClass
 
 @Composable
 fun StaticContent(
@@ -31,9 +30,9 @@ fun StaticContent(
             .padding(horizontal = 32.dp, vertical = 48.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val windowSizeClass = rememberWindowSizeClass()
+        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
         val isLandscape = maxWidth > maxHeight
-            && windowSizeClass.isHeightCompact()
+            && windowSizeClass.minHeightDp == 0
         if (isLandscape) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

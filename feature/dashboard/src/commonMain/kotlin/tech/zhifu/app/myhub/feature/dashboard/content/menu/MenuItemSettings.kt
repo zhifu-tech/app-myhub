@@ -19,9 +19,13 @@ import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToSettings
 @Composable
 fun MenuItemSettings(
     viewModel: DashboardViewModel,
+    onBeforeNavigate: () -> Unit,
 ) {
     MenuItemSettingsContent(
-        onClick = viewModel::navigateToSettings
+        onClick = {
+            onBeforeNavigate()
+            viewModel.navigateToSettings()
+        }
     )
 }
 

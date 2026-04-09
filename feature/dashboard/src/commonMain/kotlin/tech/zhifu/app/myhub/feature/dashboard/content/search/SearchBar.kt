@@ -23,7 +23,6 @@ import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
 import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
-import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable

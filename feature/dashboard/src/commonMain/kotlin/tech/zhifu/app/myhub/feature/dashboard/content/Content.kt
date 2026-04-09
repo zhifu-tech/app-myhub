@@ -23,7 +23,6 @@ import tech.zhifu.app.myhub.ui.design.util.tapToClearFocus
 import tech.zhifu.app.myhub.ui.state.layout.collectAsLayoutAsListStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
-import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable

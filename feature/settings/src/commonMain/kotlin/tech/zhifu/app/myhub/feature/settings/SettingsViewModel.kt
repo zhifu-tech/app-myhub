@@ -15,19 +15,22 @@ import tech.zhifu.app.myhub.ui.state.user.UserState
 import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
+import tech.zhifu.app.myhub.ui.viewmodel.ViewModelSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
 
 class SettingsViewModel(
     override val userRepository: UserRepository,
 ) : ViewModel(),
     ContainerHost<SettingsUiState, SettingsSideEffect>,
+    ViewModelSideEffect<SettingsSideEffect>,
     UserState,
     UserPreferencesState,
     ThemeState,
     LanguageState,
     ProviderState {
-
     override val container: Container<SettingsUiState, SettingsSideEffect> =
         container(initialState = SettingsUiState.Content)
+    override val sideEffect = createSideEffectFlow()
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val language = createLanguageStateFlow()

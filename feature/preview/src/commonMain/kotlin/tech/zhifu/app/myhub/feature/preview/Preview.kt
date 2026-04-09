@@ -6,12 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,23 +14,29 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
+import tech.zhifu.app.myhub.feature.preview.content.PreviewOverlay
+import tech.zhifu.app.myhub.feature.preview.content.PreviewPlaceholder
 import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotController
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
+import tech.zhifu.app.myhub.ui.model.ContentCard
+
 
 @Composable
 fun Preview(
     state: PreviewState,
     modifier: Modifier = Modifier,
 ) {
+    logger.debug { "Preview : state: ${state.hashCode()}" }
     val snapshotController = rememberPreviewSnapshotController()
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
@@ -54,11 +55,18 @@ fun Preview(
                 )
             )
         }
-    ) { card ->
-        if (card == null) {
-            Spacer(modifier = Modifier.fillMaxSize())
+    ) { targetCard: ContentCard? ->
+        logger.debug { "Preview : targetCard: ${targetCard.hashCode()}" }
+        if (targetCard == null) {
+            if (state.pined) {
+                PreviewPlaceholder()
+            } else {
+                Spacer(modifier = Modifier.fillMaxSize())
+            }
         } else {
-            PreviewOverlay(state = state)
+            if (!state.pined) {
+                PreviewOverlay(state = state)
+            }
             BoxWithConstraints(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -70,6 +78,18 @@ fun Preview(
                         b = minOf(maxWidth, maxHeight) * 0.92f
                     )
                 )
+                if (state.pined) {
+                    PreviewContent(
+                        card = targetCard,
+                        animatedVisibilityScope = this@AnimatedContent,
+                        modifier = Modifier
+                            .width(maxCardWidth)
+                            .padding(vertical = 16.dp),
+                        snapshotController = snapshotController,
+                    )
+                    return@BoxWithConstraints
+                }
+
                 val shareActionSize = 48.dp
                 val adjustSize = 12.dp * 2
                 val expectHorizontalMaxWidth = maxCardWidth + shareActionSize * 2 + adjustSize
@@ -82,7 +102,7 @@ fun Preview(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         PreviewContent(
-                            card = card,
+                            card = targetCard,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier.weight(1f, fill = false),
                             snapshotController = snapshotController,
@@ -91,12 +111,12 @@ fun Preview(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             PreviewActionSavingButton(
-                                card = card,
+                                card = targetCard,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
-                                card = card,
+                                card = targetCard,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
@@ -112,7 +132,7 @@ fun Preview(
                     ) {
                         Spacer(modifier.size(shareActionSize))
                         PreviewContent(
-                            card = card,
+                            card = targetCard,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier
                                 .widthIn(max = maxCardWidth),
@@ -122,12 +142,12 @@ fun Preview(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             PreviewActionSavingButton(
-                                card = card,
+                                card = targetCard,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                             )
                             PreviewActionShareButton(
-                                card = card,
+                                card = targetCard,
                                 shareContentWidth = maxCardWidth,
                                 snapshotController = snapshotController,
                                 modifier = Modifier
@@ -138,26 +158,4 @@ fun Preview(
             }
         }
     }
-}
-
-@Composable
-private fun PreviewOverlay(
-    state: PreviewState,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val overlayColor = if (isSystemInDarkTheme()) {
-        MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f)
-    } else {
-        MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f)
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = state::hide,
-            )
-            .background(color = overlayColor)
-    )
 }

@@ -15,7 +15,6 @@ import tech.zhifu.app.myhub.feature.settings.content.TopBar
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
-import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable

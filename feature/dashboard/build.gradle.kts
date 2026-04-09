@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)
             implementation(libs.jb.compose.material3.material3)
+            implementation(libs.jb.compose.material3.adaptive.adaptive)
             implementation(libs.jb.compose.runtime.runtime)
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.koin.compose.viewmodel)

@@ -19,12 +19,15 @@ import tech.zhifu.app.myhub.ui.state.user.UserState
 import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
+import tech.zhifu.app.myhub.ui.viewmodel.ViewModelSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
 
 class AIViewModel(
     override val userRepository: UserRepository,
     private val orchestrator: CaptureOrchestrator,
 ) : ViewModel(),
     ContainerHost<AIUiState, AISideEffect>,
+    ViewModelSideEffect<AISideEffect>,
     UserState,
     UserPreferencesState,
     ProviderState {
@@ -40,6 +43,7 @@ class AIViewModel(
     ) {
         bootstrap()
     }
+    override val sideEffect = createSideEffectFlow()
 
     private fun bootstrap() = intent {
         providerRoutingConfig

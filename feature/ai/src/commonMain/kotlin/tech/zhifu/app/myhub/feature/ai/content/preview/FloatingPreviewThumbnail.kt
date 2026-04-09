@@ -35,10 +35,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
+import tech.zhifu.app.myhub.feature.preview.sharedElement
 
 @Composable
 fun FloatingPreviewThumbnail(
     previewKey: String,
+    coverKey: String? = null,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier.Companion,
     onClick: () -> Unit = {},
@@ -55,6 +57,14 @@ fun FloatingPreviewThumbnail(
             label = "draft_thumbnail_translate_y",
         )
     val interactionSource = remember { MutableInteractionSource() }
+    val coverModifier = if (coverKey != null) {
+        Modifier.sharedElement(
+            key = coverKey,
+            animatedVisibilityScope = animatedVisibilityScope,
+        )
+    } else {
+        Modifier
+    }
     ElevatedCard(
         modifier = modifier
             .offset(y = floatingOffset.dp)
@@ -82,7 +92,7 @@ fun FloatingPreviewThumbnail(
         ),
     ) {
         Box(
-            modifier = Modifier
+            modifier = coverModifier
                 .fillMaxWidth()
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
                 .border(1.dp, Color(0x66FFFFFF), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))

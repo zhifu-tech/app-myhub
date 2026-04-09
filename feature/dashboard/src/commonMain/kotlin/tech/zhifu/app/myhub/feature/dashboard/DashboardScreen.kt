@@ -22,7 +22,6 @@ import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
 import tech.zhifu.app.myhub.ui.viewmodel.CollectPredicatedSharedSideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
-import tech.zhifu.app.myhub.ui.viewmodel.sideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable

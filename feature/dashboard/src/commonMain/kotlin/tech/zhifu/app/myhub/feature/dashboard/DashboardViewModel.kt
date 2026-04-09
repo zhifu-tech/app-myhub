@@ -26,12 +26,15 @@ import tech.zhifu.app.myhub.ui.state.user.UserState
 import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
+import tech.zhifu.app.myhub.ui.viewmodel.ViewModelSideEffect
+import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
 
 class DashboardViewModel(
     internal val cardRepository: CardRepository,
     override val userRepository: UserRepository,
 ) : ViewModel(),
     ContainerHost<DashboardUiState, DashboardSideEffect>,
+    ViewModelSideEffect<DashboardSideEffect>,
     UserState,
     UserPreferencesState,
     LayoutState,
@@ -40,6 +43,7 @@ class DashboardViewModel(
         container(initialState = DashboardUiState.Idle) {
             observeUiStateFlow()
         }
+    override val sideEffect = createSideEffectFlow()
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val layout = createLayoutStateFlow()
@@ -222,3 +226,4 @@ class DashboardViewModel(
         postSideEffect(DashboardSideEffect.ShowSnack(message))
     }
 }
+
