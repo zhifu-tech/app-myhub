@@ -7,6 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -29,35 +33,34 @@ fun ChatInputBar(
     viewModel: AIViewModel,
     state: BottomBarState,
 ) {
-    val placeHolder = when {
-        state.conversationState == ConversationState.INFO_COLLECT &&
-            state.missingFields.firstOrNull() == Field.MEDIA -> {
+    val placeHolder = when (state.conversationState) {
+        ConversationState.INFO_COLLECT if state.missingFields.firstOrNull() == Field.MEDIA -> {
             stringResource(Res.string.feature_ai_input_placeholder_media)
         }
 
-        state.conversationState == ConversationState.INFO_COLLECT &&
-            state.missingFields.firstOrNull() == Field.TAGS -> {
+        ConversationState.INFO_COLLECT if state.missingFields.firstOrNull() == Field.TAGS -> {
             stringResource(Res.string.feature_ai_input_placeholder_tags)
         }
 
-        state.conversationState == ConversationState.INFO_COLLECT &&
-            state.missingFields.firstOrNull() == Field.TITLE -> {
+        ConversationState.INFO_COLLECT if state.missingFields.firstOrNull() == Field.TITLE -> {
             stringResource(Res.string.feature_ai_input_placeholder_title)
         }
 
-        state.conversationState == ConversationState.CARD_REVIEW ||
-            state.conversationState == ConversationState.MANUAL_EDIT -> {
+        ConversationState.CARD_REVIEW, ConversationState.MANUAL_EDIT -> {
             stringResource(Res.string.feature_ai_input_placeholder_review)
         }
 
         else -> stringResource(Res.string.feature_ai_input_placeholder_default)
     }
+    // 输入需要及时响应，updateInput 会有延迟，导致输入跳变
+    var input by remember { mutableStateOf(state.input) }
     ChatInputBarContent(
         modifier = modifier,
-        onInputChange = {
-            viewModel.updateInput(it)
+        onInputChange = { text ->
+            input = text
+            viewModel.updateInput(text)
         },
-        input = state.input,
+        input = input,
         placeHolder = placeHolder,
         onSend = {
             viewModel.submitInput()

@@ -166,6 +166,7 @@ fun AIScreenTwoPanel(
                 true,
                 Modifier
                     .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .width(previewHostWidth)
             )
         }
