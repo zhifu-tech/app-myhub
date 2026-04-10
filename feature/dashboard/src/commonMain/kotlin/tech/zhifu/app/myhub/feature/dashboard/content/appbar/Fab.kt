@@ -68,7 +68,7 @@ fun FabContent(
             onClickAdd
         },
         shape = CircleShape,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
         modifier = modifier
             .height(56.dp)
             .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = true)

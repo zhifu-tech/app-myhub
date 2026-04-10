@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.feature.ai.content.input.InputBox
+import tech.zhifu.app.myhub.feature.ai.content.input.ChatInputBar
 import tech.zhifu.app.myhub.feature.ai.content.preview.toPreviewCard
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
@@ -52,7 +52,7 @@ fun BottomBar(
             previewState.show(draft.toPreviewCard())
         },
         inputBox = { modifier ->
-            InputBox(
+            ChatInputBar(
                 modifier = modifier,
                 viewModel = viewModel,
                 state = safeState,
@@ -71,7 +71,7 @@ fun BottomBarContent(
         modifier = Modifier
             .fillMaxWidth()
             .imePadding()
-            .padding(32.dp), // 保持与键盘间距
+            .padding(16.dp), // 保持与键盘间距
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -93,7 +93,7 @@ fun BottomBarContent(
                     visible = state.previewState.isPreviewing().not(),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(y = (-80).dp),
+                        .offset(y = (-64).dp),
                 ) {
                     val safeDraft = state.draft ?: return@PreviewAnimatedVisibility
                     PreviewFloatThumbnail(

@@ -58,7 +58,7 @@ fun BottomBarContent(
         modifier = modifier
             .fillMaxWidth()
             .imePadding()
-            .padding(32.dp), // 保持与键盘间距
+            .padding(16.dp), // 保持与键盘间距
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
             space = 12.dp,

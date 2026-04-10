@@ -18,7 +18,7 @@ import tech.zhifu.app.myhub.feature.ai.content.appbar.BottomBarState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 
 @Composable
-fun InputBox(
+fun ChatInputBar(
     modifier: Modifier,
     viewModel: AIViewModel,
     state: BottomBarState,
@@ -29,7 +29,7 @@ fun InputBox(
         ConversationState.CARD_REVIEW, ConversationState.MANUAL_EDIT -> "输入新标题后发送"
         else -> "输入要捕获的内容"
     }
-    ChatInputBar(
+    ChatInputBarContent(
         modifier = modifier,
         onInputChange = {
             input.value = it
@@ -44,7 +44,7 @@ fun InputBox(
 }
 
 @Composable
-fun ChatInputBar(
+fun ChatInputBarContent(
     modifier: Modifier = Modifier,
     input: String,
     placeHolder: String,
@@ -110,4 +110,3 @@ fun ChatInputBar(
         }
     }
 }
-

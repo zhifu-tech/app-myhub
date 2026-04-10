@@ -79,7 +79,7 @@ fun SearchBarContent(
         targetValue = if (isFocused.value) {
             MaterialTheme.colorScheme.surface
         } else {
-            MaterialTheme.colorScheme.surface/*.copy(alpha = 0.95f)*/
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
         }
     )
 
