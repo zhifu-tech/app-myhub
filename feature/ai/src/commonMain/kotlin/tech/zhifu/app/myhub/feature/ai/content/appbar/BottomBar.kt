@@ -17,12 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.ChatInputBar
 import tech.zhifu.app.myhub.feature.ai.content.preview.toPreviewCard
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Field
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_preview_continue_edit
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_preview_continue_hint
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_preview_untitled_draft
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.content.PreviewFloatThumbnail
 import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
@@ -40,16 +46,25 @@ fun BottomBar(
                 input = uiState.input,
                 isPublishing = uiState.isPublishing,
                 conversationState = uiState.conversationState,
+                missingFields = uiState.missingFields,
                 previewState = uiState.previewState,
             )
         }
     }
     val safeState = state ?: return
+    val untitledDraft = stringResource(Res.string.feature_ai_preview_untitled_draft)
+    val continueHint = stringResource(Res.string.feature_ai_preview_continue_hint)
+    val continueEdit = stringResource(Res.string.feature_ai_preview_continue_edit)
     BottomBarContent(
         state = safeState,
         onDraftPreviewClick = { previewState, draft ->
-
-            previewState.show(draft.toPreviewCard())
+            previewState.show(
+                draft.toPreviewCard(
+                    untitledDraft = untitledDraft,
+                    continueHint = continueHint,
+                    continueEdit = continueEdit,
+                )
+            )
         },
         inputBox = { modifier ->
             ChatInputBar(
@@ -132,5 +147,6 @@ data class BottomBarState(
     val input: String,
     val isPublishing: Boolean,
     val conversationState: ConversationState,
+    val missingFields: List<Field>,
     val previewState: PreviewState,
 )

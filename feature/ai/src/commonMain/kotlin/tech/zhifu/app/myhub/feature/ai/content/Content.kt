@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
@@ -57,9 +58,16 @@ fun ContentContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.colorScheme.surface,
+                    )
+                )
+            )
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = contentPadding,
     ) {
         item { providerModeItem() }
@@ -76,4 +84,3 @@ fun ContentContent(
         }
     }
 }
-

@@ -9,10 +9,14 @@ import tech.zhifu.app.myhub.ui.model.ContentCardAction
 import tech.zhifu.app.myhub.ui.model.ContentCardCover
 import kotlin.time.Clock
 
-fun CaptureDraft.toPreviewCard(): ContentCard = ContentCard(
+fun CaptureDraft.toPreviewCard(
+    untitledDraft: String,
+    continueHint: String,
+    continueEdit: String,
+): ContentCard = ContentCard(
     id = id,
-    title = title.ifBlank { "未命名草稿" },
-    summary = summary.ifBlank { sourceText.ifBlank { "继续补充你的想法..." } },
+    title = title.ifBlank { untitledDraft },
+    summary = summary.ifBlank { sourceText.ifBlank { continueHint } },
     location = "",
     updatedAt = Clock.System.now().toEpochMilliseconds(),
     status = CardStatus.DRAFT,
@@ -23,7 +27,7 @@ fun CaptureDraft.toPreviewCard(): ContentCard = ContentCard(
         tint = Color(0xFF6366F1),
     ),
     action = ContentCardAction(
-        label = "继续编辑",
+        label = continueEdit,
         iconKey = "edit",
         color = Color(0xFF6366F1),
     ),

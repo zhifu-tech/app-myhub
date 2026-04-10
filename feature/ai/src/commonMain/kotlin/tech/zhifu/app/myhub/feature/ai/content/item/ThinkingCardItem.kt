@@ -11,10 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_thinking_title
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -53,14 +55,14 @@ fun ThinkingCardItemContent(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
-                text = "AI 思考中…",
+                text = stringResource(Res.string.feature_ai_thinking_title),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF334155),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF0F172A),
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

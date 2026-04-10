@@ -11,7 +11,7 @@ class ResponseParser {
             .orEmpty()
             .trim()
             .take(24)
-            .ifBlank { "未命名捕获" }
+            .ifBlank { "Untitled capture" }
         val tags = input
             .replace("，", " ")
             .replace("。", " ")

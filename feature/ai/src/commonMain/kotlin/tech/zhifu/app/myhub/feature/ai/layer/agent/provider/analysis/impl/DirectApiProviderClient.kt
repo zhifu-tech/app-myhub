@@ -1,15 +1,10 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.impl
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.header
-import io.ktor.client.request.preparePost
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
-import io.ktor.utils.io.readUTF8Line
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -92,7 +87,7 @@ class DirectApiProviderClient(
                                         put(
                                             key = "content",
                                             element = JsonPrimitive(
-                                                value = "Return JSON with keys intent,title,summary,tags for capture analysis."
+                                                value = "你是 AI 捕获助手。仅返回 JSON，不要 markdown 代码块。必须包含 intent,title,summary,tags 四个字段；tags 为字符串数组。若信息不足也要给可用草稿，intent 默认 create_card。"
                                             )
                                         )
                                     }.also { add(it) }

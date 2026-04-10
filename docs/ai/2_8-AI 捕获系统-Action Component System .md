@@ -645,11 +645,73 @@ Action Components → 执行交互
 
 ---
 
-## 下一步建议（关键）
+# 十七、V1.2 组件统一设计（当前实现建议）
 
-建议你下一步补这两个，会直接进入“可开发状态”：
+## 17.1 统一渲染模型
 
-1️⃣ **Conversation Engine（服务端状态流转 + API 设计）**
-2️⃣ **Tool API JSON Schema（给 LLM 的严格接口定义）**
+组件统一采用：
 
-我可以帮你把这两块直接补成 **后端接口级 + 伪代码级实现文档**。
+```text
+Action Card（容器）
+ + Title（当前步骤）
+ + Options（按钮/标签）
+```
+
+设计规则：
+
+```text
+Primary Action: Filled Button
+Secondary Action: Outlined Button
+Selector Action: Chip
+Input Hint: 仅提示，不重复输入框
+```
+
+## 17.2 状态到组件映射（收敛版）
+
+```text
+INFO_COLLECT:
+  if missing=media -> upload + quick_reply(skip_media/review)
+  if missing=tags  -> tag_selector + quick_reply(skip_tags/review)
+  if missing=title -> input_hint + quick_reply(review)
+
+CARD_REVIEW:
+  card_actions(edit_title/publish)
+
+MANUAL_EDIT:
+  input_hint(title) + card_actions(edit_title/publish)
+
+COMPLETE:
+  quick_reply(new_capture)
+```
+
+## 17.3 生命周期
+
+```text
+active -> completed -> expired
+```
+
+示例：
+
+```text
+点击“跳过图片”后，media 组件 completed，不再渲染；
+下一缺失字段组件自动接管（如 tags）。
+```
+
+## 17.4 事件协议（建议补齐）
+
+```json
+{
+  "event_type": "component_action",
+  "component_type": "upload|tag_selector|quick_reply|card_actions",
+  "field": "media|tags|title|null",
+  "value": "action_value",
+  "session_id": "session_xxx"
+}
+```
+
+## 17.5 缺失字段策略
+
+```text
+missing_fields 必须是有序列表：media -> tags -> title
+一次只驱动一个主任务，避免同屏多任务认知负担。
+```

@@ -7,15 +7,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.appbar.BottomBarState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.ai.model.Field
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_default
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_media
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_review
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_tags
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_title
 
 @Composable
 fun ChatInputBar(
@@ -23,19 +29,35 @@ fun ChatInputBar(
     viewModel: AIViewModel,
     state: BottomBarState,
 ) {
-    val input = remember { mutableStateOf(state.input) }
-    val placeHolder = when (state.conversationState) {
-        ConversationState.INFO_COLLECT -> "输入标签后发送，例如：美食"
-        ConversationState.CARD_REVIEW, ConversationState.MANUAL_EDIT -> "输入新标题后发送"
-        else -> "输入要捕获的内容"
+    val placeHolder = when {
+        state.conversationState == ConversationState.INFO_COLLECT &&
+            state.missingFields.firstOrNull() == Field.MEDIA -> {
+            stringResource(Res.string.feature_ai_input_placeholder_media)
+        }
+
+        state.conversationState == ConversationState.INFO_COLLECT &&
+            state.missingFields.firstOrNull() == Field.TAGS -> {
+            stringResource(Res.string.feature_ai_input_placeholder_tags)
+        }
+
+        state.conversationState == ConversationState.INFO_COLLECT &&
+            state.missingFields.firstOrNull() == Field.TITLE -> {
+            stringResource(Res.string.feature_ai_input_placeholder_title)
+        }
+
+        state.conversationState == ConversationState.CARD_REVIEW ||
+            state.conversationState == ConversationState.MANUAL_EDIT -> {
+            stringResource(Res.string.feature_ai_input_placeholder_review)
+        }
+
+        else -> stringResource(Res.string.feature_ai_input_placeholder_default)
     }
     ChatInputBarContent(
         modifier = modifier,
         onInputChange = {
-            input.value = it
             viewModel.updateInput(it)
         },
-        input = input.value,
+        input = state.input,
         placeHolder = placeHolder,
         onSend = {
             viewModel.submitInput()

@@ -1,7 +1,5 @@
 package tech.zhifu.app.myhub.feature.ai.layer
 
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisContext
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
@@ -21,6 +19,12 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandDispatcher
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandResult
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Field
+import tech.zhifu.app.myhub.feature.ai.model.Message
+import tech.zhifu.app.myhub.feature.ai.model.asRawValue
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_restore_session
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import kotlin.time.Clock
@@ -51,7 +55,7 @@ class CaptureOrchestrator(
                     Message(
                         id = "m_restore",
                         role = Message.Role.SYSTEM,
-                        text = "已恢复上次会话草稿。",
+                        textRes = Res.string.feature_ai_msg_restore_session,
                     )
                 )
             val restoredContext = base.copy(
@@ -123,7 +127,7 @@ class CaptureOrchestrator(
                                 ),
                                 context = ProviderAnalysisContext(
                                     state = context.state.name,
-                                    missing_fields = context.missingFields,
+                                    missing_fields = context.missingFields.map { it.asRawValue() },
                                 ),
                             ),
                             onReasoning = onReasoning,
@@ -198,31 +202,65 @@ class CaptureOrchestrator(
             }
 
             ConversationState.INFO_COLLECT -> {
-                // fixme: 为什么直接进入 增加 tag ？？
                 val draft = context.draft ?: return context
-                val result = toolCommandDispatcher.execute(
-                    command = ToolCommand.AddTag(
-                        draft = draft,
-                        tag = text
-                    )
-                )
-                when (result) {
-                    is ToolCommandResult.DraftUpdated -> {
-                        conversationEngine.onTagUpdated(
-                            context = context,
-                            tag = text,
-                            draft = result.draft
+                when (context.missingFields.firstOrNull()) {
+                    Field.TITLE -> {
+                        val result = toolCommandDispatcher.execute(
+                            command = ToolCommand.UpdateTitle(
+                                draft = draft,
+                                title = text
+                            )
                         )
+                        when (result) {
+                            is ToolCommandResult.DraftUpdated -> {
+                                conversationEngine.onTitleUpdated(
+                                    context = context,
+                                    title = text,
+                                    draft = result.draft
+                                )
+                            }
+
+                            is ToolCommandResult.Failed -> {
+                                conversationEngine.onBlockedAction(
+                                    context = context,
+                                    action = "update_title:${result.code}:${result.message}"
+                                )
+                            }
+
+                            else -> context
+                        }
                     }
 
-                    is ToolCommandResult.Failed -> {
-                        conversationEngine.onBlockedAction(
-                            context = context,
-                            action = "add_tag:${result.code}:${result.message}"
-                        )
+                    Field.MEDIA -> {
+                        conversationEngine.onBlockedInput(context)
                     }
 
-                    else -> context
+                    else -> {
+                        val result = toolCommandDispatcher.execute(
+                            command = ToolCommand.AddTag(
+                                draft = draft,
+                                tag = text
+                            )
+                        )
+                        when (result) {
+                            is ToolCommandResult.DraftUpdated -> {
+                                conversationEngine.onTagUpdated(
+                                    context = context,
+                                    tag = text,
+                                    draft = result.draft
+                                )
+                            }
+
+                            is ToolCommandResult.Failed -> {
+                                conversationEngine.onBlockedAction(
+                                    context = context,
+                                    action = "add_tag:${result.code}:${result.message}"
+                                )
+                            }
+
+                            else -> context
+                        }
+                    }
                 }
             }
 
@@ -288,25 +326,10 @@ class CaptureOrchestrator(
                 )
                 when (result) {
                     is ToolCommandResult.MediaAttached -> {
-                        context
-                            .copy(
-                                draft = result.draft,
-                                messages = context.messages +
-                                    listOf(
-                                        Message(
-                                            id = "m_upload_${Clock.System.now().toEpochMilliseconds()}",
-                                            role = Message.Role.AI,
-                                            text = if (result.draft.mediaAssets.isEmpty()) {
-                                                "未选择媒体文件。"
-                                            } else {
-                                                "已附加媒体 ${result.draft.mediaAssets.size} 个。"
-                                            },
-                                        )
-                                    )
-                            )
-                            .let {
-                                conversationEngine.refreshActionComponents(context = it)
-                            }
+                        conversationEngine.onMediaUpdated(
+                            context = context,
+                            draft = result.draft
+                        )
                     }
 
                     is ToolCommandResult.Failed -> {
@@ -320,7 +343,21 @@ class CaptureOrchestrator(
                 }
             }
 
-            in listOf("skip_tags", "review") -> {
+            "skip_tags" -> {
+                conversationEngine.onFieldSkipped(
+                    context = context,
+                    field = Field.TAGS,
+                )
+            }
+
+            "skip_media" -> {
+                conversationEngine.onFieldSkipped(
+                    context = context,
+                    field = Field.MEDIA,
+                )
+            }
+
+            "review" -> {
                 conversationEngine.onMoveToReview(context)
             }
 
@@ -427,7 +464,7 @@ private fun fallbackDraftFromInput(input: String): CaptureDraft {
         id = "draft_fallback_$now",
         title = "",
         summary = input.trim(),
-        tags = listOf("手工"),
+        tags = listOf("manual"),
         sourceText = input.trim(),
         mediaAssets = emptyList(),
     )

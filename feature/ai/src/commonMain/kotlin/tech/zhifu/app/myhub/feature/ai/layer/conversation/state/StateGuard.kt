@@ -25,7 +25,7 @@ class StateGuard {
         }
         val allowed = when (state) {
             ConversationState.INFO_COLLECT -> {
-                setOf("skip_tags", "review", "upload_media")
+                setOf("skip_tags", "skip_media", "review", "upload_media")
             }
 
             ConversationState.CARD_REVIEW,

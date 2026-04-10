@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_send_desc
 
 @Composable
 fun SendButton(
@@ -67,7 +70,7 @@ fun SendButton(
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.Send,
-            contentDescription = "Send",
+            contentDescription = stringResource(Res.string.feature_ai_send_desc),
             tint = contentColor
         )
     }

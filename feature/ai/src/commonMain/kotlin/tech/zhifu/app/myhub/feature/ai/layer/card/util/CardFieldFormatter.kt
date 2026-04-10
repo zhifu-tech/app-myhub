@@ -5,7 +5,7 @@ class CardFieldFormatter {
         title: String
     ): String = title
         .trim()
-        .ifBlank { "未命名捕获" }
+        .ifBlank { "Untitled capture" }
         .take(64)
 
     fun normalizeSummary(

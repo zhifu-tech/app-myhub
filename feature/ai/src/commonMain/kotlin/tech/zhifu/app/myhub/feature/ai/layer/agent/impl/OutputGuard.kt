@@ -5,7 +5,7 @@ class OutputGuard {
         parsed: ParsedAgentOutput,
         rawInput: String
     ): ParsedAgentOutput {
-        val fixedTitle = parsed.title.ifBlank { "未命名捕获" }
+        val fixedTitle = parsed.title.ifBlank { "Untitled capture" }
         val fixedSummary = parsed.summary.ifBlank { rawInput.trim() }
         return parsed.copy(
             title = fixedTitle,
@@ -13,5 +13,4 @@ class OutputGuard {
         )
     }
 }
-
 

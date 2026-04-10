@@ -1,8 +1,9 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Field
 
 interface StorageGateway {
     suspend fun loadLatestDraftSession(): StoredDraftSession?
@@ -10,7 +11,7 @@ interface StorageGateway {
         sessionId: String,
         state: ConversationState,
         draft: CaptureDraft?,
-        missingFields: List<String>,
+        missingFields: List<Field>,
     )
 
     suspend fun clearDraftSession(sessionId: String): Long
@@ -22,7 +23,7 @@ data class StoredDraftSession(
     val sessionId: String,
     val state: ConversationState,
     val draft: CaptureDraft?,
-    val missingFields: List<String>,
+    val missingFields: List<Field>,
 )
 
 data class StoredAiJob(

@@ -11,8 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.model.Message
 
 @Composable
@@ -29,17 +29,37 @@ fun MessageBubbleItem(message: Message) {
                 .fillMaxWidth(0.88f)
                 .background(
                     color = when (message.role) {
-                        Message.Role.AI -> Color(0xFFEFF6FF)
-                        Message.Role.USER -> Color(0xFF1D4ED8)
-                        Message.Role.SYSTEM -> Color(0xFFE2E8F0)
+                        Message.Role.AI -> MaterialTheme.colorScheme.surfaceContainerHighest
+                        Message.Role.USER -> MaterialTheme.colorScheme.primaryContainer
+                        Message.Role.SYSTEM -> MaterialTheme.colorScheme.secondaryContainer
                     },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = when (message.role) {
+                        Message.Role.USER -> RoundedCornerShape(
+                            topStart = 18.dp,
+                            topEnd = 6.dp,
+                            bottomStart = 18.dp,
+                            bottomEnd = 18.dp,
+                        )
+
+                        else -> RoundedCornerShape(
+                            topStart = 6.dp,
+                            topEnd = 18.dp,
+                            bottomStart = 18.dp,
+                            bottomEnd = 18.dp,
+                        )
+                    },
                 )
                 .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
             Text(
-                text = message.text,
-                color = if (isUser) Color.White else Color(0xFF0F172A),
+                text = message.textRes?.let { res ->
+                    stringResource(resource = res, *message.textArgs.toTypedArray())
+                } ?: message.text,
+                color = if (isUser) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
                 style = MaterialTheme.typography.bodyMedium,
             )
         }

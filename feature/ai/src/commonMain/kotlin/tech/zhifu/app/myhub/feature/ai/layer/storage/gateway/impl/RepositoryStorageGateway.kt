@@ -1,15 +1,14 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.gateway.impl
 
+import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
-import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
 import tech.zhifu.app.myhub.datastore.repository.capture.DraftSessionSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.MediaAssetSnapshot
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.layer.common.util.inferMimeType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
@@ -18,6 +17,9 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredDraftSession
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaGarbageCollector
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessExecutor
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessRequest
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.Field
+import tech.zhifu.app.myhub.feature.ai.model.toFieldOrNull
 import kotlin.enums.enumEntries
 import kotlin.time.Clock
 
@@ -43,8 +45,10 @@ class RepositoryStorageGateway(
             .deserialize<CaptureDraft>()
             .getOrNull()
         val missingFields = snapshot.missingFieldsJson
-            ?.let {
-                it.deserialize<List<String>>().getOrNull()
+            ?.let { json ->
+                json.deserialize<List<Field>>().getOrNull()
+                    ?: json.deserialize<List<String>>().getOrNull()
+                        ?.mapNotNull { value -> value.toFieldOrNull() }
             }
             ?: emptyList()
         return StoredDraftSession(
@@ -59,7 +63,7 @@ class RepositoryStorageGateway(
         sessionId: String,
         state: ConversationState,
         draft: CaptureDraft?,
-        missingFields: List<String>,
+        missingFields: List<Field>,
     ) {
         val safeDraft = draft ?: CaptureDraft(
             id = sessionId,

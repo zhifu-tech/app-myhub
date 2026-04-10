@@ -18,6 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_back
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_settings
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_title
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
 
@@ -33,7 +38,7 @@ fun TopBar(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
-                    contentDescription = "设置"
+                    contentDescription = stringResource(Res.string.feature_ai_top_bar_settings),
                 )
             }
         }
@@ -60,13 +65,13 @@ internal fun TopBarContent(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "AI 捕获",
+                    contentDescription = stringResource(Res.string.feature_ai_top_bar_back),
                 )
             }
         },
         title = {
             Text(
-                text = "AI 捕获",
+                text = stringResource(Res.string.feature_ai_top_bar_title),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )
