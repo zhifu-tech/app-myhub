@@ -30,22 +30,22 @@ fun SearchBar(
     modifier: Modifier,
     viewModel: DashboardViewModel
 ) {
+    val isContentEmpty by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? DashboardUiState.Content)?.items?.isEmpty() ?: true
+    }
+    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
+    val showSearchingBar = !(isContentEmpty && !isSearching)
+
+    val query by viewModel.searchState.collectAsState()
+    val queryState = remember { mutableStateOf(query) }
+
     val focusManager = LocalFocusManager.current
     viewModel.sideEffect.CollectPredicatedSharedSideEffect(
         predicate = { it is DashboardSideEffect.ResetSearch }
     ) {
         focusManager.clearFocus()
+        queryState.value = ""
     }
-
-    val isContentEmpty by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? DashboardUiState.Content)?.items?.isEmpty() ?: true
-    }
-    val isSearching by viewModel.searchState.collectAsSearchingStateWithLifecycle()
-
-    val showSearchingBar = !(isContentEmpty && !isSearching)
-
-    val query by viewModel.searchState.collectAsState()
-    val queryState = remember { mutableStateOf(query) }
 
     AnimatedVisibility(
         modifier = modifier,
