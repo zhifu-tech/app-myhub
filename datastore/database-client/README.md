@@ -14,7 +14,7 @@
 
 - **Android** - 使用 `AndroidSqliteDriver`，数据库存储在应用私有目录
 - **iOS** - 使用 `NativeSqliteDriver`，数据库存储在应用沙盒目录
-- **JVM** - 使用 `JdbcSqliteDriver`，数据库存储在用户主目录（`~/.myhub/myhub.db`）
+- **JVM** - 使用 `JdbcSqliteDriver`，数据库存储在 `FileKit.filesDir/app-data/myhub.db`
 - **JS** - 使用 `WebWorkerDriver`（SQL.js），在 Web Worker 中运行
 - **WASM** - 使用 `WebWorkerDriver`（SQL.js），在 Web Worker 中运行
 
@@ -142,9 +142,10 @@ val androidModule = module {
 ### JVM (Desktop)
 
 - **驱动类型**：`JdbcSqliteDriver`
-- **数据库位置**：用户主目录（`~/.myhub/myhub.db`）
+- **数据库位置**：`FileKit.filesDir/app-data/myhub.db`
 - **特点**：
     - 使用 SQLite JDBC 驱动
+    - 与 AI 媒体转存目录同根（`FileKit.filesDir/app-data`）
     - 自动创建数据库目录
     - 自动处理数据库迁移
 
@@ -248,12 +249,15 @@ val androidModule = module {
 
 ### JVM 平台
 
-JVM 平台会在用户主目录创建 `.myhub` 目录，数据库文件存储在 `~/.myhub/myhub.db`：
+JVM 平台数据库位于 `FileKit.filesDir/app-data/myhub.db`，并与媒体目录同根：
 
 ```kotlin
-// 数据库路径：~/.myhub/myhub.db
-// 如果目录不存在，会自动创建
+// 数据库路径：FileKit.filesDir/app-data/myhub.db
+// 媒体路径：FileKit.filesDir/app-data/cards/{cardId}/media/{mediaId}.ext
+// app-data 目录不存在时会自动创建
 ```
+
+> 说明：Android/iOS 仍使用各平台驱动默认的应用私有数据库目录（都在 app sandbox 内），语义上与媒体存储同属应用私有空间。
 
 ## 📌 注意事项
 
@@ -289,4 +293,3 @@ JVM 平台会在用户主目录创建 `.myhub` 目录，数据库文件存储在
 - [SQLDelight 官方文档](https://cashapp.github.io/sqldelight/)
 - [SQLDelight Web 平台文档](https://cashapp.github.io/sqldelight/js_sqlite/)
 - [Koin 官方文档](https://insert-koin.io/)
-

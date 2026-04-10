@@ -4,6 +4,7 @@ import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
 
 class MediaGarbageCollector(
     private val captureLocalRepository: CaptureLocalRepository,
+    private val mediaFileStore: MediaFileStore,
 ) {
     suspend fun collect(
         limit: Int = 500
@@ -14,11 +15,11 @@ class MediaGarbageCollector(
 
         assets.forEach { asset ->
             val hasCard = captureLocalRepository.hasCard(asset.cardId)
-            val localExists = fileExists(path = asset.localUri)
+            val localExists = mediaFileStore.fileExists(localUri = asset.localUri)
             if (!hasCard || !localExists) {
-                deleteFileIfExists(path = asset.localUri)
+                mediaFileStore.deleteIfExists(localUri = asset.localUri)
                 asset.thumbUri?.let {
-                    deleteFileIfExists(path = it)
+                    mediaFileStore.deleteIfExists(localUri = it)
                 }
                 captureLocalRepository.deleteMediaAsset(asset.id)
                 removedCount += 1
@@ -27,16 +28,6 @@ class MediaGarbageCollector(
             }
         }
         return MediaGcResult(removedCount = removedCount, keptCount = keptCount)
-    }
-
-    private fun fileExists(
-        path: String
-    ): Boolean = path.isNotBlank() // fixme  需要增加文件是否存在的判断
-
-    private fun deleteFileIfExists(path: String) {
-        if (path.isBlank()) return
-        // fixme 需要增加文件删除的逻辑
-        // No-op in commonMain. File deletion is platform-specific with filekit 0.13.
     }
 }
 

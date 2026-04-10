@@ -3,20 +3,24 @@ package tech.zhifu.app.myhub.datastore.database
 import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.createDirectories
+import io.github.vinceglb.filekit.div
+import io.github.vinceglb.filekit.exists
+import io.github.vinceglb.filekit.filesDir
+import io.github.vinceglb.filekit.path
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import java.io.File
 
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-        val databasePath = File(System.getProperty("user.home"), ".myhub/myhub.db")
-        if (!databasePath.parentFile.exists()) {
-            databasePath.parentFile.mkdirs()
-        }
-        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${databasePath.absolutePath}")
+        val appDataDir = FileKit.filesDir / "app-data"
+        appDataDir.createDirectories()
+        val databasePath = (appDataDir / "myhub.db").path
+        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:$databasePath")
 
         // 检查数据库文件是否已存在
-        val databaseExists = databasePath.exists()
+        val databaseExists = (appDataDir / "myhub.db").exists()
 
         if (!databaseExists) {
             // 数据库文件不存在，创建新数据库和表（版本 2）

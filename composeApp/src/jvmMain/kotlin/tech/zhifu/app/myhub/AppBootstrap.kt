@@ -7,10 +7,10 @@ import tech.zhifu.app.myhub.startup.StartupOrchestrator
 object AppBootstrap {
 
     fun start() {
+        FileKit.init(appId = "tech.zhifu.app.myhub")
+
         // 初始化 Koin 依赖注入
         val koinApplication = initKoin()
         koinApplication.koin.get<StartupOrchestrator>().start()
-
-        FileKit.init(appId = "tech.zhifu.app.myhub")
     }
 }

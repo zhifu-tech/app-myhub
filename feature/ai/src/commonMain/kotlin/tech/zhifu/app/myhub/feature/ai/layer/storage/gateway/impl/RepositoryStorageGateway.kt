@@ -1,6 +1,9 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.gateway.impl
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
+import tech.zhifu.app.myhub.datastore.model.domain.CardUi
+import tech.zhifu.app.myhub.datastore.model.domain.Cover
+import tech.zhifu.app.myhub.datastore.model.domain.ui
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
@@ -14,6 +17,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationStat
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredDraftSession
+import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaFileStore
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaGarbageCollector
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessExecutor
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessRequest
@@ -29,6 +33,7 @@ class RepositoryStorageGateway(
     private val captureLocalRepository: CaptureLocalRepository,
     private val mediaPostProcessExecutor: MediaPostProcessExecutor,
     private val mediaGarbageCollector: MediaGarbageCollector,
+    private val mediaFileStore: MediaFileStore,
 ) : StorageGateway {
     override suspend fun loadLatestDraftSession(): StoredDraftSession? {
         val snapshot = captureLocalRepository.getLatestDraftSession()
@@ -110,14 +115,33 @@ class RepositoryStorageGateway(
         draft: CaptureDraft
     ) {
         val user = userRepository.requireUser()
+        val importedUris = mutableListOf<String>()
         runCatching {
-            cardRepository.insertCard(card = card, userId = user.id)
-            draft.mediaAssets.forEachIndexed { index, media ->
+            val mediaIdPrefix = "media_${card.id}_"
+            val importedDraft = draft.copy(
+                mediaAssets = draft.mediaAssets.mapIndexed { index, media ->
+                    val mediaId = "$mediaIdPrefix$index"
+                    val imported = mediaFileStore.importToManagedStorage(
+                        cardId = card.id,
+                        mediaId = mediaId,
+                        sourceUri = media.localUri,
+                    )
+                    importedUris += imported.localUri
+                    media.copy(
+                        localUri = imported.localUri,
+                        sizeBytes = imported.sizeBytes,
+                    )
+                }
+            )
+            val cardToSave = card.withCoverUrl(importedDraft.coverLocalUri())
+
+            cardRepository.insertCard(card = cardToSave, userId = user.id)
+            importedDraft.mediaAssets.forEachIndexed { index, media ->
                 val now = Clock.System.now().toEpochMilliseconds()
                 captureLocalRepository.upsertMediaAsset(
                     snapshot = MediaAssetSnapshot(
-                        id = "media_${card.id}_$index",
-                        cardId = card.id,
+                        id = "$mediaIdPrefix$index",
+                        cardId = cardToSave.id,
                         mediaType = media.mediaType.ifBlank { inferMimeType(media.localUri) },
                         localUri = media.localUri,
                         sizeBytes = media.sizeBytes,
@@ -127,11 +151,11 @@ class RepositoryStorageGateway(
                 )
                 captureLocalRepository.upsertAiJob(
                     snapshot = AiJobSnapshot(
-                        id = "media_postprocess_${card.id}_$index",
+                        id = "media_postprocess_${cardToSave.id}_$index",
                         provider = "local_media_pipeline",
                         requestJson = MediaPostProcessRequest(
-                            cardId = card.id,
-                            mediaId = "media_${card.id}_$index",
+                            cardId = cardToSave.id,
+                            mediaId = "$mediaIdPrefix$index",
                             mediaUri = media.localUri,
                         ).serialize().orEmpty(),
                         responseJson = null,
@@ -152,7 +176,41 @@ class RepositoryStorageGateway(
                     needSync = false
                 )
             }
+            importedUris.forEach { uri ->
+                runCatching { mediaFileStore.deleteIfExists(localUri = uri) }
+                runCatching { mediaFileStore.deleteIfExists(localUri = "$uri.thumb.jpg") }
+            }
             throw it
         }
     }
+}
+
+private fun CaptureDraft.coverLocalUri(): String? = mediaAssets
+    .firstOrNull { it.mediaType.startsWith("image/") }
+    ?.localUri
+    ?: mediaAssets.firstOrNull()?.localUri
+
+private fun Card.withCoverUrl(
+    coverUrl: String?
+): Card {
+    if (coverUrl.isNullOrBlank()) return this
+    val currentUi = this.ui
+    val merged = currentUi
+        ?.copy(
+            cover = (currentUi.cover ?: Cover(
+                iconKey = "",
+                bgColor = "#EFF6FF",
+                tintColor = "",
+                imageUrl = coverUrl,
+            )).copy(imageUrl = coverUrl)
+        )
+        ?: CardUi(
+            cover = Cover(
+                iconKey = "",
+                bgColor = "#EFF6FF",
+                tintColor = "",
+                imageUrl = coverUrl,
+            )
+        )
+    return copy(uiRaw = merged.serialize().orEmpty())
 }

@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.preview.resources.Res
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_float_thumbnail_description
@@ -46,6 +48,7 @@ fun PreviewFloatThumbnail(
     previewKey: String,
     coverKey: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    coverUrl: String? = null,
     modifier: Modifier = Modifier.Companion,
     onClick: () -> Unit = {},
 ) {
@@ -119,24 +122,33 @@ fun PreviewFloatThumbnail(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Description,
-                    contentDescription = stringResource(Res.string.feature_preview_float_thumbnail_description),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 2.dp)
-                        .clip(RectangleShape)
-                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(width = 24.dp, height = 2.dp)
-                        .clip(RectangleShape)
-                        .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-                )
+                if (coverUrl.isNullOrBlank()) {
+                    Icon(
+                        imageVector = Icons.Outlined.Description,
+                        contentDescription = stringResource(Res.string.feature_preview_float_thumbnail_description),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 32.dp, height = 2.dp)
+                            .clip(RectangleShape)
+                            .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                    )
+                    Spacer(
+                        modifier = Modifier
+                            .size(width = 24.dp, height = 2.dp)
+                            .clip(RectangleShape)
+                            .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                    )
+                } else {
+                    SubcomposeAsyncImage(
+                        model = coverUrl,
+                        contentDescription = stringResource(Res.string.feature_preview_float_thumbnail_description),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
         }
     }

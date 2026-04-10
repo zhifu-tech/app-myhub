@@ -21,14 +21,34 @@ fun CaptureDraft.toPreviewCard(
     updatedAt = Clock.System.now().toEpochMilliseconds(),
     status = CardStatus.DRAFT,
     tags = tags.toImmutableList(),
-    cover = ContentCardCover(
-        iconKey = "edit_note",
-        background = Color(0xFFEFF6FF),
-        tint = Color(0xFF6366F1),
-    ),
+    cover = run {
+        val coverUrl = previewCoverUrl()
+        ContentCardCover(
+            iconKey = if (coverUrl == null) "edit_note" else null,
+            background = Color(0xFFEFF6FF),
+            tint = if (coverUrl == null) Color(0xFF6366F1) else null,
+            url = coverUrl,
+        )
+    },
     action = ContentCardAction(
         label = continueEdit,
         iconKey = "edit",
         color = Color(0xFF6366F1),
     ),
 )
+
+fun CaptureDraft.previewCoverUrl(): String? {
+    return mediaAssets
+        .firstOrNull { asset ->
+            val mime = asset.mediaType.lowercase()
+            mime.startsWith(prefix = "image/") || asset.localUri.lowercase().let { uri ->
+                uri.endsWith(".jpg") ||
+                    uri.endsWith(".jpeg") ||
+                    uri.endsWith(".png") ||
+                    uri.endsWith(".webp") ||
+                    uri.endsWith(".heic") ||
+                    uri.endsWith(".gif")
+            }
+        }
+        ?.localUri
+}

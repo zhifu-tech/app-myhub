@@ -7,6 +7,8 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardSourceKind
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
+import tech.zhifu.app.myhub.datastore.model.domain.CardUi
+import tech.zhifu.app.myhub.datastore.model.domain.Cover
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.feature.ai.layer.card.CardEngine
 import tech.zhifu.app.myhub.feature.ai.layer.card.PrePublishCheckResult
@@ -63,9 +65,28 @@ class LocalCardEngine(
         }
         val safe = validator.validateDraft(draft)
         val now = Clock.System.now()
+        val coverUrl = safe.mediaAssets.firstOrNull { it.mediaType.startsWith("image/") }?.localUri
+            ?: safe.mediaAssets.firstOrNull()?.localUri
+        val contentType = when {
+            coverUrl != null && safe.summary.isBlank() && safe.sourceText.isBlank() -> CardContentType.IMAGE
+            else -> CardContentType.TEXT
+        }
+        val contentValue = safe.summary
+            .ifBlank { safe.sourceText }
+            .ifBlank { coverUrl.orEmpty() }
+        val sourceKind = when {
+            safe.sourceText.isHttpUrl() -> CardSourceKind.LINK
+            safe.mediaAssets.isNotEmpty() -> CardSourceKind.IMPORT
+            else -> CardSourceKind.MANUAL
+        }
+        val sourceRef = when {
+            safe.sourceText.isHttpUrl() -> safe.sourceText
+            coverUrl != null -> coverUrl
+            else -> null
+        }
         return Card(
             id = "card_${now.toEpochMilliseconds()}_${safe.id}",
-            type = CardType.NOTE,       // fixme ? 为什么写死
+            type = CardType.NOTE,
             status = CardStatus.PUBLISHED,
             title = safe.title,
             summary = safe.summary,
@@ -75,15 +96,30 @@ class LocalCardEngine(
             updatedAt = now,
             locationRaw = null,
             tagsRaw = safe.tags.serialize().orEmpty(),
-            uiRaw = null,
+            uiRaw = coverUrl?.let { url ->
+                CardUi(
+                    cover = Cover(
+                        iconKey = "",
+                        bgColor = "#EFF6FF",
+                        tintColor = "",
+                        imageUrl = url,
+                    )
+                ).serialize().orEmpty()
+            },
             contentRaw = CardContent(
-                // fixme ? 为什么写死, 这里还有UI的元素的
-                type = CardContentType.TEXT, // fixme ? 为什么写死
-                value = safe.summary
+                type = contentType,
+                value = contentValue,
             ).serialize().orEmpty(),
             sourceRaw = CardSource(
-                kind = CardSourceKind.MANUAL, // fixme ? 为什么写死
+                kind = sourceKind,
+                ref = sourceRef,
             ).serialize().orEmpty(),
         )
     }
+}
+
+private fun String.isHttpUrl(): Boolean {
+    val value = trim()
+    return value.startsWith("http://", ignoreCase = true) ||
+        value.startsWith("https://", ignoreCase = true)
 }

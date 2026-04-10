@@ -18,6 +18,10 @@ configure<KotlinMultiplatformExtension> {
 
     sourceSets {
         fun KotlinSourceSet.injectPlatformVariant(platform: String) {
+            // 注入平台通用代码 (e.g., src/nonWebMain)
+            kotlin.srcDir("src/nonWebMain/kotlin")
+            resources.srcDir("src/nonWebMain/resources")
+
             val p = platform.lowercase()
             // 注入平台环境代码 (e.g., src/androidDevMain)
             kotlin.srcDir("src/${p}${envTitle}Main/kotlin")

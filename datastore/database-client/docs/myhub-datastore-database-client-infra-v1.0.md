@@ -196,7 +196,7 @@ expect class DatabaseDriverFactory {
 
 - **Android**：使用 `AndroidSqliteDriver`，需要 `Context` 参数
 - **iOS**：使用 `NativeSqliteDriver`，数据库存储在应用沙盒目录
-- **JVM**：使用 `JdbcSqliteDriver`，数据库存储在用户主目录
+- **JVM**：使用 `JdbcSqliteDriver`，数据库存储在 `FileKit.filesDir/app-data/myhub.db`
 - **JS/WASM**：使用 `WebWorkerDriver`，在 Web Worker 中运行
 
 #### 4.2.2 DatabaseModule（Koin 模块）
@@ -255,7 +255,7 @@ actual class DatabaseDriverFactory(private val context: Context) {
 **特点**：
 
 - 使用 `JdbcSqliteDriver`
-- 数据库存储在用户主目录（`~/.myhub/myhub.db`）
+- 数据库存储在 `FileKit.filesDir/app-data/myhub.db`
 - 自动创建数据库目录
 
 #### 4.3.4 JS/WASM 实现
@@ -292,11 +292,10 @@ actual class DatabaseDriverFactory(private val context: Context) {
 ```kotlin
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
-        val dbPath = File(System.getProperty("user.home"), ".myhub")
-        dbPath.mkdirs()
-        val dbFile = File(dbPath, "myhub.db")
-        return JdbcSqliteDriver("jdbc:sqlite:${dbFile.absolutePath}")
-            .also { MyHubDatabase.Schema.create(it) }
+        val appDataDir = FileKit.filesDir / "app-data"
+        appDataDir.createDirectories()
+        val databasePath = (appDataDir / "myhub.db").path
+        return JdbcSqliteDriver(url = "jdbc:sqlite:$databasePath")
     }
 }
 ```

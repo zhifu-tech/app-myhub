@@ -8,6 +8,7 @@ import kotlin.time.Clock
 
 class MediaPostProcessExecutor(
     private val captureLocalRepository: CaptureLocalRepository,
+    private val mediaFileStore: MediaFileStore,
 ) {
     suspend fun processQueuedJobs(
         limit: Int = 20
@@ -69,16 +70,20 @@ class MediaPostProcessExecutor(
         )
     }
 
-    private fun deriveThumbUri(
+    private suspend fun deriveThumbUri(
         localUri: String,
         mediaType: String
     ): String? = when {
-        mediaType.startsWith("image/") -> "$localUri.thumb.jpg"
-        mediaType.startsWith("video/") -> "$localUri.frame.jpg"
+        mediaType.startsWith("image/") -> runCatching {
+            mediaFileStore.createImageThumbnail(localUri = localUri)
+        }.getOrNull()
+
+        // 当前阶段未实现跨平台视频首帧抽取，保留为空。
+        mediaType.startsWith("video/") -> null
         else -> null
     }
 
     private fun deriveDurationMs(
         mediaType: String
-    ): Long? = if (mediaType.startsWith("video/")) 0L else null
+    ): Long? = if (mediaType.startsWith("video/")) null else null
 }

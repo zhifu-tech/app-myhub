@@ -25,6 +25,7 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqlite)
+            implementation(libs.filekit.core)
         }
 
         iosMain.dependencies {

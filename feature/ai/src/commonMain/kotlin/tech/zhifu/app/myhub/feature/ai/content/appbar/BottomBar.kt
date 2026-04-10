@@ -21,6 +21,7 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.ChatInputBar
+import tech.zhifu.app.myhub.feature.ai.content.preview.previewCoverUrl
 import tech.zhifu.app.myhub.feature.ai.content.preview.toPreviewCard
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
@@ -114,6 +115,7 @@ fun BottomBarContent(
                     PreviewFloatThumbnail(
                         previewKey = "content-preview-${safeDraft.id}",
                         coverKey = "content-image-${safeDraft.id}",
+                        coverUrl = safeDraft.previewCoverUrl(),
                         animatedVisibilityScope = this,
                         onClick = { onDraftPreviewClick(state.previewState, safeDraft) },
                     )
