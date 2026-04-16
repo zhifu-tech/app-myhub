@@ -17,7 +17,7 @@ fun CaptureDraft.toPreviewCard(
     id = id,
     title = title.ifBlank { untitledDraft },
     summary = summary.ifBlank { sourceText.ifBlank { continueHint } },
-    location = "",
+    location = location?.name.orEmpty(),
     updatedAt = Clock.System.now().toEpochMilliseconds(),
     status = CardStatus.DRAFT,
     tags = tags.toImmutableList(),

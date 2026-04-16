@@ -5,34 +5,55 @@
   <string name="feature_ai_loading_title">Loading…</string>
   <string name="feature_ai_loading_subtitle">Please wait</string>
   <string name="feature_ai_error_fallback_title">Load failed</string>
+  <string name="feature_ai_thinking_collapsed_hint">AI thinking completed (tap to expand)</string>
+  <string name="feature_ai_thinking_expand">Expand</string>
+  <string name="feature_ai_thinking_collapse">Collapse</string>
   <string name="feature_ai_thinking_title">AI is thinking…</string>
   <string name="feature_ai_action_title_media">Media</string>
   <string name="feature_ai_action_title_tags">Tags</string>
   <string name="feature_ai_action_title_next_step">Next step</string>
   <string name="feature_ai_action_title_recommended_tags">Recommended tags</string>
   <string name="feature_ai_action_title_draft_actions">Draft actions</string>
+  <string name="feature_ai_action_title_type">Capture type</string>
+  <string name="feature_ai_action_title_location">Location</string>
   <string name="feature_ai_action_input_hint">Type in the input box</string>
   <string name="feature_ai_input_placeholder_media">Upload an image first or tap Skip image</string>
   <string name="feature_ai_input_placeholder_tags">Type a tag and send, e.g. food</string>
+  <string name="feature_ai_input_placeholder_summary">Type summary and send</string>
+  <string name="feature_ai_input_placeholder_location">Type location and send</string>
   <string name="feature_ai_input_placeholder_title">Type a title and send</string>
   <string name="feature_ai_input_placeholder_review">Type a new title and send</string>
   <string name="feature_ai_input_placeholder_default">Type content to capture</string>
   <string name="feature_ai_send_desc">Send</string>
   <string name="feature_ai_action_upload_media">Upload image</string>
+  <string name="feature_ai_action_replace_media">Replace image</string>
+  <string name="feature_ai_action_remove_media">Remove image</string>
+  <string name="feature_ai_action_uploaded_media">Uploaded images</string>
   <string name="feature_ai_action_skip_media">Skip image</string>
   <string name="feature_ai_action_skip_tags">Skip tags</string>
   <string name="feature_ai_action_review">Review now</string>
+  <string name="feature_ai_action_edit_media">Edit cover</string>
+  <string name="feature_ai_action_edit_location">Edit location</string>
   <string name="feature_ai_action_edit_title">Edit title</string>
+  <string name="feature_ai_action_edit_tags">Edit tags</string>
+  <string name="feature_ai_action_edit_summary">Edit summary</string>
   <string name="feature_ai_action_publish">Publish card</string>
+  <string name="feature_ai_action_save_draft">Save draft</string>
+  <string name="feature_ai_action_delete_card">Delete card</string>
+  <string name="feature_ai_action_clear_location">Clear location</string>
   <string name="feature_ai_action_new_capture">New capture</string>
   <string name="feature_ai_action_input_title_hint">Type a new title and send</string>
-  <string name="feature_ai_msg_bootstrap">Enter content to capture (text/image clues supported). I will draft it and guide you to publish.</string>
+  <string name="feature_ai_msg_bootstrap">Enter content to capture (text/image clues supported). I will draft it and
+    guide you to publish.
+  </string>
   <string name="feature_ai_msg_reasoning">AI reasoning:\n%1$s</string>
   <string name="feature_ai_msg_intent">Intent detected: %1$s</string>
   <string name="feature_ai_msg_draft_complete">Draft is complete. Enter publish review?</string>
-  <string name="feature_ai_msg_draft_need_media">Draft is ready. Missing media. Upload one image or tap Skip image.</string>
+  <string name="feature_ai_msg_draft_need_media">Draft is ready. Missing media. Upload one image or tap Skip image.
+  </string>
   <string name="feature_ai_msg_draft_need_tags">Draft is ready. Missing tags. Pick one tag or tap Skip tags.</string>
-  <string name="feature_ai_msg_draft_need_title">Draft is ready. Missing title. Please enter a title to continue.</string>
+  <string name="feature_ai_msg_draft_need_title">Draft is ready. Missing title. Please enter a title to continue.
+  </string>
   <string name="feature_ai_msg_tag_added_complete">Tag added: %1$s. All info is ready. You can review now.</string>
   <string name="feature_ai_msg_tag_added_need_more">Tag added: %1$s. Continue the next step below.</string>
   <string name="feature_ai_msg_media_not_selected">No image selected. Continue the next step below.</string>
@@ -40,14 +61,27 @@
   <string name="feature_ai_msg_skip_media">Skipped image step. Continue the next step below.</string>
   <string name="feature_ai_msg_skip_tags">Skipped tag step. Continue the next step below.</string>
   <string name="feature_ai_msg_skip_field">Skipped field: %1$s. Continue the next step below.</string>
-  <string name="feature_ai_msg_move_review">Entered publish review. You can publish directly or edit title first.</string>
+  <string name="feature_ai_msg_move_review">Entered publish review. You can publish directly or edit title first.
+  </string>
   <string name="feature_ai_msg_manual_edit">Please enter the title you want.</string>
   <string name="feature_ai_msg_ai_unavailable">AI unavailable: %1$s</string>
   <string name="feature_ai_msg_switch_manual">Switched to manual edit. Enter title first, then publish.</string>
-  <string name="feature_ai_msg_title_updated">Title updated. Ready to publish.</string>
+  <string name="feature_ai_msg_title_updated">Title updated.</string>
+  <string name="feature_ai_msg_tags_editing">Tag editing enabled. Input a tag to add, or tap existing tag to remove.
+  </string>
+  <string name="feature_ai_msg_summary_editing">Summary editing enabled. Input summary and send to update.</string>
+  <string name="feature_ai_msg_location_editing">Location editing enabled. Input location and send to update.</string>
+  <string name="feature_ai_msg_summary_updated">Summary updated. You can continue editing or publish.</string>
+  <string name="feature_ai_msg_tag_removed">Tag removed: %1$s.</string>
+  <string name="feature_ai_msg_type_updated">Capture type updated: %1$s.</string>
+  <string name="feature_ai_msg_location_updated">Location updated: %1$s.</string>
+  <string name="feature_ai_msg_location_cleared">Location cleared.</string>
+  <string name="feature_ai_msg_draft_saved">Draft saved locally.</string>
   <string name="feature_ai_msg_published">Published (local commit): %1$s</string>
   <string name="feature_ai_msg_reset">New session started. Enter content to capture.</string>
-  <string name="feature_ai_msg_blocked_input">Current stage does not accept this input. Complete the current step or use actions below.</string>
+  <string name="feature_ai_msg_blocked_input">Current stage does not accept this input. Complete the current step or use
+    actions below.
+  </string>
   <string name="feature_ai_msg_blocked_action">Action unavailable: %1$s (current state: %2$s)</string>
   <string name="feature_ai_msg_restore_session">Last draft session restored.</string>
   <string name="feature_ai_preview_untitled_draft">Untitled draft</string>

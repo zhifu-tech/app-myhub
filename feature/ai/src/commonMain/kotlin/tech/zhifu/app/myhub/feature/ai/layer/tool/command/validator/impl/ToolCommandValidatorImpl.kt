@@ -36,6 +36,51 @@ class ToolCommandValidatorImpl : ToolCommandValidator {
                 }
             }
 
+            is ToolCommand.RemoveTag -> {
+                if (command.tag.trim().isBlank()) {
+                    ValidationResult(
+                        ok = false,
+                        message = "tag_blank"
+                    )
+                } else {
+                    ValidationResult(
+                        ok = true
+                    )
+                }
+            }
+
+            is ToolCommand.UpdateSummary -> {
+                if (command.summary.trim().isBlank()) {
+                    ValidationResult(
+                        ok = false,
+                        message = "summary_blank"
+                    )
+                } else {
+                    ValidationResult(
+                        ok = true
+                    )
+                }
+            }
+
+            is ToolCommand.UpdateType -> {
+                ValidationResult(ok = true)
+            }
+
+            is ToolCommand.UpdateLocation -> {
+                if (command.location.trim().isBlank()) {
+                    ValidationResult(
+                        ok = false,
+                        message = "location_blank"
+                    )
+                } else {
+                    ValidationResult(ok = true)
+                }
+            }
+
+            is ToolCommand.ClearLocation -> {
+                ValidationResult(ok = true)
+            }
+
             is ToolCommand.PublishCard -> {
                 ValidationResult(
                     ok = true

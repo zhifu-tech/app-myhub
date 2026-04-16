@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.layer.card
 
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 
 interface CardEngine {
     fun updateDraftTitle(
@@ -12,6 +13,30 @@ interface CardEngine {
     fun appendTag(
         draft: CaptureDraft,
         tag: String
+    ): CaptureDraft
+
+    fun removeTag(
+        draft: CaptureDraft,
+        tag: String
+    ): CaptureDraft
+
+    fun updateDraftSummary(
+        draft: CaptureDraft,
+        summary: String
+    ): CaptureDraft
+
+    fun updateDraftType(
+        draft: CaptureDraft,
+        type: CaptureType
+    ): CaptureDraft
+
+    fun updateDraftLocation(
+        draft: CaptureDraft,
+        location: String
+    ): CaptureDraft
+
+    fun clearDraftLocation(
+        draft: CaptureDraft
     ): CaptureDraft
 
     fun prePublishCheck(

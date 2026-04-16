@@ -4,26 +4,22 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Field {
+enum class Field(val value: String) {
+    @SerialName("unknown")
+    UNKNOWN(value = "unknown"),
+
     @SerialName("media")
-    MEDIA,
+    MEDIA(value = "media"),
 
     @SerialName("tags")
-    TAGS,
+    TAGS(value = "tags"),
+
+    @SerialName("summary")
+    SUMMARY(value = "summary"),
 
     @SerialName("title")
-    TITLE,
-}
+    TITLE(value = "title"),
 
-fun Field.asRawValue(): String = when (this) {
-    Field.MEDIA -> "media"
-    Field.TAGS -> "tags"
-    Field.TITLE -> "title"
-}
-
-fun String.toFieldOrNull(): Field? = when (lowercase()) {
-    "media" -> Field.MEDIA
-    "tags" -> Field.TAGS
-    "title" -> Field.TITLE
-    else -> null
+    @SerialName("location")
+    LOCATION(value = "location");
 }

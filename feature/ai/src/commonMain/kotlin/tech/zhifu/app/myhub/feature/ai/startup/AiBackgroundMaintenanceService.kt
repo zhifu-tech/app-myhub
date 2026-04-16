@@ -24,7 +24,7 @@ class AiBackgroundMaintenanceService(
     private var job: Job? = null
 
     fun start(
-        intervalMs: Long = 60_000L,
+        intervalMs: Long = 60_000 * 60 * 12L,
         mediaBatchSize: Int = 50,
         gcBatchSize: Int = 500,
     ) {

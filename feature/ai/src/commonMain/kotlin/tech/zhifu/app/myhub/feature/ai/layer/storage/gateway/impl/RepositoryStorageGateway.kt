@@ -23,7 +23,6 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessExecu
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessRequest
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Field
-import tech.zhifu.app.myhub.feature.ai.model.toFieldOrNull
 import kotlin.enums.enumEntries
 import kotlin.time.Clock
 
@@ -53,7 +52,7 @@ class RepositoryStorageGateway(
             ?.let { json ->
                 json.deserialize<List<Field>>().getOrNull()
                     ?: json.deserialize<List<String>>().getOrNull()
-                        ?.mapNotNull { value -> value.toFieldOrNull() }
+                        ?.map(Field::valueOf)
             }
             ?: emptyList()
         return StoredDraftSession(

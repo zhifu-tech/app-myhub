@@ -31,7 +31,6 @@ import tech.zhifu.app.myhub.feature.ai.content.Content
 import tech.zhifu.app.myhub.feature.ai.content.appbar.BottomBar
 import tech.zhifu.app.myhub.feature.ai.content.appbar.TopBar
 import tech.zhifu.app.myhub.feature.ai.content.preview.AIPreview
-import tech.zhifu.app.myhub.feature.ai.content.statics.Error
 import tech.zhifu.app.myhub.feature.ai.content.statics.Loading
 import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.design.util.LocalSharedTransitionScope
@@ -58,12 +57,6 @@ fun AIScreen(
                 },
                 loading = { contentPadding ->
                     Loading(contentPadding = contentPadding, viewModel = viewModel)
-                },
-                error = { contentPadding ->
-                    Error(
-                        contentPadding = contentPadding,
-                        viewModel = viewModel,
-                    )
                 },
                 content = { contentPadding ->
                     Content(
@@ -179,7 +172,6 @@ internal fun AIScreenContent(
     topBar: @Composable () -> Unit,
     bottomBar: @Composable () -> Unit,
     loading: @Composable (PaddingValues) -> Unit,
-    error: @Composable (PaddingValues) -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
@@ -189,10 +181,7 @@ internal fun AIScreenContent(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         content = { contentPadding ->
             when (state) {
-                AIUiState.State.IDLE,
                 AIUiState.State.LOADING -> loading(contentPadding)
-
-                AIUiState.State.ERROR -> error(contentPadding)
                 AIUiState.State.CONTENT -> content(contentPadding)
             }
         },

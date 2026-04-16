@@ -1,8 +1,11 @@
 package tech.zhifu.app.myhub.feature.ai.layer.card.impl
 
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.CardContent
 import tech.zhifu.app.myhub.datastore.model.domain.CardContentType
+import tech.zhifu.app.myhub.datastore.model.domain.CardLocation
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardSourceKind
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
@@ -10,12 +13,15 @@ import tech.zhifu.app.myhub.datastore.model.domain.CardType
 import tech.zhifu.app.myhub.datastore.model.domain.CardUi
 import tech.zhifu.app.myhub.datastore.model.domain.Cover
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
+import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.card.CardEngine
 import tech.zhifu.app.myhub.feature.ai.layer.card.PrePublishCheckResult
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardFieldFormatter
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardPrePublishChecker
 import tech.zhifu.app.myhub.feature.ai.layer.card.util.CardValidator
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureLocation
+import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 import kotlin.time.Clock
 
 class LocalCardEngine(
@@ -47,6 +53,59 @@ class LocalCardEngine(
             )
         )
     }
+
+    override fun removeTag(
+        draft: CaptureDraft,
+        tag: String
+    ): CaptureDraft {
+        val normalized = fieldFormatter.normalizeTag(tag = tag)
+        if (normalized.isBlank()) return draft
+        return validator.validateDraft(
+            draft = draft.copy(
+                tags = draft.tags.filterNot { it == normalized }
+            )
+        )
+    }
+
+    override fun updateDraftSummary(
+        draft: CaptureDraft,
+        summary: String
+    ): CaptureDraft {
+        return validator.validateDraft(
+            draft = draft.copy(
+                summary = fieldFormatter.normalizeSummary(
+                    summary = summary,
+                    sourceText = draft.sourceText,
+                )
+            )
+        )
+    }
+
+    override fun updateDraftType(
+        draft: CaptureDraft,
+        type: CaptureType
+    ): CaptureDraft = validator.validateDraft(
+        draft = draft.copy(captureType = type)
+    )
+
+    override fun updateDraftLocation(
+        draft: CaptureDraft,
+        location: String
+    ): CaptureDraft {
+        val normalized = location.trim()
+        if (normalized.isBlank()) return draft
+        return validator.validateDraft(
+            draft = draft.copy(
+                location = CaptureLocation(name = normalized)
+            )
+        )
+    }
+
+    override fun clearDraftLocation(
+        draft: CaptureDraft
+    ): CaptureDraft = validator.validateDraft(
+        draft = draft.copy(location = null)
+    )
 
     override fun prePublishCheck(
         draft: CaptureDraft
@@ -84,8 +143,28 @@ class LocalCardEngine(
             coverUrl != null -> coverUrl
             else -> null
         }
+        val locationRaw = safe.location?.let { location ->
+            if (location.latitude != null && location.longitude != null) {
+                CardLocation(
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                    name = location.name,
+                    address = location.name,
+                ).serialize().orEmpty()
+            } else {
+                null
+            }
+        }
+        val sourceMeta = buildJsonObject {
+            safe.captureType?.let { put("capture_type", it.value) }
+            safe.location?.let { location ->
+                put("location_name", location.name)
+                location.latitude?.let { put("location_latitude", it) }
+                location.longitude?.let { put("location_longitude", it) }
+            }
+        }.takeIf { it.isNotEmpty() }
         return Card(
-            id = "card_${now.toEpochMilliseconds()}_${safe.id}",
+            id = generateUUId(),
             type = CardType.NOTE,
             status = CardStatus.PUBLISHED,
             title = safe.title,
@@ -94,7 +173,7 @@ class LocalCardEngine(
             deletedAt = null,
             createdAt = now,
             updatedAt = now,
-            locationRaw = null,
+            locationRaw = locationRaw,
             tagsRaw = safe.tags.serialize().orEmpty(),
             uiRaw = coverUrl?.let { url ->
                 CardUi(
@@ -113,6 +192,7 @@ class LocalCardEngine(
             sourceRaw = CardSource(
                 kind = sourceKind,
                 ref = sourceRef,
+                meta = sourceMeta,
             ).serialize().orEmpty(),
         )
     }

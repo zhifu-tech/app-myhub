@@ -1,9 +1,9 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.impl
 
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.agent.AgentDraftSuggestion
 import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
-import kotlin.time.Clock
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 
 class DefaultCaptureAgent(
     private val promptAssembler: PromptAssembler,
@@ -22,7 +22,7 @@ class DefaultCaptureAgent(
         return AgentDraftSuggestion(
             intent = safe.intent,
             draft = CaptureDraft(
-                id = "draft_${Clock.System.now().toEpochMilliseconds()}",
+                id = "draft_${generateUUId()}",
                 title = safe.title,
                 summary = safe.summary,
                 tags = safe.tags,

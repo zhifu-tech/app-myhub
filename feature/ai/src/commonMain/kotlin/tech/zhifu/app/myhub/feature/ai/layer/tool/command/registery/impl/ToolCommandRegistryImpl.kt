@@ -4,7 +4,6 @@ import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.size
 import tech.zhifu.app.myhub.component.media.MediaPicker
-import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.layer.card.CardEngine
 import tech.zhifu.app.myhub.feature.ai.layer.common.util.inferMimeType
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
@@ -12,6 +11,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandRegistry
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandResult
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolErrorCode
+import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 
 class ToolCommandRegistryImpl(
     private val cardEngine: CardEngine,
@@ -36,6 +36,50 @@ class ToolCommandRegistryImpl(
                     draft = cardEngine.appendTag(
                         command.draft,
                         command.tag
+                    )
+                )
+            }
+
+            is ToolCommand.RemoveTag -> {
+                ToolCommandResult.DraftUpdated(
+                    draft = cardEngine.removeTag(
+                        draft = command.draft,
+                        tag = command.tag
+                    )
+                )
+            }
+
+            is ToolCommand.UpdateSummary -> {
+                ToolCommandResult.DraftUpdated(
+                    draft = cardEngine.updateDraftSummary(
+                        draft = command.draft,
+                        summary = command.summary
+                    )
+                )
+            }
+
+            is ToolCommand.UpdateType -> {
+                ToolCommandResult.DraftUpdated(
+                    draft = cardEngine.updateDraftType(
+                        draft = command.draft,
+                        type = command.type,
+                    )
+                )
+            }
+
+            is ToolCommand.UpdateLocation -> {
+                ToolCommandResult.DraftUpdated(
+                    draft = cardEngine.updateDraftLocation(
+                        draft = command.draft,
+                        location = command.location,
+                    )
+                )
+            }
+
+            is ToolCommand.ClearLocation -> {
+                ToolCommandResult.DraftUpdated(
+                    draft = cardEngine.clearDraftLocation(
+                        draft = command.draft,
                     )
                 )
             }

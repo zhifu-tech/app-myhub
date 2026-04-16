@@ -11,6 +11,9 @@ data class ConversationContext(
     val state: ConversationState = ConversationState.IDLE,
     val messages: List<Message> = emptyList(),
     val draft: CaptureDraft? = null,
+    val focusField: Field? = null,
     val missingFields: List<Field> = emptyList(),
     val actionComponents: List<ActionComponentSchema> = emptyList(),
+    val reasoningText: String = "",
+    val reasoningStatus: Boolean = false,
 )

@@ -12,6 +12,7 @@ data class Message(
     enum class Role {
         AI,
         USER,
-        SYSTEM
+        SYSTEM,
+        THINKING,
     }
 }

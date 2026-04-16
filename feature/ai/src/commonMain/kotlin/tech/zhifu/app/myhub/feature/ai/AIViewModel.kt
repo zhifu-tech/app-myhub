@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.ai.layer.CaptureOrchestrator
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
-import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
@@ -25,6 +25,7 @@ import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
 class AIViewModel(
     override val userRepository: UserRepository,
     private val orchestrator: CaptureOrchestrator,
+    private val contextManager: ContextManager,
 ) : ViewModel(),
     ContainerHost<AIUiState, AISideEffect>,
     ViewModelSideEffect<AISideEffect>,
@@ -32,8 +33,7 @@ class AIViewModel(
     UserPreferencesState,
     ProviderState {
 
-    private var context: ConversationContext? = null
-    private val previewState = PreviewState()
+    private var needInit = true
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val providerRoutingConfig = createAIProviderStateFlow()
@@ -48,15 +48,37 @@ class AIViewModel(
     private fun bootstrap() = intent {
         providerRoutingConfig
             .onEach { stateProvider ->
-                // 首先加载初始化配置
                 orchestrator.updateProviderConfig(stateProvider)
-                // fixme 当用户切换了AI提供商，需要重置上下文 ？？？
+                reduce {
+                    // 非内容态，等待初始化完成
+                    val state = state as? AIUiState.Content ?: return@reduce state
+                    state.copy(
+                        providerMode = stateProvider.mode,
+                    )
+                }
+                if (needInit) {
+                    needInit = false
+                    // 初始化时，注册回调
+                    contextManager.addContextChangeCallback { context, _ ->
+                        val state = state as? AIUiState.Content ?: AIUiState.Content(
+                            // 这里执行初始化，会初始化所有可能的状态，所以这里包含 PreviewMode
+                            providerMode = orchestrator.providerMode(),
+                        )
+                        reduce {
+                            state.copy(
+                                conversationState = context.state,
+                                messages = context.messages,
+                                draft = context.draft,
+                                missingFields = context.missingFields,
+                                actionComponents = context.actionComponents,
+                                // 更新推理状态
+                                reasoningStatus = context.reasoningStatus,
+                                reasoningText = context.reasoningText,
+                            )
+                        }
+                    }
 
-                // 然后加载上下文
-                if (context == null) {
-                    val initial = orchestrator.bootstrap()
-                    context = initial
-                    reduce { initial.toUiState(input = "") }
+                    orchestrator.bootstrap()
                 }
             }
             .launchIn(viewModelScope)
@@ -69,37 +91,26 @@ class AIViewModel(
 
     fun submitInput() = intent {
         val current = state as? AIUiState.Content ?: return@intent
-        val currentContext = context ?: return@intent
-        reduce {
-            current.copy(
-                isThinking = true,
-                thinkingText = ""
-            )
-        }
-        val updated = orchestrator.onInput(
-            context = currentContext,
-            input = current.input,
-            onReasoning = { thinking ->
-                val currentState = state as? AIUiState.Content
-                if (currentState != null) {
-                    reduce {
-                        currentState.copy(
-                            isThinking = true,
-                            thinkingText = thinking
-                        )
-                    }
-                }
-            },
+        val userInput = current.input
+        if (userInput.trim().isBlank()) return@intent
+        orchestrator.onInput(
+            input = userInput,
         )
-        context = updated
-        reduce { updated.toUiState(input = "") }
     }
 
     fun performQuickAction(action: String) = intent {
-        val currentContext = context ?: return@intent
-        val updated = orchestrator.onAction(currentContext, action)
-        context = updated
-        reduce { updated.toUiState(input = "") }
+        orchestrator.onAction(action)
+//        val currentContext = context ?: return@intent
+//        val updated = orchestrator.onAction(currentContext, action)
+//        context = updated
+//        reduce {
+//            updated.toUiState(
+//                input = prefilledInputForAction(
+//                    action = action,
+//                    context = updated,
+//                )
+//            )
+//        }
     }
 
     fun updateProviderMode(mode: ProviderMode) = intent {
@@ -108,20 +119,31 @@ class AIViewModel(
         reduce { current.copy(providerMode = mode) }
     }
 
-    private fun ConversationContext.toUiState(
-        input: String
-    ): AIUiState.Content = AIUiState.Content(
-        conversationState = state,
-        sessionId = sessionId,
-        messages = messages,
-        draft = draft,
-        missingFields = missingFields,
-        actionComponents = actionComponents,
-        providerMode = orchestrator.providerMode(),
-        input = input,
-        isPublishing = state == ConversationState.PUBLISH_CONFIRM,
-        thinkingText = "",
-        isThinking = false,
-        previewState = previewState,
-    )
+//    private fun ConversationContext.toUiState(
+//        input: String
+//    ): AIUiState.Content = AIUiState.Content(
+//        conversationState = state,
+//        sessionId = sessionId,
+//        messages = messages,
+//        draft = draft,
+//        inputField = inputField,
+//        missingFields = missingFields,
+//        actionComponents = actionComponents,
+//        providerMode = orchestrator.providerMode(),
+//        input = input,
+//        isPublishing = state == ConversationState.PUBLISH_CONFIRM,
+//        thinkingText = "",
+//        isThinking = false,
+//        previewState = previewState,
+//    )
+
+    private fun prefilledInputForAction(
+        action: String,
+        context: ConversationContext,
+    ): String = when (action) {
+        ActionOptionType.EDIT_TITLE.value -> context.draft?.title.orEmpty()
+        ActionOptionType.EDIT_SUMMARY.value -> context.draft?.summary.orEmpty()
+        ActionOptionType.EDIT_LOCATION.value -> context.draft?.location?.name.orEmpty()
+        else -> ""
+    }
 }

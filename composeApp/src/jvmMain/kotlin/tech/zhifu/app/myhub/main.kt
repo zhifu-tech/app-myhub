@@ -11,7 +11,8 @@ fun main() = application {
     AppBootstrap.start()
 
     val windowState = remember {
-        WindowState(size = DpSize(width = 390.dp, height = 844.dp))
+//        WindowState(size = DpSize(width = 390.dp, height = 844.dp))
+        WindowState(size = DpSize(width = 840.dp, height = 844.dp))
     }
 
     Window(

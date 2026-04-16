@@ -398,19 +398,21 @@ DB Update
 
 ---
 
-# 七、组件生命周期
+# 七、组件显示控制（以状态机为准）
 
 ---
 
-## 7.1 生命周期状态
+## 7.1 当前实现原则
 
 ```text
-active → completed → expired
+不维护独立组件生命周期状态机
+不依赖 active/completed/expired 驱动流程
+每次事件后，重新计算 missingFields + 会话状态，然后重建组件列表
 ```
 
 ---
 
-## 7.2 示例
+## 7.2 示例（跳过图片）
 
 ```text
 需要添加图片？
@@ -418,23 +420,27 @@ active → completed → expired
 [上传] [跳过]
 ```
 
-点击后：
+点击“跳过图片”后：
 
-```text
-✔ 已跳过图片
-```
+1. tool 更新 draft（media 仍为空）
+2. ConversationEngine 重算 missingFields
+3. StateMachine 通过 `NeedMoreInfo` 保持/切换到 `INFO_COLLECT`
+4. Planner 只渲染新的当前缺失字段组件（例如 tags）
 
 ---
 
-## 7.3 生命周期控制
+## 7.3 控制源
 
 由：
 
 ```text
-State Machine + Conversation Engine
+State Machine + Conversation Engine + SlotManager（missingFields）
 ```
 
-控制。
+说明：
+
+1. 组件 `status` 字段仅可作为 UI 表现层信息，不作为流程控制依据。
+2. 流程推进只看状态迁移信号（`DraftReady/NeedMoreInfo/MoveToReview/...`）。
 
 ---
 

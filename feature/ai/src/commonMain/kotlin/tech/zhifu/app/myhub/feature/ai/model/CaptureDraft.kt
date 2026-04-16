@@ -1,7 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.model
 
 import kotlinx.serialization.Serializable
-import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 
 @Serializable
 data class CaptureDraft(
@@ -11,4 +10,6 @@ data class CaptureDraft(
     val tags: List<String>,
     val sourceText: String,
     val mediaAssets: List<CaptureMediaAsset> = emptyList(),
+    val captureType: CaptureType? = null,
+    val location: CaptureLocation? = null,
 )

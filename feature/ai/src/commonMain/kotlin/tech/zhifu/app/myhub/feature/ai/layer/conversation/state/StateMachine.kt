@@ -1,53 +1,56 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.state
 
+import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.logger
+
 class StateMachine {
-    private val transitions: Map<Pair<ConversationState, Signal>, ConversationState> = mapOf(
-        ConversationState.IDLE to Signal.NeedMoreInfo
-            to ConversationState.INFO_COLLECT,
-        ConversationState.IDLE to Signal.DraftReady
-            to ConversationState.CARD_REVIEW,
+    private val transitionTable: Map<TransitionKey, ConversationState> = mapOf(
+        transition(ConversationState.IDLE, Signal.START_CAPTURE, ConversationState.INTENT_DETECT),
 
-        ConversationState.INTENT_DETECT to Signal.NeedMoreInfo
-            to ConversationState.INFO_COLLECT,
-        ConversationState.INTENT_DETECT to Signal.DraftReady
-            to ConversationState.CARD_REVIEW,
+        transition(ConversationState.INTENT_DETECT, Signal.DRAFT_INCOMPLETE, ConversationState.INFO_COLLECT),
+        transition(ConversationState.INTENT_DETECT, Signal.DRAFT_COMPLETE, ConversationState.CARD_REVIEW),
 
-        ConversationState.DRAFT_CREATE to Signal.NeedMoreInfo
-            to ConversationState.INFO_COLLECT,
-        ConversationState.DRAFT_CREATE to Signal.DraftReady
-            to ConversationState.CARD_REVIEW,
+        transition(ConversationState.INFO_COLLECT, Signal.DRAFT_INCOMPLETE, ConversationState.INFO_COLLECT),
+        transition(ConversationState.INFO_COLLECT, Signal.DRAFT_COMPLETE, ConversationState.CARD_REVIEW),
 
-        ConversationState.INFO_COLLECT to Signal.NeedMoreInfo
-            to ConversationState.INFO_COLLECT,
-        ConversationState.INFO_COLLECT to Signal.DraftReady
-            to ConversationState.CARD_REVIEW,
-        ConversationState.INFO_COLLECT to Signal.MoveToReview
-            to ConversationState.CARD_REVIEW,
+        transition(ConversationState.CARD_REVIEW, Signal.REQUEST_MANUAL_EDIT, ConversationState.MANUAL_EDIT),
+        transition(ConversationState.CARD_REVIEW, Signal.REQUEST_PUBLISH, ConversationState.PUBLISH),
+        transition(ConversationState.CARD_REVIEW, Signal.DRAFT_COMPLETE, ConversationState.CARD_REVIEW),
 
-        ConversationState.CARD_REVIEW to Signal.PublishRequested
-            to ConversationState.PUBLISH_CONFIRM,
+        transition(ConversationState.MANUAL_EDIT, Signal.REQUEST_REVIEW, ConversationState.CARD_REVIEW),
 
-        ConversationState.MANUAL_EDIT to Signal.PublishRequested
-            to ConversationState.PUBLISH_CONFIRM,
+        transition(ConversationState.PUBLISH, Signal.PUBLISH_SUCCEEDED, ConversationState.COMPLETE),
 
-        ConversationState.PUBLISH_CONFIRM to Signal.PublishSucceeded
-            to ConversationState.COMPLETE,
+        transition(ConversationState.COMPLETE, Signal.START_CAPTURE, ConversationState.INTENT_DETECT),
+    ).toMap()
 
-        ConversationState.COMPLETE to Signal.NeedMoreInfo
-            to ConversationState.INFO_COLLECT,
-        ConversationState.COMPLETE to Signal.DraftReady
-            to ConversationState.CARD_REVIEW,
+    fun transition(
+        current: ConversationState,
+        signal: Signal,
+    ): ConversationState {
+        val next = transitionTable[TransitionKey(current, signal)] ?: current
+        logger.debug { "state.transition: $current --$signal--> $next" }
+        return next
+    }
+
+    private data class TransitionKey(
+        val from: ConversationState,
+        val signal: Signal,
     )
 
-    fun transition(current: ConversationState, signal: Signal): ConversationState {
-        return transitions[current to signal] ?: current
-    }
+    private fun transition(
+        from: ConversationState,
+        signal: Signal,
+        to: ConversationState,
+    ): Pair<TransitionKey, ConversationState> = TransitionKey(from, signal) to to
 }
 
 enum class Signal {
-    DraftReady,
-    NeedMoreInfo,
-    MoveToReview,
-    PublishRequested,
-    PublishSucceeded,
+    START_CAPTURE,
+    DRAFT_COMPLETE,
+    DRAFT_INCOMPLETE,
+    REQUEST_REVIEW,
+    REQUEST_MANUAL_EDIT,
+    REQUEST_PUBLISH,
+    PUBLISH_SUCCEEDED,
 }

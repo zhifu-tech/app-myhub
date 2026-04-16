@@ -11,30 +11,24 @@ import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 sealed class AIUiState(
     val state: State,
 ) {
-    object Idle : AIUiState(state = State.IDLE)
-
     object Loading : AIUiState(state = State.LOADING)
 
     data class Content(
-        val conversationState: ConversationState = ConversationState.IDLE,
-        val sessionId: String? = null,
         val messages: List<Message> = emptyList(),
+        val conversationState: ConversationState = ConversationState.IDLE,
         val draft: CaptureDraft? = null,
+        val inputField: Field? = null,
         val missingFields: List<Field> = emptyList(),
         val actionComponents: List<ActionComponentSchema> = emptyList(),
         val providerMode: ProviderMode = ProviderMode.DISABLED,
         val input: String = "",
         val isPublishing: Boolean = false,
-        val thinkingText: String = "",
-        val isThinking: Boolean = false,
+        val reasoningText: String = "",
+        val reasoningStatus: Boolean = false,
         val previewState: PreviewState = PreviewState(),
     ) : AIUiState(state = State.CONTENT)
 
-    data class Error(
-        val message: String = "",
-    ) : AIUiState(state = State.ERROR)
-
     enum class State {
-        IDLE, LOADING, CONTENT, ERROR
+        LOADING, CONTENT
     }
 }

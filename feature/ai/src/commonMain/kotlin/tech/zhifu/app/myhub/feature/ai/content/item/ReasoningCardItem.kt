@@ -21,30 +21,36 @@ import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
-fun ThinkingCardItem(
+fun ReasoningCardItem(
     viewModel: AIViewModel,
 ) {
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.let { state ->
-            ThinkingCardItemState(
-                text = state.thinkingText,
-                isThinking = state.isThinking,
+            ReasoningCardItemState(
+                reasoningText = state.reasoningText,
+                reasoningStatus = state.reasoningStatus,
             )
         }
     }
-
-    ThinkingCardItemContent(
-        isThinking = state?.isThinking ?: false,
-        text = state?.text.orEmpty(),
+    val safeState = state ?: return
+    ReasoningCardItemContent(
+        reasoningStatus = safeState.reasoningStatus,
+        reasoningText = state?.reasoningText.orEmpty(),
     )
 }
 
+@Immutable
+private data class ReasoningCardItemState(
+    val reasoningText: String,
+    val reasoningStatus: Boolean,
+)
+
 @Composable
-fun ThinkingCardItemContent(
-    isThinking: Boolean,
-    text: String,
+fun ReasoningCardItemContent(
+    reasoningStatus: Boolean,
+    reasoningText: String,
 ) {
-    if (!isThinking || text.isBlank()) return
+    if (!reasoningStatus || reasoningText.isBlank()) return
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,16 +66,10 @@ fun ThinkingCardItemContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = text,
+                text = reasoningText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
 }
-
-@Immutable
-private data class ThinkingCardItemState(
-    val text: String,
-    val isThinking: Boolean,
-)
