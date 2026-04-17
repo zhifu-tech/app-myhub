@@ -43,8 +43,7 @@
   <string name="feature_ai_action_clear_location">清除位置</string>
   <string name="feature_ai_action_new_capture">新建捕获</string>
   <string name="feature_ai_action_input_title_hint">输入新标题后发送</string>
-  <string name="feature_ai_msg_bootstrap">请输入你要捕获的内容（支持文本/图片线索），我会先生成草稿，再引导你补齐并发布。
-  </string>
+  <string name="feature_ai_msg_bootstrap">您好！有什么我可以帮您捕获的吗？您可以直接告诉我，我会为您整理。</string>
   <string name="feature_ai_msg_reasoning">AI 思考过程：\n%1$s</string>
   <string name="feature_ai_msg_intent">意图识别：%1$s</string>
   <string name="feature_ai_msg_draft_complete">草稿已完成，是否进入发布确认？</string>
