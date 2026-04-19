@@ -13,21 +13,26 @@ data class ProviderAnalysisRequest(
 )
 
 sealed interface ProviderAnalysisResult {
+    @Serializable
     data class Success(
+        @SerialName("data")
         val data: ProviderAnalysisData,
     ) : ProviderAnalysisResult
 
+    @Serializable
     data class Failed(
         val reason: String,
         val category: ProviderAnalysisError,
     ) : ProviderAnalysisResult
 }
 
+@Serializable
 data class ProviderAnalysisData(
     val patches: List<ProviderJsonPatchOp>,
     val reasoning: String? = null,
 )
 
+@Serializable
 data class ProviderJsonPatchOp(
     val op: String,
     val path: String,
@@ -35,6 +40,7 @@ data class ProviderJsonPatchOp(
     val value: JsonElement? = null,
 )
 
+@Serializable
 enum class ProviderAnalysisError {
     CONFIG,
     AUTH,

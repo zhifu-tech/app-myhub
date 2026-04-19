@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.orchestrator
 
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
@@ -17,6 +18,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationStat
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateGuard
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
+import tech.zhifu.app.myhub.feature.ai.layer.storage.job.failed
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandDispatcher
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandResult
@@ -25,7 +27,6 @@ import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.orchestrator.patch.PatchApplier
 import tech.zhifu.app.myhub.feature.ai.orchestrator.storage.autoSaveDraftSession
 import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
@@ -395,16 +396,13 @@ class CaptureOrchestrator(
             language = "zh-CN",
             inputText = text,
         )
-
-        val jobId = "job_${generateUUId()}"
-        storageGateway.saveAiJob(
-            snapshot = StoredAiJob(
-                id = jobId,
-                provider = route.mode.name.lowercase(),
-                requestJson = """{"task":"capture_analysis","input":"${text.escapeJson()}"}""",
-                status = "running",
-            )
+        val aiJob = StoredAiJob(
+            id = "job_${generateUUId()}",
+            provider = route.mode.name.lowercase(),
+            requestJson = Json.encodeToString(request),
+            status = "running",
         )
+        storageGateway.saveAiJob(snapshot = aiJob)
 
         if (!route.available) {
             providerTelemetry.recordFailure(
@@ -413,12 +411,8 @@ class CaptureOrchestrator(
                 category = ProviderAnalysisError.UNAVAILABLE,
             )
             storageGateway.saveAiJob(
-                snapshot = StoredAiJob(
-                    id = jobId,
-                    provider = route.mode.name.lowercase(),
-                    requestJson = """{"task":"capture_analysis","input":"${text.escapeJson()}"}""",
-                    responseJson = """{"error":"${(route.reason ?: "AI_UNAVAILABLE").escapeJson()}"}""",
-                    status = "failed",
+                snapshot = aiJob.failed(
+                    reason = route.reason ?: "AI_UNAVAILABLE"
                 )
             )
             conversationEngine.emitAiUnavailable(
@@ -433,7 +427,7 @@ class CaptureOrchestrator(
         }
 
         val startedAt = Clock.System.now().toEpochMilliseconds()
-        when (val analysisResult = providerAnalysisExecutor.analyze(
+        when (val result = providerAnalysisExecutor.analyze(
             route = route,
             request = request,
             onReasoning = { reasoning ->
@@ -441,12 +435,8 @@ class CaptureOrchestrator(
             },
         )) {
             is ProviderAnalysisResult.Success -> {
-                val finalOutput = analysisResult.data
                 storageGateway.saveAiJob(
-                    snapshot = StoredAiJob(
-                        id = jobId,
-                        provider = route.mode.name.lowercase(),
-                        requestJson = """{"task":"capture_analysis","input":"${text.escapeJson()}"}""",
+                    snapshot = aiJob.copy(
                         responseJson = "",
                         status = "succeeded",
                     )
@@ -454,30 +444,26 @@ class CaptureOrchestrator(
 
                 val applied = patchApplier.apply(
                     draft = conversationEngine.currentDraft(),
-                    ops = finalOutput.patches,
+                    ops = result.data.patches,
                 )
                 conversationEngine.applyCaptureAnalysisResult(
                     draft = applied.draft,
+                    reasoning = result.data.reasoning,
                 )
             }
 
             is ProviderAnalysisResult.Failed -> {
-                logger.error { "CaptureAnalysis failed: ${analysisResult.reason}" }
                 providerTelemetry.recordFailure(
                     mode = route.mode,
                     latencyMs = Clock.System.now().toEpochMilliseconds() - startedAt,
-                    category = analysisResult.category,
+                    category = result.category,
                 )
                 storageGateway.saveAiJob(
-                    snapshot = StoredAiJob(
-                        id = jobId,
-                        provider = route.mode.name.lowercase(),
-                        requestJson = """{"task":"capture_analysis","input":"${text.escapeJson()}"}""",
-                        responseJson = """{"error":"${analysisResult.reason.escapeJson()}","category":"${analysisResult.category.name.lowercase()}"}""",
-                        status = "failed",
+                    snapshot = aiJob.failed(
+                        reason = result.reason,
+                        category = result.category.name.lowercase()
                     )
                 )
-
                 conversationEngine.emitAiUnavailable(reason = "AI不可用")
                 delay(100.milliseconds)
                 conversationEngine.applyCaptureAnalysisResult(
@@ -487,8 +473,3 @@ class CaptureOrchestrator(
         }
     }
 }
-
-private fun String.escapeJson(): String = this
-    .replace("\\", "\\\\")
-    .replace("\"", "\\\"")
-    .replace("\n", "\\n")

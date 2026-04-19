@@ -72,7 +72,7 @@ class DirectApiProviderClient(
                 category = ProviderAnalysisError.TIMEOUT,
             )
 
-        logger.debug { "DirectApiProviderClient responseText: ${payload.responseText}" }
+        logger.debug { "DirectApiProviderClient payload: $payload" }
         if (payload.responseText.startsWith("__HTTP_ERROR__")) {
             return ProviderAnalysisResult.Failed(
                 reason = "direct_api_http_error:${payload.httpStatus ?: "unknown"}",
@@ -254,6 +254,7 @@ private fun parseStreamChunk(
 private data class StreamResponsePayload(
     val responseText: String,
     val reasoning: String?,
+    // 用于调试
     val rawResponseText: String? = null,
     val chunkCount: Int = 0,
     val reasoningChunkCount: Int = 0,
