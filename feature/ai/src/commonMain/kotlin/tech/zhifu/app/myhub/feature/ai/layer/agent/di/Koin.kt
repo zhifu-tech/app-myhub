@@ -2,12 +2,6 @@ package tech.zhifu.app.myhub.feature.ai.layer.agent.di
 
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
-import tech.zhifu.app.myhub.feature.ai.layer.agent.impl.DefaultCaptureAgent
-import tech.zhifu.app.myhub.feature.ai.layer.agent.impl.OutputGuard
-import tech.zhifu.app.myhub.feature.ai.layer.agent.impl.PromptAssembler
-import tech.zhifu.app.myhub.feature.ai.layer.agent.impl.ResponseParser
-import tech.zhifu.app.myhub.feature.ai.layer.agent.impl.ToolPlanner
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.impl.DirectApiProviderClient
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.impl.RoutedProviderAnalysisExecutor
@@ -23,19 +17,6 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTe
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.impl.InMemoryProviderTelemetry
 
 fun agentModule() = module {
-    singleOf(::PromptAssembler)
-    singleOf(::ToolPlanner)
-    singleOf(::ResponseParser)
-    singleOf(::OutputGuard)
-    single<CaptureAgent> {
-        DefaultCaptureAgent(
-            promptAssembler = get(),
-            toolPlanner = get(),
-            responseParser = get(),
-            outputGuard = get(),
-        )
-    }
-
     single<MutableProviderConfigSource> {
         InMemoryProviderConfigSource()
     }
