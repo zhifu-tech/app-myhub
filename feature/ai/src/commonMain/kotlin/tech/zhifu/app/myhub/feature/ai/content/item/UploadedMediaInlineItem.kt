@@ -46,11 +46,11 @@ fun UploadedMediaInlineItem(
 ) {
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.let { state ->
-            when (state.conversationState) {
+            when (state.context.state) {
                 ConversationState.INFO_COLLECT,
                 ConversationState.CARD_REVIEW,
                 ConversationState.MANUAL_EDIT -> {
-                    state.draft?.mediaAssets
+                    state.context.draft.mediaAssets
                 }
 
                 else -> null

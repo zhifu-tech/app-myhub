@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry
 
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 
 interface ProviderTelemetry {
@@ -12,7 +12,7 @@ interface ProviderTelemetry {
     fun recordFailure(
         mode: ProviderMode,
         latencyMs: Long,
-        category: ProviderErrorCategory
+        category: ProviderAnalysisError
     )
 
     fun snapshot(): ProviderTelemetrySnapshot

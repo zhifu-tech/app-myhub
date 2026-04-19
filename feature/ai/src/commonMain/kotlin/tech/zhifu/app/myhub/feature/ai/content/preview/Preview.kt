@@ -27,9 +27,9 @@ fun AIPreview(
     if (pinned) {
         // 需要实时预览
         val draft by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-            (it as? AIUiState.Content)?.draft
+            (it as? AIUiState.Content)?.context?.draft
         }
-        safePreviewState.pined = pinned
+        safePreviewState.pined = true
         safePreviewState.card.value = draft?.toPreviewCard(
             untitledDraft = stringResource(Res.string.feature_ai_preview_untitled_draft),
             continueHint = stringResource(Res.string.feature_ai_preview_continue_hint),

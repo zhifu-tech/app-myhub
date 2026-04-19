@@ -6,7 +6,7 @@ interface ProviderAnalysisExecutor {
     suspend fun analyze(
         route: ProviderRouteDecision,
         request: ProviderAnalysisRequest,
-        onReasoning: (suspend (String) -> Unit)? = null,
+        onReasoning: suspend (String) -> Unit,
     ): ProviderAnalysisResult
 
 }

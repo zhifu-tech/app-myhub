@@ -66,8 +66,8 @@ fun ActionSectionItem(
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.let { content ->
             ActionSectionState(
-                components = content.actionComponents,
-                selectedTags = content.draft?.tags.orEmpty(),
+                components = content.context.actionComponents,
+                selectedTags = content.context.draft.tags,
             )
         }
     }

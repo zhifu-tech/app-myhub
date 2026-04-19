@@ -41,10 +41,9 @@ fun ChatInputBar(
         (it as? AIUiState.Content)?.let { uiState ->
             ChatInputBarState(
                 input = uiState.input,
-                isPublishing = uiState.isPublishing,
-                conversationState = uiState.conversationState,
-                inputField = uiState.inputField,
-                missingFields = uiState.missingFields,
+                conversationState = uiState.context.state,
+                inputField = uiState.context.focusField,
+                missingFields = uiState.context.missingFields,
             )
         }
     }
@@ -95,7 +94,6 @@ fun ChatInputBar(
 @Immutable
 data class ChatInputBarState(
     val input: String,
-    val isPublishing: Boolean,
     val conversationState: ConversationState,
     val inputField: Field?,
     val missingFields: List<Field>,

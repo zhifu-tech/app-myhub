@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.impl
 
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetrySnapshot
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
@@ -10,7 +10,7 @@ class InMemoryProviderTelemetry : ProviderTelemetry {
     private var successCount: Long = 0
     private var failureCount: Long = 0
     private var totalLatencyMs: Long = 0
-    private val errors: MutableMap<ProviderErrorCategory, Long> = mutableMapOf()
+    private val errors: MutableMap<ProviderAnalysisError, Long> = mutableMapOf()
     private var updatedAtMs: Long = 0
 
     override fun recordSuccess(
@@ -25,7 +25,7 @@ class InMemoryProviderTelemetry : ProviderTelemetry {
     override fun recordFailure(
         mode: ProviderMode,
         latencyMs: Long,
-        category: ProviderErrorCategory
+        category: ProviderAnalysisError
     ) {
         failureCount += 1
         totalLatencyMs += latencyMs.coerceAtLeast(0)

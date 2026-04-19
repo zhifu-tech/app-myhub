@@ -12,6 +12,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.di.conversationModule
 import tech.zhifu.app.myhub.feature.ai.layer.storage.di.storageModule
 import tech.zhifu.app.myhub.feature.ai.layer.tool.di.toolModule
 import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
+import tech.zhifu.app.myhub.feature.ai.orchestrator.patch.PatchApplier
 import tech.zhifu.app.myhub.feature.ai.startup.AiBackgroundMaintenanceService
 import tech.zhifu.app.myhub.feature.ai.startup.AiBackgroundStartupTask
 import tech.zhifu.app.myhub.startup.StartupTask
@@ -24,6 +25,7 @@ fun aiModule() = module {
     includes(storageModule())
     includes(toolModule())
 
+    singleOf(::PatchApplier)
     singleOf(::CaptureOrchestrator)
     singleOf(::AiBackgroundMaintenanceService)
     factoryOf(::AiBackgroundStartupTask) bind StartupTask::class

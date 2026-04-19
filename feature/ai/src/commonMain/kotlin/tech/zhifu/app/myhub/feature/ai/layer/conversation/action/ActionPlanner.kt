@@ -8,7 +8,7 @@ import tech.zhifu.app.myhub.feature.ai.model.Field
 class ActionPlanner {
     fun actionsFor(
         state: ConversationState,
-        draft: CaptureDraft? = null,
+        draft: CaptureDraft,
         missingFields: List<Field> = emptyList(),
         focusField: Field? = null,
     ): List<ActionComponentSchema> = when (state) {
@@ -39,9 +39,8 @@ class ActionPlanner {
 
 }
 
-
 private fun infoCollectActions(
-    draft: CaptureDraft?,
+    draft: CaptureDraft,
     missingFields: List<Field>,
     focusField: Field?,
 ): List<ActionComponentSchema> {
@@ -134,7 +133,7 @@ private fun reviewActions(
 
 
 private fun manualEditActions(
-    draft: CaptureDraft?,
+    draft: CaptureDraft,
     focusField: Field?,
 ): List<ActionComponentSchema> {
     val field = focusField ?: Field.TITLE
@@ -225,9 +224,9 @@ private fun orderedDraftActions(
 
 
 private fun buildOptionGrid(
-    draft: CaptureDraft?,
+    draft: CaptureDraft,
 ): List<ActionOptionSchema> {
-    val selected = draft?.captureType
+    val selected = draft.captureType
     return CaptureType.entries.map { type ->
         ActionOptionSchema(
             type = ActionOptionType.SET_CAPTURE_TYPE,
@@ -239,9 +238,9 @@ private fun buildOptionGrid(
 }
 
 private fun buildLocationOptions(
-    draft: CaptureDraft?,
+    draft: CaptureDraft,
 ): List<ActionOptionSchema> {
-    val selected = draft?.location?.name.orEmpty()
+    val selected = draft.location?.name.orEmpty()
     val presets = listOf("Home", "Office", "Shanghai", "Hangzhou")
     val presetOptions = presets.map { name ->
         ActionOptionSchema(
@@ -270,12 +269,12 @@ private fun buildLocationOptions(
 }
 
 private fun buildTagOptions(
-    draft: CaptureDraft?
+    draft: CaptureDraft
 ): List<ActionOptionSchema> {
-    val selected = draft?.tags.orEmpty().toSet()
+    val selected = draft.tags.toSet()
     val seeds = buildList {
         addAll(listOf("food", "idea", "todo", "work", "life"))
-        addAll(draft?.tags.orEmpty())
+        addAll(draft.tags)
     }
     return seeds
         .map { it.trim() }

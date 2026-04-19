@@ -33,7 +33,7 @@ fun BoxScope.PreviewThumbnail(
             }
             PreviewThumbnailState(
                 previewState = uiState.previewState,
-                draft = uiState.draft,
+                draft = uiState.context.draft,
             )
         }
     }

@@ -26,7 +26,6 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_draft_need_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_draft_need_tags
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_draft_need_title
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_draft_saved
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_intent
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_cleared
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_updated
@@ -79,7 +78,7 @@ class ConversationEngine(
         contextManager.removeContextChangeCallback(callback)
     }
 
-    fun currentDraft(): CaptureDraft? = contextManager.context.draft
+    fun currentDraft(): CaptureDraft = contextManager.context.draft
 
     fun currentMissingFields(): List<Field> = contextManager.context.missingFields
 
@@ -91,7 +90,6 @@ class ConversationEngine(
 
     suspend fun applyCaptureAnalysisResult(
         draft: CaptureDraft,
-        intent: String? = null,
         reasoning: String? = null,
     ) = serialize {
         with(contextManager) {
@@ -102,15 +100,6 @@ class ConversationEngine(
                         ofMessage(
                             role = Message.Role.THINKING,
                             text = reasoning.trim(),
-                        )
-                    )
-                }
-                if (intent.isNullOrBlank().not()) {
-                    add(
-                        ofMessage(
-                            role = Message.Role.AI,
-                            textRes = Res.string.feature_ai_msg_intent,
-                            textArgs = listOf(intent),
                         )
                     )
                 }
@@ -659,9 +648,7 @@ class ConversationEngine(
         // 在进入某个状态/或者某个状态发生变化时，需要追加信息
         when (cur.state) {
             ConversationState.INFO_COLLECT -> {
-                logger.debug { "onPostContextChanged: ${cur.focusField} , ${pre?.focusField}" }
                 if (pre?.focusField != cur.focusField) {
-                    logger.debug { "onPostContextChanged: context = ${cur.focusField}, ${cur.focusField}" }
                     emitMessage(
                         contextManager.ofMessage(
                             role = Message.Role.AI,

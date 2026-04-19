@@ -1,9 +1,9 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.impl
 
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.ProviderConfigSource
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouteDecision
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
@@ -17,12 +17,12 @@ class RoutedProviderAnalysisExecutor(
     override suspend fun analyze(
         route: ProviderRouteDecision,
         request: ProviderAnalysisRequest,
-        onReasoning: (suspend (String) -> Unit)?,
+        onReasoning: suspend (String) -> Unit
     ): ProviderAnalysisResult {
         if (!route.available) {
             return ProviderAnalysisResult.Failed(
                 reason = route.reason ?: "AI_UNAVAILABLE",
-                category = ProviderErrorCategory.UNAVAILABLE,
+                category = ProviderAnalysisError.UNAVAILABLE,
             )
         }
         val config = configSource.current()
@@ -46,7 +46,7 @@ class RoutedProviderAnalysisExecutor(
             ProviderMode.DISABLED -> {
                 ProviderAnalysisResult.Failed(
                     reason = "AI_UNAVAILABLE:disabled",
-                    category = ProviderErrorCategory.UNAVAILABLE,
+                    category = ProviderAnalysisError.UNAVAILABLE,
                 )
             }
         }

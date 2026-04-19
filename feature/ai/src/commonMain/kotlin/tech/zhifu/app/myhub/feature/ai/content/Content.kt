@@ -38,7 +38,7 @@ fun Content(
     contentPadding: PaddingValues,
 ) {
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? AIUiState.Content)?.messages
+        (it as? AIUiState.Content)?.context?.messages
     }
     val safeState = state ?: return
     logger.debug { "Content: message.size = ${safeState.size}" }

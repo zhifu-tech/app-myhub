@@ -27,8 +27,8 @@ fun ReasoningCardItem(
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
         (it as? AIUiState.Content)?.let { state ->
             ReasoningCardItemState(
-                reasoningText = state.reasoningText,
-                reasoningStatus = state.reasoningStatus,
+                reasoningText = state.context.reasoningText,
+                reasoningStatus = state.context.reasoningStatus,
             )
         }
     }

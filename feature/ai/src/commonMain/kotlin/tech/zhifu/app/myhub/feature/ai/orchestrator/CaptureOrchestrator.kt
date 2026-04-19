@@ -2,13 +2,10 @@ package tech.zhifu.app.myhub.feature.ai.orchestrator
 
 import kotlinx.coroutines.delay
 import tech.zhifu.app.myhub.datastore.model.util.generateUUId
-import tech.zhifu.app.myhub.feature.ai.layer.agent.CaptureAgent
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisContext
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisInput
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderErrorCategory
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.MutableProviderConfigSource
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
@@ -23,11 +20,12 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandDispatcher
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandResult
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 import tech.zhifu.app.myhub.feature.ai.model.Field
+import tech.zhifu.app.myhub.feature.ai.orchestrator.patch.PatchApplier
 import tech.zhifu.app.myhub.feature.ai.orchestrator.storage.autoSaveDraftSession
 import tech.zhifu.app.myhub.logger.debug
+import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
@@ -49,11 +47,11 @@ class CaptureOrchestrator(
     private val providerRouter: ProviderRouter,
     val conversationEngine: ConversationEngine,
     private val stateGuard: StateGuard,
-    private val captureAgent: CaptureAgent,
     private val providerAnalysisExecutor: ProviderAnalysisExecutor,
     private val providerConfigSource: MutableProviderConfigSource,
     private val providerTelemetry: ProviderTelemetry,
     private val toolCommandDispatcher: ToolCommandDispatcher,
+    private val patchApplier: PatchApplier,
     val storageGateway: StorageGateway,
 ) {
     init {
@@ -68,7 +66,7 @@ class CaptureOrchestrator(
 
     suspend fun bootstrap() {
         val restored = storageGateway.loadLatestDraftSession()
-        if (conversationEngine.applyRestoredSession(restored = restored)) {
+        if (false && conversationEngine.applyRestoredSession(restored = restored)) {
             logger.debug { "bootstrap: restored session ${restored?.sessionId}" }
         } else {
             conversationEngine.emitBootstrap()
@@ -114,7 +112,10 @@ class CaptureOrchestrator(
                 ActionOptionType.EDIT_SUMMARY -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
                 ActionOptionType.EDIT_TAGS -> conversationEngine.commandEnterManualEdit(Field.TAGS)
                 ActionOptionType.EDIT_TITLE -> conversationEngine.commandEnterManualEdit(Field.TITLE)
-                ActionOptionType.NEW_CAPTURE -> conversationEngine.commandResetSession()
+                ActionOptionType.NEW_CAPTURE -> {
+                    conversationEngine.commandResetSession()
+                }
+
                 ActionOptionType.PUBLISH -> handlePublish()
                 ActionOptionType.REMOVE_MEDIA -> handleRemoveAllMedia()
                 ActionOptionType.REPLACE_MEDIA -> handleAttachMedia(replaceExisting = true)
@@ -136,7 +137,7 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleDraftFieldInput(text: String) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         conversationEngine.appendUserInputMessage(text = text)
         when (conversationEngine.currentFocusField()) {
             Field.TITLE -> {
@@ -181,9 +182,11 @@ class CaptureOrchestrator(
                 when (val result = toolCommandDispatcher.execute(
                     command = ToolCommand.UpdateSummary(draft = draft, summary = text)
                 )) {
-                    is ToolCommandResult.DraftUpdated -> conversationEngine.applySummaryUpdated(
-                        draft = result.draft,
-                    )
+                    is ToolCommandResult.DraftUpdated -> {
+                        conversationEngine.applySummaryUpdated(
+                            draft = result.draft,
+                        )
+                    }
 
                     is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                         action = "update_summary:${result.code}:${result.message}"
@@ -197,9 +200,11 @@ class CaptureOrchestrator(
                 when (val result = toolCommandDispatcher.execute(
                     command = ToolCommand.UpdateLocation(draft = draft, location = text)
                 )) {
-                    is ToolCommandResult.DraftUpdated -> conversationEngine.applyLocationUpdated(
-                        draft = result.draft
-                    )
+                    is ToolCommandResult.DraftUpdated -> {
+                        conversationEngine.applyLocationUpdated(
+                            draft = result.draft
+                        )
+                    }
 
                     is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                         action = "update_location:${result.code}:${result.message}"
@@ -215,7 +220,7 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handlePublish() {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         conversationEngine.commandPublishRequested()
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.PublishCard(draft = draft)
@@ -243,11 +248,14 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleClearLocation() {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.ClearLocation(draft = draft)
         )) {
-            is ToolCommandResult.DraftUpdated -> conversationEngine.applyLocationCleared(result.draft)
+            is ToolCommandResult.DraftUpdated -> {
+                conversationEngine.applyLocationCleared(result.draft)
+            }
+
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "clear_location:${result.code}:${result.message}"
             )
@@ -257,12 +265,15 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleAttachMedia(replaceExisting: Boolean) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         val sourceDraft = if (replaceExisting) draft.copy(mediaAssets = emptyList()) else draft
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.AttachPickedMedia(draft = sourceDraft)
         )) {
-            is ToolCommandResult.MediaAttached -> conversationEngine.applyMediaUpdated(result.draft)
+            is ToolCommandResult.MediaAttached -> {
+                conversationEngine.applyMediaUpdated(result.draft)
+            }
+
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "attach_media:${result.code}:${result.message}"
             )
@@ -272,14 +283,14 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleRemoveAllMedia() {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         conversationEngine.applyMediaUpdated(
             draft = draft.copy(mediaAssets = emptyList())
         )
     }
 
     private suspend fun handleMediaRemovedAt(index: Int) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         if (index !in draft.mediaAssets.indices) {
             conversationEngine.emitBlockedAction(action = ActionOptionType.encodeRemoveMediaAt(index))
             return
@@ -292,14 +303,16 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleTagSelected(tag: String) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.AddTag(draft = draft, tag = tag)
         )) {
-            is ToolCommandResult.DraftUpdated -> conversationEngine.applyTagUpdated(
-                tag = tag,
-                draft = result.draft,
-            )
+            is ToolCommandResult.DraftUpdated -> {
+                conversationEngine.applyTagUpdated(
+                    tag = tag,
+                    draft = result.draft,
+                )
+            }
 
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "add_tag:${result.code}:${result.message}"
@@ -310,14 +323,16 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleTagRemoved(tag: String) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.RemoveTag(draft = draft, tag = tag)
         )) {
-            is ToolCommandResult.DraftUpdated -> conversationEngine.applyTagRemoved(
-                tag = tag,
-                draft = result.draft,
-            )
+            is ToolCommandResult.DraftUpdated -> {
+                conversationEngine.applyTagRemoved(
+                    tag = tag,
+                    draft = result.draft,
+                )
+            }
 
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "remove_tag:${result.code}:${result.message}"
@@ -328,7 +343,7 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleCaptureTypeSelected(type: String, rawAction: String) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         val parsedType = CaptureType.fromValue(type) ?: run {
             conversationEngine.emitBlockedAction(rawAction)
             return
@@ -353,13 +368,15 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleLocationSelected(location: String) {
-        val draft = conversationEngine.currentDraft() ?: return
+        val draft = conversationEngine.currentDraft()
         when (val result = toolCommandDispatcher.execute(
             command = ToolCommand.UpdateLocation(draft = draft, location = location)
         )) {
-            is ToolCommandResult.DraftUpdated -> conversationEngine.applyLocationUpdated(
-                draft = result.draft,
-            )
+            is ToolCommandResult.DraftUpdated -> {
+                conversationEngine.applyLocationUpdated(
+                    draft = result.draft,
+                )
+            }
 
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "set_location:${result.code}:${result.message}"
@@ -374,6 +391,11 @@ class CaptureOrchestrator(
         conversationEngine.commandCaptureAnalysisStarted()
 
         val route = providerRouter.resolveRoute()
+        val request = ProviderAnalysisRequest(
+            language = "zh-CN",
+            inputText = text,
+        )
+
         val jobId = "job_${generateUUId()}"
         storageGateway.saveAiJob(
             snapshot = StoredAiJob(
@@ -388,7 +410,7 @@ class CaptureOrchestrator(
             providerTelemetry.recordFailure(
                 mode = route.mode,
                 latencyMs = 0,
-                category = ProviderErrorCategory.UNAVAILABLE,
+                category = ProviderAnalysisError.UNAVAILABLE,
             )
             storageGateway.saveAiJob(
                 snapshot = StoredAiJob(
@@ -404,7 +426,8 @@ class CaptureOrchestrator(
             )
             delay(300.milliseconds)
             conversationEngine.applyCaptureAnalysisResult(
-                draft = fallbackDraftFromInput(text)
+                draft = conversationEngine.currentDraft(),
+                reasoning = "",
             )
             return
         }
@@ -412,49 +435,34 @@ class CaptureOrchestrator(
         val startedAt = Clock.System.now().toEpochMilliseconds()
         when (val analysisResult = providerAnalysisExecutor.analyze(
             route = route,
-            request = ProviderAnalysisRequest(
-                input = ProviderAnalysisInput(text = text),
-                context = ProviderAnalysisContext(
-                    state = conversationEngine.currentState().name,
-                    missing_fields = conversationEngine.currentMissingFields().map { it.value },
-                ),
-            ),
+            request = request,
             onReasoning = { reasoning ->
                 conversationEngine.applyReasoningProgress(reasoning = reasoning)
             },
         )) {
             is ProviderAnalysisResult.Success -> {
-                providerTelemetry.recordSuccess(
-                    mode = route.mode,
-                    latencyMs = Clock.System.now().toEpochMilliseconds() - startedAt,
-                )
+                val finalOutput = analysisResult.data
                 storageGateway.saveAiJob(
                     snapshot = StoredAiJob(
                         id = jobId,
                         provider = route.mode.name.lowercase(),
                         requestJson = """{"task":"capture_analysis","input":"${text.escapeJson()}"}""",
-                        responseJson = analysisResult.rawResponseJson,
+                        responseJson = "",
                         status = "succeeded",
                     )
                 )
 
-                val draftSuggestion = captureAgent.analyzeToDraft(input = text)
-                val suggestion = draftSuggestion.copy(
-                    intent = analysisResult.output.intent,
-                    draft = draftSuggestion.draft.copy(
-                        title = analysisResult.output.title.ifBlank { draftSuggestion.draft.title },
-                        summary = analysisResult.output.summary.ifBlank { draftSuggestion.draft.summary },
-                        tags = analysisResult.output.tags.ifEmpty { draftSuggestion.draft.tags },
-                    ),
+                val applied = patchApplier.apply(
+                    draft = conversationEngine.currentDraft(),
+                    ops = finalOutput.patches,
                 )
                 conversationEngine.applyCaptureAnalysisResult(
-                    intent = suggestion.intent,
-                    draft = suggestion.draft,
-                    reasoning = analysisResult.reasoning,
+                    draft = applied.draft,
                 )
             }
 
             is ProviderAnalysisResult.Failed -> {
+                logger.error { "CaptureAnalysis failed: ${analysisResult.reason}" }
                 providerTelemetry.recordFailure(
                     mode = route.mode,
                     latencyMs = Clock.System.now().toEpochMilliseconds() - startedAt,
@@ -473,22 +481,11 @@ class CaptureOrchestrator(
                 conversationEngine.emitAiUnavailable(reason = "AI不可用")
                 delay(100.milliseconds)
                 conversationEngine.applyCaptureAnalysisResult(
-                    draft = fallbackDraftFromInput(text)
+                    draft = conversationEngine.currentDraft(),
                 )
             }
         }
     }
-}
-
-private fun fallbackDraftFromInput(input: String): CaptureDraft {
-    return CaptureDraft(
-        id = "draft_fallback_${generateUUId()}",
-        title = "",
-        summary = input.trim(),
-        tags = listOf("manual"),
-        sourceText = input.trim(),
-        mediaAssets = emptyList(),
-    )
 }
 
 private fun String.escapeJson(): String = this

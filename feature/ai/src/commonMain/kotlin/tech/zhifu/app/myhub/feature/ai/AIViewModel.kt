@@ -64,18 +64,7 @@ class AIViewModel(
                             // 这里执行初始化，会初始化所有可能的状态，所以这里包含 PreviewMode
                             providerMode = orchestrator.providerMode(),
                         )
-                        reduce {
-                            state.copy(
-                                conversationState = context.state,
-                                messages = context.messages,
-                                draft = context.draft,
-                                missingFields = context.missingFields,
-                                actionComponents = context.actionComponents,
-                                // 更新推理状态
-                                reasoningStatus = context.reasoningStatus,
-                                reasoningText = context.reasoningText,
-                            )
-                        }
+                        reduce { state.copy(context = context) }
                     }
 
                     orchestrator.bootstrap()
@@ -141,9 +130,9 @@ class AIViewModel(
         action: String,
         context: ConversationContext,
     ): String = when (action) {
-        ActionOptionType.EDIT_TITLE.value -> context.draft?.title.orEmpty()
-        ActionOptionType.EDIT_SUMMARY.value -> context.draft?.summary.orEmpty()
-        ActionOptionType.EDIT_LOCATION.value -> context.draft?.location?.name.orEmpty()
+        ActionOptionType.EDIT_TITLE.value -> context.draft.title
+        ActionOptionType.EDIT_SUMMARY.value -> context.draft.summary
+        ActionOptionType.EDIT_LOCATION.value -> context.draft.location?.name.orEmpty()
         else -> ""
     }
 }
