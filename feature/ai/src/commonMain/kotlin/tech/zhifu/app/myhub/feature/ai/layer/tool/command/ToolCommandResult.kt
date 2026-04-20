@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.tool.command
 
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 
 sealed interface ToolCommandResult {
     data class DraftUpdated(
@@ -14,6 +15,7 @@ sealed interface ToolCommandResult {
 
     data class MediaAttached(
         val draft: CaptureDraft,
+        val attachedAssets: List<CaptureMediaAsset>,
     ) : ToolCommandResult
 
     data class Failed(

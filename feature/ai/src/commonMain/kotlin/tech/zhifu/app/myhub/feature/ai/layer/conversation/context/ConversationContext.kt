@@ -13,6 +13,7 @@ data class ConversationContext(
 
     val draft: CaptureDraft = newCaptureDraft(),
     val messages: List<Message> = emptyList(),
+    val actionOwnerMessageId: String? = null,
 
     val focusField: Field? = null,
     val missingFields: List<Field> = emptyList(),

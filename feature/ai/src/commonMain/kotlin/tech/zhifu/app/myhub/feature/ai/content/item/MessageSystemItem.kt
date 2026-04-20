@@ -1,30 +1,21 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
 
 @Composable
 fun MessageSystemItem(
-    message: Message
+    message: Message,
+    draft: CaptureDraft,
+    selectedTags: List<String>,
+    onAction: (String) -> Unit,
 ) {
-    MessageBubbleItem(
-        placeLeft = true,
-        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-    ) {
-        Text(
-            text = message.textRes
-                ?.let { res ->
-                    stringResource(
-                        resource = res,
-                        formatArgs = *message.textArgs.toTypedArray()
-                    )
-                }
-                ?: message.text,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    AssistantMessageItem(
+        message = message,
+        tone = AssistantTone.SYSTEM,
+        draft = draft,
+        selectedTags = selectedTags,
+        onAction = onAction,
+    )
 }

@@ -130,7 +130,8 @@ class ToolCommandRegistryImpl(
                 ToolCommandResult.MediaAttached(
                     command.draft.copy(
                         mediaAssets = (command.draft.mediaAssets + assets).distinctBy { it.localUri }
-                    )
+                    ),
+                    attachedAssets = assets,
                 )
             }
         }

@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
+import tech.zhifu.app.myhub.feature.ai.model.hasVisibleContent
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_preview_continue_edit
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_preview_continue_hint
@@ -30,11 +31,13 @@ fun AIPreview(
             (it as? AIUiState.Content)?.context?.draft
         }
         safePreviewState.pined = true
-        safePreviewState.card.value = draft?.toPreviewCard(
-            untitledDraft = stringResource(Res.string.feature_ai_preview_untitled_draft),
-            continueHint = stringResource(Res.string.feature_ai_preview_continue_hint),
-            continueEdit = stringResource(Res.string.feature_ai_preview_continue_edit),
-        )
+        safePreviewState.card.value = draft
+            ?.takeIf { it.hasVisibleContent() }
+            ?.toPreviewCard(
+                untitledDraft = stringResource(Res.string.feature_ai_preview_untitled_draft),
+                continueHint = stringResource(Res.string.feature_ai_preview_continue_hint),
+                continueEdit = stringResource(Res.string.feature_ai_preview_continue_edit),
+            )
     } else {
         // 需要点击设置
         safePreviewState.pined = false

@@ -7,13 +7,17 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextChangeC
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.appendMessages
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.bindActionComponents
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.canOwnActionComponents
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ofMessage
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.replaceMessage
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.slot.SlotManager
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.Signal
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateMachine
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredDraftSession
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -30,15 +34,19 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_cleared
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_updated
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_manual_edit
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_attached
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_editing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_move_review
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_published
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_publishing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_restore_session
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_review_input_help
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_field
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_summary_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_summary_updated
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_tag_added_need_more
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_tag_removed
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_tags_editing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_title_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_title_updated
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_type_updated
 import tech.zhifu.app.myhub.logger.debug
@@ -79,8 +87,6 @@ class ConversationEngine(
     }
 
     fun currentDraft(): CaptureDraft = contextManager.context.draft
-
-    fun currentMissingFields(): List<Field> = contextManager.context.missingFields
 
     fun currentState(): ConversationState = contextManager.context.state
 
@@ -135,12 +141,13 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_location_cleared,
-                )
+                ),
+                manualEditField = Field.LOCATION,
             )
         }
     }
@@ -149,13 +156,14 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_location_updated,
                     textArgs = listOf(draft.location?.name.orEmpty()),
-                )
+                ),
+                manualEditField = Field.LOCATION,
             )
         }
     }
@@ -164,14 +172,37 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
-                draft = draft,
-                message = ofMessage(
-                    role = Message.Role.AI,
-                    textRes = Res.string.feature_ai_msg_media_attached,
-                    textArgs = listOf(draft.mediaAssets.size),
-                )
-            )
+            when (context.state) {
+                ConversationState.MANUAL_EDIT -> {
+                    updateActionOwnerMessage(
+                        draft = draft,
+                        focusField = Field.MEDIA,
+                        message = ofMessage(
+                            role = Message.Role.AI,
+                            textRes = Res.string.feature_ai_msg_media_editing,
+                            editingField = Field.MEDIA,
+                        ),
+                    )
+                }
+
+                ConversationState.INFO_COLLECT -> {
+                    transitionToNextState(
+                        draft = draft,
+                    )
+                }
+
+                else -> {
+                    updateActionOwnerMessage(
+                        draft = draft,
+                        focusField = Field.MEDIA,
+                        message = ofMessage(
+                            role = Message.Role.AI,
+                            textRes = Res.string.feature_ai_msg_media_editing,
+                            editingField = Field.MEDIA,
+                        ),
+                    )
+                }
+            }
         }
     }
 
@@ -247,7 +278,7 @@ class ConversationEngine(
                         draft = draft,
                         message = contextManager.ofMessage(
                             role = Message.Role.AI,
-                            text = "已进入发布确认阶段，你可以直接发布！"
+                            textRes = Res.string.feature_ai_msg_move_review,
                         )
                     )
 
@@ -262,12 +293,13 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_summary_updated,
-                )
+                ),
+                manualEditField = Field.SUMMARY,
             )
         }
     }
@@ -277,13 +309,14 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_tag_removed,
                     textArgs = listOf(tag),
-                )
+                ),
+                manualEditField = Field.TAGS,
             )
         }
     }
@@ -293,13 +326,14 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_tag_added_need_more,
                     textArgs = listOf(tag),
-                )
+                ),
+                manualEditField = Field.TAGS,
             )
         }
     }
@@ -308,12 +342,13 @@ class ConversationEngine(
         draft: CaptureDraft,
     ) = serialize {
         with(contextManager) {
-            transitionToNextState(
+            applyDraftMutation(
                 draft = draft,
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_title_updated,
-                )
+                ),
+                manualEditField = Field.TITLE,
             )
         }
     }
@@ -326,6 +361,22 @@ class ConversationEngine(
                 ofMessage(
                     role = Message.Role.USER,
                     text = text,
+                )
+            )
+        }
+    }
+
+    suspend fun appendUserMediaMessage(
+        mediaAssets: List<CaptureMediaAsset>,
+        text: String = "",
+    ) = serialize {
+        if (mediaAssets.isEmpty()) return@serialize
+        with(contextManager) {
+            emitMessage(
+                ofMessage(
+                    role = Message.Role.USER,
+                    text = text,
+                    mediaAssets = mediaAssets,
                 )
             )
         }
@@ -347,28 +398,43 @@ class ConversationEngine(
                 focusField = field,
                 message = when (field) {
                     Field.MEDIA -> ofMessage(
-                        role = Message.Role.USER,
-                        text = "请选择你想要的图片"
+                        role = Message.Role.AI,
+                        textRes = if (context.draft.mediaAssets.isEmpty()) {
+                            Res.string.feature_ai_msg_draft_need_media
+                        } else {
+                            Res.string.feature_ai_msg_media_editing
+                        },
+                        editingField = field,
+                    )
+
+                    Field.TITLE -> ofMessage(
+                        role = Message.Role.AI,
+                        textRes = Res.string.feature_ai_msg_title_editing,
+                        editingField = field,
                     )
 
                     Field.TAGS -> ofMessage(
-                        role = Message.Role.SYSTEM,
-                        textRes = Res.string.feature_ai_msg_tags_editing
+                        role = Message.Role.AI,
+                        textRes = Res.string.feature_ai_msg_tags_editing,
+                        editingField = field,
                     )
 
                     Field.SUMMARY -> ofMessage(
-                        role = Message.Role.SYSTEM,
-                        textRes = Res.string.feature_ai_msg_summary_editing
+                        role = Message.Role.AI,
+                        textRes = Res.string.feature_ai_msg_summary_editing,
+                        editingField = field,
                     )
 
                     Field.LOCATION -> ofMessage(
-                        role = Message.Role.SYSTEM,
-                        textRes = Res.string.feature_ai_msg_location_editing
+                        role = Message.Role.AI,
+                        textRes = Res.string.feature_ai_msg_location_editing,
+                        editingField = field,
                     )
 
                     else -> ofMessage(
-                        role = Message.Role.SYSTEM,
-                        textRes = Res.string.feature_ai_msg_manual_edit
+                        role = Message.Role.AI,
+                        textRes = Res.string.feature_ai_msg_manual_edit,
+                        editingField = field,
                     )
                 },
             )
@@ -383,7 +449,7 @@ class ConversationEngine(
                 focusField = null,
                 message = ofMessage(
                     role = Message.Role.AI,
-                    text = "发布中..."
+                    textRes = Res.string.feature_ai_msg_publishing,
                 ),
             )
         }
@@ -408,10 +474,6 @@ class ConversationEngine(
             transitionWithPlan(
                 signal = Signal.REQUEST_REVIEW,
                 focusField = null,
-                message = ofMessage(
-                    role = Message.Role.AI,
-                    text = "已进入发布确认阶段，你可以直接发布！"
-                ),
             )
         }
     }
@@ -424,7 +486,7 @@ class ConversationEngine(
                 message = ofMessage(
                     role = Message.Role.AI,
                     textRes = Res.string.feature_ai_msg_skip_field,
-                    textArgs = listOf(field.name),
+                    textArgs = listOf(fieldDisplayName(field)),
                 )
             )
         }
@@ -441,7 +503,7 @@ class ConversationEngine(
             ),
             message2 = contextManager.ofMessage(
                 role = Message.Role.AI,
-                text = "已切换到手工编辑"// TODO: 国际化
+                textRes = Res.string.feature_ai_msg_manual_edit,
             )
         )
     }
@@ -468,6 +530,19 @@ class ConversationEngine(
                     role = Message.Role.SYSTEM,
                     textRes = Res.string.feature_ai_msg_blocked_input,
                 )
+            )
+        }
+    }
+
+    suspend fun emitReviewInputHelp(
+    ) = serialize {
+        with(contextManager) {
+            emitMessage(
+                ofMessage(
+                    role = Message.Role.AI,
+                    textRes = Res.string.feature_ai_msg_review_input_help,
+                ),
+                bindCurrentActions = true,
             )
         }
     }
@@ -505,13 +580,30 @@ class ConversationEngine(
      */
     private suspend fun emitMessage(
         message: Message,
+        bindCurrentActions: Boolean = false,
     ) = with(contextManager) {
         logger.debug { "emitMessage: $message" }
+        val nextOwnerMessageId = if (bindCurrentActions && message.canOwnActionComponents()) {
+            message.id
+        } else {
+            context.actionOwnerMessageId
+        }
+        val nextMessages = appendMessages {
+            add(message)
+        }.let { messages ->
+            if (bindCurrentActions && message.canOwnActionComponents()) {
+                messages.bindActionComponents(
+                    components = context.actionComponents,
+                    ownerMessageId = nextOwnerMessageId,
+                )
+            } else {
+                messages
+            }
+        }
         notifyContextChange(
             updated = context.copy(
-                messages = appendMessages {
-                    add(message)
-                }
+                messages = nextMessages,
+                actionOwnerMessageId = nextOwnerMessageId,
             )
         )
     }
@@ -556,13 +648,21 @@ class ConversationEngine(
         val nextActions = actionPlanner.actionsFor(
             state = nextState,
             draft = nextDraft,
-            missingFields = nextMissing,
             focusField = nextFocus,
         )
+        val actionOwnerMessageId = when {
+            message?.canOwnActionComponents() == true -> message.id
+            messages != null -> messages.lastOrNull(Message::canOwnActionComponents)?.id
+            else -> current.actionOwnerMessageId
+        }
 
-        val nextMessages = message?.let { current.messages + it }
+        val nextMessages = (message?.let { current.messages + it }
             ?: messages?.let { current.messages + it }
-            ?: current.messages
+            ?: current.messages)
+            .bindActionComponents(
+                components = nextActions,
+                ownerMessageId = actionOwnerMessageId,
+            )
 
         notifyContextChange(
             updated = current.copy(
@@ -572,6 +672,7 @@ class ConversationEngine(
                 missingFields = nextMissing,
                 actionComponents = nextActions,
                 messages = nextMessages,
+                actionOwnerMessageId = actionOwnerMessageId,
                 reasoningStatus = reasoningStatus ?: current.reasoningStatus,
                 reasoningText = reasoningText ?: current.reasoningText,
             )
@@ -659,7 +760,8 @@ class ConversationEngine(
                                 Field.TITLE -> Res.string.feature_ai_msg_draft_need_title
                                 else -> Res.string.feature_ai_msg_draft_complete
                             }
-                        )
+                        ),
+                        bindCurrentActions = true,
                     )
                 }
             }
@@ -669,13 +771,130 @@ class ConversationEngine(
                     emitMessage(
                         contextManager.ofMessage(
                             role = Message.Role.AI,
-                            text = "已进入发布确认阶段，你可以直接发布！"
-                        )
+                            textRes = Res.string.feature_ai_msg_move_review,
+                        ),
+                        bindCurrentActions = true,
                     )
                 }
             }
 
             else -> Unit
         }
+    }
+
+    private suspend fun ContextManager.applyDraftMutation(
+        draft: CaptureDraft,
+        message: Message,
+        manualEditField: Field,
+    ) {
+        if (context.state == ConversationState.MANUAL_EDIT) {
+            updateActionOwnerMessage(
+                draft = draft,
+                focusField = manualEditField,
+                message = message,
+            )
+        } else {
+            transitionToNextState(
+                draft = draft,
+                message = message,
+            )
+        }
+    }
+
+    private suspend fun ContextManager.refreshCurrentState(
+        draft: CaptureDraft,
+        focusField: Field? = context.focusField,
+        message: Message? = null,
+    ) {
+        val current = context
+        val nextMissing = slotManager.missingFields(draft)
+        val nextActions = actionPlanner.actionsFor(
+            state = current.state,
+            draft = draft,
+            focusField = focusField,
+        )
+        val actionOwnerMessageId = when {
+            message?.canOwnActionComponents() == true -> message.id
+            current.actionOwnerMessageId != null -> current.actionOwnerMessageId
+            else -> current.messages.lastOrNull { existing ->
+                existing.canOwnActionComponents() && existing.actionComponents.isNotEmpty()
+            }?.id
+        }
+        val nextMessages = (current.messages + listOfNotNull(message))
+            .bindActionComponents(
+                components = nextActions,
+                ownerMessageId = actionOwnerMessageId,
+            )
+        notifyContextChange(
+            updated = current.copy(
+                draft = draft,
+                focusField = focusField,
+                missingFields = nextMissing,
+                actionComponents = nextActions,
+                messages = nextMessages,
+                actionOwnerMessageId = actionOwnerMessageId,
+            )
+        )
+    }
+
+    private suspend fun ContextManager.updateActionOwnerMessage(
+        draft: CaptureDraft,
+        focusField: Field? = context.focusField,
+        message: Message,
+    ) {
+        val current = context
+        val nextMissing = slotManager.missingFields(draft)
+        val nextActions = actionPlanner.actionsFor(
+            state = current.state,
+            draft = draft,
+            focusField = focusField,
+        )
+        val ownerMessageId = current.actionOwnerMessageId
+            ?: current.messages.lastOrNull { existing ->
+                existing.canOwnActionComponents() && existing.actionComponents.isNotEmpty()
+            }?.id
+
+        if (ownerMessageId == null) {
+            refreshCurrentState(
+                draft = draft,
+                focusField = focusField,
+                message = message,
+            )
+            return
+        }
+
+        val nextMessages = current.messages
+            .replaceMessage(ownerMessageId) { existing ->
+                existing.copy(
+                    text = message.text,
+                    textRes = message.textRes,
+                    textArgs = message.textArgs,
+                    mediaAssets = message.mediaAssets,
+                    editingField = message.editingField ?: existing.editingField,
+                )
+            }
+            .bindActionComponents(
+                components = nextActions,
+                ownerMessageId = ownerMessageId,
+            )
+        notifyContextChange(
+            updated = current.copy(
+                draft = draft,
+                focusField = focusField,
+                missingFields = nextMissing,
+                actionComponents = nextActions,
+                messages = nextMessages,
+                actionOwnerMessageId = ownerMessageId,
+            )
+        )
+    }
+
+    private fun fieldDisplayName(field: Field): String = when (field) {
+        Field.MEDIA -> "图片"
+        Field.TAGS -> "标签"
+        Field.TITLE -> "标题"
+        Field.SUMMARY -> "摘要"
+        Field.LOCATION -> "位置"
+        Field.UNKNOWN -> "当前步骤"
     }
 }

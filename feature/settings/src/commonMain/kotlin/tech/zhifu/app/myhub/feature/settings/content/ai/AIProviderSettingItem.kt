@@ -28,6 +28,7 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_valid
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProvider
+import tech.zhifu.app.myhub.ui.state.ai.updateAIProviderShortcutVisible
 
 @Composable
 fun AIProviderSettingItem(
@@ -58,6 +59,12 @@ fun AIProviderSettingItem(
         showDialog.value
     ) {
         mutableStateOf<StringResource?>(null)
+    }
+    var providerShortcutVisible by remember(
+        providerRoutingConfig,
+        showDialog.value
+    ) {
+        mutableStateOf(providerRoutingConfig.shortcutVisible)
     }
 
     AiProviderSettingItemContent(
@@ -121,8 +128,13 @@ fun AIProviderSettingItem(
             validationMessageRes.value = null
         },
         onRetriesChanged = { value ->
-            timeoutInput.value = value
+            maxRetriesInput = value
             validationMessageRes.value = null
+        },
+        providerShortcutVisible = providerShortcutVisible,
+        onProviderShortcutVisibleChanged = { visible ->
+            providerShortcutVisible = visible
+            viewModel.updateAIProviderShortcutVisible(visible)
         },
     )
 }

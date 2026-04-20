@@ -34,6 +34,9 @@
   <string name="feature_settings_ai_direct_api_key">Direct API Key</string>
   <string name="feature_settings_ai_timeout_ms">Timeout (ms)</string>
   <string name="feature_settings_ai_retries">Max Retries</string>
+  <string name="feature_settings_ai_shortcut_title">Provider Shortcut</string>
+  <string name="feature_settings_ai_shortcut_hint">Show the provider shortcut card on the AI capture page header.
+  </string>
   <string name="feature_settings_ai_save">Save AI Settings</string>
   <string name="feature_settings_ai_validation_timeout_invalid">Timeout must be a positive integer</string>
   <string name="feature_settings_ai_validation_max_retries_invalid">Max retries must be a non-negative integer</string>

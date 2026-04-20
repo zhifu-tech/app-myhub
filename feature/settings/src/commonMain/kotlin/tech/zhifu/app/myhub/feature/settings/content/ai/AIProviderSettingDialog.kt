@@ -9,6 +9,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +25,8 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direc
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_mode
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_retries
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_save
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_shortcut_hint
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_shortcut_title
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_timeout_ms
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_close
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
@@ -44,6 +47,9 @@ fun AIProviderSettingDialog(
     onApiKeyChanged: (String) -> Unit,
     onTimeoutChanged: (String) -> Unit,
     onRetriesChanged: (String) -> Unit,
+
+    providerShortcutVisible: Boolean,
+    onProviderShortcutVisibleChanged: (Boolean) -> Unit,
 ) {
     if (!visible) return
 
@@ -52,6 +58,33 @@ fun AIProviderSettingDialog(
         title = { Text(text = stringResource(Res.string.feature_settings_ai_config)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // config shortcut switcher
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.feature_settings_ai_shortcut_title),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                        Text(
+                            text = stringResource(Res.string.feature_settings_ai_shortcut_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = providerShortcutVisible,
+                        onCheckedChange = onProviderShortcutVisibleChanged,
+                    )
+                }
+
+                // Provider mode config
                 Text(
                     text = stringResource(Res.string.feature_settings_ai_mode),
                     style = MaterialTheme.typography.titleSmall

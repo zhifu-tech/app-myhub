@@ -28,6 +28,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
@@ -51,7 +52,8 @@ internal fun RowScope.StickyInputCore(
     placeHolder: String,
     onInputChange: (String) -> Unit,
     heightState: StickyInputHeightState,
-    onSend: () -> Unit
+    onSend: () -> Unit,
+    enabled: Boolean = true,
 ) {
     val minHeight = 40.dp
     val maxHeight = 140.dp
@@ -84,6 +86,7 @@ internal fun RowScope.StickyInputCore(
             value = input,
             onValueChange = onInputChange,
             maxLines = 6,
+            enabled = enabled,
 
             textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurface
@@ -129,10 +132,11 @@ internal fun RowScope.StickyInputCore(
                 text = placeHolder,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.align(Alignment.BottomStart)
                     .padding(bottom = 12.dp)
             )
         }
     }
 }
-

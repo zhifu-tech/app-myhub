@@ -10,8 +10,9 @@ sealed class AIUiState(
     object Loading : AIUiState(state = State.LOADING)
 
     data class Content(
-        val context: ConversationContext = ConversationContext(),
         val providerMode: ProviderMode = ProviderMode.DISABLED,
+        val shortcutVisible: Boolean = false,
+        val context: ConversationContext = ConversationContext(),
         val input: String = "",
         val previewState: PreviewState = PreviewState(),
     ) : AIUiState(state = State.CONTENT)

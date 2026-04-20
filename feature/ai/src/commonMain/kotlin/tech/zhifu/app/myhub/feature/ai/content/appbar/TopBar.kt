@@ -1,27 +1,30 @@
 package tech.zhifu.app.myhub.feature.ai.content.appbar
 
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_back
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_settings
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_subtitle
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_top_bar_title
 import tech.zhifu.app.myhub.feature.settings.api.navigateToSettings
 import tech.zhifu.app.myhub.navigation.AppNavigator
@@ -32,9 +35,62 @@ fun TopBar(
 ) {
     TopBarContent(
         onClickBack = navigator::goBack,
-        actions = {
+        onClickSettings = navigator::navigateToSettings,
+    )
+}
+
+@Composable
+internal fun TopBarContent(
+    onClickBack: () -> Unit,
+    onClickSettings: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f),
+        ),
+        shadowElevation = 2.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             IconButton(
-                onClick = navigator::navigateToSettings
+                onClick = onClickBack,
+                modifier = Modifier.size(40.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = stringResource(Res.string.feature_ai_top_bar_back),
+                )
+            }
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.feature_ai_top_bar_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = stringResource(Res.string.feature_ai_top_bar_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(
+                onClick = onClickSettings,
+                modifier = Modifier.size(40.dp),
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
@@ -42,40 +98,5 @@ fun TopBar(
                 )
             }
         }
-    )
-}
-
-@Composable
-internal fun TopBarContent(
-    actions: @Composable RowScope.() -> Unit = {},
-    onClickBack: () -> Unit,
-) {
-    TopAppBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-        ),
-        navigationIcon = {
-            IconButton(
-                onClick = onClickBack,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = stringResource(Res.string.feature_ai_top_bar_back),
-                )
-            }
-        },
-        title = {
-            Text(
-                text = stringResource(Res.string.feature_ai_top_bar_title),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        actions = actions
-    )
+    }
 }

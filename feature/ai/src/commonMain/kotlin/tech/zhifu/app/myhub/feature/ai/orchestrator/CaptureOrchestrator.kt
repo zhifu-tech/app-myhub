@@ -90,6 +90,8 @@ class CaptureOrchestrator(
             ConversationState.INFO_COLLECT,
             ConversationState.MANUAL_EDIT -> handleDraftFieldInput(text)
 
+            ConversationState.CARD_REVIEW -> conversationEngine.emitReviewInputHelp()
+
             else -> {
                 logger.debug { "onInput: blocked input $state" }
                 conversationEngine.emitBlockedInput()
@@ -138,42 +140,54 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleDraftFieldInput(text: String) {
-        val draft = conversationEngine.currentDraft()
+        val focusField = conversationEngine.currentFocusField()
+        if (focusField == null) {
+            conversationEngine.emitBlockedInput()
+            return
+        }
         conversationEngine.appendUserInputMessage(text = text)
-        when (conversationEngine.currentFocusField()) {
+        when (focusField) {
             Field.TITLE -> {
                 when (val result = toolCommandDispatcher.execute(
-                    command = ToolCommand.UpdateTitle(draft = draft, title = text)
+                    command = ToolCommand.UpdateTitle(
+                        draft = conversationEngine.currentDraft(),
+                        title = text,
+                    )
                 )) {
-                    is ToolCommandResult.DraftUpdated -> {
-                        delay(100.milliseconds)
+                    is ToolCommandResult.DraftUpdated ->
                         conversationEngine.applyTitleUpdated(result.draft)
-                    }
 
-                    is ToolCommandResult.Failed -> {
+                    is ToolCommandResult.Failed ->
                         conversationEngine.emitBlockedAction(
                             action = "update_title:${result.code}:${result.message}"
                         )
-                    }
 
                     else -> Unit
                 }
             }
 
             Field.TAGS -> {
+                val tag = text
+                    .split(',', '，', '、', '\n')
+                    .firstOrNull { it.trim().isNotBlank() }
+                    ?.trim()
+                    ?: text.trim()
                 when (val result = toolCommandDispatcher.execute(
-                    command = ToolCommand.AddTag(draft = draft, tag = text)
+                    command = ToolCommand.AddTag(
+                        draft = conversationEngine.currentDraft(),
+                        tag = tag,
+                    )
                 )) {
-                    is ToolCommandResult.DraftUpdated -> {
+                    is ToolCommandResult.DraftUpdated ->
                         conversationEngine.applyTagUpdated(
-                            tag = text,
+                            tag = tag,
                             draft = result.draft,
                         )
-                    }
 
-                    is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
-                        action = "add_tag:${result.code}:${result.message}"
-                    )
+                    is ToolCommandResult.Failed ->
+                        conversationEngine.emitBlockedAction(
+                            action = "add_tag:${result.code}:${result.message}"
+                        )
 
                     else -> Unit
                 }
@@ -181,31 +195,40 @@ class CaptureOrchestrator(
 
             Field.SUMMARY -> {
                 when (val result = toolCommandDispatcher.execute(
-                    command = ToolCommand.UpdateSummary(draft = draft, summary = text)
+                    command = ToolCommand.UpdateSummary(
+                        draft = conversationEngine.currentDraft(),
+                        summary = text,
+                    )
                 )) {
-                    is ToolCommandResult.DraftUpdated -> {
+                    is ToolCommandResult.DraftUpdated ->
                         conversationEngine.applySummaryUpdated(
                             draft = result.draft,
                         )
-                    }
 
-                    is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
-                        action = "update_summary:${result.code}:${result.message}"
-                    )
+                    is ToolCommandResult.Failed ->
+                        conversationEngine.emitBlockedAction(
+                            action = "update_summary:${result.code}:${result.message}"
+                        )
 
                     else -> Unit
                 }
             }
 
             Field.LOCATION -> {
+                if (text.trim().lowercase() in CLEAR_KEYWORDS) {
+                    handleClearLocation()
+                    return
+                }
                 when (val result = toolCommandDispatcher.execute(
-                    command = ToolCommand.UpdateLocation(draft = draft, location = text)
+                    command = ToolCommand.UpdateLocation(
+                        draft = conversationEngine.currentDraft(),
+                        location = text
+                    )
                 )) {
-                    is ToolCommandResult.DraftUpdated -> {
+                    is ToolCommandResult.DraftUpdated ->
                         conversationEngine.applyLocationUpdated(
                             draft = result.draft
                         )
-                    }
 
                     is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                         action = "update_location:${result.code}:${result.message}"
@@ -215,9 +238,13 @@ class CaptureOrchestrator(
                 }
             }
 
-            Field.MEDIA -> conversationEngine.emitBlockedInput()
-            else -> conversationEngine.emitBlockedInput()
+            Field.MEDIA,
+            Field.UNKNOWN -> conversationEngine.emitBlockedInput()
         }
+    }
+
+    companion object {
+        private val CLEAR_KEYWORDS = setOf("清空", "删除", "无", "none", "clear")
     }
 
     private suspend fun handlePublish() {
@@ -272,6 +299,21 @@ class CaptureOrchestrator(
             command = ToolCommand.AttachPickedMedia(draft = sourceDraft)
         )) {
             is ToolCommandResult.MediaAttached -> {
+                if (result.attachedAssets.isEmpty()) return
+
+                val previousUris = draft.mediaAssets
+                    .map { it.localUri }
+                    .toSet()
+                val visibleAssets = if (replaceExisting) {
+                    result.attachedAssets
+                } else {
+                    result.attachedAssets.filterNot { it.localUri in previousUris }
+                }
+                if (visibleAssets.isNotEmpty()) {
+                    conversationEngine.appendUserMediaMessage(
+                        mediaAssets = visibleAssets,
+                    )
+                }
                 conversationEngine.applyMediaUpdated(result.draft)
             }
 

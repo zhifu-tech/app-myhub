@@ -13,22 +13,27 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.feature.ai.content.item.ActionSectionItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageAIItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageSystemItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageThinkingItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageUserItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ProviderModeItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningCardItem
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -38,42 +43,68 @@ fun Content(
     contentPadding: PaddingValues,
 ) {
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? AIUiState.Content)?.context?.messages
+        (it as? AIUiState.Content)?.let { content ->
+            ContentState(
+                messages = content.context.messages,
+                draft = content.context.draft,
+            )
+        }
     }
     val safeState = state ?: return
-    logger.debug { "Content: message.size = ${safeState.size}" }
     ContentContent(
-        messages = safeState,
+        messages = safeState.messages,
+        draft = safeState.draft,
         contentPadding = contentPadding,
+        onAction = viewModel::doAction,
         providerModeItem = {
             ProviderModeItem(viewModel)
         },
         reasoningCardItem = {
             ReasoningCardItem(viewModel)
         },
-        uploadedMediaInlineItem = {
-//            UploadedMediaInlineItem(viewModel)
-        },
-        actionSectionItem = {
-            ActionSectionItem(viewModel)
-        }
     )
 }
 
 @Composable
 fun ContentContent(
     messages: List<Message>,
+    draft: CaptureDraft,
     contentPadding: PaddingValues,
+    onAction: (String) -> Unit,
     providerModeItem: @Composable BoxScope.() -> Unit,
     reasoningCardItem: @Composable BoxScope.() -> Unit,
-    uploadedMediaInlineItem: @Composable BoxScope.() -> Unit,
-    actionSectionItem: @Composable BoxScope.() -> Unit,
 ) {
     val listState = rememberLazyListState()
-//    LaunchedEffect(messages.lastOrNull()?.id, messages.size) {
-//        val lastIndex = messages.size + 2 + if (mediaAssets.isNotEmpty() && mediaManageEnabled) 1 else 0
-//        listState.animateScrollToItem(index = lastIndex)
-//    }
+    var shouldStickToBottom by remember { mutableStateOf(true) }
+    var didInitialScroll by remember { mutableStateOf(false) }
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            if (lastVisibleIndex == null) {
+                null
+            } else {
+                lastVisibleIndex >= (layoutInfo.totalItemsCount - 2).coerceAtLeast(0)
+            }
+        }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collect { shouldStickToBottom = it }
+    }
+
+    LaunchedEffect(messages.lastOrNull()?.id, messages.size) {
+        if (messages.isEmpty()) return@LaunchedEffect
+        val targetIndex = messages.size
+        if (!didInitialScroll) {
+            didInitialScroll = true
+            listState.scrollToItem(index = targetIndex)
+            return@LaunchedEffect
+        }
+        if (shouldStickToBottom) {
+            listState.animateScrollToItem(index = targetIndex)
+        }
+    }
     LazyColumn(
         state = listState,
         modifier = Modifier
@@ -92,9 +123,7 @@ fun ContentContent(
     ) {
         item(key = "provider_mode") {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
+                modifier = Modifier.fillMaxWidth(),
                 content = providerModeItem,
             )
         }
@@ -104,41 +133,38 @@ fun ContentContent(
             contentType = { "message" }
         ) { msg ->
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 when (msg.role) {
-                    Message.Role.AI -> MessageAIItem(msg)
+                    Message.Role.AI -> MessageAIItem(
+                        message = msg,
+                        draft = draft,
+                        selectedTags = draft.tags,
+                        onAction = onAction,
+                    )
+
                     Message.Role.USER -> MessageUserItem(msg)
-                    Message.Role.SYSTEM -> MessageSystemItem(msg)
+                    Message.Role.SYSTEM -> MessageSystemItem(
+                        message = msg,
+                        draft = draft,
+                        selectedTags = draft.tags,
+                        onAction = onAction,
+                    )
+
                     Message.Role.THINKING -> MessageThinkingItem(msg)
                 }
             }
         }
         item(key = "reasoning_card") {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
+                modifier = Modifier.fillMaxWidth(),
                 content = reasoningCardItem,
-            )
-        }
-        item(key = "uploaded_media_inline") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
-                content = uploadedMediaInlineItem,
-            )
-        }
-        item(key = "action_section") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateItem(),
-                content = actionSectionItem,
             )
         }
     }
 }
+
+private data class ContentState(
+    val messages: List<Message>,
+    val draft: CaptureDraft,
+)

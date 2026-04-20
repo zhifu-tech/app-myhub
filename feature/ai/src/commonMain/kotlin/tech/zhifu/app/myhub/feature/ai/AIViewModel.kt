@@ -9,7 +9,6 @@ import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ConversationContext
 import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
@@ -54,6 +53,7 @@ class AIViewModel(
                     val state = state as? AIUiState.Content ?: return@reduce state
                     state.copy(
                         providerMode = stateProvider.mode,
+                        shortcutVisible = stateProvider.shortcutVisible,
                     )
                 }
                 if (needInit) {
@@ -63,6 +63,7 @@ class AIViewModel(
                         val state = state as? AIUiState.Content ?: AIUiState.Content(
                             // 这里执行初始化，会初始化所有可能的状态，所以这里包含 PreviewMode
                             providerMode = orchestrator.providerMode(),
+                            shortcutVisible = stateProvider.shortcutVisible,
                         )
                         reduce { state.copy(context = context) }
                     }
@@ -87,52 +88,26 @@ class AIViewModel(
         )
     }
 
-    fun performQuickAction(action: String) = intent {
+    fun doAction(action: String) = intent {
+        val current = state as? AIUiState.Content
+        if (current != null) {
+            reduce {
+                current.copy(
+                    input = when (action) {
+                        ActionOptionType.EDIT_TITLE.value -> current.context.draft.title
+                        ActionOptionType.EDIT_SUMMARY.value -> current.context.draft.summary
+                        ActionOptionType.EDIT_LOCATION.value -> current.context.draft.location?.name.orEmpty()
+                        else -> ""
+                    }
+                )
+            }
+        }
         orchestrator.onAction(action)
-//        val currentContext = context ?: return@intent
-//        val updated = orchestrator.onAction(currentContext, action)
-//        context = updated
-//        reduce {
-//            updated.toUiState(
-//                input = prefilledInputForAction(
-//                    action = action,
-//                    context = updated,
-//                )
-//            )
-//        }
     }
 
     fun updateProviderMode(mode: ProviderMode) = intent {
         updateAIProviderMode(mode)
         val current = state as? AIUiState.Content ?: return@intent
         reduce { current.copy(providerMode = mode) }
-    }
-
-//    private fun ConversationContext.toUiState(
-//        input: String
-//    ): AIUiState.Content = AIUiState.Content(
-//        conversationState = state,
-//        sessionId = sessionId,
-//        messages = messages,
-//        draft = draft,
-//        inputField = inputField,
-//        missingFields = missingFields,
-//        actionComponents = actionComponents,
-//        providerMode = orchestrator.providerMode(),
-//        input = input,
-//        isPublishing = state == ConversationState.PUBLISH_CONFIRM,
-//        thinkingText = "",
-//        isThinking = false,
-//        previewState = previewState,
-//    )
-
-    private fun prefilledInputForAction(
-        action: String,
-        context: ConversationContext,
-    ): String = when (action) {
-        ActionOptionType.EDIT_TITLE.value -> context.draft.title
-        ActionOptionType.EDIT_SUMMARY.value -> context.draft.summary
-        ActionOptionType.EDIT_LOCATION.value -> context.draft.location?.name.orEmpty()
-        else -> ""
     }
 }

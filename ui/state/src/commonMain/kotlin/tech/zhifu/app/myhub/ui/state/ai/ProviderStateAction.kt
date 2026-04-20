@@ -5,14 +5,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
-import tech.zhifu.app.myhub.logger.info
-import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 
 fun <VM> VM.createAIProviderStateFlow(): StateFlow<ProviderRoutingConfig>
@@ -20,11 +17,10 @@ fun <VM> VM.createAIProviderStateFlow(): StateFlow<ProviderRoutingConfig>
           VM : UserPreferencesState,
           VM : ProviderState {
     return userPreferencesStateFlow
-        .map { prefs ->
+        .mapNotNull { prefs ->
             prefs.aiProvider.deserialize<ProviderRoutingConfig>()
                 .getOrNull()
         }
-        .filterNotNull()
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
@@ -38,7 +34,6 @@ fun <VM> VM.updateAIProvider(providerRoutingConfig: ProviderRoutingConfig)
           VM : UserPreferencesState,
           VM : ProviderState {
 
-    logger.info { "updateAIProvider: $providerRoutingConfig" }
     val userId = userPreferencesStateFlow.value.userId
     viewModelScope.launch {
         userRepository.updateUserPreferencesAiProvider(
@@ -55,37 +50,9 @@ fun <VM> VM.updateAIProviderMode(mode: ProviderMode)
     updateAIProvider(providerRoutingConfig.value.copy(mode = mode))
 }
 
-fun <VM> VM.updateAIProviderDirectEndpoint(directEndpoint: String)
+fun <VM> VM.updateAIProviderShortcutVisible(visible: Boolean)
     where VM : ViewModel,
           VM : UserPreferencesState,
           VM : ProviderState {
-    updateAIProvider(providerRoutingConfig.value.copy(directEndpoint = directEndpoint))
-}
-
-fun <VM> VM.updateAIProviderDirectModel(directModel: String)
-    where VM : ViewModel,
-          VM : UserPreferencesState,
-          VM : ProviderState {
-    updateAIProvider(providerRoutingConfig.value.copy(directModel = directModel))
-}
-
-fun <VM> VM.updateAIProviderDirectApiKey(directApiKey: String)
-    where VM : ViewModel,
-          VM : UserPreferencesState,
-          VM : ProviderState {
-    updateAIProvider(providerRoutingConfig.value.copy(directApiKey = directApiKey))
-}
-
-fun <VM> VM.updateAIProviderTimeoutMs(timeoutMs: Long)
-    where VM : ViewModel,
-          VM : UserPreferencesState,
-          VM : ProviderState {
-    updateAIProvider(providerRoutingConfig.value.copy(timeoutMs = timeoutMs))
-}
-
-fun <VM> VM.updateAIProviderMaxRetries(maxRetries: Int)
-    where VM : ViewModel,
-          VM : UserPreferencesState,
-          VM : ProviderState {
-    updateAIProvider(providerRoutingConfig.value.copy(maxRetries = maxRetries))
+    updateAIProvider(providerRoutingConfig.value.copy(shortcutVisible = visible))
 }

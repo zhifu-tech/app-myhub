@@ -56,8 +56,8 @@ fun SendButton(
 
     Box(
         modifier = Modifier
-            .padding(start = 4.dp)
-            .size(40.dp)
+            .padding(start = 6.dp, bottom = 2.dp)
+            .size(42.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale

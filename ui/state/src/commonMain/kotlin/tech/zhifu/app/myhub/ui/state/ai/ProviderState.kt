@@ -20,6 +20,7 @@ data class ProviderRoutingConfig(
     val maxRetries: Int = 1,
     val healthFailThreshold: Int = 3,
     val circuitOpenMs: Long = 60_000,
+    val shortcutVisible: Boolean = false
 )
 
 @Serializable

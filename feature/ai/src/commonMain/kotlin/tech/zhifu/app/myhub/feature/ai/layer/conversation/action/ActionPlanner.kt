@@ -9,28 +9,27 @@ class ActionPlanner {
     fun actionsFor(
         state: ConversationState,
         draft: CaptureDraft,
-        missingFields: List<Field> = emptyList(),
         focusField: Field? = null,
     ): List<ActionComponentSchema> = when (state) {
         ConversationState.INFO_COLLECT -> infoCollectActions(
             draft = draft,
-            missingFields = missingFields,
-            focusField = focusField,
+            focusField = focusField
         )
 
         ConversationState.CARD_REVIEW -> reviewActions(
-            draft = draft,
         )
 
         ConversationState.MANUAL_EDIT -> manualEditActions(
             draft = draft,
-            focusField = focusField,
+            focusField = focusField
         )
 
         ConversationState.COMPLETE -> listOf(
             ActionComponentSchema(
                 type = ActionComponentType.QUICK_REPLY,
-                options = listOf(ActionOptionSchema.of(ActionOptionType.NEW_CAPTURE)),
+                options = listOf(
+                    ActionOptionSchema.of(ActionOptionType.NEW_CAPTURE)
+                ),
             )
         )
 
@@ -41,17 +40,15 @@ class ActionPlanner {
 
 private fun infoCollectActions(
     draft: CaptureDraft,
-    missingFields: List<Field>,
     focusField: Field?,
-): List<ActionComponentSchema> {
-    val field = focusField ?: missingFields.firstOrNull()
-    return when (field) {
+): List<ActionComponentSchema> =
+    when (focusField) {
         Field.MEDIA -> listOf(
             ActionComponentSchema(
                 type = ActionComponentType.UPLOAD,
                 field = Field.MEDIA,
                 status = ActionComponentStatus.ACTIVE,
-                options = listOf(ActionOptionSchema.of(ActionOptionType.UPLOAD_MEDIA)),
+                options = mediaOptions(draft = draft),
             ),
             ActionComponentSchema(
                 type = ActionComponentType.QUICK_REPLY,
@@ -96,14 +93,11 @@ private fun infoCollectActions(
 
         else -> emptyList()
     }
-}
 
 
 private fun reviewActions(
-    @Suppress("UNUSED_PARAMETER")
-    draft: CaptureDraft?,
-): List<ActionComponentSchema> {
-    return listOf(
+): List<ActionComponentSchema> =
+    listOf(
         ActionComponentSchema(
             type = ActionComponentType.CARD_PREVIEW,
             status = ActionComponentStatus.ACTIVE,
@@ -129,7 +123,6 @@ private fun reviewActions(
             )
         ),
     )
-}
 
 
 private fun manualEditActions(
@@ -142,7 +135,7 @@ private fun manualEditActions(
             type = ActionComponentType.UPLOAD,
             field = Field.MEDIA,
             status = ActionComponentStatus.ACTIVE,
-            options = listOf(ActionOptionSchema.of(ActionOptionType.UPLOAD_MEDIA)),
+            options = mediaOptions(draft = draft),
         )
 
         Field.TAGS -> ActionComponentSchema(
@@ -160,10 +153,10 @@ private fun manualEditActions(
         )
 
         Field.LOCATION -> ActionComponentSchema(
-            type = ActionComponentType.INPUT,
+            type = ActionComponentType.LOCATION_PICKER,
             field = Field.LOCATION,
             status = ActionComponentStatus.ACTIVE,
-            options = listOf(ActionOptionSchema.of(ActionOptionType.EDIT_LOCATION)),
+            options = buildLocationEditorOptions(draft = draft),
         )
 
         else -> ActionComponentSchema(
@@ -237,34 +230,13 @@ private fun buildOptionGrid(
     }
 }
 
-private fun buildLocationOptions(
+private fun buildLocationEditorOptions(
     draft: CaptureDraft,
 ): List<ActionOptionSchema> {
-    val selected = draft.location?.name.orEmpty()
-    val presets = listOf("Home", "Office", "Shanghai", "Hangzhou")
-    val presetOptions = presets.map { name ->
-        ActionOptionSchema(
-            type = ActionOptionType.SET_LOCATION,
-            label = name,
-            value = ActionOptionType.encodeSetLocation(name),
-            selected = selected.equals(name, ignoreCase = true),
-        )
-    }
-    val selectedOption = selected
-        .takeIf { it.isNotBlank() && presets.none { preset -> preset.equals(it, ignoreCase = true) } }
-        ?.let { custom ->
-            ActionOptionSchema(
-                type = ActionOptionType.SET_LOCATION,
-                label = custom,
-                value = ActionOptionType.encodeSetLocation(custom),
-                selected = true,
-            )
-        }
     return buildList {
-        add(ActionOptionSchema.of(ActionOptionType.EDIT_LOCATION))
-        addAll(presetOptions)
-        if (selectedOption != null) add(selectedOption)
-        if (selected.isNotBlank()) add(ActionOptionSchema.of(ActionOptionType.CLEAR_LOCATION))
+        if (draft.location?.name.isNullOrBlank().not()) {
+            add(ActionOptionSchema.of(ActionOptionType.CLEAR_LOCATION))
+        }
     }
 }
 
@@ -273,7 +245,7 @@ private fun buildTagOptions(
 ): List<ActionOptionSchema> {
     val selected = draft.tags.toSet()
     val seeds = buildList {
-        addAll(listOf("food", "idea", "todo", "work", "life"))
+        addAll(listOf("灵感", "待办", "工作", "生活", "美食", "餐厅"))
         addAll(draft.tags)
     }
     return seeds
@@ -292,4 +264,17 @@ private fun buildTagOptions(
                 ActionOptionSchema.tag(tag)
             }
         }
+}
+
+private fun mediaOptions(
+    draft: CaptureDraft,
+): List<ActionOptionSchema> {
+    return if (draft.mediaAssets.isEmpty()) {
+        listOf(ActionOptionSchema.of(ActionOptionType.UPLOAD_MEDIA))
+    } else {
+        listOf(
+            ActionOptionSchema.of(ActionOptionType.REPLACE_MEDIA),
+            ActionOptionSchema.of(ActionOptionType.REMOVE_MEDIA),
+        )
+    }
 }
