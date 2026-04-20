@@ -42,6 +42,7 @@ import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
+import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -198,7 +199,7 @@ private fun UserMediaSection(
                     }
                 } else {
                     SubcomposeAsyncImage(
-                        model = asset.localUri,
+                        model = asset.localUri.toPlayableUrl(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
@@ -244,7 +245,7 @@ private fun MediaPlaceholder(
 private fun CaptureMediaAsset.toMediaItem(): MediaItem =
     MediaItem(
         id = sha256.ifBlank { localUri },
-        file = PlatformFile(localUri),
+        file = PlatformFile(localUri.removePrefix("file://")),
         name = displayName(),
         isVideo = isVideo(),
     )

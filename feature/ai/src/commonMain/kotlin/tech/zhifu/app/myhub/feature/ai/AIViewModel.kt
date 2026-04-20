@@ -14,6 +14,8 @@ import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProviderMode
+import tech.zhifu.app.myhub.ui.state.language.LanguageState
+import tech.zhifu.app.myhub.ui.state.language.createLanguageStateFlow
 import tech.zhifu.app.myhub.ui.state.user.UserState
 import tech.zhifu.app.myhub.ui.state.user.createUserStateFlow
 import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
@@ -30,12 +32,14 @@ class AIViewModel(
     ViewModelSideEffect<AISideEffect>,
     UserState,
     UserPreferencesState,
-    ProviderState {
+    ProviderState,
+    LanguageState {
 
     private var needInit = true
     override val userStateFlow = createUserStateFlow()
     override val userPreferencesStateFlow = createUserPreferencesStatFlow()
     override val providerRoutingConfig = createAIProviderStateFlow()
+    override val language = createLanguageStateFlow()
 
     override val container = container<AIUiState, AISideEffect>(
         initialState = AIUiState.Loading,
@@ -58,6 +62,12 @@ class AIViewModel(
                 }
                 if (needInit) {
                     needInit = false
+                    orchestrator.updateLanguageTag(language.value.languageTag)
+                    language
+                        .onEach { currentLanguage ->
+                            orchestrator.updateLanguageTag(currentLanguage.languageTag)
+                        }
+                        .launchIn(viewModelScope)
                     // 初始化时，注册回调
                     contextManager.addContextChangeCallback { context, _ ->
                         val state = state as? AIUiState.Content ?: AIUiState.Content(

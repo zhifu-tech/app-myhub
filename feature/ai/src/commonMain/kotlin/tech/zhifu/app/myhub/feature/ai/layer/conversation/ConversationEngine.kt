@@ -40,7 +40,12 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_published
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_publishing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_restore_session
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_review_input_help
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_field
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_current_step
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_location
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_media
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_summary
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_tags
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_title
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_summary_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_summary_updated
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_tag_added_need_more
@@ -485,8 +490,14 @@ class ConversationEngine(
             transitionToNextState(
                 message = ofMessage(
                     role = Message.Role.AI,
-                    textRes = Res.string.feature_ai_msg_skip_field,
-                    textArgs = listOf(fieldDisplayName(field)),
+                    textRes = when (field) {
+                        Field.MEDIA -> Res.string.feature_ai_msg_skip_media
+                        Field.TAGS -> Res.string.feature_ai_msg_skip_tags
+                        Field.TITLE -> Res.string.feature_ai_msg_skip_title
+                        Field.SUMMARY -> Res.string.feature_ai_msg_skip_summary
+                        Field.LOCATION -> Res.string.feature_ai_msg_skip_location
+                        Field.UNKNOWN -> Res.string.feature_ai_msg_skip_current_step
+                    },
                 )
             )
         }
@@ -887,14 +898,5 @@ class ConversationEngine(
                 actionOwnerMessageId = ownerMessageId,
             )
         )
-    }
-
-    private fun fieldDisplayName(field: Field): String = when (field) {
-        Field.MEDIA -> "图片"
-        Field.TAGS -> "标签"
-        Field.TITLE -> "标题"
-        Field.SUMMARY -> "摘要"
-        Field.LOCATION -> "位置"
-        Field.UNKNOWN -> "当前步骤"
     }
 }

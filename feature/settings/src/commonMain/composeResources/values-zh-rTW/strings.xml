@@ -30,6 +30,15 @@
   <string name="feature_settings_ai_direct_api_key">直連 API Key</string>
   <string name="feature_settings_ai_timeout_ms">逾時（毫秒）</string>
   <string name="feature_settings_ai_retries">最大重試次數</string>
+  <string name="feature_settings_ai_shortcut_title">AI 擷取頁頂部 Provider 入口</string>
+  <string name="feature_settings_ai_shortcut_hint">在 AI 擷取頁頂部顯示 Provider
+    快捷切換。之後也可以在聊天頁或這裡再次隱藏。
+  </string>
+  <string name="feature_settings_ai_mode_hint">選擇新的分析請求應該走哪一條 Provider 路徑。</string>
+  <string name="feature_settings_ai_direct_title">直連 API 參數</string>
+  <string name="feature_settings_ai_direct_hint">僅在選擇「直連 API」模式時生效。</string>
+  <string name="feature_settings_ai_runtime_title">執行參數</string>
+  <string name="feature_settings_ai_runtime_hint">逾時和重試次數會作用於所有 Provider 模式。</string>
   <string name="feature_settings_ai_save">儲存 AI 設定</string>
   <string name="feature_settings_ai_validation_timeout_invalid">逾時必須是大於 0 的整數</string>
   <string name="feature_settings_ai_validation_max_retries_invalid">最大重試次數必須是大於等於 0 的整數</string>

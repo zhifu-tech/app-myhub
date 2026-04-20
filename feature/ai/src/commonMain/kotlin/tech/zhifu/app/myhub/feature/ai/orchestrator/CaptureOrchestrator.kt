@@ -30,6 +30,8 @@ import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
+import tech.zhifu.app.myhub.ui.state.language.Language
+import tech.zhifu.app.myhub.ui.state.language.toLanguage
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -55,6 +57,8 @@ class CaptureOrchestrator(
     private val patchApplier: PatchApplier,
     val storageGateway: StorageGateway,
 ) {
+    private var languageTag: String = Language.ZH_CN.languageTag
+
     init {
         autoSaveDraftSession()
     }
@@ -64,6 +68,12 @@ class CaptureOrchestrator(
     suspend fun updateProviderConfig(
         config: ProviderRoutingConfig
     ) = providerConfigSource.update(config)
+
+    fun updateLanguageTag(
+        languageTag: String,
+    ) {
+        this.languageTag = languageTag.toLanguage().languageTag
+    }
 
     suspend fun bootstrap() {
         val restored = storageGateway.loadLatestDraftSession()
@@ -215,7 +225,7 @@ class CaptureOrchestrator(
             }
 
             Field.LOCATION -> {
-                if (text.trim().lowercase() in CLEAR_KEYWORDS) {
+                if (isClearLocationCommand(text)) {
                     handleClearLocation()
                     return
                 }
@@ -243,8 +253,71 @@ class CaptureOrchestrator(
         }
     }
 
-    companion object {
-        private val CLEAR_KEYWORDS = setOf("清空", "删除", "无", "none", "clear")
+    private fun isClearLocationCommand(
+        text: String,
+    ): Boolean {
+        val normalized = normalizeCommand(text)
+        if (normalized.isBlank()) return false
+        return normalized in clearKeywordsFor(languageTag.toLanguage()) ||
+            normalized in universalClearKeywords
+    }
+
+    private fun clearKeywordsFor(
+        language: Language,
+    ): Set<String> = when (language) {
+        Language.ZH_CN -> setOf("清空", "清除", "删除", "移除", "无", "没有", "暂无", "先不填", "不填")
+        Language.ZH_TW -> setOf("清空", "清除", "刪除", "移除", "無", "沒有", "暫無", "先不填", "不填")
+        Language.EN -> setOf(
+            "clear",
+            "delete",
+            "remove",
+            "empty",
+            "none",
+            "reset",
+            "no location",
+            "no place",
+            "skip",
+        )
+    }
+
+    private fun normalizeCommand(
+        text: String,
+    ): String {
+        return text
+            .trim()
+            .lowercase()
+            .removePrefix("：")
+            .removePrefix(":")
+            .replace("　", " ")
+            .trimEnd('.', '。', '!', '！', '?', '？', ',', '，')
+            .replace("\\s+".toRegex(), "")
+    }
+
+    private companion object {
+        private val universalClearKeywords = setOf(
+            "clear",
+            "delete",
+            "remove",
+            "empty",
+            "none",
+            "reset",
+            "nolocation",
+            "noplace",
+            "skip",
+            "清空",
+            "清除",
+            "删除",
+            "刪除",
+            "移除",
+            "无",
+            "無",
+            "沒有",
+            "没有",
+            "暫無",
+            "暂无",
+            "先不填",
+            "不填",
+        )
     }
 
     private suspend fun handlePublish() {
@@ -435,7 +508,7 @@ class CaptureOrchestrator(
 
         val route = providerRouter.resolveRoute()
         val request = ProviderAnalysisRequest(
-            language = "zh-CN",
+            language = languageTag,
             inputText = text,
         )
         val aiJob = StoredAiJob(

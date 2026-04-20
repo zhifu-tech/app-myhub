@@ -26,12 +26,25 @@ fun PlatformFile.toMediaItem(): MediaItem {
     )
 }
 
-fun PlatformFile.toPlayableUrl(): String {
-    val rawPath = toString().trim()
+fun PlatformFile.toPlayableUrl(): String = toString().toPlayableUrl()
+
+fun String.toPlayableUrl(): String {
+    val rawPath = this.trim()
     if (rawPath.isBlank()) return ""
-    return if (rawPath.startsWith("file://")) rawPath else "file://$rawPath"
+    return if (
+        rawPath.startsWith("file://") ||
+        rawPath.startsWith("content://") ||
+        rawPath.startsWith("http://") ||
+        rawPath.startsWith("https://") ||
+        rawPath.startsWith("blob:") ||
+        rawPath.startsWith("data:")
+    ) {
+        rawPath
+    } else {
+        "file://$rawPath"
+    }
 }
 
 fun MediaItem.systemMimeType(): String {
-    return file.mimeType()?.toString() ?: if (isVideo) "video/*" else "audio/*"
+    return file.mimeType()?.toString() ?: if (isVideo) "video/*" else "image/*"
 }

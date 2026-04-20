@@ -28,7 +28,6 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_valid
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderRoutingConfig
 import tech.zhifu.app.myhub.ui.state.ai.updateAIProvider
-import tech.zhifu.app.myhub.ui.state.ai.updateAIProviderShortcutVisible
 
 @Composable
 fun AIProviderSettingItem(
@@ -101,6 +100,7 @@ fun AIProviderSettingItem(
             val retries = maxRetriesInput.toIntOrNull() ?: 1
             viewModel.updateAIProvider(
                 editProvider.copy(
+                    shortcutVisible = providerShortcutVisible,
                     timeoutMs = timeout,
                     maxRetries = retries,
                 )
@@ -134,7 +134,6 @@ fun AIProviderSettingItem(
         providerShortcutVisible = providerShortcutVisible,
         onProviderShortcutVisibleChanged = { visible ->
             providerShortcutVisible = visible
-            viewModel.updateAIProviderShortcutVisible(visible)
         },
     )
 }

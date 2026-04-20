@@ -142,6 +142,7 @@ fun AIScreenTwoPanel(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(12.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.35f))
                     .draggable(
                         orientation = Orientation.Horizontal,

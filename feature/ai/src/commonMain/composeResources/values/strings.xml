@@ -87,6 +87,10 @@
   <string name="feature_ai_msg_skip_media">Skipped image step. Continue the next step below.</string>
   <string name="feature_ai_msg_skip_tags">Skipped tag step. Continue the next step below.</string>
   <string name="feature_ai_msg_skip_field">Skipped field: %1$s. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_title">Skipped title step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_summary">Skipped summary step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_location">Skipped place step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_current_step">Skipped the current step. Continue the next step below.</string>
   <string name="feature_ai_msg_move_review">The draft is ready. Publish if it already looks right, or tap a field below
     to adjust it.
   </string>

@@ -75,6 +75,10 @@
   <string name="feature_ai_msg_skip_media">已跳過圖片補充。請繼續完成下一步。</string>
   <string name="feature_ai_msg_skip_tags">已跳過標籤補充。請繼續完成下一步。</string>
   <string name="feature_ai_msg_skip_field">已跳過欄位：%1$s。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_title">已跳過標題補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_summary">已跳過摘要補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_location">已跳過位置補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_current_step">已跳過目前步驟。請繼續完成下一步。</string>
   <string name="feature_ai_msg_move_review">草稿已經整理好了。沒問題就直接發布；想調整的話，點下方項目即可。</string>
   <string name="feature_ai_msg_manual_edit">告訴我你想改成什麼樣，我會直接更新草稿。</string>
   <string name="feature_ai_msg_title_editing">在下方輸入新標題；改完可點「回到複核」。</string>

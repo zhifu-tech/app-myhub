@@ -50,6 +50,7 @@ import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
+import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionSchema
@@ -286,7 +287,7 @@ private fun MediaPanel(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
                         ) {
                             SubcomposeAsyncImage(
-                                model = asset.localUri,
+                                model = asset.localUri.toPlayableUrl(),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -918,7 +919,7 @@ private fun ExamplePill(
 private fun CaptureMediaAsset.toMediaItem(): MediaItem {
     return MediaItem(
         id = sha256.ifBlank { localUri },
-        file = PlatformFile(localUri),
+        file = PlatformFile(localUri.removePrefix("file://")),
         name = localUri.substringAfterLast('/').ifBlank { sha256.take(8) },
         isVideo = mediaType.startsWith("video/", ignoreCase = true),
     )

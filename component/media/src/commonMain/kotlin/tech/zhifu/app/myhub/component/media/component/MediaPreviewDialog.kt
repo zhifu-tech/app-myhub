@@ -64,6 +64,7 @@ fun MediaPreviewDialog(
         item.isVideo -> MediaPreviewDialogShell(onDismiss = onDismiss) {
             VideoContent(mediaUrl = mediaUrl)
         }
+
         else -> MediaPreviewDialogShell(onDismiss = onDismiss) {
             ImageContent(item = item)
         }
@@ -95,6 +96,9 @@ private fun MediaPreviewDialogShell(
                     .align(Alignment.Center)
                     .fillMaxWidth(0.9f)
                     .fillMaxHeight(0.85f)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {})
+                    }
             ) {
                 Box(
                     modifier = Modifier
@@ -150,8 +154,11 @@ private fun VideoContent(
 private fun ImageContent(
     item: MediaItem
 ) {
+    val imageModel = remember(item.file) {
+        item.file.toPlayableUrl().ifBlank { item.file.toString() }
+    }
     SubcomposeAsyncImage(
-        model = item.file,
+        model = imageModel,
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Fit,
@@ -162,7 +169,19 @@ private fun ImageContent(
             ) {
                 CircularProgressIndicator()
             }
-        }
+        },
+        error = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = item.name.ifBlank { "Media preview unavailable" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
     )
 }
 

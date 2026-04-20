@@ -34,9 +34,15 @@
   <string name="feature_settings_ai_direct_api_key">Direct API Key</string>
   <string name="feature_settings_ai_timeout_ms">Timeout (ms)</string>
   <string name="feature_settings_ai_retries">Max Retries</string>
-  <string name="feature_settings_ai_shortcut_title">Provider Shortcut</string>
-  <string name="feature_settings_ai_shortcut_hint">Show the provider shortcut card on the AI capture page header.
+  <string name="feature_settings_ai_shortcut_title">Provider Shortcut in AI Capture</string>
+  <string name="feature_settings_ai_shortcut_hint">Show the provider switcher in the AI capture header. You can hide it
+    again from the chat page or here in settings.
   </string>
+  <string name="feature_settings_ai_mode_hint">Choose how new analysis requests should be routed.</string>
+  <string name="feature_settings_ai_direct_title">Direct API</string>
+  <string name="feature_settings_ai_direct_hint">These fields are used only when Direct API mode is selected.</string>
+  <string name="feature_settings_ai_runtime_title">Runtime</string>
+  <string name="feature_settings_ai_runtime_hint">Timeout and retry settings apply to all provider modes.</string>
   <string name="feature_settings_ai_save">Save AI Settings</string>
   <string name="feature_settings_ai_validation_timeout_invalid">Timeout must be a positive integer</string>
   <string name="feature_settings_ai_validation_max_retries_invalid">Max retries must be a non-negative integer</string>

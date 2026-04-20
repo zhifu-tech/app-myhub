@@ -13,9 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -63,15 +60,12 @@ fun ChatInputBar(
         }
     }
     val safeState = state ?: return
-    var input by remember { mutableStateOf("") }
-    input = safeState.input
     ChatInputBarContent(
         modifier = modifier,
         onInputChange = { text ->
             viewModel.updateInput(text)
-            input = text
         },
-        input = input,
+        input = safeState.input,
         placeHolder = safeState.placeHolderText(),
         contextLabel = safeState.contextLabel(),
         supportingText = safeState.supportingText(),
