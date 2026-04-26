@@ -248,8 +248,8 @@ private fun mediaGridLayoutSpec(
     )
 
     7 -> listOf(
-        MediaGridCell(0, 0, 4, 2),
-        MediaGridCell(0, 2, 4, 2),
+        MediaGridCell(0, 0, 2, 4),
+        MediaGridCell(2, 0, 2, 4),
         MediaGridCell(4, 0, 2, 2),
         MediaGridCell(4, 2, 2, 2),
         MediaGridCell(0, 4, 2, 2),
@@ -258,9 +258,9 @@ private fun mediaGridLayoutSpec(
     )
 
     8 -> listOf(
-        MediaGridCell(0, 0, 4, 2),
+        MediaGridCell(0, 0, 2, 4),
+        MediaGridCell(2, 0, 2, 2),
         MediaGridCell(4, 0, 2, 2),
-        MediaGridCell(0, 2, 2, 2),
         MediaGridCell(2, 2, 2, 2),
         MediaGridCell(4, 2, 2, 2),
         MediaGridCell(0, 4, 2, 2),
