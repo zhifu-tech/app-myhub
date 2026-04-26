@@ -586,21 +586,17 @@ private fun TagPanel(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             tagOptions.forEach { option ->
-                when (option.type) {
-                    ActionOptionType.REMOVE_TAG -> InputChip(
+                val isSelected = option.label in selectedTags
+                val action = ActionOptionType.encodeTagAdd(option.label)
+                if (isSelected) {
+                    InputChip(
                         selected = true,
-                        onClick = { onAction(option.value) },
+                        onClick = { onAction(action) },
                         label = { Text(displayLabel(option)) },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = null,
-                            )
-                        },
                     )
-
-                    else -> AssistChip(
-                        onClick = { onAction(option.value) },
+                } else {
+                    AssistChip(
+                        onClick = { onAction(action) },
                         label = { Text(displayLabel(option)) },
                     )
                 }
@@ -835,26 +831,24 @@ private fun GenericActionPanel(
                 when (option.type) {
                     ActionOptionType.REMOVE_TAG -> InputChip(
                         selected = true,
-                        onClick = { onAction(option.value) },
+                        onClick = { onAction(ActionOptionType.encodeTagAdd(option.label)) },
                         label = { Text(displayLabel(option)) },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = null,
-                            )
-                        },
                     )
 
-                    ActionOptionType.TAG -> AssistChip(
-                        onClick = {
-                            if (option.label in selectedTags) {
-                                onAction(ActionOptionType.encodeTagRemove(option.label))
-                            } else {
-                                onAction(option.value)
-                            }
-                        },
-                        label = { Text(displayLabel(option)) },
-                    )
+                    ActionOptionType.TAG -> {
+                        if (option.label in selectedTags) {
+                            InputChip(
+                                selected = true,
+                                onClick = { onAction(ActionOptionType.encodeTagAdd(option.label)) },
+                                label = { Text(displayLabel(option)) },
+                            )
+                        } else {
+                            AssistChip(
+                                onClick = { onAction(ActionOptionType.encodeTagAdd(option.label)) },
+                                label = { Text(displayLabel(option)) },
+                            )
+                        }
+                    }
 
                     else -> OutlinedButton(
                         onClick = { onAction(option.value) },

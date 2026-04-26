@@ -21,18 +21,14 @@ data class ActionOptionSchema(
     companion object {
         fun of(
             type: ActionOptionType,
+            label: String = type.value,
+            value: String = type.value,
             selected: Boolean = false,
         ): ActionOptionSchema = ActionOptionSchema(
             type = type,
-            label = type.value,
-            value = type.value,
-            selected = selected,
-        )
-
-        fun tag(label: String): ActionOptionSchema = ActionOptionSchema(
-            type = ActionOptionType.TAG,
             label = label,
-            value = ActionOptionType.encodeTagAdd(label),
+            value = value,
+            selected = selected,
         )
     }
 }

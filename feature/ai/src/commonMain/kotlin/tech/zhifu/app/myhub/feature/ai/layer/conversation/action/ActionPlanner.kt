@@ -189,27 +189,24 @@ private fun buildLocationEditorOptions(
 private fun buildTagOptions(
     draft: CaptureDraft
 ): List<ActionOptionSchema> {
-    val selected = draft.tags.toSet()
     val seeds = buildList {
         addAll(listOf("灵感", "待办", "工作", "生活", "美食", "餐厅"))
         addAll(draft.tags)
     }
     return seeds
+        .asSequence()
         .map { it.trim() }
         .filter { it.isNotBlank() }
         .distinct()
         .take(12)
         .map { tag ->
-            if (tag in selected) {
-                ActionOptionSchema(
-                    type = ActionOptionType.REMOVE_TAG,
-                    label = tag,
-                    value = ActionOptionType.encodeTagRemove(tag),
-                )
-            } else {
-                ActionOptionSchema.tag(tag)
-            }
+            ActionOptionSchema.of(
+                type = ActionOptionType.TAG,
+                label = tag,
+                value = ActionOptionType.encodeTagAdd(tag),
+            )
         }
+        .toList()
 }
 
 private fun mediaOptions(
