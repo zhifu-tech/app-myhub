@@ -15,9 +15,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -48,10 +48,11 @@ fun ContentGrid(
             item = item,
             modifier = Modifier.animateItem(),
             viewModel = viewModel
-        ) { animatedVisibilityScope ->
+        ) { animatedVisibilityScope, onOpenMediaPreview ->
             ContentGridItem(
                 item = item,
                 animatedVisibilityScope = animatedVisibilityScope,
+                onOpenMediaPreview = onOpenMediaPreview,
             )
         }
     }
@@ -69,13 +70,13 @@ internal fun ContentGridContent(
         modifier = modifier,
         contentPadding = paddingValues,
         columns = GridCells.Adaptive(minSize = 150.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
         state = gridState,
     ) {
         items(
             items = items,
-            key = { it.id },
+            key = { it.card.id },
             contentType = { "gridItem" },
             itemContent = contentItem,
         )

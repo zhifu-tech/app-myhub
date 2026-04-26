@@ -1,2 +1,3 @@
+"NSCameraUsageDescription" = "允許存取相機，這樣你就可以直接拍照，把眼前內容快速整理成卡片。";
 "NSPhotoLibraryAddUsageDescription" = "允許將預覽圖片儲存到你的照片。";
 "NSPhotoLibraryUsageDescription" = "允許存取你的照片以儲存預覽圖片。";

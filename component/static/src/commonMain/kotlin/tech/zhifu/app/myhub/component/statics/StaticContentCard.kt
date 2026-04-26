@@ -7,7 +7,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,13 +36,13 @@ fun StaticContentCard(
     onClick: () -> Unit = {},
 ) {
     val transition = rememberInfiniteTransition(label = "loading-card")
-    val cardShape = RoundedCornerShape(16.dp)
-    val floatOffsetPx = with(LocalDensity.current) { 10.dp.toPx() }
+    val cardShape = RoundedCornerShape(28.dp)
+    val floatOffsetPx = with(LocalDensity.current) { 8.dp.toPx() }
     val floatOffset by transition.animateFloat(
         initialValue = 0f,
         targetValue = -floatOffsetPx,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 3800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse,
         ),
         label = "loading-card-float",
@@ -54,33 +54,36 @@ fun StaticContentCard(
     ) {
         Box(
             modifier = Modifier
-                .requiredSize(width = 176.dp, height = 208.dp)
-                .shadow(24.dp, cardShape, clip = false),
+                .requiredSize(width = 188.dp, height = 220.dp)
+                .shadow(18.dp, cardShape, clip = false),
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(cardShape)
-                    .clickable(onClick = onClick)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = cardShape
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
-                        shape = cardShape
-                    )
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .clickable(onClick = onClick),
+                shape = cardShape,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.34f),
+                ),
+                tonalElevation = 2.dp,
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    StaticContentCardLine(width = 0.75f)
-                    StaticContentCardLine(width = 0.5f)
-                    StaticContentCardLine(width = 0.66f)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        StaticContentCardLine(width = 0.92f)
+                        StaticContentCardLine(width = 0.68f)
+                        StaticContentCardLine(width = 0.82f)
+                    }
+                    stateIndicator()
                 }
-                stateIndicator()
             }
         }
     }
@@ -91,10 +94,10 @@ private fun StaticContentCardLine(width: Float) {
     Box(
         modifier = Modifier
             .fillMaxWidth(width)
-            .height(10.dp)
+            .height(9.dp)
             .background(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(50)
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
+                shape = RoundedCornerShape(999.dp)
             )
     )
 }

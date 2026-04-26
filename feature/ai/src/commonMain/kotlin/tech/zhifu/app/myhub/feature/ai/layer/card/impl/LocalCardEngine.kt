@@ -2,16 +2,13 @@ package tech.zhifu.app.myhub.feature.ai.layer.card.impl
 
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import tech.zhifu.app.myhub.datastore.file.storage.isExternalStorageHandle
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.CardContent
-import tech.zhifu.app.myhub.datastore.model.domain.CardContentType
 import tech.zhifu.app.myhub.datastore.model.domain.CardLocation
 import tech.zhifu.app.myhub.datastore.model.domain.CardSource
 import tech.zhifu.app.myhub.datastore.model.domain.CardSourceKind
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.CardType
-import tech.zhifu.app.myhub.datastore.model.domain.CardUi
-import tech.zhifu.app.myhub.datastore.model.domain.Cover
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.card.CardEngine
@@ -116,23 +113,10 @@ class LocalCardEngine(
     override fun toPublishedCard(
         draft: CaptureDraft
     ): Card {
-        val check = prePublishCheck(draft)
-        if (!check.ok) {
-            error(
-                "pre_publish_check_failed:${check.issues.joinToString(",")}"
-            )
-        }
         val safe = validator.validateDraft(draft)
         val now = Clock.System.now()
-        val coverUrl = safe.mediaAssets.firstOrNull { it.mediaType.startsWith("image/") }?.localUri
-            ?: safe.mediaAssets.firstOrNull()?.localUri
-        val contentType = when {
-            coverUrl != null && safe.summary.isBlank() && safe.sourceText.isBlank() -> CardContentType.IMAGE
-            else -> CardContentType.TEXT
-        }
-        val contentValue = safe.summary
-            .ifBlank { safe.sourceText }
-            .ifBlank { coverUrl.orEmpty() }
+        val externalMedia = safe.mediaAssets.filter { isExternalStorageHandle(it.storageHandle) }
+        val firstMediaUrl = externalMedia.firstOrNull()?.accessUrl
         val sourceKind = when {
             safe.sourceText.isHttpUrl() -> CardSourceKind.LINK
             safe.mediaAssets.isNotEmpty() -> CardSourceKind.IMPORT
@@ -140,7 +124,7 @@ class LocalCardEngine(
         }
         val sourceRef = when {
             safe.sourceText.isHttpUrl() -> safe.sourceText
-            coverUrl != null -> coverUrl
+            firstMediaUrl != null -> firstMediaUrl
             else -> null
         }
         val locationRaw = safe.location?.let { location ->
@@ -175,20 +159,6 @@ class LocalCardEngine(
             updatedAt = now,
             locationRaw = locationRaw,
             tagsRaw = safe.tags.serialize().orEmpty(),
-            uiRaw = coverUrl?.let { url ->
-                CardUi(
-                    cover = Cover(
-                        iconKey = "",
-                        bgColor = "#EFF6FF",
-                        tintColor = "",
-                        imageUrl = url,
-                    )
-                ).serialize().orEmpty()
-            },
-            contentRaw = CardContent(
-                type = contentType,
-                value = contentValue,
-            ).serialize().orEmpty(),
             sourceRaw = CardSource(
                 kind = sourceKind,
                 ref = sourceRef,

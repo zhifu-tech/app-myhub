@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.feature.dashboard.content.item
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -15,9 +14,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
-import tech.zhifu.app.myhub.ui.model.ContentCard
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -48,10 +47,11 @@ fun ContentList(
             item = item,
             modifier = Modifier.animateItem(),
             viewModel = viewModel
-        ) { animatedVisibilityScope ->
+        ) { animatedVisibilityScope, onOpenMediaPreview ->
             ContentListItem(
                 item = item,
                 animatedVisibilityScope = animatedVisibilityScope,
+                onOpenMediaPreview = onOpenMediaPreview,
             )
         }
     }
@@ -68,12 +68,12 @@ internal fun ContentListContent(
     LazyColumn(
         modifier = modifier,
         contentPadding = paddingValues,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
         state = listState,
     ) {
         items(
             items = items,
-            key = { it.id },
+            key = { it.card.id },
             contentType = { "listItem" },
             itemContent = contentItem,
         )

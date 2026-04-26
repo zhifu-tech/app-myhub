@@ -5,12 +5,19 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.component.statics.StaticContent
@@ -64,11 +71,33 @@ private fun LoadingIndicator(modifier: Modifier) {
         ),
         label = "loading-spinner-rotation",
     )
-    Icon(
-        imageVector = MaterialSymbolsProgress_activity,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-        modifier = modifier.size(36.dp)
-            .graphicsLayer { rotationZ = rotation },
-    )
+    Surface(
+        modifier = modifier
+            .size(44.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.04f),
+                    )
+                )
+            ),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+    ) {
+        Box(
+            modifier = Modifier.padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = MaterialSymbolsProgress_activity,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.82f),
+                modifier = Modifier
+                    .size(28.dp)
+                    .graphicsLayer { rotationZ = rotation },
+            )
+        }
+    }
 }

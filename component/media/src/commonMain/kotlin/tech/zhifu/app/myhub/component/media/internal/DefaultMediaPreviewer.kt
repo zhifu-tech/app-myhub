@@ -6,7 +6,7 @@ import tech.zhifu.app.myhub.component.media.util.systemMimeType
 
 class DefaultMediaPreviewer : MediaPreviewer {
     override fun openInSystemPlayer(item: MediaItem): Boolean {
-        return openInSystemPlayer(item.file, item.systemMimeType())
+        return openInSystemPlayer(item, item.systemMimeType())
     }
 
     override fun isSystemPlayerPreferred(): Boolean {

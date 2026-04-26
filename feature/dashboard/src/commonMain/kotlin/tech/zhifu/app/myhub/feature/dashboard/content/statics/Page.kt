@@ -16,6 +16,7 @@ import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_error_title
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_subtitle
 import tech.zhifu.app.myhub.feature.dashboard.resources.feature_dashboard_loading_title
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 
 @Composable
 fun Loading(
@@ -50,6 +51,7 @@ fun Empty(
     EmptyContent(
         modifier = Modifier.padding(paddingValues = contentPadding),
         title = stringResource(Res.string.feature_dashboard_empty_title),
-        subTitle = stringResource(Res.string.feature_dashboard_empty_subtitle)
+        subTitle = stringResource(Res.string.feature_dashboard_empty_subtitle),
+        onClick = viewModel::navigateToAiCapture,
     )
 }

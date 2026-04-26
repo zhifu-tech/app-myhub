@@ -25,12 +25,13 @@ fun StaticContentState(
 ) {
     Surface(
         modifier = modifier
-            .size(80.dp)
-            .requiredSize(80.dp)
-            .shadow(10.dp, CircleShape, clip = false)
+            .size(84.dp)
+            .requiredSize(84.dp)
+            .shadow(8.dp, CircleShape, clip = false)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
             .border(4.dp, MaterialTheme.colorScheme.surface, CircleShape),
+        tonalElevation = 1.dp,
     ) {
         Box {
             Box(
@@ -40,14 +41,14 @@ fun StaticContentState(
                         Brush.sweepGradient(
                             listOf(
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                                 Color.Transparent
                             )
                         )
                     )
-                    .graphicsLayer { alpha = 0.6f }
+                    .graphicsLayer { alpha = 0.7f }
             )
             stateIndicator(Modifier.align(alignment = Alignment.Center))
         }

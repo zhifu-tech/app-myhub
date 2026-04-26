@@ -19,15 +19,13 @@ fun EmptyContent(
     modifier: Modifier = Modifier,
     title: String,
     subTitle: String?,
+    onClick: () -> Unit = {},
 ) {
-
     StaticContent(
         modifier = modifier,
         contentCard = {
             StaticContentCard(
-                onClick = {
-
-                },
+                onClick = onClick,
                 stateIndicator = {
                     StaticContentState(
                         stateIndicator = { modifier ->
@@ -56,7 +54,7 @@ private fun EmptyIndicator(modifier: Modifier) {
     Icon(
         imageVector = Icons.Outlined.Add,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-        modifier = modifier.size(36.dp)
+        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.82f),
+        modifier = modifier.size(32.dp)
     )
 }

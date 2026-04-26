@@ -21,13 +21,13 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.core.saving.ImageSavingResult
 import tech.zhifu.app.myhub.core.saving.rememberImageSaver
 import tech.zhifu.app.myhub.core.saving.rememberImageSavingSupported
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.preview.resources.Res
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_failure
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_permission_denied
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_success
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_saving_unsupported
 import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewActionSavingButton(

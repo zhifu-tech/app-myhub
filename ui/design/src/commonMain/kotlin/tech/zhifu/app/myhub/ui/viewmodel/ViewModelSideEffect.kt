@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.shareIn
 import org.orbitmvi.orbit.ContainerHost
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 
 interface ViewModelSideEffect<SIDE_EFFECT : Any> {
     val sideEffect: SharedFlow<SIDE_EFFECT>
@@ -40,7 +38,6 @@ fun <SIDE_EFFECT> SharedFlow<SIDE_EFFECT>.CollectPredicatedSharedSideEffect(
     predicate: (SIDE_EFFECT) -> Boolean = { true },
     onSideEffect: FlowCollector<SIDE_EFFECT>
 ) {
-    logger.debug { "CollectPredicatedSharedSideEffect" + this.hashCode() }
     val lifecycleOwner = LocalLifecycleOwner.current
     val collector by rememberUpdatedState(onSideEffect)
 

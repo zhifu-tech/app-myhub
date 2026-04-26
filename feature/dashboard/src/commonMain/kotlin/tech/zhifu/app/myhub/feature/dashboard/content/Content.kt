@@ -87,7 +87,7 @@ private fun ContentContent(
     val modifier = Modifier
         .fillMaxSize()
         .tapToClearFocus()
-        .padding(horizontal = 16.dp)
+        .padding(horizontal = 18.dp)
         .background(color = MaterialTheme.colorScheme.surfaceVariant)
 
     if (layoutAsList) {

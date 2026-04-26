@@ -17,10 +17,15 @@ configure<KotlinMultiplatformExtension> {
     val channelTitle = channel.replaceFirstChar { it.uppercase() }
 
     sourceSets {
+        var baseMain = commonMain.get()
+        baseMain = maybeCreate("commonNativeMain").apply { dependsOn(baseMain) }
+        baseMain = maybeCreate("mobileMain").apply { dependsOn(baseMain) }
+        nativeMain.get().dependsOn(baseMain)
+
         fun KotlinSourceSet.injectPlatformVariant(platform: String) {
-            // 注入平台通用代码 (e.g., src/nonWebMain)
-            kotlin.srcDir("src/nonWebMain/kotlin")
-            resources.srcDir("src/nonWebMain/resources")
+            // 注入nonWeb, 代码不对 web平台生效，其他都可以生效。
+            kotlin.srcDir("src/shared/nonWeb/kotlin")
+            resources.srcDir("src/shared/nonWeb/resources")
 
             val p = platform.lowercase()
             // 注入平台环境代码 (e.g., src/androidDevMain)

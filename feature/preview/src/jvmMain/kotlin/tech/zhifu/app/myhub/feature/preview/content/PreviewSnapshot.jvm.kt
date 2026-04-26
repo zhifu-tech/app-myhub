@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO

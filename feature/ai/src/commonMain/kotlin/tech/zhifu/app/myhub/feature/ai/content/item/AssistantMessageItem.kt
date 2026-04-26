@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.model.Message
@@ -38,6 +39,7 @@ fun AssistantMessageItem(
     message: Message,
     tone: AssistantTone,
     draft: CaptureDraft,
+    mediaGenerationProgress: ProviderImageGenerationProgress?,
     selectedTags: List<String>,
     onAction: (String) -> Unit,
 ) {
@@ -104,6 +106,7 @@ fun AssistantMessageItem(
                     InlineActionDeck(
                         components = message.actionComponents,
                         draft = draft,
+                        mediaGenerationProgress = mediaGenerationProgress,
                         selectedTags = selectedTags,
                         onAction = onAction,
                     )

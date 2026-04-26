@@ -22,6 +22,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.component.cardMixed)
+            implementation(projects.component.media)
             implementation(projects.component.static)
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
@@ -33,10 +35,10 @@ kotlin {
             implementation(projects.feature.settingsApi)
             implementation(projects.feature.preview)
             implementation(projects.ui.design)
-            implementation(projects.ui.model)
             implementation(projects.ui.state)
 
             implementation(libs.coil.compose)
+            implementation(libs.filekit.core)
             implementation(libs.jb.androidx.window.windowCore)
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.material.materialIconsExtend)

@@ -10,7 +10,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.di.agentModule
 import tech.zhifu.app.myhub.feature.ai.layer.card.di.cardEngineModule
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.di.conversationModule
 import tech.zhifu.app.myhub.feature.ai.layer.storage.di.storageModule
-import tech.zhifu.app.myhub.feature.ai.layer.tool.di.toolModule
+import tech.zhifu.app.myhub.feature.ai.layer.tool.command.di.toolCommandModule
 import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
 import tech.zhifu.app.myhub.feature.ai.orchestrator.patch.PatchApplier
 import tech.zhifu.app.myhub.feature.ai.startup.AiBackgroundMaintenanceService
@@ -19,11 +19,13 @@ import tech.zhifu.app.myhub.startup.StartupTask
 
 fun aiModule() = module {
 
-    includes(agentModule())
-    includes(conversationModule())
-    includes(cardEngineModule())
-    includes(storageModule())
-    includes(toolModule())
+    includes(
+        agentModule(),
+        conversationModule(),
+        cardEngineModule(),
+        storageModule(),
+        toolCommandModule()
+    )
 
     singleOf(::PatchApplier)
     singleOf(::CaptureOrchestrator)

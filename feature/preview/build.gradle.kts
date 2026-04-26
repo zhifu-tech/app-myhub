@@ -23,13 +23,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.component.cardMixed)
+            implementation(projects.component.media)
             implementation(projects.core.logger)
             implementation(projects.core.navigation)
             implementation(projects.core.saving)
             implementation(projects.core.sharing)
             implementation(projects.datastore.model)
             implementation(projects.ui.design)
-            implementation(projects.ui.model)
 
             implementation(libs.jb.compose.components.componentsResources)
             implementation(libs.jb.compose.foundation.foundation)
@@ -39,6 +40,7 @@ kotlin {
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
             implementation(libs.coil.compose)
         }

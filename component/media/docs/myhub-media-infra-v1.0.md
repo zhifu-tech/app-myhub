@@ -8,7 +8,7 @@
 - **评审状态**：待评审
 - **方案状态**：进行中
 - **修改历史**：
-  - v1.0 (2026-02-06)：合并媒体选择与播放方案，统一 Media 组件基础设施设计
+    - v1.0 (2026-02-06)：合并媒体选择与播放方案，统一 Media 组件基础设施设计
 
 ---
 
@@ -98,11 +98,19 @@ Capture 模块需要支持：
 ```kotlin
 data class MediaItem(
     val id: String,
-    val file: PlatformFile,
     val name: String,
-    val isVideo: Boolean
+    val previewUrl: String,
+    val isVideo: Boolean = false,
+    val file: PlatformFile? = null,
+    val thumbnailUrl: String? = null,
 )
 ```
+
+设计约束：
+
+- `previewUrl` 是统一预览与播放入口
+- `file` 仅作为非 Web 平台的可选本地文件句柄
+- `Web / Wasm` 不再要求也不再伪造路径型 `PlatformFile`
 
 ### 4.3 数据流
 
@@ -115,6 +123,11 @@ UI(Add Media / Drag Drop)
  -> MediaPreviewDialog 统一预览
 ```
 
+补充说明：
+
+- 非 Web：可以同时持有 `previewUrl + file`
+- Web/Wasm：只持有 `previewUrl`
+
 ---
 
 ## 5. 实现细节
@@ -123,7 +136,8 @@ UI(Add Media / Drag Drop)
 
 - `PlatformFile.toMediaItem()` 生成统一模型
 - `MediaItem.systemMimeType()` 统一 MIME 推断
-- `PlatformFile.toPlayableUrl()` 处理平台路径与播放 URL
+- `String.toPlayableUrl()` 统一处理 `file://` / `content://` / `http(s)` / `blob:` / `data:`
+- 预览组件优先使用 `previewUrl`，仅在非 Web 平台按需回退到 `file`
 
 ### 5.2 FileKit Picker 接入
 
@@ -135,16 +149,18 @@ UI(Add Media / Drag Drop)
 
 - 桌面端通过平台拖拽 API 获取 `PlatformFile` 列表
 - 与 Picker 共享 `MediaItem` 生成与渲染链路
+- 生成后的 UI 层统一消费 `previewUrl`
 
 ### 5.4 预览与播放
 
-- 图片：`SubcomposeAsyncImage` 直接加载 `PlatformFile`
+- 图片：`SubcomposeAsyncImage` 优先加载 `previewUrl`
 - 视频/音频：使用 `MediaPlayerHost` + `VideoPlayerComposable`
-- 若桌面端 VLC 不可用，走系统播放器 fallback
+- 系统播放器 fallback 优先使用 `previewUrl`
+- 若存在本地 `file`，仅作为非 Web 平台的补充能力
 
 ### 5.5 FileKit + Coil 预览
 
-- 全局配置 `ImageLoader` 以支持 `PlatformFile`：
+- 非 Web 平台可全局配置 `ImageLoader` 以支持 `PlatformFile`：
 
 ```kotlin
 setSingletonImageLoaderFactory { context ->
@@ -154,6 +170,8 @@ setSingletonImageLoaderFactory { context ->
 }
 ```
 
+但当前组件链路不再要求 UI 必须持有 `PlatformFile` 才能预览图片。
+
 ---
 
 ## 6. 平台注意事项
@@ -162,15 +180,24 @@ setSingletonImageLoaderFactory { context ->
 
 - 需在 `index.html` 引入 Shaka 相关脚本
 - 保证脚本加载顺序（Shaka -> Global -> Helpers -> Compose App）
+- 只使用 `previewUrl`（`blob:` / `data:` / `http(s)`）进行预览与播放
+- 不再支持通过路径构造 `PlatformFile`
 
 ### 6.2 Desktop
 
 - 视频播放需要本机安装 VLC
 - YouTube 支持需要 Java 环境
+- 如有本地文件句柄，可通过 `file` 补充系统播放器能力
 
 ### 6.3 Android
 
 - 如启用 PiP 或 Resume Playback，需在 Manifest 与 Activity 中完成配置
+- `previewUrl` 可以是 `content://` 或 `file://`
+
+### 6.4 iOS
+
+- `previewUrl` 可以是沙盒内绝对路径或 `file://` URL
+- 若接入应用私有媒体目录，推荐由上层先解析成稳定 URL 再交给 `MediaItem`
 
 ---
 
@@ -190,6 +217,7 @@ setSingletonImageLoaderFactory { context ->
 - 文件格式兼容：视频缩略图跨平台复杂
 - Desktop 依赖 VLC 与 Java，用户环境不可控
 - wasmJs 仍为实验状态，性能与兼容性不确定
+- 若业务层再次把 Web/Wasm 当成本地路径文件系统，会重新引入 `PlatformFile` 误用风险
 
 ---
 

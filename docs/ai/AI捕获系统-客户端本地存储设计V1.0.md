@@ -1,5 +1,11 @@
 # AI捕获系统-客户端本地存储设计 V1.0
 
+> 本文档已被新的跨平台媒体存储设计替代。
+>
+> 请以
+> [AI捕获系统-跨平台媒体存储设计V2.0.md](/Users/zzf/Work/zhifu-tech-apps/app-myhub/docs/ai/AI捕获系统-跨平台媒体存储设计V2.0.md:1)
+> 作为唯一实现基线。
+
 ## 1. 文档定位
 
 - 版本：V1.0
@@ -83,8 +89,8 @@ App Layer
     - `card_id` TEXT
     - `media_type` TEXT (`image|video|file|audio`)
     - `mime_type` TEXT
-    - `local_uri` TEXT
-    - `thumb_uri` TEXT NULL
+    - `stored_ref` TEXT
+    - `thumb_stored_ref` TEXT NULL
     - `width` INTEGER NULL
     - `height` INTEGER NULL
     - `duration_ms` INTEGER NULL
@@ -116,6 +122,7 @@ App Layer
 - `ui` 使用 JSON-TEXT：用于存储封面 icon/color/image_ref 等展示结构，与正文内容分离。
 - `location` 使用 JSON-TEXT：统一存储地点名称与经纬度（`name/latitude/longitude`），便于地图定位。
 - `source` 使用 JSON-TEXT：与 `content` 保持一致，便于支持多来源形态（link/import/manual/share 等）和附加属性扩展。
+- `stored_ref` / `thumb_stored_ref` 存储的是稳定存储键，不是沙盒绝对路径；当前约定为 `managed://{relativePath}`，例如 `managed://cards/{cardId}/media/{mediaId}.jpg`。
 - 常用筛选字段（`type/status/updated_at/location`）仍保持为独立列，保证查询性能。
 
 索引建议：
@@ -133,19 +140,27 @@ App Layer
 建议目录结构：
 
 ```text
-/app-data
+<managed-root>/app-data
+  /ai-capture
+    /drafts
+      /{draftId}
+        /media
+          {mediaId}.{ext}
+    /generated
+      /{draftId}
+        {mediaId}.{ext}
   /cards
     /{cardId}
-      card.json (可选缓存)
       /media
-        {mediaId}.orig
+        {mediaId}.{ext}
         {mediaId}.thumb.jpg
 ```
 
 命名规范：
 
 - 文件名使用 `mediaId + 扩展名`，避免用户原始文件名冲突。
-- 所有媒体由 `media_asset.local_uri` 反查，不直接依赖路径拼接。
+- 所有媒体由稳定存储键反查，不持久化 `absolutePath()`。
+- 运行时展示路径通过 `managed-root + relativePath` 动态解析，不允许把沙盒前缀写入数据库或草稿 JSON。
 
 ### 4.3 检索层（可选）
 
@@ -170,7 +185,7 @@ App Layer
 ### 5.2 视频
 
 - 仅本地存路径和元数据，不把视频本体写入 DB。
-- 抽取首帧缩略图，写入 `thumb_uri`。
+- 抽取首帧缩略图，写入 `thumb_stored_ref`。
 - 存储元信息：时长、分辨率、大小、mime。
 
 ### 5.3 大文件
@@ -184,6 +199,7 @@ App Layer
 2. 替换：新文件写入后更新索引，旧文件延迟清理。
 3. 删除：卡片软删除后进入垃圾回收队列。
 4. 回收：后台任务清理无引用文件。
+5. 根目录调整：如果未来再次修改平台存储根目录，必须配套显式数据替换方案；当前实现不再保留运行时兼容迁移。
 
 ## 6. 多平台目录建议
 
@@ -195,9 +211,18 @@ App Layer
 
 ### 6.2 iOS
 
-- 主存储：`Application Support`
+- 主存储：`Library/Application Support/app-data`
+- 根目录策略：iOS 不再使用 `FileKit.filesDir`（`Documents`）作为长期媒体根目录，改为 `Application Support` 作为应用私有持久目录。
+- 运行时解析：数据库与草稿 JSON 仅保存 `managed://...` 存储键；实际文件访问时再解析为当前沙盒内绝对路径。
 - 临时缓存：`Caches`
 - 防 iCloud 自动备份：对可重建缓存设置 `isExcludedFromBackup`
+
+### 6.2.1 草稿媒体约束
+
+- `draft_session.draft_json` 内禁止保存外部临时 URI（如相机/相册返回的临时路径、一次性安全域路径）。
+- 草稿态媒体在 `attach/capture` 成功后必须立即转存到 app-managed 目录。
+- `draft_session` 持久化时只能写入稳定存储键（如 `managed://ai-capture/generated/{draftId}/{mediaId}.jpg`），禁止写入沙盒绝对路径。
+- 恢复草稿时必须校验 `mediaAsset.resolvedUrl` 是否存在；不存在则标记为失效媒体，并在 UI 提示用户重新选择图片。
 
 ### 6.3 JVM 桌面
 
@@ -216,6 +241,9 @@ App Layer
 
 - 新建卡片 + 绑定标签 + 写媒体索引
 - 草稿提交为发布态
+
+5. 任何写入 DB/JSON 的媒体引用都必须先做“绝对路径 -> 稳定存储键”的归一化。
+6. 任何从 DB/JSON 读取的媒体引用都必须先做“稳定存储键 -> 当前运行时绝对路径”的解析。
 
 ## 8. 本地安全与隐私
 
@@ -277,6 +305,10 @@ backup.zip
 2. 不破坏旧数据，新增字段需有默认值。
 3. 升级失败回滚，保留原数据库副本。
 4. 大版本升级前自动触发本地快照备份。
+5. 媒体路径替换采用单一新模型：
+    - 文件层：统一写入当前受控目录
+    - 引用层：所有持久化媒体引用统一写成稳定存储键 `managed://...`
+6. `card.ui.cover.imageUrl`、`card.source.ref`、`card.content.value/ref`、`media_asset.stored_ref/thumb_stored_ref`、`draft_session.draft_json.mediaAssets[].storedRef` 都属于替换范围，不能只改 `media_asset`。
 
 ## 12. 推荐实施顺序
 
@@ -291,6 +323,7 @@ backup.zip
 - 离线可创建/编辑/发布卡片。
 - 图片/视频可稳定导入、预览、删除、恢复。
 - 重启应用后草稿可恢复。
+- iOS 正常冷启动、热重启、版本升级后，本地媒体路径不因沙盒前缀变化而失效。
 - 大量卡片列表滚动性能稳定。
 - 数据迁移后无丢失、无孤儿文件。
 

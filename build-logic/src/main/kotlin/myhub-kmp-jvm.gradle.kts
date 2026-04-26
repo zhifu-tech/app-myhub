@@ -24,11 +24,11 @@ configure<KotlinMultiplatformExtension> {
     val channelTitle = channel.replaceFirstChar { it.uppercase() }
 
     sourceSets {
-        fun KotlinSourceSet.injectPlatformVariant(platform: String) {
-            // 注入平台通用代码 (e.g., src/nonWebMain)
-            kotlin.srcDir("src/nonWebMain/kotlin")
-            resources.srcDir("src/nonWebMain/resources")
+        var baseMain = commonMain.get()
+        baseMain = maybeCreate("commonNativeMain").apply { dependsOn(baseMain) }
+        jvmMain.get().dependsOn(baseMain)
 
+        fun KotlinSourceSet.injectPlatformVariant(platform: String) {
             val p = platform.lowercase()
             // 注入平台环境代码 (e.g., src/jvmDevMain)
             kotlin.srcDir("src/${p}${envTitle}Main/kotlin")

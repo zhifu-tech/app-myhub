@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.preview.PreviewTokens
 import tech.zhifu.app.myhub.feature.preview.resources.Res
 import tech.zhifu.app.myhub.feature.preview.resources.feature_preview_float_thumbnail_description
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
@@ -46,9 +47,9 @@ import tech.zhifu.app.myhub.feature.preview.sharedElement
 @Composable
 fun PreviewFloatThumbnail(
     previewKey: String,
-    coverKey: String,
+    mediaKey: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    coverUrl: String? = null,
+    mediaUrl: String? = null,
     modifier: Modifier = Modifier.Companion,
     onClick: () -> Unit = {},
 ) {
@@ -70,7 +71,7 @@ fun PreviewFloatThumbnail(
             .sharedBounds(
                 key = previewKey,
                 animatedVisibilityScope = animatedVisibilityScope,
-                overlayClipShape = MaterialTheme.shapes.medium,
+                overlayClipShape = PreviewTokens.ThumbnailShape,
             )
             .graphicsLayer {
                 translationY = with(density) { floatingOffset.dp.toPx() }
@@ -81,7 +82,7 @@ fun PreviewFloatThumbnail(
                 indication = null,
                 onClick = onClick,
             ),
-        shape = MaterialTheme.shapes.medium,
+        shape = PreviewTokens.ThumbnailShape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
         ),
@@ -95,15 +96,15 @@ fun PreviewFloatThumbnail(
         Box(
             modifier = Modifier
                 .sharedElement(
-                    key = coverKey,
+                    key = mediaKey,
                     animatedVisibilityScope = animatedVisibilityScope,
                 )
                 .fillMaxSize()
-                .clip(shape = MaterialTheme.shapes.small)
+                .clip(shape = PreviewTokens.ThumbnailShape)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-                    shape = MaterialTheme.shapes.small,
+                    shape = PreviewTokens.ThumbnailShape,
                 )
                 .padding(4.dp),
             contentAlignment = Alignment.Center,
@@ -111,18 +112,18 @@ fun PreviewFloatThumbnail(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(shape = MaterialTheme.shapes.small)
+                    .clip(shape = PreviewTokens.ThumbnailShape)
                     .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
                     .border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
-                        shape = MaterialTheme.shapes.small,
+                        shape = PreviewTokens.ThumbnailShape,
                     )
                     .padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                if (coverUrl.isNullOrBlank()) {
+                if (mediaUrl.isNullOrBlank()) {
                     Icon(
                         imageVector = Icons.Outlined.Description,
                         contentDescription = stringResource(Res.string.feature_preview_float_thumbnail_description),
@@ -143,7 +144,7 @@ fun PreviewFloatThumbnail(
                     )
                 } else {
                     SubcomposeAsyncImage(
-                        model = coverUrl,
+                        model = mediaUrl,
                         contentDescription = stringResource(Res.string.feature_preview_float_thumbnail_description),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,

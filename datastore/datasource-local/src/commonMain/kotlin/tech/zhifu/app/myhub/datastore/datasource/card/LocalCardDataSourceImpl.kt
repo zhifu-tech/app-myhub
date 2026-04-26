@@ -6,14 +6,12 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.content
 import tech.zhifu.app.myhub.datastore.model.domain.location
 import tech.zhifu.app.myhub.datastore.model.domain.source
 import tech.zhifu.app.myhub.datastore.model.domain.tags
-import tech.zhifu.app.myhub.datastore.model.domain.ui
+import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
@@ -34,8 +32,6 @@ class LocalCardDataSourceImpl(
                     type = card.type.value,
                     title = card.title,
                     summary = card.summary,
-                    content = card.content.serialize(),
-                    ui = card.ui.serialize(),
                     location = card.location.serialize(),
                     tags = card.tags.serialize().orEmpty(),
                     status = card.status.wire,

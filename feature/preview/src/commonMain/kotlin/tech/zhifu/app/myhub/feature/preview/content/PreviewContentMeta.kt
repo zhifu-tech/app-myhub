@@ -21,15 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.location
+import tech.zhifu.app.myhub.datastore.model.domain.tags
 
 @Composable
 internal fun PreviewContentMeta(
     modifier: Modifier,
     card: ContentCard,
 ) {
-    val location = card.location
-    val tags = card.tags
+    val location = card.card.location?.name.orEmpty()
+    val tags = card.card.tags
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),

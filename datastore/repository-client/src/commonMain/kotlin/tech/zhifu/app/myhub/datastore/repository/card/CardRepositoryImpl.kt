@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.repository.card
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -11,6 +12,13 @@ import tech.zhifu.app.myhub.datastore.model.domain.Card
 class CardRepositoryImpl(
     private val store: CardStore
 ) : CardRepository {
+    private val contentRevision = MutableStateFlow(0L)
+
+    override fun observeContentRevision(): Flow<Long> = contentRevision
+
+    private fun bumpContentRevision() {
+        contentRevision.value = contentRevision.value + 1L
+    }
 
     override suspend fun insertCard(
         card: Card,
@@ -29,6 +37,7 @@ class CardRepositoryImpl(
                     )
                 )
             )
+        bumpContentRevision()
     }
 
     override fun flowCard(
@@ -92,5 +101,6 @@ class CardRepositoryImpl(
                     id = cardId
                 )
             )
+        bumpContentRevision()
     }
 }

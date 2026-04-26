@@ -1,15 +1,15 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.gateway.impl
 
+import tech.zhifu.app.myhub.datastore.file.storage.isExternalStorageHandle
+import tech.zhifu.app.myhub.datastore.file.storage.resolveStorageHandleToAccessUrl
+import tech.zhifu.app.myhub.datastore.file.storage.storageHandleFromAccessUrl
 import tech.zhifu.app.myhub.datastore.model.domain.Card
-import tech.zhifu.app.myhub.datastore.model.domain.CardUi
-import tech.zhifu.app.myhub.datastore.model.domain.Cover
-import tech.zhifu.app.myhub.datastore.model.domain.ui
+import tech.zhifu.app.myhub.datastore.model.domain.MediaAsset
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
 import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
 import tech.zhifu.app.myhub.datastore.repository.capture.DraftSessionSnapshot
-import tech.zhifu.app.myhub.datastore.repository.capture.MediaAssetSnapshot
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.ai.layer.common.util.inferMimeType
@@ -19,9 +19,11 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredAiJob
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StoredDraftSession
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaFileStore
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaGarbageCollector
+import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaImportSource
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessExecutor
 import tech.zhifu.app.myhub.feature.ai.layer.storage.media.MediaPostProcessRequest
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import kotlin.enums.enumEntries
 import kotlin.time.Clock
@@ -55,11 +57,15 @@ class RepositoryStorageGateway(
                         ?.map(Field::valueOf)
             }
             ?: emptyList()
+        val restoredDraft = draft
+            ?.hydrateResolvedUrls()
+            ?.let { markMissingMediaAssets(it, mediaFileStore) }
         return StoredDraftSession(
             sessionId = snapshot.id,
             state = state,
-            draft = draft,
+            draft = restoredDraft,
             missingFields = missingFields,
+            invalidMediaCount = restoredDraft?.mediaAssets?.count { it.isMissing } ?: 0,
         )
     }
 
@@ -80,7 +86,7 @@ class RepositoryStorageGateway(
         val snapshot = DraftSessionSnapshot(
             id = sessionId,
             state = state.name,
-            draftJson = safeDraft.serialize().orEmpty(),
+            draftJson = safeDraft.normalizeStoredRefs().serialize().orEmpty(),
             missingFieldsJson = missingFields.serialize().orEmpty(),
             updatedAt = Clock.System.now().toEpochMilliseconds(),
         )
@@ -123,26 +129,30 @@ class RepositoryStorageGateway(
                     val imported = mediaFileStore.importToManagedStorage(
                         cardId = card.id,
                         mediaId = mediaId,
-                        sourceUri = media.localUri,
+                        source = MediaImportSource(
+                            storageHandle = media.storageHandle,
+                            accessUrl = media.accessUrl,
+                            sizeBytes = media.sizeBytes,
+                        ),
                     )
-                    importedUris += imported.localUri
+                    importedUris += imported.storageHandle
                     media.copy(
-                        localUri = imported.localUri,
+                        storageHandle = imported.storageHandle,
+                        accessUrl = imported.accessUrl,
                         sizeBytes = imported.sizeBytes,
                     )
                 }
             )
-            val cardToSave = card.withCoverUrl(importedDraft.coverLocalUri())
-
-            cardRepository.insertCard(card = cardToSave, userId = user.id)
+            cardRepository.insertCard(card = card, userId = user.id)
             importedDraft.mediaAssets.forEachIndexed { index, media ->
                 val now = Clock.System.now().toEpochMilliseconds()
                 captureLocalRepository.upsertMediaAsset(
-                    snapshot = MediaAssetSnapshot(
+                    snapshot = MediaAsset(
                         id = "$mediaIdPrefix$index",
-                        cardId = cardToSave.id,
-                        mediaType = media.mediaType.ifBlank { inferMimeType(media.localUri) },
-                        localUri = media.localUri,
+                        cardId = card.id,
+                        mediaType = media.mediaType.ifBlank { inferMimeType(media.accessUrl) },
+                        storageHandle = media.storageHandle,
+                        accessUrl = media.accessUrl,
                         sizeBytes = media.sizeBytes,
                         sha256 = media.sha256,
                         createdAt = now,
@@ -150,12 +160,12 @@ class RepositoryStorageGateway(
                 )
                 captureLocalRepository.upsertAiJob(
                     snapshot = AiJobSnapshot(
-                        id = "media_postprocess_${cardToSave.id}_$index",
+                        id = "media_postprocess_${card.id}_$index",
                         provider = "local_media_pipeline",
                         requestJson = MediaPostProcessRequest(
-                            cardId = cardToSave.id,
+                            cardId = card.id,
                             mediaId = "$mediaIdPrefix$index",
-                            mediaUri = media.localUri,
+                            mediaStorageHandle = media.storageHandle,
                         ).serialize().orEmpty(),
                         responseJson = null,
                         status = "queued",
@@ -176,40 +186,59 @@ class RepositoryStorageGateway(
                 )
             }
             importedUris.forEach { uri ->
-                runCatching { mediaFileStore.deleteIfExists(localUri = uri) }
-                runCatching { mediaFileStore.deleteIfExists(localUri = "$uri.thumb.jpg") }
+                runCatching { mediaFileStore.deleteIfExists(storageHandle = uri) }
             }
             throw it
         }
     }
 }
 
-private fun CaptureDraft.coverLocalUri(): String? = mediaAssets
-    .firstOrNull { it.mediaType.startsWith("image/") }
-    ?.localUri
-    ?: mediaAssets.firstOrNull()?.localUri
-
-private fun Card.withCoverUrl(
-    coverUrl: String?
-): Card {
-    if (coverUrl.isNullOrBlank()) return this
-    val currentUi = this.ui
-    val merged = currentUi
-        ?.copy(
-            cover = (currentUi.cover ?: Cover(
-                iconKey = "",
-                bgColor = "#EFF6FF",
-                tintColor = "",
-                imageUrl = coverUrl,
-            )).copy(imageUrl = coverUrl)
-        )
-        ?: CardUi(
-            cover = Cover(
-                iconKey = "",
-                bgColor = "#EFF6FF",
-                tintColor = "",
-                imageUrl = coverUrl,
+private suspend fun markMissingMediaAssets(
+    draft: CaptureDraft,
+    mediaFileStore: MediaFileStore,
+): CaptureDraft {
+    val updatedAssets = draft.mediaAssets.map { asset ->
+        if (!asset.shouldValidateExistence()) {
+            asset.copy(isMissing = false)
+        } else {
+            asset.copy(
+                isMissing = !mediaFileStore.fileExists(
+                    storageHandle = asset.storageHandle,
+                    accessUrl = asset.accessUrl,
+                )
             )
+        }
+    }
+    return draft.copy(mediaAssets = updatedAssets)
+}
+
+private fun CaptureDraft.normalizeStoredRefs(): CaptureDraft = copy(
+    mediaAssets = mediaAssets.map { asset ->
+        val storageHandle = asset.storageHandle.ifBlank {
+            storageHandleFromAccessUrl(asset.accessUrl)
+        }
+        asset.copy(
+            storageHandle = storageHandle,
+            accessUrl = if (isExternalStorageHandle(storageHandle)) {
+                storageHandle
+            } else {
+                ""
+            }
         )
-    return copy(uiRaw = merged.serialize().orEmpty())
+    }
+)
+
+private suspend fun CaptureDraft.hydrateResolvedUrls(): CaptureDraft = copy(
+    mediaAssets = mediaAssets.map { asset ->
+        asset.copy(accessUrl = resolveStorageHandleToAccessUrl(asset.storageHandle).orEmpty())
+    }
+)
+
+private fun CaptureMediaAsset.shouldValidateExistence(): Boolean {
+    val uri = accessUrl.trim()
+    if (uri.isBlank()) return false
+    return !(uri.startsWith("http://") ||
+        uri.startsWith("https://") ||
+        uri.startsWith("data:") ||
+        uri.startsWith("blob:"))
 }

@@ -1,13 +1,21 @@
 package tech.zhifu.app.myhub.feature.ai.orchestrator
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisExecutor
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisMediaInput
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.MutableProviderConfigSource
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationEngine
@@ -22,6 +30,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.storage.job.failed
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommand
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandDispatcher
 import tech.zhifu.app.myhub.feature.ai.layer.tool.command.ToolCommandResult
+import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.orchestrator.patch.PatchApplier
@@ -58,6 +67,8 @@ class CaptureOrchestrator(
     val storageGateway: StorageGateway,
 ) {
     private var languageTag: String = Language.ZH_CN.languageTag
+    private val orchestrationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var runningAnalysisJob: Job? = null
 
     init {
         autoSaveDraftSession()
@@ -77,9 +88,16 @@ class CaptureOrchestrator(
 
     suspend fun bootstrap() {
         val restored = storageGateway.loadLatestDraftSession()
-        if (false && conversationEngine.applyRestoredSession(restored = restored)) {
+        if (conversationEngine.applyRestoredSession(restored = restored)) {
             logger.debug { "bootstrap: restored session ${restored?.sessionId}" }
         } else {
+            if (restored != null) {
+                logger.debug {
+                    "bootstrap: restore skipped session=${restored.sessionId} " +
+                        "state=${restored.state} hasDraft=${restored.draft != null} " +
+                        "mediaCount=${restored.draft?.mediaAssets?.size ?: 0}"
+                }
+            }
             conversationEngine.emitBootstrap()
         }
     }
@@ -118,6 +136,7 @@ class CaptureOrchestrator(
         }
         when (val event = parseActionEvent(action)) {
             is ActionEvent.Option -> when (event.type) {
+                ActionOptionType.CAPTURE_MEDIA -> handleCaptureMediaInput(capturePhoto = true)
                 ActionOptionType.CLEAR_LOCATION -> handleClearLocation()
                 ActionOptionType.DELETE_CARD -> handleDeleteCard()
                 ActionOptionType.EDIT_LOCATION -> conversationEngine.commandEnterManualEdit(Field.LOCATION)
@@ -125,6 +144,7 @@ class CaptureOrchestrator(
                 ActionOptionType.EDIT_SUMMARY -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
                 ActionOptionType.EDIT_TAGS -> conversationEngine.commandEnterManualEdit(Field.TAGS)
                 ActionOptionType.EDIT_TITLE -> conversationEngine.commandEnterManualEdit(Field.TITLE)
+                ActionOptionType.GENERATE_MEDIA -> handleGenerateMedia()
                 ActionOptionType.NEW_CAPTURE -> {
                     conversationEngine.commandResetSession()
                 }
@@ -136,7 +156,18 @@ class CaptureOrchestrator(
                 ActionOptionType.SAVE_DRAFT -> conversationEngine.emitDraftSaved()
                 ActionOptionType.SKIP_MEDIA -> conversationEngine.commandSkipField(Field.MEDIA)
                 ActionOptionType.SKIP_TAGS -> conversationEngine.commandSkipField(Field.TAGS)
-                ActionOptionType.UPLOAD_MEDIA -> handleAttachMedia(replaceExisting = false)
+                ActionOptionType.UPLOAD_MEDIA -> {
+                    if (conversationEngine.currentState() in setOf(
+                            ConversationState.IDLE,
+                            ConversationState.COMPLETE,
+                        )
+                    ) {
+                        handleCaptureMediaInput(capturePhoto = false)
+                    } else {
+                        handleAttachMedia(replaceExisting = false)
+                    }
+                }
+
                 else -> Unit
             }
 
@@ -147,6 +178,14 @@ class CaptureOrchestrator(
             is ActionEvent.SetLocation -> handleLocationSelected(event.location)
             else -> Unit
         }
+    }
+
+    suspend fun cancelCurrentAnalysis() {
+        val job = runningAnalysisJob ?: return
+        runningAnalysisJob = null
+        job.cancel(CancellationException("capture_analysis_cancelled"))
+        runCatching { job.join() }
+        conversationEngine.applyCaptureAnalysisCancelled()
     }
 
     private suspend fun handleDraftFieldInput(text: String) {
@@ -375,12 +414,12 @@ class CaptureOrchestrator(
                 if (result.attachedAssets.isEmpty()) return
 
                 val previousUris = draft.mediaAssets
-                    .map { it.localUri }
+                    .map { it.accessUrl }
                     .toSet()
                 val visibleAssets = if (replaceExisting) {
                     result.attachedAssets
                 } else {
-                    result.attachedAssets.filterNot { it.localUri in previousUris }
+                    result.attachedAssets.filterNot { it.accessUrl in previousUris }
                 }
                 if (visibleAssets.isNotEmpty()) {
                     conversationEngine.appendUserMediaMessage(
@@ -393,6 +432,103 @@ class CaptureOrchestrator(
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
                 action = "attach_media:${result.code}:${result.message}"
             )
+
+            else -> Unit
+        }
+    }
+
+    private suspend fun handleCaptureMediaInput(
+        capturePhoto: Boolean,
+    ) {
+        val shouldStartNewCapture = conversationEngine.currentState() in setOf(
+            ConversationState.IDLE,
+            ConversationState.COMPLETE,
+        )
+        val draft = prepareDraftForFreshCapture(shouldStartNewCapture)
+        val result = if (capturePhoto) {
+            toolCommandDispatcher.execute(
+                command = ToolCommand.CaptureMediaPhoto(draft = draft)
+            )
+        } else {
+            toolCommandDispatcher.execute(
+                command = ToolCommand.AttachPickedMedia(
+                    draft = draft,
+                    imagesOnly = false,
+                )
+            )
+        }
+        when (result) {
+            is ToolCommandResult.MediaAttached -> {
+                if (result.attachedAssets.isEmpty()) return
+                conversationEngine.appendUserMediaMessage(
+                    mediaAssets = result.attachedAssets,
+                )
+                if (shouldStartNewCapture && result.analysisInputs.isNotEmpty()) {
+                    conversationEngine.commandCaptureAnalysisStarted(includesMedia = true)
+                    runCaptureAnalysis(
+                        inputText = "",
+                        baseDraft = result.draft,
+                        mediaInputs = result.analysisInputs,
+                    )
+                } else {
+                    conversationEngine.applyMediaUpdated(result.draft)
+                    if (shouldStartNewCapture && result.analysisInputs.isEmpty()) {
+                        conversationEngine.emitMediaAnalysisFallback()
+                    }
+                }
+            }
+
+            is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
+                action = if (capturePhoto) {
+                    "capture_media:${result.code}:${result.message}"
+                } else {
+                    "attach_media:${result.code}:${result.message}"
+                }
+            )
+
+            else -> Unit
+        }
+    }
+
+    private suspend fun handleGenerateMedia() {
+        val draft = conversationEngine.currentDraft()
+        logger.debug {
+            "handleGenerateMedia start draftId=${draft.id} " +
+                "mediaCount=${draft.mediaAssets.size} language=$languageTag"
+        }
+        conversationEngine.emitMediaGenerationStarted()
+        when (
+            val result = toolCommandDispatcher.execute(
+                command = ToolCommand.GenerateImage(
+                    draft = draft,
+                    language = languageTag,
+                    replaceExisting = draft.mediaAssets.isNotEmpty(),
+                    onProgress = { progress: ProviderImageGenerationProgress ->
+                        conversationEngine.applyMediaGenerationProgress(progress)
+                    },
+                )
+            )
+        ) {
+            is ToolCommandResult.MediaAttached -> {
+                logger.debug {
+                    "handleGenerateMedia success draftId=${draft.id} attached=${result.attachedAssets.size}"
+                }
+                if (result.attachedAssets.isNotEmpty()) {
+                    conversationEngine.appendUserMediaMessage(
+                        mediaAssets = result.attachedAssets,
+                    )
+                }
+                conversationEngine.clearMediaGenerationProgress()
+                conversationEngine.applyMediaUpdated(result.draft)
+            }
+
+            is ToolCommandResult.Failed -> {
+                logger.debug {
+                    "handleGenerateMedia failed draftId=${draft.id} " +
+                        "code=${result.code} message=${result.message}"
+                }
+                conversationEngine.emitMediaGenerationFailedFallback()
+            }
 
             else -> Unit
         }
@@ -503,88 +639,129 @@ class CaptureOrchestrator(
     }
 
     private suspend fun handleCaptureAnalysis(text: String) {
+        val baseDraft = prepareDraftForFreshCapture(
+            shouldStartNewCapture = conversationEngine.currentState() == ConversationState.COMPLETE,
+        )
         conversationEngine.appendUserInputMessage(text = text)
-        conversationEngine.commandCaptureAnalysisStarted()
-
-        val route = providerRouter.resolveRoute()
-        val request = ProviderAnalysisRequest(
-            language = languageTag,
+        conversationEngine.commandCaptureAnalysisStarted(includesMedia = false)
+        runCaptureAnalysis(
             inputText = text,
+            baseDraft = baseDraft,
         )
-        val aiJob = StoredAiJob(
-            id = "job_${generateUUId()}",
-            provider = route.mode.name.lowercase(),
-            requestJson = Json.encodeToString(request),
-            status = "running",
+    }
+
+    private suspend fun prepareDraftForFreshCapture(
+        shouldStartNewCapture: Boolean,
+    ): CaptureDraft {
+        if (!shouldStartNewCapture) return conversationEngine.currentDraft()
+        storageGateway.clearDraftSession(
+            sessionId = conversationEngine.currentSessionId().orEmpty()
         )
-        storageGateway.saveAiJob(snapshot = aiJob)
+        conversationEngine.commandResetSession()
+        return conversationEngine.currentDraft()
+    }
 
-        if (!route.available) {
-            providerTelemetry.recordFailure(
-                mode = route.mode,
-                latencyMs = 0,
-                category = ProviderAnalysisError.UNAVAILABLE,
+    private suspend fun runCaptureAnalysis(
+        inputText: String,
+        baseDraft: CaptureDraft,
+        mediaInputs: List<ProviderAnalysisMediaInput> = emptyList(),
+    ) {
+        runningAnalysisJob?.cancel(CancellationException("capture_analysis_replaced"))
+        val job = orchestrationScope.launch {
+            val route = providerRouter.resolveRoute()
+            val request = ProviderAnalysisRequest(
+                language = languageTag,
+                inputText = inputText,
+                mediaInputs = mediaInputs,
             )
-            storageGateway.saveAiJob(
-                snapshot = aiJob.failed(
-                    reason = route.reason ?: "AI_UNAVAILABLE"
-                )
+            val aiJob = StoredAiJob(
+                id = "job_${generateUUId()}",
+                provider = route.mode.name.lowercase(),
+                requestJson = Json.encodeToString(request),
+                status = "running",
             )
-            conversationEngine.emitAiUnavailable(
-                reason = route.reason ?: "AI_UNAVAILABLE",
-            )
-            delay(300.milliseconds)
-            conversationEngine.applyCaptureAnalysisResult(
-                draft = conversationEngine.currentDraft(),
-                reasoning = "",
-            )
-            return
-        }
+            storageGateway.saveAiJob(snapshot = aiJob)
 
-        val startedAt = Clock.System.now().toEpochMilliseconds()
-        when (val result = providerAnalysisExecutor.analyze(
-            route = route,
-            request = request,
-            onReasoning = { reasoning ->
-                conversationEngine.applyReasoningProgress(reasoning = reasoning)
-            },
-        )) {
-            is ProviderAnalysisResult.Success -> {
-                storageGateway.saveAiJob(
-                    snapshot = aiJob.copy(
-                        responseJson = "",
-                        status = "succeeded",
-                    )
-                )
-
-                val applied = patchApplier.apply(
-                    draft = conversationEngine.currentDraft(),
-                    ops = result.data.patches,
-                )
-                conversationEngine.applyCaptureAnalysisResult(
-                    draft = applied.draft,
-                    reasoning = result.data.reasoning,
-                )
-            }
-
-            is ProviderAnalysisResult.Failed -> {
+            if (!route.available) {
                 providerTelemetry.recordFailure(
                     mode = route.mode,
-                    latencyMs = Clock.System.now().toEpochMilliseconds() - startedAt,
-                    category = result.category,
+                    latencyMs = 0,
+                    category = ProviderAnalysisError.UNAVAILABLE,
                 )
                 storageGateway.saveAiJob(
                     snapshot = aiJob.failed(
-                        reason = result.reason,
-                        category = result.category.name.lowercase()
+                        reason = route.reason ?: "AI_UNAVAILABLE"
                     )
                 )
-                conversationEngine.emitAiUnavailable(reason = "AI不可用")
-                delay(100.milliseconds)
-                conversationEngine.applyCaptureAnalysisResult(
-                    draft = conversationEngine.currentDraft(),
+                conversationEngine.emitAiUnavailable(
+                    reason = route.reason ?: "AI_UNAVAILABLE",
                 )
+                delay(300.milliseconds)
+                conversationEngine.applyCaptureAnalysisResult(
+                    draft = baseDraft,
+                    reasoning = "",
+                )
+                return@launch
+            }
+
+            val startedAt = Clock.System.now().toEpochMilliseconds()
+            try {
+                when (val result = providerAnalysisExecutor.analyze(
+                    route = route,
+                    request = request,
+                    onReasoning = { reasoning ->
+                        conversationEngine.applyReasoningProgress(reasoning = reasoning)
+                    },
+                )) {
+                    is ProviderAnalysisResult.Success -> {
+                        storageGateway.saveAiJob(
+                            snapshot = aiJob.copy(
+                                responseJson = "",
+                                status = "succeeded",
+                            )
+                        )
+
+                        val applied = patchApplier.apply(
+                            draft = baseDraft,
+                            ops = result.data.patches,
+                        )
+                        conversationEngine.applyCaptureAnalysisResult(
+                            draft = applied.draft,
+                            reasoning = result.data.reasoning,
+                        )
+                    }
+
+                    is ProviderAnalysisResult.Failed -> {
+                        providerTelemetry.recordFailure(
+                            mode = route.mode,
+                            latencyMs = Clock.System.now().toEpochMilliseconds() - startedAt,
+                            category = result.category,
+                        )
+                        storageGateway.saveAiJob(
+                            snapshot = aiJob.failed(
+                                reason = result.reason,
+                                category = result.category.name.lowercase()
+                            )
+                        )
+                        conversationEngine.emitAiUnavailable(reason = "AI不可用")
+                        delay(100.milliseconds)
+                        conversationEngine.applyCaptureAnalysisResult(
+                            draft = baseDraft,
+                        )
+                    }
+                }
+            } catch (_: CancellationException) {
+                storageGateway.saveAiJob(
+                    snapshot = aiJob.failed(
+                        reason = "capture_analysis_cancelled",
+                    )
+                )
+            } finally {
+                if (runningAnalysisJob == kotlinx.coroutines.currentCoroutineContext()[Job]) {
+                    runningAnalysisJob = null
+                }
             }
         }
+        runningAnalysisJob = job
     }
 }

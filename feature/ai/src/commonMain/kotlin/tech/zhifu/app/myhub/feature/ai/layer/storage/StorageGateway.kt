@@ -24,6 +24,7 @@ data class StoredDraftSession(
     val state: ConversationState,
     val draft: CaptureDraft?,
     val missingFields: List<Field>,
+    val invalidMediaCount: Int = 0,
 )
 
 data class StoredAiJob(

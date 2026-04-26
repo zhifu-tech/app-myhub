@@ -32,6 +32,7 @@ import tech.zhifu.app.myhub.feature.ai.content.item.MessageThinkingItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageUserItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ProviderModeItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningCardItem
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
@@ -47,6 +48,7 @@ fun Content(
             ContentState(
                 messages = content.context.messages,
                 draft = content.context.draft,
+                mediaGenerationProgress = content.context.mediaGenerationProgress,
             )
         }
     }
@@ -54,6 +56,7 @@ fun Content(
     ContentContent(
         messages = safeState.messages,
         draft = safeState.draft,
+        mediaGenerationProgress = safeState.mediaGenerationProgress,
         contentPadding = contentPadding,
         onAction = viewModel::doAction,
         providerModeItem = {
@@ -69,6 +72,7 @@ fun Content(
 fun ContentContent(
     messages: List<Message>,
     draft: CaptureDraft,
+    mediaGenerationProgress: ProviderImageGenerationProgress?,
     contentPadding: PaddingValues,
     onAction: (String) -> Unit,
     providerModeItem: @Composable BoxScope.() -> Unit,
@@ -139,6 +143,7 @@ fun ContentContent(
                     Message.Role.AI -> MessageAIItem(
                         message = msg,
                         draft = draft,
+                        mediaGenerationProgress = mediaGenerationProgress,
                         selectedTags = draft.tags,
                         onAction = onAction,
                     )
@@ -147,6 +152,7 @@ fun ContentContent(
                     Message.Role.SYSTEM -> MessageSystemItem(
                         message = msg,
                         draft = draft,
+                        mediaGenerationProgress = mediaGenerationProgress,
                         selectedTags = draft.tags,
                         onAction = onAction,
                     )
@@ -167,4 +173,5 @@ fun ContentContent(
 private data class ContentState(
     val messages: List<Message>,
     val draft: CaptureDraft,
+    val mediaGenerationProgress: ProviderImageGenerationProgress?,
 )

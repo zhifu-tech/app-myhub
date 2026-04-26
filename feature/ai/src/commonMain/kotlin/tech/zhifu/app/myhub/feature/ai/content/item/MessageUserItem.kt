@@ -1,23 +1,16 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,18 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
-import io.github.vinceglb.filekit.PlatformFile
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
-import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
-import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
+import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
+import tech.zhifu.app.myhub.component.media.component.MediaGridNine
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -53,7 +42,7 @@ fun MessageUserItem(
     message: Message
 ) {
     val mediaPreviewer: MediaPreviewer = koinInject()
-    var previewingAsset by remember(message.id) { mutableStateOf<CaptureMediaAsset?>(null) }
+    var previewingIndex by remember(message.id, message.mediaAssets) { mutableStateOf<Int?>(null) }
     val text = message.textRes
         ?.let { res ->
             stringResource(
@@ -102,7 +91,7 @@ fun MessageUserItem(
                 if (message.mediaAssets.isNotEmpty()) {
                     UserMediaSection(
                         mediaAssets = message.mediaAssets,
-                        onPreview = { previewingAsset = it },
+                        onPreview = { previewingIndex = it },
                     )
                 }
             }
@@ -138,11 +127,14 @@ fun MessageUserItem(
         }
     }
 
-    previewingAsset?.let { asset ->
-        MediaPreviewDialog(
-            item = asset.toMediaItem(),
+    previewingIndex?.let { index ->
+        MediaGalleryDialog(
+            items = message.mediaAssets.mapIndexed { mediaIndex, asset ->
+                asset.toMediaItem(index = mediaIndex)
+            },
+            initialIndex = index,
             mediaPreviewer = mediaPreviewer,
-            onDismiss = { previewingAsset = null },
+            onDismiss = { previewingIndex = null },
         )
     }
 }
@@ -150,108 +142,28 @@ fun MessageUserItem(
 @Composable
 private fun UserMediaSection(
     mediaAssets: List<CaptureMediaAsset>,
-    onPreview: (CaptureMediaAsset) -> Unit,
+    onPreview: (Int) -> Unit,
 ) {
-    val single = mediaAssets.size == 1
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        mediaAssets.forEachIndexed { index, asset ->
-            val shape = RoundedCornerShape(16.dp)
-            val thumbWidth = if (single) 220.dp else 128.dp
-            Box(
-                modifier = Modifier
-                    .width(thumbWidth)
-                    .height(if (single) 168.dp else 128.dp)
-                    .clip(shape)
-                    .background(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.08f),
-                        shape = shape,
-                    )
-                    .clickable { onPreview(asset) }
-            ) {
-                if (asset.isVideo()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.16f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Outlined.PlayCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(30.dp),
-                            )
-                            Text(
-                                text = asset.displayName(index),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                } else {
-                    SubcomposeAsyncImage(
-                        model = asset.localUri.toPlayableUrl(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                        loading = {
-                            MediaPlaceholder(
-                                label = asset.displayName(index),
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                        },
-                        error = {
-                            MediaPlaceholder(
-                                label = asset.displayName(index),
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                        },
-                    )
-                }
+    MediaGridNine(
+        items = mediaAssets.mapIndexed { index, asset -> asset.toMediaItem(index) },
+        onItemClick = { index ->
+            if (!mediaAssets[index].isMissing) {
+                onPreview(index)
             }
-        }
-    }
+        },
+    )
 }
 
-@Composable
-private fun MediaPlaceholder(
-    label: String,
-    contentColor: Color,
-) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = contentColor,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 12.dp),
-        )
-    }
-}
-
-private fun CaptureMediaAsset.toMediaItem(): MediaItem =
+private fun CaptureMediaAsset.toMediaItem(index: Int = 0): MediaItem =
     MediaItem(
-        id = sha256.ifBlank { localUri },
-        file = PlatformFile(localUri.removePrefix("file://")),
+        id = sha256.ifBlank { storageHandle },
         name = displayName(),
+        previewUrl = accessUrl.takeUnless { isMissing }.orEmpty(),
         isVideo = isVideo(),
     )
 
 private fun CaptureMediaAsset.displayName(index: Int = 0): String =
-    localUri.substringAfterLast('/').ifBlank {
+    accessUrl.substringAfterLast('/').ifBlank {
         if (isVideo()) {
             "video-${index + 1}"
         } else {

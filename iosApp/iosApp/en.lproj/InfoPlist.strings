@@ -1,2 +1,3 @@
+"NSCameraUsageDescription" = "Allow camera access so you can take a photo and turn what you see into a card right away.";
 "NSPhotoLibraryAddUsageDescription" = "Allow saving preview images to your photo library.";
 "NSPhotoLibraryUsageDescription" = "Allow access to your photo library for saving preview images.";

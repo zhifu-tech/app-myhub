@@ -2,16 +2,16 @@ package tech.zhifu.app.myhub.component.media.internal
 
 import android.content.Intent
 import android.net.Uri
-import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.path
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import tech.zhifu.app.myhub.component.media.MediaItem
 
 actual fun openInSystemPlayer(
-    file: PlatformFile,
+    item: MediaItem,
     mimeType: String?
 ): Boolean {
-    val path = file.path
+    val path = item.previewUrl.ifBlank { item.file?.path.orEmpty() }
     if (path.isBlank()) return false
     val contextProvider = object : KoinComponent {
         val context by inject<android.content.Context>()

@@ -96,8 +96,8 @@ internal fun BoxScope.PreviewThumbnailStateContent(
             ) {
                 PreviewFloatThumbnail(
                     previewKey = "content-preview-${safeDraft.id}",
-                    coverKey = "content-image-${safeDraft.id}",
-                    coverUrl = safeDraft.previewCoverUrl(),
+                    mediaKey = "content-image-${safeDraft.id}",
+                    mediaUrl = safeDraft.previewMediaUrl(),
                     animatedVisibilityScope = animatedScope,
                     onClick = { onClick(state.previewState, safeDraft) },
                 )

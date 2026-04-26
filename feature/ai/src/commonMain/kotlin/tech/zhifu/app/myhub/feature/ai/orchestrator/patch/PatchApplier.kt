@@ -7,6 +7,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderJsonPatchOp
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.model.CaptureLocation
+import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 
 data class PatchApplyResult(
     val draft: CaptureDraft,
@@ -43,6 +45,9 @@ class PatchApplier {
         return when (op.path) {
             "/title" -> applyTitle(current, op)
             "/summary" -> applySummary(current, op)
+            "/sourceText" -> applySourceText(current, op)
+            "/captureType" -> applyCaptureType(current, op)
+            "/location", "/location/name" -> applyLocation(current, op)
             "/tags/-", "/tags" -> applyTags(current, op)
             else -> {
                 if (op.path.startsWith("/extra/")) {
@@ -109,6 +114,47 @@ class PatchApplier {
                 }
             }
 
+            else -> null
+        }
+    }
+
+    private fun applySourceText(
+        current: CaptureDraft,
+        op: ProviderJsonPatchOp,
+    ): CaptureDraft? {
+        val value = jsonText(op.value)?.trim()
+        return when (op.op) {
+            "replace", "add" -> current.copy(sourceText = value.orEmpty())
+            "remove" -> current.copy(sourceText = "")
+            else -> null
+        }
+    }
+
+    private fun applyCaptureType(
+        current: CaptureDraft,
+        op: ProviderJsonPatchOp,
+    ): CaptureDraft? {
+        val value = jsonText(op.value)?.trim()
+        return when (op.op) {
+            "replace", "add" -> current.copy(captureType = value?.let(CaptureType::fromValue))
+            "remove" -> current.copy(captureType = null)
+            else -> null
+        }
+    }
+
+    private fun applyLocation(
+        current: CaptureDraft,
+        op: ProviderJsonPatchOp,
+    ): CaptureDraft? {
+        val value = jsonText(op.value)?.trim()
+        return when (op.op) {
+            "replace", "add" -> current.copy(
+                location = value
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { CaptureLocation(name = it) }
+            )
+
+            "remove" -> current.copy(location = null)
             else -> null
         }
     }

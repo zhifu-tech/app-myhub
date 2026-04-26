@@ -3,6 +3,8 @@ package tech.zhifu.app.myhub.datastore.repository.capture
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import tech.zhifu.app.myhub.datastore.database.MyHubDatabase
+import tech.zhifu.app.myhub.datastore.file.storage.resolveStorageHandleToAccessUrl
+import tech.zhifu.app.myhub.datastore.model.domain.MediaAsset
 
 class CaptureLocalRepositoryImpl(
     private val database: MyHubDatabase,
@@ -109,13 +111,13 @@ class CaptureLocalRepositoryImpl(
         database.ai_jobQueries.deleteAiJobById(jobId)
     }
 
-    override suspend fun upsertMediaAsset(snapshot: MediaAssetSnapshot) {
+    override suspend fun upsertMediaAsset(snapshot: MediaAsset) {
         database.media_assetQueries.upsertMediaAsset(
             id = snapshot.id,
             card_id = snapshot.cardId,
             media_type = snapshot.mediaType,
-            local_uri = snapshot.localUri,
-            thumb_uri = snapshot.thumbUri,
+            storage_handle = snapshot.storageHandle,
+            thumb_storage_handle = snapshot.thumbStorageHandle,
             width = snapshot.width,
             height = snapshot.height,
             duration_ms = snapshot.durationMs,
@@ -125,14 +127,16 @@ class CaptureLocalRepositoryImpl(
         )
     }
 
-    override suspend fun getMediaAsset(id: String): MediaAssetSnapshot? {
+    override suspend fun getMediaAsset(id: String): MediaAsset? {
         val row = database.media_assetQueries.selectMediaAssetById(id).awaitAsOneOrNull() ?: return null
-        return MediaAssetSnapshot(
+        return MediaAsset(
             id = row.id,
             cardId = row.card_id,
             mediaType = row.media_type,
-            localUri = row.local_uri,
-            thumbUri = row.thumb_uri,
+            storageHandle = row.storage_handle,
+            accessUrl = resolveStorageHandleToAccessUrl(row.storage_handle).orEmpty(),
+            thumbStorageHandle = row.thumb_storage_handle,
+            thumbAccessUrl = row.thumb_storage_handle?.let { resolveStorageHandleToAccessUrl(it) },
             width = row.width,
             height = row.height,
             durationMs = row.duration_ms,
@@ -142,17 +146,42 @@ class CaptureLocalRepositoryImpl(
         )
     }
 
-    override suspend fun listAllMediaAssets(limit: Int, offset: Int): List<MediaAssetSnapshot> {
+    override suspend fun listMediaAssetsByCardId(cardId: String): List<MediaAsset> {
+        return database.media_assetQueries
+            .selectMediaAssetsByCardId(card_id = cardId)
+            .awaitAsList()
+            .map { row ->
+                MediaAsset(
+                    id = row.id,
+                    cardId = row.card_id,
+                    mediaType = row.media_type,
+                    storageHandle = row.storage_handle,
+                    accessUrl = resolveStorageHandleToAccessUrl(row.storage_handle).orEmpty(),
+                    thumbStorageHandle = row.thumb_storage_handle,
+                    thumbAccessUrl = row.thumb_storage_handle?.let { resolveStorageHandleToAccessUrl(it) },
+                    width = row.width,
+                    height = row.height,
+                    durationMs = row.duration_ms,
+                    sizeBytes = row.size_bytes,
+                    sha256 = row.sha256,
+                    createdAt = row.created_at,
+                )
+            }
+    }
+
+    override suspend fun listAllMediaAssets(limit: Int, offset: Int): List<MediaAsset> {
         return database.media_assetQueries
             .selectAllMediaAssets(limit = limit.toLong(), offset = offset.toLong())
             .awaitAsList()
             .map { row ->
-                MediaAssetSnapshot(
+                MediaAsset(
                     id = row.id,
                     cardId = row.card_id,
                     mediaType = row.media_type,
-                    localUri = row.local_uri,
-                    thumbUri = row.thumb_uri,
+                    storageHandle = row.storage_handle,
+                    accessUrl = resolveStorageHandleToAccessUrl(row.storage_handle).orEmpty(),
+                    thumbStorageHandle = row.thumb_storage_handle,
+                    thumbAccessUrl = row.thumb_storage_handle?.let { resolveStorageHandleToAccessUrl(it) },
                     width = row.width,
                     height = row.height,
                     durationMs = row.duration_ms,

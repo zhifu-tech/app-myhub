@@ -24,7 +24,7 @@ class ServerGatewayProviderClient(
         onReasoning: suspend (String) -> Unit,
     ): ProviderAnalysisResult {
         // fixme：需要同步 direct 的操作，我们先开发 direct，最后调试Api的
-        val url = "${ApiConfig.BASE_URL}/api/ai/capture-analysis"
+        val url = "${ApiConfig.BASE_URL}/api/capture/analysis"
         val responseText =
             withTimeoutOrNull(config.timeoutMs) {
                 val response = httpClient.post(url) {

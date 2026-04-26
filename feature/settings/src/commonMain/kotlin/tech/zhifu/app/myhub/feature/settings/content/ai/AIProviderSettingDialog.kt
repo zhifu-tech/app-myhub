@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.settings.content.ai
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -28,8 +29,10 @@ import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_confi
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_api_key
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_endpoint
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_hint
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_image_model
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_model
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_title
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_direct_vision_model
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_mode
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_mode_hint
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_retries
@@ -57,6 +60,8 @@ fun AIProviderSettingDialog(
     onModeChanged: (ProviderMode) -> Unit,
     onEndpointChanged: (String) -> Unit,
     onModelChanged: (String) -> Unit,
+    onVisionModelChanged: (String) -> Unit,
+    onImageModelChanged: (String) -> Unit,
     onApiKeyChanged: (String) -> Unit,
     onTimeoutChanged: (String) -> Unit,
     onRetriesChanged: (String) -> Unit,
@@ -168,6 +173,20 @@ fun AIProviderSettingDialog(
                         )
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
+                            value = providerRoutingConfig.directVisionModel,
+                            onValueChange = onVisionModelChanged,
+                            singleLine = true,
+                            label = { Text(stringResource(Res.string.feature_settings_ai_direct_vision_model)) },
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = providerRoutingConfig.directImageModel,
+                            onValueChange = onImageModelChanged,
+                            singleLine = true,
+                            label = { Text(stringResource(Res.string.feature_settings_ai_direct_image_model)) },
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
                             value = providerRoutingConfig.directApiKey,
                             onValueChange = onApiKeyChanged,
                             singleLine = true,
@@ -238,6 +257,10 @@ private fun SettingsSectionCard(
     Surface(
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f),
+        ),
     ) {
         Column(
             modifier = Modifier

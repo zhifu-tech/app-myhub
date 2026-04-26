@@ -31,12 +31,12 @@ kotlin {
             implementation(projects.core.navigation)
             implementation(projects.core.startup)
             implementation(projects.datastore.model)
+            implementation(projects.datastore.fileStorage)
             implementation(projects.datastore.repositoryClientApi)
             implementation(projects.feature.aiApi)
             implementation(projects.feature.settingsApi)
             implementation(projects.feature.preview)
             implementation(projects.ui.design)
-            implementation(projects.ui.model)
             implementation(projects.ui.state)
 
             implementation(libs.jb.androidx.window.windowCore)

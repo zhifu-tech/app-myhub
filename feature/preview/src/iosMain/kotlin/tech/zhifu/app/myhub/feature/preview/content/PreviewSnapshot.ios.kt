@@ -35,11 +35,12 @@ import platform.UIKit.UIImagePNGRepresentation
 import platform.UIKit.UIScreen
 import platform.UIKit.UIWindow
 import platform.UIKit.UIWindowLevelNormal
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 import tech.zhifu.app.myhub.ui.design.theme.AppTheme
-import tech.zhifu.app.myhub.ui.model.ContentCard
 import kotlin.math.abs
 
 @Composable
@@ -76,6 +77,7 @@ private suspend fun captureFullContentImage(
         AppTheme {
             PreviewContent(
                 card = payload,
+                previewState = PreviewState(),
                 modifier = Modifier.width(width),
             )
         }

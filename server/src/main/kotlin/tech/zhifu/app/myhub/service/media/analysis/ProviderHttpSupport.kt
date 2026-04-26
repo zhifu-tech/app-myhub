@@ -27,6 +27,22 @@ internal object ProviderHttpSupport {
         return client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString())
     }
 
+    fun getBytes(
+        url: String,
+        timeoutMs: Long,
+        headers: Map<String, String> = emptyMap(),
+    ): HttpResponse<ByteArray> {
+        val requestBuilder = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .timeout(Duration.ofMillis(timeoutMs))
+            .GET()
+        headers.forEach { (k, v) -> requestBuilder.header(k, v) }
+        val client = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofMillis(timeoutMs))
+            .build()
+        return client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofByteArray())
+    }
+
     inline fun <T> withRetry(
         maxAttempts: Int,
         initialBackoffMs: Long,

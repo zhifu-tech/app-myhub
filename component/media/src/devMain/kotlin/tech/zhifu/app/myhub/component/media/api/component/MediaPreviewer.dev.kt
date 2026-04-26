@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.vinceglb.filekit.PlatformFile
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
@@ -29,21 +28,18 @@ private object PreviewMediaPreviewer : MediaPreviewer {
     override fun isSystemPlayerPreferred(): Boolean = false
 }
 
-private fun previewPlatformFile(): PlatformFile =
-    throw NotImplementedError("Preview-only placeholder PlatformFile")
-
 private fun sampleImageItem(): MediaItem = MediaItem(
     id = "preview-image",
-    file = previewPlatformFile(),
     name = "Preview Image",
-    isVideo = false
+    previewUrl = "https://example.com/preview-image.jpg",
+    isVideo = false,
 )
 
 private fun sampleVideoItem(): MediaItem = MediaItem(
     id = "preview-video",
-    file = previewPlatformFile(),
     name = "Preview Video",
-    isVideo = true
+    previewUrl = "https://example.com/preview-video.mp4",
+    isVideo = true,
 )
 
 @Preview

@@ -4,7 +4,9 @@ import io.github.vinceglb.filekit.PlatformFile
 
 data class MediaItem(
     val id: String,
-    val file: PlatformFile,
     val name: String,
-    val isVideo: Boolean = false
+    val previewUrl: String,
+    val isVideo: Boolean = false,
+    val file: PlatformFile? = null,
+    val thumbnailUrl: String? = null,
 )

@@ -21,8 +21,6 @@ data class Card(
 
     internal val locationRaw: String?,
     internal val tagsRaw: String?,
-    internal val uiRaw: String?,
-    internal val contentRaw: String?,
     internal val sourceRaw: String?,
 ) {
     @Transient
@@ -38,7 +36,7 @@ data class Card(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private inline fun <T> getFromMap(
+    internal inline fun <T> getFromMap(
         key: String,
         crossinline factory: Card.() -> T?
     ): T? {

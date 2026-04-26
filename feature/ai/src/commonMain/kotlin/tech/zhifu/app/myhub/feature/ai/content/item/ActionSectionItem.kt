@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -37,20 +35,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
-import coil3.compose.SubcomposeAsyncImage
-import io.github.vinceglb.filekit.PlatformFile
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
-import tech.zhifu.app.myhub.component.media.component.MediaPreviewDialog
-import tech.zhifu.app.myhub.component.media.util.toPlayableUrl
+import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
+import tech.zhifu.app.myhub.component.media.component.MediaGridNine
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionSchema
@@ -59,6 +54,7 @@ import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_capture_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_clear_location
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_delete_card
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_location
@@ -66,6 +62,7 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_summary
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_tags
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_title
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_generate_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_input_hint
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_input_title_hint
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_new_capture
@@ -90,8 +87,15 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_locatio
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_location_title_ready
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_empty_placeholder
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_existing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_missing_hint
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_progress
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_stage_finalizing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_stage_generating
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_stage_preparing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_support_generating
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_support_missing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_support_ready
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_title_generating
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_title_missing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_title_ready
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_preview_check_copy
@@ -104,8 +108,6 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_preview
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_preview_title_pinned
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_publish_support
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_publish_title
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_review_edit_support
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_review_edit_title
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_tag_custom_hint
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_tag_support
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_tag_title_empty
@@ -117,6 +119,7 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_review
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_save_draft
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_skip_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_skip_tags
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_title_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_upload_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_capture_type_article
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_capture_type_idea
@@ -127,6 +130,7 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_capture_type_place
 fun InlineActionDeck(
     components: List<ActionComponentSchema>,
     draft: CaptureDraft,
+    mediaGenerationProgress: ProviderImageGenerationProgress?,
     selectedTags: List<String>,
     onAction: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -149,16 +153,12 @@ fun InlineActionDeck(
     ) {
         when {
             previewVisible || fieldEditor != null || cardActions != null -> {
-                if (previewVisible) {
-                    PreviewGuideCard()
-                }
-                fieldEditor?.let { component ->
-                    EditFieldsPanel(
-                        draft = draft,
-                        options = component.options,
-                        onAction = onAction,
-                    )
-                }
+                ReviewActionPanel(
+                    previewVisible = previewVisible,
+                    draft = draft,
+                    options = fieldEditor?.options.orEmpty(),
+                    onAction = onAction,
+                )
                 cardActions?.let { component ->
                     PublishPanel(
                         options = component.options,
@@ -169,6 +169,7 @@ fun InlineActionDeck(
 
             upload != null -> MediaPanel(
                 draft = draft,
+                mediaGenerationProgress = mediaGenerationProgress,
                 options = mergeOptions(upload.options, quickReplies),
                 onAction = onAction,
             )
@@ -207,12 +208,20 @@ fun InlineActionDeck(
 }
 
 @Composable
-private fun PreviewGuideCard(
+private fun ReviewActionPanel(
+    previewVisible: Boolean,
+    draft: CaptureDraft,
+    options: List<ActionOptionSchema>,
+    onAction: (String) -> Unit,
 ) {
     val previewPinned = currentWindowAdaptiveInfo().windowSizeClass
         .isWidthAtLeastBreakpoint(WIDTH_DP_EXPANDED_LOWER_BOUND)
     ActionSupportPanel(
-        eyebrow = stringResource(Res.string.feature_ai_action_panel_preview_status),
+        eyebrow = if (previewVisible) {
+            stringResource(Res.string.feature_ai_action_panel_preview_status)
+        } else {
+            null
+        },
         title = if (previewPinned) {
             stringResource(Res.string.feature_ai_action_panel_preview_title_pinned)
         } else {
@@ -232,109 +241,133 @@ private fun PreviewGuideCard(
             DraftMetaPill(text = stringResource(Res.string.feature_ai_action_panel_preview_check_copy))
             DraftMetaPill(text = stringResource(Res.string.feature_ai_action_panel_preview_check_meta))
         }
+        if (options.isNotEmpty()) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                options.forEach { option ->
+                    Surface(
+                        onClick = { onAction(option.value) },
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
+                        ),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 11.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(
+                                text = displayLabel(option),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = fieldValueText(option = option, draft = draft),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun MediaPanel(
     draft: CaptureDraft,
+    mediaGenerationProgress: ProviderImageGenerationProgress?,
     options: List<ActionOptionSchema>,
     onAction: (String) -> Unit,
 ) {
     val mediaPreviewer: MediaPreviewer = koinInject()
-    var previewingAsset by remember(draft.mediaAssets) { mutableStateOf<CaptureMediaAsset?>(null) }
+    var previewingIndex by remember(draft.mediaAssets) { mutableStateOf<Int?>(null) }
     val hasMedia = draft.mediaAssets.isNotEmpty()
-    val primary =
-        options.firstOrNull { it.type in setOf(ActionOptionType.UPLOAD_MEDIA, ActionOptionType.REPLACE_MEDIA) }
-    val secondary = options.filterNot { it == primary }
+    val missingMediaCount = draft.mediaAssets.count { it.isMissing }
+    val isGenerating = mediaGenerationProgress != null
+    val primaryOptions = options.filter {
+        it.type in setOf(
+            ActionOptionType.CAPTURE_MEDIA,
+            ActionOptionType.UPLOAD_MEDIA,
+            ActionOptionType.REPLACE_MEDIA,
+            ActionOptionType.GENERATE_MEDIA,
+        )
+    }
+    val secondary = options.filterNot { it in primaryOptions }
     ActionSupportPanel(
-        eyebrow = stringResource(Res.string.feature_ai_action_upload_media),
-        title = if (hasMedia) {
+        eyebrow = stringResource(Res.string.feature_ai_action_title_media),
+        title = if (isGenerating) {
+            stringResource(Res.string.feature_ai_action_panel_media_title_generating)
+        } else if (hasMedia) {
             stringResource(Res.string.feature_ai_action_panel_media_title_ready, draft.mediaAssets.size)
         } else {
             stringResource(Res.string.feature_ai_action_panel_media_title_missing)
         },
-        supporting = if (hasMedia) {
+        supporting = if (isGenerating) {
+            stringResource(Res.string.feature_ai_action_panel_media_support_generating)
+        } else if (hasMedia) {
             stringResource(Res.string.feature_ai_action_panel_media_support_ready)
         } else {
             stringResource(Res.string.feature_ai_action_panel_media_support_missing)
         },
     ) {
-        if (hasMedia) {
+        if (hasMedia || isGenerating) {
             Text(
                 text = stringResource(Res.string.feature_ai_action_panel_media_existing),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
             )
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                itemsIndexed(
-                    items = draft.mediaAssets,
-                    key = { index, asset -> "${asset.localUri}#$index" },
-                ) { index, asset ->
-                    Box(
-                        modifier = Modifier.size(108.dp),
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp)),
-                            shape = RoundedCornerShape(16.dp),
-                            tonalElevation = 1.dp,
-                            shadowElevation = 2.dp,
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
-                        ) {
-                            SubcomposeAsyncImage(
-                                model = asset.localUri.toPlayableUrl(),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp)),
-                                onSuccess = {
-                                    Unit
-                                },
-                                loading = {
-                                    MediaLoadingPlaceholder(
-                                        text = asset.localUri.substringAfterLast('/').ifBlank { "${index + 1}" },
-                                    )
-                                },
-                                error = {
-                                    MediaLoadingPlaceholder(
-                                        text = asset.localUri.substringAfterLast('/').ifBlank { "${index + 1}" },
-                                    )
-                                },
-                            )
-                        }
-                        Surface(
-                            onClick = { previewingAsset = asset },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp)),
-                            color = Color.Transparent,
-                        ) {}
-                        IconButton(
-                            onClick = { onAction(ActionOptionType.encodeRemoveMediaAt(index)) },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(6.dp)
-                                .size(24.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f),
-                                    shape = RoundedCornerShape(999.dp),
-                                ),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = stringResource(Res.string.feature_ai_action_remove_media),
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(14.dp),
-                            )
-                        }
+            if (missingMediaCount > 0) {
+                HintPill(
+                    text = stringResource(
+                        Res.string.feature_ai_action_panel_media_missing_hint,
+                        missingMediaCount,
+                    )
+                )
+            }
+            MediaGridNine(
+                items = draft.mediaAssets.mapIndexed { index, asset ->
+                    asset.toMediaItem(index = index)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                onItemClick = { index ->
+                    if (!draft.mediaAssets[index].isMissing) {
+                        previewingIndex = index
                     }
-                }
+                },
+                overlayContent = { index, _ ->
+                    IconButton(
+                        onClick = { onAction(ActionOptionType.encodeRemoveMediaAt(index)) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .size(24.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f),
+                                shape = RoundedCornerShape(999.dp),
+                            ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = stringResource(Res.string.feature_ai_action_remove_media),
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
+                },
+            )
+            if (isGenerating) {
+                GeneratingMediaTile(progress = mediaGenerationProgress)
             }
         } else {
             Surface(
@@ -361,13 +394,62 @@ private fun MediaPanel(
                 }
             }
         }
-        primary?.let { option ->
-            Button(
-                onClick = { onAction(option.value) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text(displayLabel(option))
+        primaryOptions.forEach { option ->
+            when (option.type) {
+                ActionOptionType.CAPTURE_MEDIA -> if (hasMedia) {
+                    OutlinedButton(
+                        onClick = { onAction(option.value) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Text(displayLabel(option))
+                    }
+                } else {
+                    Button(
+                        onClick = { onAction(option.value) },
+                        enabled = !isGenerating,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Text(displayLabel(option))
+                    }
+                }
+
+                ActionOptionType.GENERATE_MEDIA -> if (hasMedia) {
+                    FilledTonalButton(
+                        onClick = { onAction(option.value) },
+                        enabled = !isGenerating,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Text(displayLabel(option))
+                    }
+                } else {
+                    Button(
+                        onClick = { onAction(option.value) },
+                        enabled = !isGenerating,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                    ) {
+                        Text(displayLabel(option))
+                    }
+                }
+
+                ActionOptionType.UPLOAD_MEDIA -> OutlinedButton(
+                    onClick = { onAction(option.value) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(displayLabel(option))
+                }
+
+                else -> Button(
+                    onClick = { onAction(option.value) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(displayLabel(option))
+                }
             }
         }
         SecondaryActions(
@@ -375,13 +457,91 @@ private fun MediaPanel(
             onAction = onAction,
         )
     }
-    previewingAsset?.let { asset ->
-        MediaPreviewDialog(
-            item = asset.toMediaItem(),
+    previewingIndex?.let {
+        MediaGalleryDialog(
+            items = draft.mediaAssets.mapIndexed { index, asset ->
+                asset.toMediaItem(index = index)
+            },
+            initialIndex = it,
             mediaPreviewer = mediaPreviewer,
-            onDismiss = { previewingAsset = null },
+            onDismiss = { previewingIndex = null },
         )
     }
+}
+
+@Composable
+private fun GeneratingMediaTile(
+    progress: ProviderImageGenerationProgress?,
+) {
+    val fraction = progress
+        ?.takeIf { (it.total ?: 0) > 0 }
+        ?.let { (it.completed ?: 0).toFloat() / (it.total ?: 1).toFloat() }
+        ?.coerceIn(0f, 1f)
+    Surface(
+        modifier = Modifier.size(108.dp),
+        shape = RoundedCornerShape(16.dp),
+        tonalElevation = 1.dp,
+        shadowElevation = 2.dp,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.78f),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        ) {
+            Text(
+                text = mediaGenerationStageLabel(progress),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = fraction?.let {
+                    stringResource(
+                        Res.string.feature_ai_action_panel_media_progress,
+                        progress?.completed ?: 0,
+                        progress?.total ?: 0,
+                    )
+                } ?: progress?.status.orEmpty().ifBlank { "..." },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction ?: 0.22f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun mediaGenerationStageLabel(
+    progress: ProviderImageGenerationProgress?,
+): String = when (progress?.stage) {
+    ProviderImageGenerationProgress.Stage.FINALIZING ->
+        stringResource(Res.string.feature_ai_action_panel_media_stage_finalizing)
+
+    ProviderImageGenerationProgress.Stage.GENERATING ->
+        stringResource(Res.string.feature_ai_action_panel_media_stage_generating)
+
+    ProviderImageGenerationProgress.Stage.PREPARING,
+    null -> stringResource(Res.string.feature_ai_action_panel_media_stage_preparing)
 }
 
 @Composable
@@ -604,56 +764,6 @@ private fun InputPanel(
             options = quickReplies,
             onAction = onAction,
         )
-    }
-}
-
-@Composable
-private fun EditFieldsPanel(
-    draft: CaptureDraft,
-    options: List<ActionOptionSchema>,
-    onAction: (String) -> Unit,
-) {
-    ActionSupportPanel(
-        eyebrow = stringResource(Res.string.feature_ai_action_review),
-        title = stringResource(Res.string.feature_ai_action_panel_review_edit_title),
-        supporting = stringResource(Res.string.feature_ai_action_panel_review_edit_support),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            options.forEach { option ->
-                Surface(
-                    onClick = { onAction(option.value) },
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
-                    ),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 11.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = displayLabel(option),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = fieldValueText(option = option, draft = draft),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -916,14 +1026,23 @@ private fun ExamplePill(
     }
 }
 
-private fun CaptureMediaAsset.toMediaItem(): MediaItem {
+private fun CaptureMediaAsset.toMediaItem(index: Int = 0): MediaItem {
     return MediaItem(
-        id = sha256.ifBlank { localUri },
-        file = PlatformFile(localUri.removePrefix("file://")),
-        name = localUri.substringAfterLast('/').ifBlank { sha256.take(8) },
+        id = sha256.ifBlank { storageHandle },
+        name = displayName(index),
+        previewUrl = accessUrl.takeUnless { isMissing }.orEmpty(),
         isVideo = mediaType.startsWith("video/", ignoreCase = true),
     )
 }
+
+private fun CaptureMediaAsset.displayName(index: Int = 0): String =
+    accessUrl.substringAfterLast('/').ifBlank {
+        if (mediaType.startsWith("video/", ignoreCase = true)) {
+            "video-${index + 1}"
+        } else {
+            "image-${index + 1}"
+        }
+    }
 
 private fun mergeOptions(
     primary: List<ActionOptionSchema>,
@@ -982,8 +1101,10 @@ private fun fieldValueText(
 
 @Composable
 private fun displayLabel(option: ActionOptionSchema): String = when (option.type) {
+    ActionOptionType.CAPTURE_MEDIA -> stringResource(Res.string.feature_ai_action_capture_media)
     ActionOptionType.UPLOAD_MEDIA -> stringResource(Res.string.feature_ai_action_upload_media)
     ActionOptionType.REPLACE_MEDIA -> stringResource(Res.string.feature_ai_action_replace_media)
+    ActionOptionType.GENERATE_MEDIA -> stringResource(Res.string.feature_ai_action_generate_media)
     ActionOptionType.REMOVE_MEDIA -> stringResource(Res.string.feature_ai_action_remove_media)
     ActionOptionType.SKIP_MEDIA -> stringResource(Res.string.feature_ai_action_skip_media)
     ActionOptionType.SKIP_TAGS -> stringResource(Res.string.feature_ai_action_skip_tags)

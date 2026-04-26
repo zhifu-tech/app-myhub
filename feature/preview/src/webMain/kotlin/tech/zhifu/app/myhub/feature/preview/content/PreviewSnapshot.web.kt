@@ -11,12 +11,10 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.unit.Dp
-import kotlin.js.ExperimentalWasmJsInterop
-import kotlin.js.toJsString
 import kotlinx.browser.document
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
-import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 
 @Composable
 internal actual fun rememberPreviewSnapshot(

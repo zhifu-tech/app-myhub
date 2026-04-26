@@ -54,7 +54,7 @@ private fun ErrorIndicator(modifier: Modifier) {
     Icon(
         imageVector = Icons.Outlined.Refresh,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-        modifier = modifier.size(36.dp)
+        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.82f),
+        modifier = modifier.size(32.dp)
     )
 }

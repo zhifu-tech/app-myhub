@@ -13,6 +13,12 @@ enum class ActionOptionType(
     @SerialName("replace_media")
     REPLACE_MEDIA("replace_media"),
 
+    @SerialName("capture_media")
+    CAPTURE_MEDIA("capture_media"),
+
+    @SerialName("generate_media")
+    GENERATE_MEDIA("generate_media"),
+
     @SerialName("remove_media")
     REMOVE_MEDIA("remove_media"),
 

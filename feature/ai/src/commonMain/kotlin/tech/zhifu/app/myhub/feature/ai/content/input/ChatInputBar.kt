@@ -3,10 +3,12 @@ package tech.zhifu.app.myhub.feature.ai.content.input
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -39,6 +42,9 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_re
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_summary
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_tags
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_placeholder_title
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_quick_capture
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_quick_upload
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_input_support_capture
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -70,6 +76,18 @@ fun ChatInputBar(
         contextLabel = safeState.contextLabel(),
         supportingText = safeState.supportingText(),
         inputEnabled = safeState.inputLocked.not(),
+        topContent = {
+            if (safeState.showCaptureShortcuts()) {
+                QuickCaptureActions(
+                    onCapture = {
+                        viewModel.doAction(ActionOptionType.CAPTURE_MEDIA.value)
+                    },
+                    onUpload = {
+                        viewModel.doAction(ActionOptionType.UPLOAD_MEDIA.value)
+                    },
+                )
+            }
+        },
         onSend = {
             viewModel.submitInput()
         }
@@ -95,6 +113,7 @@ fun ChatInputBarContent(
     inputEnabled: Boolean = true,
     onInputChange: (String) -> Unit,
     onSend: (String) -> Unit,
+    topContent: @Composable (() -> Unit)? = null,
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable ((Boolean) -> Unit)? = null,
 ) {
@@ -119,6 +138,7 @@ fun ChatInputBarContent(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            topContent?.invoke()
             contextLabel
                 ?.takeIf { it.isNotBlank() }
                 ?.let { label ->
@@ -193,9 +213,13 @@ fun ChatInputBarContent(
 private fun ChatInputBarState.supportingText(): String? =
     input.takeIf { it.isBlank() }?.let {
         when (conversationState) {
+            ConversationState.IDLE,
+            ConversationState.COMPLETE -> stringResource(Res.string.feature_ai_input_support_capture)
+
             ConversationState.INFO_COLLECT,
             ConversationState.MANUAL_EDIT ->
                 when (inputField ?: missingFields.firstOrNull()) {
+                    Field.MEDIA -> stringResource(Res.string.feature_ai_input_support_capture)
                     Field.TITLE,
                     Field.SUMMARY,
                     Field.LOCATION,
@@ -241,6 +265,18 @@ private fun ChatInputBarState.contextLabel(): String? =
         else -> null
     }
 
+private fun ChatInputBarState.showCaptureShortcuts(): Boolean {
+    return when (conversationState) {
+        ConversationState.IDLE,
+        ConversationState.COMPLETE -> true
+
+        ConversationState.INFO_COLLECT ->
+            (inputField ?: missingFields.firstOrNull()) == Field.MEDIA
+
+        else -> false
+    }
+}
+
 @Composable
 private fun ChatInputBarState.placeHolderText(): String =
     when (conversationState) {
@@ -265,3 +301,27 @@ private fun ChatInputBarState.placeHolderText(): String =
 
         else -> stringResource(Res.string.feature_ai_input_placeholder_default)
     }
+
+@Composable
+private fun QuickCaptureActions(
+    onCapture: () -> Unit,
+    onUpload: () -> Unit,
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AssistChip(
+            onClick = onCapture,
+            label = {
+                Text(text = stringResource(Res.string.feature_ai_input_quick_capture))
+            },
+        )
+        AssistChip(
+            onClick = onUpload,
+            label = {
+                Text(text = stringResource(Res.string.feature_ai_input_quick_upload))
+            },
+        )
+    }
+}

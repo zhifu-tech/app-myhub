@@ -13,19 +13,27 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_EXPANDED_LOWER_BOUND
+import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.input.ChatInputBar
 import tech.zhifu.app.myhub.feature.ai.content.preview.PreviewThumbnail
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun BottomBar(
     viewModel: AIViewModel,
 ) {
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        it is AIUiState.Content
+    }
+    if (state.not()) return
     BottomBarContent(
         previewThumbnail = {
             PreviewThumbnail(viewModel = viewModel)

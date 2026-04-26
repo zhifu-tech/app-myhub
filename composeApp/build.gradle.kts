@@ -180,6 +180,32 @@ dependencies {
     "androidRuntimeClasspath"(libs.jb.compose.ui.uiTooling)
 }
 
+val prepareWebPrivateMediaStoreForWasm = tasks.register("prepareWebPrivateMediaStoreForWasm") {
+    val sourceFile = rootProject.layout.projectDirectory.file("webApp/webPrivateMediaStore.mjs").asFile
+    val kotlinTargetDir = rootProject.layout.buildDirectory.dir("wasm/packages/composeApp/kotlin")
+    val webAppTargetDir = rootProject.layout.buildDirectory.dir("wasm/webApp")
+
+    doLast {
+        require(sourceFile.exists()) {
+            "Missing web private media store source: ${sourceFile.absolutePath}"
+        }
+        val kotlinTarget = kotlinTargetDir.get().asFile
+        val webAppTarget = webAppTargetDir.get().asFile
+        kotlinTarget.mkdirs()
+        webAppTarget.mkdirs()
+        sourceFile.copyTo(kotlinTarget.resolve("webPrivateMediaStore.mjs"), overwrite = true)
+        sourceFile.copyTo(webAppTarget.resolve("webPrivateMediaStore.mjs"), overwrite = true)
+    }
+}
+
+tasks.matching {
+    it.name == "wasmJsBrowserDevelopmentRun" ||
+        it.name == "wasmJsBrowserDevelopmentWebpack" ||
+        it.name == "wasmJsBrowserProductionWebpack"
+}.configureEach {
+    dependsOn(prepareWebPrivateMediaStoreForWasm)
+}
+
 compose.desktop {
     application {
         mainClass = "tech.zhifu.app.myhub.MainKt"

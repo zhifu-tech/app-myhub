@@ -10,7 +10,29 @@ data class ProviderAnalysisRequest(
     val inputText: String,
     @SerialName("language")
     val language: String,
+    @SerialName("media_inputs")
+    val mediaInputs: List<ProviderAnalysisMediaInput> = emptyList(),
 )
+
+@Serializable
+data class ProviderAnalysisMediaInput(
+    @SerialName("kind")
+    val kind: Kind = Kind.IMAGE,
+    @SerialName("mime_type")
+    val mimeType: String,
+    @SerialName("data_base64")
+    val dataBase64: String,
+    @SerialName("source_url")
+    val sourceUrl: String? = null,
+) {
+    @Serializable
+    enum class Kind {
+        @SerialName("image")
+        IMAGE,
+    }
+
+    fun toDataUrl(): String = "data:$mimeType;base64,$dataBase64"
+}
 
 sealed interface ProviderAnalysisResult {
     @Serializable

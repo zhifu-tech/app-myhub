@@ -11,6 +11,9 @@ import tech.zhifu.app.myhub.service.media.MediaUploadService
 import tech.zhifu.app.myhub.service.media.analysis.AnalysisProvider
 import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderConfig
 import tech.zhifu.app.myhub.service.media.analysis.AnalysisProviderFactory
+import tech.zhifu.app.myhub.service.media.image.CaptureImageGenerationService
+import tech.zhifu.app.myhub.service.media.image.ImageGenerationProvider
+import tech.zhifu.app.myhub.service.media.image.ImageGenerationProviderFactory
 
 val serviceModule = module {
 
@@ -50,10 +53,26 @@ val serviceModule = module {
         get<AnalysisProviderFactory>().create()
     }
 
+    single<ImageGenerationProviderFactory> {
+        ImageGenerationProviderFactory(
+            config = get<AnalysisProviderConfig>()
+        )
+    }
+
+    single<ImageGenerationProvider> {
+        get<ImageGenerationProviderFactory>().create()
+    }
+
     single<CaptureAnalysisService> {
         CaptureAnalysisService(
             mediaUploadService = get<MediaUploadService>(),
             analysisProvider = get<AnalysisProvider>()
+        )
+    }
+
+    single<CaptureImageGenerationService> {
+        CaptureImageGenerationService(
+            imageGenerationProvider = get<ImageGenerationProvider>(),
         )
     }
 }

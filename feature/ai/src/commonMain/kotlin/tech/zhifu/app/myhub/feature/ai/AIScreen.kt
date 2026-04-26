@@ -50,7 +50,7 @@ fun AIScreen(
             AIScreenContent(
                 state = state,
                 topBar = {
-                    TopBar(navigator = navigator)
+                    TopBar(navigator = navigator, viewModel = viewModel)
                 },
                 bottomBar = {
                     BottomBar(viewModel = viewModel)
@@ -59,10 +59,7 @@ fun AIScreen(
                     Loading(contentPadding = contentPadding, viewModel = viewModel)
                 },
                 content = { contentPadding ->
-                    Content(
-                        contentPadding = contentPadding,
-                        viewModel = viewModel,
-                    )
+                    Content(contentPadding = contentPadding, viewModel = viewModel)
                 }
             )
         },

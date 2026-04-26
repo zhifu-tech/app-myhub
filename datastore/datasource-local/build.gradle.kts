@@ -25,6 +25,7 @@ kotlin {
             implementation(projects.core.logger)
             implementation(projects.datastore.model)
             implementation(projects.datastore.database)
+            implementation(projects.datastore.repositoryClientApi)
             api(projects.datastore.operations)
 
             implementation(libs.kotlinx.serialization.json)
@@ -42,4 +43,3 @@ kotlin {
         }
     }
 }
-

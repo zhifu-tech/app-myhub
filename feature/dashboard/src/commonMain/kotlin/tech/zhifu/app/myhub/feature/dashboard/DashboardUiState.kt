@@ -3,8 +3,8 @@ package tech.zhifu.app.myhub.feature.dashboard
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.preview.PreviewState
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Immutable
 sealed class DashboardUiState(
@@ -22,7 +22,6 @@ sealed class DashboardUiState(
         val hasMore: Boolean = false,
         val isLoadingMore: Boolean = false,
         val errorMessage: String = "",
-//        @Deprecated("")
         val selectedCard: ContentCard? = null,
         val previewState: PreviewState = PreviewState()
     ) : DashboardUiState(state = State.CONTENT) {

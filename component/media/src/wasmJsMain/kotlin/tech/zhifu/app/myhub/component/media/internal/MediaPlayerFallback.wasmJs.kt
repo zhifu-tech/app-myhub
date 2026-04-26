@@ -1,13 +1,13 @@
 package tech.zhifu.app.myhub.component.media.internal
 
-import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.browser.window
+import tech.zhifu.app.myhub.component.media.MediaItem
 
 actual fun openInSystemPlayer(
-    file: PlatformFile,
+    item: MediaItem,
     mimeType: String?
 ): Boolean {
-    val path = file.toString().trim()
+    val path = item.previewUrl.trim().ifBlank { item.file?.toString()?.trim().orEmpty() }
     if (path.isBlank()) return false
     window.open(path, "_blank")
     return true

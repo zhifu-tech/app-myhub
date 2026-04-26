@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 
 internal const val PREVIEW_SHARE_LINK = "https://example.com"
 

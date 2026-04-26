@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.feature.ai.layer.conversation.action
 
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 import tech.zhifu.app.myhub.feature.ai.model.Field
 
 class ActionPlanner {
@@ -173,62 +172,9 @@ private fun manualEditActions(
             status = ActionComponentStatus.ACTIVE,
             options = listOf(ActionOptionSchema.of(ActionOptionType.REVIEW)),
         ),
-//        ActionComponentSchema(
-//            type = ActionComponentType.CARD_ACTIONS,
-//            status = ActionComponentStatus.ACTIVE,
-//            options = listOf(
-//                ActionOptionSchema.of(ActionOptionType.SAVE_DRAFT),
-//                ActionOptionSchema.of(ActionOptionType.DELETE_CARD),
-//                ActionOptionSchema.of(ActionOptionType.PUBLISH),
-//            )
-//        ),
     )
 }
 
-
-private fun orderedDraftActions(
-    currentField: Field?,
-): List<ActionComponentSchema> {
-    val order = listOf(
-        ActionOptionType.EDIT_TITLE to Field.TITLE,
-        ActionOptionType.EDIT_MEDIA to Field.MEDIA,
-        ActionOptionType.EDIT_TAGS to Field.TAGS,
-        ActionOptionType.EDIT_SUMMARY to Field.SUMMARY,
-        ActionOptionType.EDIT_LOCATION to Field.LOCATION,
-    )
-    return listOf(
-        ActionComponentSchema(
-            type = ActionComponentType.CARD_ACTIONS,
-            status = ActionComponentStatus.ACTIVE,
-            options = buildList {
-                order.forEach { (type, field) ->
-                    add(
-                        ActionOptionSchema.of(
-                            type = type,
-                            selected = currentField == field,
-                        )
-                    )
-                }
-                add(ActionOptionSchema.of(ActionOptionType.PUBLISH))
-            }
-        )
-    )
-}
-
-
-private fun buildOptionGrid(
-    draft: CaptureDraft,
-): List<ActionOptionSchema> {
-    val selected = draft.captureType
-    return CaptureType.entries.map { type ->
-        ActionOptionSchema(
-            type = ActionOptionType.SET_CAPTURE_TYPE,
-            label = type.value,
-            value = ActionOptionType.encodeSetCaptureType(type.value),
-            selected = selected == type,
-        )
-    }
-}
 
 private fun buildLocationEditorOptions(
     draft: CaptureDraft,
@@ -270,10 +216,16 @@ private fun mediaOptions(
     draft: CaptureDraft,
 ): List<ActionOptionSchema> {
     return if (draft.mediaAssets.isEmpty()) {
-        listOf(ActionOptionSchema.of(ActionOptionType.UPLOAD_MEDIA))
+        listOf(
+            ActionOptionSchema.of(ActionOptionType.CAPTURE_MEDIA),
+            ActionOptionSchema.of(ActionOptionType.UPLOAD_MEDIA),
+            ActionOptionSchema.of(ActionOptionType.GENERATE_MEDIA),
+        )
     } else {
         listOf(
+            ActionOptionSchema.of(ActionOptionType.CAPTURE_MEDIA),
             ActionOptionSchema.of(ActionOptionType.REPLACE_MEDIA),
+            ActionOptionSchema.of(ActionOptionType.GENERATE_MEDIA),
             ActionOptionSchema.of(ActionOptionType.REMOVE_MEDIA),
         )
     }

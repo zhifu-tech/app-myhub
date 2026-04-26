@@ -17,10 +17,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.koin.compose.koinInject
+import tech.zhifu.app.myhub.component.media.MediaItem
+import tech.zhifu.app.myhub.component.media.MediaPreviewer
+import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
@@ -29,7 +35,6 @@ import tech.zhifu.app.myhub.feature.preview.content.PreviewPlaceholder
 import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotController
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 
 @Composable
@@ -39,6 +44,8 @@ fun Preview(
 ) {
     logger.debug { "Preview : state: ${state.hashCode()}" }
     val snapshotController = rememberPreviewSnapshotController()
+    val mediaPreviewer: MediaPreviewer = koinInject()
+    val mediaSession by state.mediaSession
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
         targetState = state.card.value,
@@ -79,9 +86,10 @@ fun Preview(
                         b = minOf(maxWidth, maxHeight) * 0.92f
                     )
                 )
-                if (targetCard.status == CardStatus.DRAFT) {
+                if (targetCard.card.status == CardStatus.DRAFT) {
                     PreviewContent(
                         card = targetCard,
+                        previewState = state,
                         animatedVisibilityScope = this@AnimatedContent,
                         modifier = Modifier
                             .width(maxCardWidth)
@@ -104,6 +112,7 @@ fun Preview(
                     ) {
                         PreviewContent(
                             card = targetCard,
+                            previewState = state,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier.weight(1f, fill = false),
                             snapshotController = snapshotController,
@@ -134,6 +143,7 @@ fun Preview(
                         Spacer(modifier.size(shareActionSize))
                         PreviewContent(
                             card = targetCard,
+                            previewState = state,
                             animatedVisibilityScope = this@AnimatedContent,
                             modifier = Modifier
                                 .widthIn(max = maxCardWidth),
@@ -158,5 +168,27 @@ fun Preview(
                 }
             }
         }
+    }
+    mediaSession?.let { session ->
+        MediaGalleryDialog(
+            items = session.items.map { item ->
+                MediaItem(
+                    id = item.media.id,
+                    name = item.media.accessUrl.substringAfterLast('/'),
+                    previewUrl = item.media.accessUrl,
+                    isVideo = item.media.mediaType.startsWith(
+                        prefix = "video/",
+                        ignoreCase = true
+                    ),
+                    thumbnailUrl = item.media.thumbAccessUrl,
+                )
+            },
+            initialIndex = session.initialIndex,
+            mediaPreviewer = mediaPreviewer,
+            onDismiss = state::hideMedia,
+            titleForIndex = { index ->
+                session.items.getOrNull(index)?.cardTitle
+            },
+        )
     }
 }

@@ -10,7 +10,7 @@ internal class AiBackgroundStartupTask(
     override val critical: Boolean = false
     override val dependencies: Set<String> = setOf(
         StartupTaskIds.BOOTSTRAP,
-        StartupTaskIds.ANALYTICS
+        StartupTaskIds.ANALYTICS,
     )
 
     override suspend fun run() {

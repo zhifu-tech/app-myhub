@@ -16,4 +16,15 @@ class DefaultMediaPicker : MediaPicker {
             mode = FileKitMode.Multiple(maxItems)
         )
     }.getOrNull().orEmpty()
+
+    override suspend fun pickImages(
+        maxItems: Int?
+    ): List<PlatformFile> = runCatching {
+        FileKit.openFilePicker(
+            type = FileKitType.Image,
+            mode = FileKitMode.Multiple(maxItems),
+        )
+    }.getOrNull().orEmpty()
+
+    override suspend fun capturePhoto(): PlatformFile? = capturePhotoWithPlatformPicker()
 }

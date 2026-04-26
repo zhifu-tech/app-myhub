@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.layer.conversation
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPlanner
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextChangeCallback
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
@@ -34,11 +35,16 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_cleared
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_editing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_location_updated
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_manual_edit
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_analysis_cancelled
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_analysis_fallback
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_editing
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_generate_failed
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_media_generating
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_move_review
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_published
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_publishing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_restore_session
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_restore_session_media_missing
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_review_input_help
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_current_step
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_skip_location
@@ -123,6 +129,9 @@ class ConversationEngine(
                 messages = messages,
                 reasoningStatus = false,
                 reasoningText = "",
+                analysisRunning = false,
+                analysisIncludesMedia = false,
+                clearMediaGenerationProgress = true,
             )
         }
     }
@@ -178,6 +187,12 @@ class ConversationEngine(
     ) = serialize {
         with(contextManager) {
             when (context.state) {
+                ConversationState.IDLE -> {
+                    transitionToNextState(
+                        draft = draft,
+                    )
+                }
+
                 ConversationState.MANUAL_EDIT -> {
                     updateActionOwnerMessage(
                         draft = draft,
@@ -211,6 +226,78 @@ class ConversationEngine(
         }
     }
 
+    suspend fun emitMediaGenerationStarted(
+    ) = serialize {
+        with(contextManager) {
+            val message = ofMessage(
+                role = Message.Role.AI,
+                textRes = Res.string.feature_ai_msg_media_generating,
+                editingField = Field.MEDIA,
+            )
+            val nextOwnerMessageId = message.id
+            notifyContextChange(
+                updated = context.copy(
+                    messages = appendMessages { add(message) }
+                        .bindActionComponents(
+                            components = context.actionComponents,
+                            ownerMessageId = nextOwnerMessageId,
+                        ),
+                    actionOwnerMessageId = nextOwnerMessageId,
+                    mediaGenerationProgress = ProviderImageGenerationProgress(
+                        stage = ProviderImageGenerationProgress.Stage.PREPARING,
+                    ),
+                )
+            )
+        }
+    }
+
+    suspend fun applyMediaGenerationProgress(
+        progress: ProviderImageGenerationProgress,
+    ) = serialize {
+        with(contextManager) {
+            notifyContextChange(
+                updated = context.copy(
+                    mediaGenerationProgress = progress,
+                )
+            )
+        }
+    }
+
+    suspend fun clearMediaGenerationProgress(
+    ) = serialize {
+        with(contextManager) {
+            if (context.mediaGenerationProgress == null) return@with
+            notifyContextChange(
+                updated = context.copy(
+                    mediaGenerationProgress = null,
+                )
+            )
+        }
+    }
+
+    suspend fun emitMediaGenerationFailedFallback(
+    ) = serialize {
+        with(contextManager) {
+            val message = ofMessage(
+                role = Message.Role.AI,
+                textRes = Res.string.feature_ai_msg_media_generate_failed,
+                editingField = Field.MEDIA,
+            )
+            val nextOwnerMessageId = message.id
+            notifyContextChange(
+                updated = context.copy(
+                    messages = appendMessages { add(message) }
+                        .bindActionComponents(
+                            components = context.actionComponents,
+                            ownerMessageId = nextOwnerMessageId,
+                        ),
+                    actionOwnerMessageId = nextOwnerMessageId,
+                    mediaGenerationProgress = null,
+                )
+            )
+        }
+    }
+
     suspend fun applyPublished(
         title: String
     ) = serialize {
@@ -236,6 +323,7 @@ class ConversationEngine(
                 updated = context.copy(
                     reasoningStatus = true,
                     reasoningText = reasoning,
+                    analysisRunning = true,
                 )
             )
         }
@@ -263,6 +351,15 @@ class ConversationEngine(
                             textRes = Res.string.feature_ai_msg_restore_session,
                         )
                     )
+                    if (restoredSession.invalidMediaCount > 0) {
+                        add(
+                            ofMessage(
+                                role = Message.Role.SYSTEM,
+                                textRes = Res.string.feature_ai_msg_restore_session_media_missing,
+                                textArgs = listOf(restoredSession.invalidMediaCount.toString()),
+                            )
+                        )
+                    }
                 }
                 notifyContextChange(
                     updated = context.copy(
@@ -388,10 +485,47 @@ class ConversationEngine(
     }
 
     suspend fun commandCaptureAnalysisStarted(
+        includesMedia: Boolean = false,
     ) = serialize {
         transitionWithPlan(
             signal = Signal.START_CAPTURE,
+            reasoningStatus = true,
+            reasoningText = "",
+            analysisRunning = true,
+            analysisIncludesMedia = includesMedia,
         )
+    }
+
+    suspend fun applyCaptureAnalysisCancelled() = serialize {
+        with(contextManager) {
+            emitMessage(
+                ofMessage(
+                    role = Message.Role.AI,
+                    textRes = Res.string.feature_ai_msg_media_analysis_cancelled,
+                ),
+                bindCurrentActions = true,
+            )
+            notifyContextChange(
+                updated = context.copy(
+                    reasoningStatus = false,
+                    reasoningText = "",
+                    analysisRunning = false,
+                    analysisIncludesMedia = false,
+                )
+            )
+        }
+    }
+
+    suspend fun emitMediaAnalysisFallback() = serialize {
+        with(contextManager) {
+            emitMessage(
+                ofMessage(
+                    role = Message.Role.AI,
+                    textRes = Res.string.feature_ai_msg_media_analysis_fallback,
+                ),
+                bindCurrentActions = true,
+            )
+        }
     }
 
     suspend fun commandEnterManualEdit(
@@ -646,6 +780,9 @@ class ConversationEngine(
         messages: List<Message>? = null,
         reasoningStatus: Boolean? = null,
         reasoningText: String? = null,
+        analysisRunning: Boolean? = null,
+        analysisIncludesMedia: Boolean? = null,
+        clearMediaGenerationProgress: Boolean = false,
     ) = with(contextManager) {
         val current = context
         val nextState = stateMachine.transition(
@@ -686,6 +823,13 @@ class ConversationEngine(
                 actionOwnerMessageId = actionOwnerMessageId,
                 reasoningStatus = reasoningStatus ?: current.reasoningStatus,
                 reasoningText = reasoningText ?: current.reasoningText,
+                analysisRunning = analysisRunning ?: current.analysisRunning,
+                analysisIncludesMedia = analysisIncludesMedia ?: current.analysisIncludesMedia,
+                mediaGenerationProgress = if (clearMediaGenerationProgress) {
+                    null
+                } else {
+                    current.mediaGenerationProgress
+                },
             )
         )
         // 状态变更之后，追加状态变化消息

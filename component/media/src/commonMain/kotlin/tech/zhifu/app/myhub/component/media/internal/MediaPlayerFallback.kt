@@ -1,11 +1,10 @@
 package tech.zhifu.app.myhub.component.media.internal
 
-import io.github.vinceglb.filekit.PlatformFile
+import tech.zhifu.app.myhub.component.media.MediaItem
 
 expect fun openInSystemPlayer(
-    file: PlatformFile,
+    item: MediaItem,
     mimeType: String? = null
 ): Boolean
 
 expect fun isVlcAvailable(): Boolean
-

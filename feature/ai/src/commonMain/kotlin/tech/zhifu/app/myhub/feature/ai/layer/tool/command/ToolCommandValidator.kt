@@ -1,12 +1,10 @@
 package tech.zhifu.app.myhub.feature.ai.layer.tool.command
 
 fun interface ToolCommandValidator {
-    fun validate(
-        command: ToolCommand
-    ): ValidationResult
+    fun validate(command: ToolCommand): ToolCommandValidation
 }
 
-data class ValidationResult(
+data class ToolCommandValidation(
     val ok: Boolean,
     val message: String? = null,
 )

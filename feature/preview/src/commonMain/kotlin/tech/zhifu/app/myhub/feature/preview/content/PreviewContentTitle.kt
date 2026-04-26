@@ -17,6 +17,7 @@ internal fun PreviewContentTitle(
         text = title,
         style = MaterialTheme.typography.headlineSmall
             .copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.onSurface,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
     )

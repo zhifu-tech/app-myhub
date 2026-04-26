@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import org.koin.ktor.plugin.Koin
 import tech.zhifu.app.myhub.api.auth.authApi
 import tech.zhifu.app.myhub.api.capture.captureAnalysisApi
+import tech.zhifu.app.myhub.api.capture.captureImageGenerationApi
 import tech.zhifu.app.myhub.api.media.mediaUploadApi
 import tech.zhifu.app.myhub.api.sync.syncApi
 import tech.zhifu.app.myhub.auth.configureAuthentication
@@ -79,5 +80,6 @@ fun Application.module() {
 //        usersApi()
         mediaUploadApi()
         captureAnalysisApi()
+        captureImageGenerationApi()
     }
 }

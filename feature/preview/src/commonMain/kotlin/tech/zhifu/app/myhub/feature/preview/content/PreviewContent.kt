@@ -13,29 +13,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.feature.preview.PreviewState
+import tech.zhifu.app.myhub.feature.preview.PreviewTokens
 import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.feature.preview.sharedElement
-import tech.zhifu.app.myhub.ui.model.ContentCard
 
 @Composable
 internal fun PreviewContent(
     card: ContentCard,
+    previewState: PreviewState,
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     snapshotController: PreviewSnapshotController? = null,
 ) {
     val contentModifier = if (animatedVisibilityScope != null) {
         modifier.sharedBounds(
-            key = "content-preview-${card.id}",
+            key = "content-preview-${card.card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
-            overlayClipShape = MaterialTheme.shapes.large,
+            overlayClipShape = PreviewTokens.CardShape,
         )
     } else {
         modifier
     }
     val titleModifier = if (animatedVisibilityScope != null) {
         Modifier.sharedBounds(
-            key = "content-title-${card.id}",
+            key = "content-title-${card.card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
         )
     } else {
@@ -43,7 +46,7 @@ internal fun PreviewContent(
     }
     val coverModifier = if (animatedVisibilityScope != null) {
         Modifier.sharedElement(
-            key = "content-image-${card.id}",
+            key = "content-image-${card.card.id}",
             animatedVisibilityScope = animatedVisibilityScope,
         )
     } else {
@@ -53,8 +56,8 @@ internal fun PreviewContent(
     ElevatedCard(
         modifier = contentModifier
             .previewSnapshotSource(snapshotController)
-            .clip(shape = MaterialTheme.shapes.large),
-        shape = MaterialTheme.shapes.large,
+            .clip(shape = PreviewTokens.CardShape),
+        shape = PreviewTokens.CardShape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
@@ -76,7 +79,7 @@ internal fun PreviewContent(
             )
 
             PreviewContentTitle(
-                title = card.title,
+                title = card.card.title,
                 modifier = titleModifier
                     .fillMaxWidth()
                     .padding(start = 4.dp, end = 4.dp, top = 8.dp)
@@ -84,6 +87,7 @@ internal fun PreviewContent(
 
             PreviewContentCover(
                 card = card,
+                previewState = previewState,
                 modifier = coverModifier
                     .fillMaxWidth()
                     .padding(top = 24.dp)

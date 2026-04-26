@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.ai
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.ContainerHost
@@ -10,10 +11,8 @@ import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
 import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
-import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
 import tech.zhifu.app.myhub.ui.state.ai.createAIProviderStateFlow
-import tech.zhifu.app.myhub.ui.state.ai.updateAIProviderMode
 import tech.zhifu.app.myhub.ui.state.language.LanguageState
 import tech.zhifu.app.myhub.ui.state.language.createLanguageStateFlow
 import tech.zhifu.app.myhub.ui.state.user.UserState
@@ -22,6 +21,7 @@ import tech.zhifu.app.myhub.ui.state.user.preferences.UserPreferencesState
 import tech.zhifu.app.myhub.ui.state.user.preferences.createUserPreferencesStatFlow
 import tech.zhifu.app.myhub.ui.viewmodel.ViewModelSideEffect
 import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
+import kotlin.time.Duration.Companion.milliseconds
 
 class AIViewModel(
     override val userRepository: UserRepository,
@@ -49,6 +49,8 @@ class AIViewModel(
     override val sideEffect = createSideEffectFlow()
 
     private fun bootstrap() = intent {
+        // 延迟数据的加载，给Loading 1s 的展示时间
+        delay(1000.milliseconds)
         providerRoutingConfig
             .onEach { stateProvider ->
                 orchestrator.updateProviderConfig(stateProvider)
@@ -99,25 +101,21 @@ class AIViewModel(
     }
 
     fun doAction(action: String) = intent {
-        val current = state as? AIUiState.Content
-        if (current != null) {
-            reduce {
-                current.copy(
-                    input = when (action) {
-                        ActionOptionType.EDIT_TITLE.value -> current.context.draft.title
-                        ActionOptionType.EDIT_SUMMARY.value -> current.context.draft.summary
-                        ActionOptionType.EDIT_LOCATION.value -> current.context.draft.location?.name.orEmpty()
-                        else -> ""
-                    }
-                )
-            }
+        val current = state as? AIUiState.Content ?: return@intent
+        reduce {
+            current.copy(
+                input = when (action) {
+                    ActionOptionType.EDIT_TITLE.value -> current.context.draft.title
+                    ActionOptionType.EDIT_SUMMARY.value -> current.context.draft.summary
+                    ActionOptionType.EDIT_LOCATION.value -> current.context.draft.location?.name.orEmpty()
+                    else -> ""
+                }
+            )
         }
         orchestrator.onAction(action)
     }
 
-    fun updateProviderMode(mode: ProviderMode) = intent {
-        updateAIProviderMode(mode)
-        val current = state as? AIUiState.Content ?: return@intent
-        reduce { current.copy(providerMode = mode) }
+    fun cancelAnalysis() = intent {
+        orchestrator.cancelCurrentAnalysis()
     }
 }

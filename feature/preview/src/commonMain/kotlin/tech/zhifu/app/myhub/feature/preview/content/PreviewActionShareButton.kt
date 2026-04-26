@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import tech.zhifu.app.myhub.core.sharing.rememberShare
 import tech.zhifu.app.myhub.core.sharing.rememberShareSupported
-import tech.zhifu.app.myhub.ui.model.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 
 @Composable
 internal fun PreviewActionShareButton(

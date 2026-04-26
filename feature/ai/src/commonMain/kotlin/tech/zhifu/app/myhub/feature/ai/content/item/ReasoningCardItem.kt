@@ -7,8 +7,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_cancel_analysis
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_reasoning_live_desc_media
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_reasoning_live_desc_text
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
@@ -21,29 +26,49 @@ fun ReasoningCardItem(
             ReasoningCardItemState(
                 reasoningText = state.context.reasoningText,
                 reasoningStatus = state.context.reasoningStatus,
+                analysisRunning = state.context.analysisRunning,
+                analysisIncludesMedia = state.context.analysisIncludesMedia,
             )
         }
     }
     val safeState = state ?: return
     ReasoningCardItemContent(
         reasoningStatus = safeState.reasoningStatus,
-        reasoningText = state?.reasoningText.orEmpty(),
+        analysisRunning = safeState.analysisRunning,
+        analysisIncludesMedia = safeState.analysisIncludesMedia,
+        reasoningText = safeState.reasoningText,
+        onCancel = viewModel::cancelAnalysis,
     )
 }
 
 @Composable
 fun ReasoningCardItemContent(
     reasoningStatus: Boolean,
+    analysisRunning: Boolean,
+    analysisIncludesMedia: Boolean,
     reasoningText: String,
+    onCancel: () -> Unit,
 ) {
-    if (!reasoningStatus || reasoningText.isBlank()) return
+    if (!analysisRunning && (!reasoningStatus || reasoningText.isBlank())) return
     ReasoningTraceCard(
-        text = reasoningText,
-        live = true,
+        text = reasoningText.ifBlank {
+            if (analysisIncludesMedia) {
+                stringResource(Res.string.feature_ai_reasoning_live_desc_media)
+            } else {
+                stringResource(Res.string.feature_ai_reasoning_live_desc_text)
+            }
+        },
+        live = analysisRunning,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp),
         persistentKey = "reasoning-live",
+        secondaryActionLabel = if (analysisRunning) {
+            stringResource(Res.string.feature_ai_action_cancel_analysis)
+        } else {
+            null
+        },
+        onSecondaryAction = if (analysisRunning) onCancel else null,
     )
 }
 
@@ -51,4 +76,6 @@ fun ReasoningCardItemContent(
 private data class ReasoningCardItemState(
     val reasoningText: String,
     val reasoningStatus: Boolean,
+    val analysisRunning: Boolean,
+    val analysisIncludesMedia: Boolean,
 )

@@ -45,9 +45,10 @@ kotlin {
         optIn.add("androidx.compose.ui.ExperimentalComposeUiApi")
         optIn.add("dev.chrisbanes.haze.ExperimentalHazeApi")
         optIn.add("dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi")
+        optIn.add("kotlin.io.encoding.ExperimentalEncodingApi")
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
         optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
-        optIn.add("org.mobilenativefoundation.store.core5.ExperimentalStoreApi")
         optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
+        optIn.add("org.mobilenativefoundation.store.core5.ExperimentalStoreApi")
     }
 }

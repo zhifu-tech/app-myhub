@@ -12,6 +12,10 @@
   <string name="feature_ai_thinking_title">AI 思考中…</string>
   <string name="feature_ai_reasoning_live_title">正在分析</string>
   <string name="feature_ai_reasoning_live_desc">我会边整理边更新结果，你可以先看过程，也可以等草稿完成。</string>
+  <string name="feature_ai_reasoning_live_desc_media">
+    正在分析你上传的媒体。我会在得到第一版稳定草稿后立即停下，不会反复卡在冲突细节里。
+  </string>
+  <string name="feature_ai_reasoning_live_desc_text">正在分析你刚输入的内容，草稿稳定后会立刻回到结果。</string>
   <string name="feature_ai_reasoning_history_title">本次分析过程</string>
   <string name="feature_ai_reasoning_collapsed_preview">已完成分析，点击展开查看过程</string>
   <string name="feature_ai_action_title_media">图片补充</string>
@@ -22,13 +26,16 @@
   <string name="feature_ai_action_title_type">捕获类型</string>
   <string name="feature_ai_action_title_location">位置</string>
   <string name="feature_ai_action_input_hint">直接在下方输入并发送</string>
-  <string name="feature_ai_input_placeholder_media">可以直接发文字，也可以先补一张图</string>
+  <string name="feature_ai_input_quick_capture">拍照识别</string>
+  <string name="feature_ai_input_quick_upload">上传媒体</string>
+  <string name="feature_ai_input_support_capture">也可以直接拍照、上传图片或视频，我会先识别内容再整理成卡片。</string>
+  <string name="feature_ai_input_placeholder_media">可以先补充媒体，或让 AI 生成一张图</string>
   <string name="feature_ai_input_placeholder_tags">一次输入一个标签，例如：探店</string>
   <string name="feature_ai_input_placeholder_summary">补一句更完整的摘要后发送</string>
   <string name="feature_ai_input_placeholder_location">输入地点后发送，例如：上海静安</string>
   <string name="feature_ai_input_placeholder_title">输入一个清晰标题后发送</string>
   <string name="feature_ai_input_placeholder_review">先点下方修改项，再输入内容</string>
-  <string name="feature_ai_input_placeholder_default">直接说点什么，我来帮你整理成卡片</string>
+  <string name="feature_ai_input_placeholder_default">输入文字，或直接拍照 / 上传媒体</string>
   <string name="feature_ai_send_desc">发送</string>
   <string name="feature_ai_input_context_default">自由输入</string>
   <string name="feature_ai_input_context_media">补充图片说明</string>
@@ -41,9 +48,12 @@
   <string name="feature_ai_input_context_hint">当前输入会直接同步到草稿</string>
   <string name="feature_ai_input_context_hint_apply">发送后会立即更新到当前草稿</string>
   <string name="feature_ai_input_context_hint_review">先点下方修改项进入对应编辑</string>
-  <string name="feature_ai_action_upload_media">补充图片</string>
-  <string name="feature_ai_action_replace_media">重新选图</string>
+  <string name="feature_ai_action_upload_media">补充媒体</string>
+  <string name="feature_ai_action_capture_media">拍照识别</string>
+  <string name="feature_ai_action_replace_media">重新选择媒体</string>
+  <string name="feature_ai_action_generate_media">AI 生成图片</string>
   <string name="feature_ai_action_remove_media">清空图片</string>
+  <string name="feature_ai_action_cancel_analysis">停止分析</string>
   <string name="feature_ai_action_uploaded_media">已上传图片</string>
   <string name="feature_ai_action_skip_media">暂时跳过</string>
   <string name="feature_ai_action_skip_tags">先不加标签</string>
@@ -59,20 +69,29 @@
   <string name="feature_ai_action_clear_location">清空位置</string>
   <string name="feature_ai_action_new_capture">开始下一条</string>
   <string name="feature_ai_action_input_title_hint">输入新标题后发送</string>
-  <string name="feature_ai_msg_bootstrap">把想法、见闻、待办直接告诉我，我会先整理成草稿，再陪你一步步补齐。</string>
+  <string name="feature_ai_msg_bootstrap">输入一句话、贴一段内容，或者直接拍照 /
+    上传媒体；我会先识别重点，再整理成草稿陪你补齐。
+  </string>
   <string name="feature_ai_msg_reasoning">AI 思考过程：\n%1$s</string>
   <string name="feature_ai_msg_intent">意图识别：%1$s</string>
   <string name="feature_ai_msg_draft_complete">草稿已经整理好了，我把重点放在下面，确认一下就能发布。</string>
-  <string name="feature_ai_msg_draft_need_media">内容我已经整理好了。补一张图片会更完整；如果现在没有，也可以直接继续。
+  <string name="feature_ai_msg_draft_need_media">内容我已经整理好了。补一条媒体会更完整；如果现在没有，也可以直接继续。
   </string>
   <string name="feature_ai_msg_draft_need_tags">我已经提炼出主要内容了。选几个标签会更好检索，不想加也可以继续。</string>
   <string name="feature_ai_msg_draft_need_title">内容已经成形了，再给它起一个清晰的标题就可以继续。</string>
   <string name="feature_ai_msg_tag_added_complete">已添加标签：%1$s。信息已齐全，可进入复核。</string>
   <string name="feature_ai_msg_tag_added_need_more">已加入「%1$s」。还可以继续加标签，或点“回到复核”。</string>
-  <string name="feature_ai_msg_media_not_selected">未选择图片。请继续完成下一步。</string>
-  <string name="feature_ai_msg_media_attached">已添加 %1$d 张图片。现在看起来更完整了。</string>
+  <string name="feature_ai_msg_media_not_selected">未选择媒体。请继续完成下一步。</string>
+  <string name="feature_ai_msg_media_attached">已添加 %1$d 条媒体。现在看起来更完整了。</string>
+  <string name="feature_ai_msg_media_generating">我会基于当前草稿生成一张更贴合内容的图片，稍等一下。</string>
+  <string name="feature_ai_msg_media_generate_failed">这次生成图片没有成功。你可以直接上传本地图片，或再试一次 AI 生成。
+  </string>
   <string name="feature_ai_msg_media_editing">图片已同步。想继续补图、换图或清空，都可以直接在下面操作。</string>
-  <string name="feature_ai_msg_skip_media">已跳过图片补充。请继续完成下一步。</string>
+  <string name="feature_ai_msg_media_analysis_cancelled">已停止当前媒体分析。你可以调整上传内容后重新开始。</string>
+  <string name="feature_ai_msg_media_analysis_fallback">
+    媒体已经保留好了，但这次没有提取到可分析的画面。你可以补一句文字、再加一张封面图，或在支持视频关键帧提取的设备上重试。
+  </string>
+  <string name="feature_ai_msg_skip_media">已跳过媒体补充。请继续完成下一步。</string>
   <string name="feature_ai_msg_skip_tags">已跳过标签补充。请继续完成下一步。</string>
   <string name="feature_ai_msg_skip_field">已跳过字段：%1$s。请继续完成下一步。</string>
   <string name="feature_ai_msg_skip_title">已跳过标题补充。请继续完成下一步。</string>
@@ -100,14 +119,27 @@
   <string name="feature_ai_msg_blocked_input">这一步更适合用下方动作，或者按提示在输入框继续补充。</string>
   <string name="feature_ai_msg_blocked_action">动作不可用：%1$s（当前状态 %2$s）</string>
   <string name="feature_ai_msg_restore_session">已恢复上次会话草稿。</string>
+  <string name="feature_ai_msg_restore_session_media_missing">有 %1$s 个媒体文件在重启后无法恢复，请重新选择图片。</string>
   <string name="feature_ai_msg_review_input_help">先点下方想修改的项目，进入对应编辑后再输入内容。</string>
-  <string name="feature_ai_action_panel_media_title_missing">补一张图片，卡片会更完整</string>
-  <string name="feature_ai_action_panel_media_title_ready">%1$d 张图片已就绪，还想调整一下吗？</string>
-  <string name="feature_ai_action_panel_media_support_missing">支持直接上传；如果现在没有图片，也可以先继续。</string>
-  <string name="feature_ai_action_panel_media_support_ready">补图、换图、清空都会停留在这里；你自己决定什么时候回到复核。
+  <string name="feature_ai_action_panel_media_title_missing">补一条媒体，卡片会更完整</string>
+  <string name="feature_ai_action_panel_media_title_generating">AI 正在生成图片</string>
+  <string name="feature_ai_action_panel_media_title_ready">%1$d 条媒体已就绪，还想调整一下吗？</string>
+  <string name="feature_ai_action_panel_media_support_missing">支持拍照、上传本地图片或视频，或基于当前草稿让 AI
+    生成一张图；首条媒体会默认作为封面，你之后也可以再换。
   </string>
-  <string name="feature_ai_action_panel_media_existing">当前图片</string>
-  <string name="feature_ai_action_panel_media_empty_placeholder">还没有图片。选图后会直接显示在这里。</string>
+  <string name="feature_ai_action_panel_media_support_generating">
+    已经开始生成了，先看这里的进度；完成后会自动替换成最终图片。
+  </string>
+  <string name="feature_ai_action_panel_media_support_ready">当前第一张图会默认作为封面；补图、换图、AI
+    生成、清空都会停留在这里，你自己决定什么时候回到复核。
+  </string>
+  <string name="feature_ai_action_panel_media_existing">当前媒体</string>
+  <string name="feature_ai_action_panel_media_empty_placeholder">还没有媒体。上传或 AI 生成后会直接显示在这里。</string>
+  <string name="feature_ai_action_panel_media_missing_hint">有 %1$s 个媒体文件已失效，请重新选择图片。</string>
+  <string name="feature_ai_action_panel_media_stage_preparing">正在唤起模型</string>
+  <string name="feature_ai_action_panel_media_stage_generating">正在生成图片</string>
+  <string name="feature_ai_action_panel_media_stage_finalizing">正在整理结果</string>
+  <string name="feature_ai_action_panel_media_progress">第 %1$d / %2$d 步</string>
   <string name="feature_ai_action_panel_tag_title_empty">选几个标签，后续会更好找</string>
   <string name="feature_ai_action_panel_tag_title_selected">标签已经整理好了，点一下可移除</string>
   <string name="feature_ai_action_panel_tag_support">推荐标签和自定义标签都可以一起使用。</string>
@@ -130,11 +162,11 @@
   <string name="feature_ai_action_panel_preview_check_cover">封面</string>
   <string name="feature_ai_action_panel_preview_check_copy">文案</string>
   <string name="feature_ai_action_panel_preview_check_meta">信息</string>
-  <string name="feature_ai_action_panel_preview_media_count">%1$d 张图片</string>
-  <string name="feature_ai_action_panel_preview_no_media">待补图片</string>
+  <string name="feature_ai_action_panel_preview_media_count">%1$d 条媒体</string>
+  <string name="feature_ai_action_panel_preview_no_media">待补媒体</string>
   <string name="feature_ai_action_panel_current_value">当前内容</string>
   <string name="feature_ai_action_panel_edit_empty">尚未填写</string>
-  <string name="feature_ai_action_panel_edit_media_value">已选 %1$d 张图片</string>
+  <string name="feature_ai_action_panel_edit_media_value">已选 %1$d 条媒体</string>
   <string name="feature_ai_action_panel_edit_tags_value">%1$s</string>
   <string name="feature_ai_action_panel_location_title_missing">补个位置，之后会更好搜回</string>
   <string name="feature_ai_action_panel_location_title_ready">位置已经有了，还想再精确一点吗？</string>

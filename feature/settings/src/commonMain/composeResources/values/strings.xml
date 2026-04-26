@@ -31,16 +31,20 @@
   <string name="feature_settings_ai_mode_direct_api">Direct API</string>
   <string name="feature_settings_ai_direct_endpoint">Direct Endpoint</string>
   <string name="feature_settings_ai_direct_model">Direct Model</string>
+  <string name="feature_settings_ai_direct_vision_model">Direct Vision Model</string>
+  <string name="feature_settings_ai_direct_image_model">Direct Image Model</string>
   <string name="feature_settings_ai_direct_api_key">Direct API Key</string>
   <string name="feature_settings_ai_timeout_ms">Timeout (ms)</string>
   <string name="feature_settings_ai_retries">Max Retries</string>
-  <string name="feature_settings_ai_shortcut_title">Provider Shortcut in AI Capture</string>
-  <string name="feature_settings_ai_shortcut_hint">Show the provider switcher in the AI capture header. You can hide it
-    again from the chat page or here in settings.
+  <string name="feature_settings_ai_shortcut_title">AI Capture Header Shortcut</string>
+  <string name="feature_settings_ai_shortcut_hint">Show a compact provider switcher in the AI capture header. This only
+    affects the in-chat shortcut and can be turned back on here later.
   </string>
   <string name="feature_settings_ai_mode_hint">Choose how new analysis requests should be routed.</string>
   <string name="feature_settings_ai_direct_title">Direct API</string>
-  <string name="feature_settings_ai_direct_hint">These fields are used only when Direct API mode is selected.</string>
+  <string name="feature_settings_ai_direct_hint">These fields are used only in Direct API mode. Use separate models for
+    text analysis, image understanding, and image generation.
+  </string>
   <string name="feature_settings_ai_runtime_title">Runtime</string>
   <string name="feature_settings_ai_runtime_hint">Timeout and retry settings apply to all provider modes.</string>
   <string name="feature_settings_ai_save">Save AI Settings</string>
@@ -48,5 +52,7 @@
   <string name="feature_settings_ai_validation_max_retries_invalid">Max retries must be a non-negative integer</string>
   <string name="feature_settings_ai_validation_direct_endpoint_required">Direct endpoint is required</string>
   <string name="feature_settings_ai_validation_direct_model_required">Direct model is required</string>
+  <string name="feature_settings_ai_validation_direct_vision_model_required">Direct vision model is required</string>
+  <string name="feature_settings_ai_validation_direct_image_model_required">Direct image model is required</string>
   <string name="feature_settings_ai_validation_direct_api_key_required">Direct API key is required</string>
 </resources>

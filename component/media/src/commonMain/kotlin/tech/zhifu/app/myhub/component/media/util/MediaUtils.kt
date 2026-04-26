@@ -20,13 +20,23 @@ fun PlatformFile.toMediaItem(): MediaItem {
     )
     return MediaItem(
         id = "${fileName}_${Clock.System.now()}",
-        file = this,
         name = fileName,
-        isVideo = isVideo
+        previewUrl = toString(),
+        isVideo = isVideo,
+        file = this,
     )
 }
 
 fun PlatformFile.toPlayableUrl(): String = toString().toPlayableUrl()
+
+fun MediaItem.displayImageModel(): String =
+    thumbnailUrl
+        ?.takeIf { it.isNotBlank() }
+        ?.toPlayableUrl()
+        ?: previewUrl.toPlayableUrl()
+
+fun MediaItem.displayMediaUrl(): String =
+    previewUrl.toPlayableUrl().ifBlank { file?.toPlayableUrl().orEmpty() }
 
 fun String.toPlayableUrl(): String {
     val rawPath = this.trim()
@@ -46,5 +56,14 @@ fun String.toPlayableUrl(): String {
 }
 
 fun MediaItem.systemMimeType(): String {
-    return file.mimeType()?.toString() ?: if (isVideo) "video/*" else "image/*"
+    return file?.mimeType()?.toString()
+        ?: previewUrl.substringAfterLast('.', "")
+            .lowercase()
+            .let { extension ->
+                when (extension) {
+                    "mp4", "mov", "m4v", "webm", "avi", "mkv", "wmv" -> "video/*"
+                    "jpg", "jpeg", "png", "webp", "gif", "heic" -> "image/*"
+                    else -> if (isVideo) "video/*" else "image/*"
+                }
+            }
 }

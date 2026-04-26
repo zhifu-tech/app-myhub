@@ -2,20 +2,15 @@ package tech.zhifu.app.myhub.datastore.bootstrap
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import tech.zhifu.app.myhub.datastore.bootstrap.model.BootstrapCardSeed
-import tech.zhifu.app.myhub.datastore.bootstrap.model.toCard
 import tech.zhifu.app.myhub.datastore.bootstrap.resources.Res
-import tech.zhifu.app.myhub.datastore.model.domain.Card
 import tech.zhifu.app.myhub.datastore.model.domain.User
 import tech.zhifu.app.myhub.datastore.model.domain.UserPreferences
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
-import kotlin.time.Clock
 
 data class BootstrapConfig(
     val userId: String,
     val user: User,
     val userPreferences: UserPreferences,
-    val cards: List<Card>,
 )
 
 suspend fun buildBootstrapConfig(
@@ -35,18 +30,11 @@ suspend fun buildBootstrapConfig(
             .getOrNull()
             ?.copy(userId = userId)
             ?: error("invalid bootstrap user_preferences.json for locale=$localeDir")
-    val now = Clock.System.now()
-    val cards = readResource("card.json", localeDir)
-        .deserialize<List<BootstrapCardSeed>>()
-        .getOrNull()
-        .orEmpty()
-        .map { it.toCard(now = now) }
 
     BootstrapConfig(
         userId = userId,
         user = user,
         userPreferences = userPreferences,
-        cards = cards,
     )
 }
 

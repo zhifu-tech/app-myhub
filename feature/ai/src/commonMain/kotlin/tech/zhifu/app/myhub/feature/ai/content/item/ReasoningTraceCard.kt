@@ -40,6 +40,8 @@ fun ReasoningTraceCard(
     live: Boolean,
     modifier: Modifier = Modifier,
     persistentKey: String? = null,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: (() -> Unit)? = null,
 ) {
     var expanded by rememberSaveable(persistentKey) { mutableStateOf(live) }
     val headerTitle = if (live) {
@@ -96,6 +98,16 @@ fun ReasoningTraceCard(
                     modifier = Modifier.clickable { expanded = !expanded },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            if (secondaryActionLabel != null && onSecondaryAction != null) {
+                Text(
+                    text = secondaryActionLabel,
+                    modifier = Modifier.clickable(onClick = onSecondaryAction),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.SemiBold,
                 )
             }

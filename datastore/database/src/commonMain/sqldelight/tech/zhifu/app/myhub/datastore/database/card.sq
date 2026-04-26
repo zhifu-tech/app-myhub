@@ -5,8 +5,6 @@ CREATE TABLE card (
     title TEXT NOT NULL,
     summary TEXT,
     status TEXT,
-    content TEXT, -- JSON-TEXT
-    ui TEXT, -- JSON-TEXT
     location TEXT, -- JSON-TEXT
     tags TEXT, -- JSON-TEXT
     source TEXT, -- JSON-TEXT
@@ -26,9 +24,9 @@ CREATE INDEX idx_card_title_id_desc ON card(title DESC, id DESC);
 
 insertCard:
 INSERT OR REPLACE INTO card (
-  id, type, title, summary, status, content, ui, location, tags, source, created_at, updated_at, deleted_at, version
+  id, type, title, summary, status, location, tags, source, created_at, updated_at, deleted_at, version
 )
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteCard:
 DELETE FROM card
@@ -64,7 +62,6 @@ WHERE uc.user_id = :userId
   AND (
     lower(c.title) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
-    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
@@ -80,7 +77,6 @@ WHERE uc.user_id = :userId
   AND (
     lower(c.title) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
-    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
@@ -118,7 +114,6 @@ WHERE uc.user_id = :userId
   AND (
     lower(c.title) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
-    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
@@ -134,7 +129,6 @@ WHERE uc.user_id = :userId
   AND (
     lower(c.title) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
-    OR lower(COALESCE(c.content, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
     OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'

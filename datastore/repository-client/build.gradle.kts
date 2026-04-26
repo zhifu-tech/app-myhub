@@ -32,6 +32,7 @@ kotlin {
             implementation(projects.datastore.model)
             implementation(projects.datastore.modelDto)
             implementation(projects.datastore.repositoryClientApi)
+            implementation(projects.datastore.fileStorage)
             implementation(projects.datastore.sync)
 
             implementation(libs.koin.core)
@@ -51,4 +52,3 @@ kotlin {
         }
     }
 }
-

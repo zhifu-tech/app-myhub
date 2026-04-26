@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.tool.command
 
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 
@@ -44,6 +45,18 @@ sealed interface ToolCommand {
 
     data class AttachPickedMedia(
         val draft: CaptureDraft,
-        val maxItems: Int = 3,
+        val maxItems: Int = 9,
+        val imagesOnly: Boolean = false,
+    ) : ToolCommand
+
+    data class CaptureMediaPhoto(
+        val draft: CaptureDraft,
+    ) : ToolCommand
+
+    data class GenerateImage(
+        val draft: CaptureDraft,
+        val language: String,
+        val replaceExisting: Boolean = false,
+        val onProgress: suspend (ProviderImageGenerationProgress) -> Unit = {},
     ) : ToolCommand
 }

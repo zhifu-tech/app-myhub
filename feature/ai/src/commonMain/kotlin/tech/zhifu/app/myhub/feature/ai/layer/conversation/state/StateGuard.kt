@@ -29,12 +29,18 @@ class StateGuard {
     )
 
     private val staticActionsByState: Map<ConversationState, Set<String>> = mapOf(
+        ConversationState.IDLE to setOf(
+            ActionOptionType.CAPTURE_MEDIA.value,
+            ActionOptionType.UPLOAD_MEDIA.value,
+        ),
         ConversationState.INFO_COLLECT to setOf(
             ActionOptionType.SKIP_TAGS.value,
             ActionOptionType.SKIP_MEDIA.value,
+            ActionOptionType.CAPTURE_MEDIA.value,
             ActionOptionType.UPLOAD_MEDIA.value,
             ActionOptionType.REPLACE_MEDIA.value,
             ActionOptionType.REMOVE_MEDIA.value,
+            ActionOptionType.GENERATE_MEDIA.value,
         ),
         ConversationState.CARD_REVIEW to setOf(
             ActionOptionType.EDIT_MEDIA.value,
@@ -54,6 +60,7 @@ class StateGuard {
             ActionOptionType.EDIT_SUMMARY.value,
             ActionOptionType.EDIT_LOCATION.value,
             ActionOptionType.REVIEW.value,
+            ActionOptionType.CAPTURE_MEDIA.value,
             ActionOptionType.UPLOAD_MEDIA.value,
             ActionOptionType.REPLACE_MEDIA.value,
             ActionOptionType.REMOVE_MEDIA.value,
@@ -63,7 +70,9 @@ class StateGuard {
             ActionOptionType.DELETE_CARD.value,
         ),
         ConversationState.COMPLETE to setOf(
-            ActionOptionType.NEW_CAPTURE.value
+            ActionOptionType.NEW_CAPTURE.value,
+            ActionOptionType.CAPTURE_MEDIA.value,
+            ActionOptionType.UPLOAD_MEDIA.value,
         ),
     )
 

@@ -9,15 +9,14 @@ data class MediaPostProcessRequest(
     val cardId: String,
     @SerialName("mediaId")
     val mediaId: String,
-    @SerialName("mediaUri")
-    val mediaUri: String,
+    @SerialName("mediaStorageHandle")
+    val mediaStorageHandle: String,
 )
 
 @Serializable
 data class MediaPostProcessResponse(
-    @SerialName("thumbUri")
-    val thumbUri: String,
+    @SerialName("thumbAccessUrl")
+    val thumbAccessUrl: String,
     @SerialName("durationMs")
     val durationMs: Long?,
 )
-

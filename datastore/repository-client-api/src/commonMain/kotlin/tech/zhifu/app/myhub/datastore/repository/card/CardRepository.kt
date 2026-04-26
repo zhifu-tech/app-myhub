@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import tech.zhifu.app.myhub.datastore.model.domain.Card
 
 interface CardRepository {
+    fun observeContentRevision(): Flow<Long>
 
     suspend fun insertCard(
         card: Card,

@@ -26,6 +26,17 @@ class RoutedProviderAnalysisExecutor(
             )
         }
         val config = configSource.current()
+        if (
+            request.mediaInputs.isNotEmpty() &&
+            config.directEndpoint.isNotBlank() &&
+            config.directVisionModel.isNotBlank()
+        ) {
+            return directApiClient.analyze(
+                request = request,
+                config = config,
+                onReasoning = onReasoning,
+            )
+        }
         return when (route.mode) {
             ProviderMode.SERVER_GATEWAY -> {
                 serverGatewayClient.analyze(

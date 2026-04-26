@@ -26,21 +26,12 @@ fun SettingsScreen(
         navigator = navigator,
         viewModel = viewModel
     )
-    SettingsScaffold(
-        viewModel = viewModel
-    )
-}
-
-@Composable
-fun SettingsScaffold(
-    viewModel: SettingsViewModel
-) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(
                 modifier = Modifier,
-                viewModel = viewModel
+                navigator = navigator,
             )
         }
     ) { padding ->
@@ -77,10 +68,6 @@ private fun SettingsSideEffect(
 ) {
     viewModel.sideEffect.CollectPredicatedSharedSideEffect { effect ->
         when (effect) {
-            SettingsSideEffect.NavigateBack -> {
-                navigator.goBack()
-            }
-
             SettingsSideEffect.NavigateToOpenSourceLicenses -> {
                 navigator.navigateToOpenSourceLicenses()
             }

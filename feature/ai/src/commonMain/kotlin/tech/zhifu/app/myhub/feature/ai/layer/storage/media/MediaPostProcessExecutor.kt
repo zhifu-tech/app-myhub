@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.media
 
+import tech.zhifu.app.myhub.datastore.model.domain.MediaAsset
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
 import tech.zhifu.app.myhub.datastore.repository.capture.AiJobSnapshot
@@ -50,11 +51,12 @@ class MediaPostProcessExecutor(
             return
         }
 
-        val thumbUri = deriveThumbUri(media.localUri, media.mediaType)
+        val thumbnail = deriveThumbnail(media)
         val duration = deriveDurationMs(media.mediaType)
         captureLocalRepository.upsertMediaAsset(
             snapshot = media.copy(
-                thumbUri = thumbUri,
+                thumbStorageHandle = thumbnail?.storageHandle,
+                thumbAccessUrl = thumbnail?.accessUrl,
                 durationMs = duration,
             )
         )
@@ -62,7 +64,7 @@ class MediaPostProcessExecutor(
             snapshot = job.copy(
                 status = "succeeded",
                 responseJson = MediaPostProcessResponse(
-                    thumbUri = thumbUri ?: "",
+                    thumbAccessUrl = thumbnail?.accessUrl ?: "",
                     durationMs = duration,
                 ).serialize().orEmpty(),
                 updatedAt = now,
@@ -70,16 +72,21 @@ class MediaPostProcessExecutor(
         )
     }
 
-    private suspend fun deriveThumbUri(
-        localUri: String,
-        mediaType: String
-    ): String? = when {
-        mediaType.startsWith("image/") -> runCatching {
-            mediaFileStore.createImageThumbnail(localUri = localUri)
+    private suspend fun deriveThumbnail(
+        media: MediaAsset,
+    ): ImportedMedia? = when {
+        media.mediaType.startsWith("image/") -> runCatching {
+            mediaFileStore.createImageThumbnail(
+                source = ImportedMedia(
+                    storageHandle = media.storageHandle,
+                    accessUrl = media.accessUrl,
+                    sizeBytes = media.sizeBytes,
+                )
+            )
         }.getOrNull()
 
         // 当前阶段未实现跨平台视频首帧抽取，保留为空。
-        mediaType.startsWith("video/") -> null
+        media.mediaType.startsWith("video/") -> null
         else -> null
     }
 

@@ -12,19 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.settings.SettingsViewModel
-import tech.zhifu.app.myhub.feature.settings.viewmodel.navigateBack
+import tech.zhifu.app.myhub.navigation.AppNavigator
 import tech.zhifu.app.myhub.ui.design.resources.settings
 import tech.zhifu.app.myhub.ui.design.resources.Res as DesignRes
 
 @Composable
 internal fun TopBar(
     modifier: Modifier,
-    viewModel: SettingsViewModel,
+    navigator: AppNavigator,
 ) {
     TopBarContent(
         modifier = modifier,
-        navigateBack = viewModel::navigateBack
+        navigateBack = navigator::goBack
     )
 }
 

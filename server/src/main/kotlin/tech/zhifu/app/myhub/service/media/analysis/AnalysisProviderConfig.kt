@@ -15,7 +15,9 @@ data class AnalysisProviderConfig(
     val videoFrameIntervalSeconds: Int = 2,
     val qwenBaseUrl: String = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
     val qwenApiKey: String? = null,
-    val qwenModel: String = "qwen-plus"
+    val qwenModel: String = "qwen-plus",
+    val qwenImageBaseUrl: String = "https://dashscope-intl.aliyuncs.com/api/v1",
+    val qwenImageModel: String = "qwen-image-2.0-pro",
 ) {
     companion object {
         fun fromEnv(): AnalysisProviderConfig {
@@ -37,7 +39,9 @@ data class AnalysisProviderConfig(
                 videoFrameIntervalSeconds = read("VIDEO_FRAME_INTERVAL_SECONDS", "2").toIntOrNull() ?: 2,
                 qwenBaseUrl = read("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"),
                 qwenApiKey = readOrNull("QWEN_API_KEY"),
-                qwenModel = read("QWEN_MODEL", "qwen-plus")
+                qwenModel = read("QWEN_MODEL", "qwen-plus"),
+                qwenImageBaseUrl = read("QWEN_IMAGE_BASE_URL", "https://dashscope-intl.aliyuncs.com/api/v1"),
+                qwenImageModel = read("QWEN_IMAGE_MODEL", "qwen-image-2.0-pro"),
             )
         }
 

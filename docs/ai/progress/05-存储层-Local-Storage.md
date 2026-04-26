@@ -14,11 +14,11 @@
 - 已完成 `missing_fields` 枚举化（`Field`）并兼容历史 `List<String>` 草稿数据恢复。
 - 已接入 `ai_job`：Agent 分析任务会写入本地作业记录（running/succeeded）。
 - 已接入 `media_asset`：发布后将草稿中附加媒体写入本地媒体索引。
-- 媒体元数据已写入 `media_type/size_bytes/sha256/local_uri`。
+- 媒体元数据已写入 `media_type/size_bytes/sha256/stored_ref`。
 - 发布链路增加失败补偿：媒体索引写失败会回滚已发布卡片。
 - `sha256` 已替换为真实 SHA-256（纯 Kotlin 实现，commonMain 生效）。
 - 发布后会为每个媒体写入 `ai_job(queued)` 作为后处理任务入口（缩略图/时长管线预留）。
-- 已新增 `MediaPostProcessExecutor`：消费 queued 任务并回写 `thumb_uri`，任务状态更新为 succeeded/failed。
+- 已新增 `MediaPostProcessExecutor`：消费 queued 任务并回写 `thumb_stored_ref`，任务状态更新为 succeeded/failed。
 - 对话期已选图片可实时映射到预览卡片 `cover.url`，并在浮动缩略图中显示。
 - 发布链路已实现媒体“转存到应用本地目录”：`filesDir/app-data/cards/{cardId}/media/{mediaId}.ext`。
 - 发布链路新增“先写文件后写库”与失败回滚：写库失败会删除已转存媒体（及已生成缩略图占位路径）。

@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
+import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.datastore.repository.capture.CaptureLocalRepository
 import tech.zhifu.app.myhub.datastore.repository.card.CardRepository
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
 import tech.zhifu.app.myhub.feature.dashboard.content.search.SearchState
@@ -25,7 +27,6 @@ import tech.zhifu.app.myhub.feature.dashboard.content.search.createSearchStateFl
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
-import tech.zhifu.app.myhub.ui.model.toDashboardContentCard
 import tech.zhifu.app.myhub.ui.state.layout.LayoutState
 import tech.zhifu.app.myhub.ui.state.layout.createLayoutStateFlow
 import tech.zhifu.app.myhub.ui.state.user.UserState
@@ -37,6 +38,7 @@ import tech.zhifu.app.myhub.ui.viewmodel.createSideEffectFlow
 
 class DashboardViewModel(
     internal val cardRepository: CardRepository,
+    private val captureLocalRepository: CaptureLocalRepository,
     override val userRepository: UserRepository,
 ) : ViewModel(),
     ContainerHost<DashboardUiState, DashboardSideEffect>,
@@ -68,14 +70,25 @@ class DashboardViewModel(
     private fun observeUiStateFlow() = intent {
         // 监听卡片数据变化（例如 AI 发布新卡片），自动触发列表刷新
         combine(
-            // 监听：布局、排序的变化
-            flow = layout
+            flow = cardRepository
+                .observeContentRevision()
+                .distinctUntilChanged()
                 .onEach {
-                    logger.debug { "布局发生变化，刷新数据！" }
+                    logger.debug { "内容发生变化，刷新数据！revision=$it" }
+                }
+                .map { arrayOf(true) },
+            // 监听：布局、排序的变化
+            flow2 = layout
+                .map { layoutState ->
+                    layoutState.sortAsDate to layoutState.sortAsName
+                }
+                .distinctUntilChanged()
+                .onEach {
+                    logger.debug { "排序发生变化，刷新数据！" }
                 }
                 .map { arrayOf(true) },
             // 监听搜索
-            flow2 = searchState
+            flow3 = searchState
                 .debounce(timeoutMillis = 300)
                 .onEach {
                     logger.debug { "搜索发生变化，刷新数据！" }
@@ -83,12 +96,13 @@ class DashboardViewModel(
                 .distinctUntilChanged()
                 .map { arrayOf(true) },
             // 监听刷新
-            flow3 = refreshState
+            flow4 = refreshState
                 .onEach {
-                    logger.debug { "刷新发生变化，刷新数据!" }
+                    logger.debug { "刷新状态 $it 发生变化，加载数据!" }
                 }
-        ) { layoutChanged, queryChanged, refreshState ->
-            val res = layoutChanged[0] || queryChanged[0] || refreshState
+        ) { contentChanged, layoutChanged, queryChanged, refreshState ->
+            val res = contentChanged[0] || layoutChanged[0] || queryChanged[0] || refreshState
+            contentChanged[0] = false
             layoutChanged[0] = false
             queryChanged[0] = false
             res
@@ -164,9 +178,9 @@ class DashboardViewModel(
                 cardRepository
                     .flowCards(
                         userId = user.id,
-                        cursorCardId = cursor?.id,
-                        cursorTitle = cursor?.title,
-                        cursorUpdatedAt = cursor?.updatedAt,
+                        cursorCardId = cursor?.card?.id,
+                        cursorTitle = cursor?.card?.title,
+                        cursorUpdatedAt = cursor?.card?.updatedAt?.toEpochMilliseconds(),
                         orderByUpdated = layout.sortAsDate,
                         orderByTitle = layout.sortAsName,
                         query = query,
@@ -175,7 +189,13 @@ class DashboardViewModel(
                     .map { isToRefresh to it }
             }
             .onEach { (isToRefresh, res) ->
-                val cards = res.map { it.toDashboardContentCard() }
+                val cards = res.map { card ->
+                    ContentCard(
+                        card = card,
+                        medias = captureLocalRepository
+                            .listMediaAssetsByCardId(card.id)
+                    )
+                }
                 val hasMore = res.size == DashboardUiState.Content.PAGE_SIZE
                 if (isToRefresh) {
                     reduce {
@@ -217,31 +237,25 @@ class DashboardViewModel(
                 }
             }
             .catch { e ->
-                handleError(e = e, message = "加载异常，请稍后重试")
+                val message = "加载异常，请稍后重试"
+                logger.error(e) { message }
+                reduce {
+                    when (val currentState = state) {
+                        is DashboardUiState.Content -> {
+                            currentState.copy(
+                                errorMessage = message,
+                                isLoadingMore = false,
+                            )
+                        }
+
+                        else -> run {
+                            DashboardUiState.Error(message = message)
+                            state
+                        }
+                    }
+                }
+                postSideEffect(DashboardSideEffect.ShowSnack(message))
             }
             .launchIn(viewModelScope)
-    }
-
-    private fun handleError(
-        e: Throwable,
-        message: String
-    ) = intent {
-        logger.error(e) { message }
-        reduce {
-            when (val currentState = state) {
-                is DashboardUiState.Content -> {
-                    currentState.copy(
-                        errorMessage = message,
-                        isLoadingMore = false,
-                    )
-                }
-
-                else -> run {
-                    DashboardUiState.Error(message = message)
-                    state
-                }
-            }
-        }
-        postSideEffect(DashboardSideEffect.ShowSnack(message))
     }
 }

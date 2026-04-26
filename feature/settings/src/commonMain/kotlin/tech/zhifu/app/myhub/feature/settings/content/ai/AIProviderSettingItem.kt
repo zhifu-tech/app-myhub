@@ -22,7 +22,9 @@ import tech.zhifu.app.myhub.feature.settings.resources.Res
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_config
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_api_key_required
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_endpoint_required
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_image_model_required
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_model_required
+import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_direct_vision_model_required
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_max_retries_invalid
 import tech.zhifu.app.myhub.feature.settings.resources.feature_settings_ai_validation_timeout_invalid
 import tech.zhifu.app.myhub.ui.state.ai.ProviderMode
@@ -119,6 +121,14 @@ fun AIProviderSettingItem(
             editProvider = editProvider.copy(directModel = value)
             validationMessageRes.value = null
         },
+        onVisionModelChanged = { value ->
+            editProvider = editProvider.copy(directVisionModel = value)
+            validationMessageRes.value = null
+        },
+        onImageModelChanged = { value ->
+            editProvider = editProvider.copy(directImageModel = value)
+            validationMessageRes.value = null
+        },
         onApiKeyChanged = { value ->
             editProvider = editProvider.copy(directApiKey = value)
             validationMessageRes.value = null
@@ -190,10 +200,27 @@ private fun validateAiProviderState(
         if (providerRoutingConfig.directModel.isBlank()) {
             return Res.string.feature_settings_ai_validation_direct_model_required
         }
-        if (providerRoutingConfig.directApiKey.isBlank()) {
+        if (providerRoutingConfig.directVisionModel.isBlank()) {
+            return Res.string.feature_settings_ai_validation_direct_vision_model_required
+        }
+        if (providerRoutingConfig.directImageModel.isBlank()) {
+            return Res.string.feature_settings_ai_validation_direct_image_model_required
+        }
+        if (requiresDirectApiKey(providerRoutingConfig.directEndpoint) && providerRoutingConfig.directApiKey.isBlank()) {
             return Res.string.feature_settings_ai_validation_direct_api_key_required
         }
     }
 
     return null
+}
+
+private fun requiresDirectApiKey(
+    endpoint: String,
+): Boolean {
+    val normalized = endpoint.trim().lowercase()
+    return normalized.isNotBlank() &&
+        !normalized.contains("localhost") &&
+        !normalized.contains("127.0.0.1") &&
+        !normalized.contains(":11434") &&
+        !normalized.contains("ollama")
 }

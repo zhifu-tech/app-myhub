@@ -11,6 +11,10 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.ProviderConfi
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.config.impl.InMemoryProviderConfigSource
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.health.impl.RealDirectApiHealthChecker
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.health.impl.RealServerGatewayHealthChecker
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationExecutor
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.impl.DirectApiImageGenerationClient
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.impl.RoutedProviderImageGenerationExecutor
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.impl.ServerGatewayImageGenerationClient
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.impl.ConfigurableProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
@@ -37,6 +41,15 @@ fun agentModule() = module {
     singleOf(::DirectApiProviderClient)
     single<ProviderAnalysisExecutor> {
         RoutedProviderAnalysisExecutor(
+            configSource = get<ProviderConfigSource>(),
+            serverGatewayClient = get(),
+            directApiClient = get(),
+        )
+    }
+    singleOf(::ServerGatewayImageGenerationClient)
+    singleOf(::DirectApiImageGenerationClient)
+    single<ProviderImageGenerationExecutor> {
+        RoutedProviderImageGenerationExecutor(
             configSource = get<ProviderConfigSource>(),
             serverGatewayClient = get(),
             directApiClient = get(),

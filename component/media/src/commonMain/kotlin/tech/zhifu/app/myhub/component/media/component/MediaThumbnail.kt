@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import tech.zhifu.app.myhub.component.media.MediaItem
+import tech.zhifu.app.myhub.component.media.util.displayImageModel
 
 @Composable
 fun MediaThumbnail(
@@ -65,7 +66,7 @@ fun MediaThumbnail(
                 )
             } else {
                 SubcomposeAsyncImage(
-                    model = item.file,
+                    model = item.displayImageModel(),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,

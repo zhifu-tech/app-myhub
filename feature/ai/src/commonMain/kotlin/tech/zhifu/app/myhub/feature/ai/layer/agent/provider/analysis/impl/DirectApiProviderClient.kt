@@ -22,6 +22,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisClient
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisError
+import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisMediaInput
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisRequest
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisResult
 import tech.zhifu.app.myhub.logger.debug
@@ -51,20 +52,31 @@ class DirectApiProviderClient(
                 category = ProviderAnalysisError.CONFIG,
             )
         }
-        if (config.directApiKey.isBlank()) {
+        if (request.mediaInputs.isNotEmpty() && config.directVisionModel.isBlank()) {
+            return ProviderAnalysisResult.Failed(
+                reason = "direct_api_vision_model_missing",
+                category = ProviderAnalysisError.CONFIG,
+            )
+        }
+        if (requiresApiKey(endpoint = endpoint) && config.directApiKey.isBlank()) {
             return ProviderAnalysisResult.Failed(
                 reason = "direct_api_api_key_missing",
                 category = ProviderAnalysisError.AUTH,
             )
         }
+        val model = if (request.mediaInputs.isNotEmpty()) {
+            config.directVisionModel
+        } else {
+            config.directModel
+        }
 
         val payload = executeChatCompletion(
             endpoint = endpoint,
             apiKey = config.directApiKey,
-            model = config.directModel,
+            model = model,
             timeoutMs = config.timeoutMs,
             systemPrompt = systemPrompt(),
-            userPrompt = userPrompt(request),
+            request = request,
             onReasoning = onReasoning,
         )
             ?: return ProviderAnalysisResult.Failed(
@@ -120,14 +132,17 @@ class DirectApiProviderClient(
         model: String,
         timeoutMs: Long,
         systemPrompt: String,
-        userPrompt: String,
+        request: ProviderAnalysisRequest,
         onReasoning: (suspend (String) -> Unit) = {},
     ): StreamResponsePayload? = withTimeoutOrNull(timeMillis = timeoutMs) {
+        val userPrompt = userPrompt(request)
+        val allowReasoningTrace = request.mediaInputs.isEmpty()
         logger.debug {
             "DirectApiProviderClient executeChatCompletion " +
                 "endpoint=$endpoint model=$model " +
                 "timeoutMs=$timeoutMs systemPromptLength=${systemPrompt.length} " +
-                "userPromptLength=${userPrompt.length}"
+                "userPromptLength=${userPrompt.length} mediaCount=${request.mediaInputs.size} " +
+                "allowReasoningTrace=$allowReasoningTrace"
         }
         httpClient
             .preparePost(urlString = "$endpoint/v1/chat/completions") {
@@ -137,15 +152,19 @@ class DirectApiProviderClient(
                     connectTimeoutMillis = timeoutMs
                     socketTimeoutMillis = timeoutMs
                 }
-                header(
-                    key = HttpHeaders.Authorization,
-                    value = "Bearer $apiKey"
-                )
+                if (shouldSendBearerHeader(endpoint = endpoint, apiKey = apiKey)) {
+                    header(
+                        key = HttpHeaders.Authorization,
+                        value = "Bearer $apiKey"
+                    )
+                }
                 setBody(
                     buildChatCompletionPayload(
                         model = model,
                         systemPrompt = systemPrompt,
                         userPrompt = userPrompt,
+                        mediaInputs = request.mediaInputs,
+                        disableReasoning = allowReasoningTrace.not(),
                     )
                 )
             }
@@ -204,14 +223,44 @@ class DirectApiProviderClient(
     }
 }
 
+private fun requiresApiKey(
+    endpoint: String,
+): Boolean {
+    val normalized = endpoint.lowercase()
+    return !normalized.contains("localhost") &&
+        !normalized.contains("127.0.0.1") &&
+        !normalized.contains(":11434") &&
+        !normalized.contains("ollama")
+}
+
+private fun shouldSendBearerHeader(
+    endpoint: String,
+    apiKey: String,
+): Boolean = apiKey.isNotBlank() && requiresApiKey(endpoint)
+
 private fun buildChatCompletionPayload(
     model: String,
     systemPrompt: String,
     userPrompt: String,
+    mediaInputs: List<ProviderAnalysisMediaInput>,
+    disableReasoning: Boolean,
 ): JsonObject = buildJsonObject {
     put(key = "model", element = JsonPrimitive(value = model))
-    put(key = "temperature", element = JsonPrimitive(value = 0.2))
+    put(
+        key = "temperature",
+        element = JsonPrimitive(value = if (mediaInputs.isEmpty()) 0.2 else 0.1)
+    )
+    put(key = "max_tokens", element = JsonPrimitive(600))
     put(key = "stream", element = JsonPrimitive(true))
+    if (disableReasoning) {
+        put(key = "reasoning_effort", element = JsonPrimitive("none"))
+        put(
+            key = "reasoning",
+            element = buildJsonObject {
+                put("effort", JsonPrimitive("none"))
+            }
+        )
+    }
     put(
         key = "messages",
         element = buildJsonArray {
@@ -222,7 +271,34 @@ private fun buildChatCompletionPayload(
 
             buildJsonObject {
                 put(key = "role", element = JsonPrimitive("user"))
-                put(key = "content", element = JsonPrimitive(value = userPrompt))
+                if (mediaInputs.isEmpty()) {
+                    put(key = "content", element = JsonPrimitive(value = userPrompt))
+                } else {
+                    put(
+                        key = "content",
+                        element = buildJsonArray {
+                            add(
+                                buildJsonObject {
+                                    put("type", JsonPrimitive("text"))
+                                    put("text", JsonPrimitive(userPrompt))
+                                }
+                            )
+                            mediaInputs.forEach { media ->
+                                add(
+                                    buildJsonObject {
+                                        put("type", JsonPrimitive("image_url"))
+                                        put(
+                                            "image_url",
+                                            buildJsonObject {
+                                                put("url", JsonPrimitive(media.toDataUrl()))
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
             }.also { add(it) }
         }
     )

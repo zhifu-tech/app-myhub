@@ -196,6 +196,7 @@ include(":datastore:operations")
 // 数据源模块
 include(":datastore:datasource-local")
 include(":datastore:datasource-remote")
+include(":datastore:file-storage")
 
 // 数据仓库模块
 include(":datastore:repository-client-api")
@@ -212,13 +213,13 @@ include(":datastore:sync")
 // 组件模块
 // ============================================================================
 include(":component:media")
+include(":component:card-mixed")
 include(":component:static")
 
 // ============================================================================
 // UI 模型模块
 // ============================================================================
 include(":ui:design")
-include(":ui:model")
 include(":ui:state")
 
 // ============================================================================

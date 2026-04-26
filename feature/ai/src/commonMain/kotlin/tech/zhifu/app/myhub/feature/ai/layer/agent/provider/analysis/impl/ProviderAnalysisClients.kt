@@ -9,15 +9,15 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisData
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderJsonPatchOp
+import tech.zhifu.app.myhub.feature.ai.model.CaptureType
 
 internal fun parseProviderOutput(
     jsonText: String,
     reasoning: String?
 ): ProviderAnalysisData? {
+    val normalized = extractFirstJsonObject(unwrapJsonCodeFence(jsonText))
     val root = runCatching {
-        Json.parseToJsonElement(
-            string = unwrapJsonCodeFence(jsonText)
-        ).jsonObject
+        Json.parseToJsonElement(string = normalized).jsonObject
     }.getOrNull() ?: return null
 
     val patches = buildList {
@@ -50,6 +50,39 @@ internal fun parseProviderOutput(
                 )
             }
             .forEach { add(it) }
+
+        root.string("sourceText")?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                ProviderJsonPatchOp(
+                    op = "replace",
+                    path = "/sourceText",
+                    value = JsonPrimitive(it),
+                )
+            }
+            ?.let { add(it) }
+
+        root.string("captureType")?.trim()
+            ?.takeIf { CaptureType.fromValue(it) != null }
+            ?.let {
+                ProviderJsonPatchOp(
+                    op = "replace",
+                    path = "/captureType",
+                    value = JsonPrimitive(it.lowercase()),
+                )
+            }
+            ?.let { add(it) }
+
+        root.string("location")?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                ProviderJsonPatchOp(
+                    op = "replace",
+                    path = "/location/name",
+                    value = JsonPrimitive(it),
+                )
+            }
+            ?.let { add(it) }
     }
 
     if (patches.isEmpty()) return null
@@ -78,6 +111,32 @@ private fun unwrapJsonCodeFence(text: String): String {
         .removePrefix("```")
         .removeSuffix("```")
         .trim()
+}
+
+private fun extractFirstJsonObject(text: String): String {
+    val trimmed = text.trim()
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) return trimmed
+    val start = trimmed.indexOf('{')
+    if (start < 0) return trimmed
+    var depth = 0
+    var inString = false
+    var escaped = false
+    for (index in start until trimmed.length) {
+        val char = trimmed[index]
+        when {
+            escaped -> escaped = false
+            char == '\\' -> escaped = true
+            char == '"' -> inString = !inString
+            !inString && char == '{' -> depth += 1
+            !inString && char == '}' -> {
+                depth -= 1
+                if (depth == 0) {
+                    return trimmed.substring(start, index + 1)
+                }
+            }
+        }
+    }
+    return trimmed.substring(start)
 }
 
 fun JsonObject.string(key: String): String? {

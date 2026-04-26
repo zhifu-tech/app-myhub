@@ -15,11 +15,20 @@ class MediaGarbageCollector(
 
         assets.forEach { asset ->
             val hasCard = captureLocalRepository.hasCard(asset.cardId)
-            val localExists = mediaFileStore.fileExists(localUri = asset.localUri)
+            val localExists = mediaFileStore.fileExists(
+                storageHandle = asset.storageHandle,
+                accessUrl = asset.accessUrl,
+            )
             if (!hasCard || !localExists) {
-                mediaFileStore.deleteIfExists(localUri = asset.localUri)
-                asset.thumbUri?.let {
-                    mediaFileStore.deleteIfExists(localUri = it)
+                mediaFileStore.deleteIfExists(
+                    storageHandle = asset.storageHandle,
+                    accessUrl = asset.accessUrl,
+                )
+                if (!asset.thumbStorageHandle.isNullOrBlank() || !asset.thumbAccessUrl.isNullOrBlank()) {
+                    mediaFileStore.deleteIfExists(
+                        storageHandle = asset.thumbStorageHandle.orEmpty(),
+                        accessUrl = asset.thumbAccessUrl.orEmpty(),
+                    )
                 }
                 captureLocalRepository.deleteMediaAsset(asset.id)
                 removedCount += 1

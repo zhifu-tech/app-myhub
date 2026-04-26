@@ -27,16 +27,20 @@
   <string name="feature_settings_ai_mode_direct_api">直連 API</string>
   <string name="feature_settings_ai_direct_endpoint">直連 Endpoint</string>
   <string name="feature_settings_ai_direct_model">直連 Model</string>
+  <string name="feature_settings_ai_direct_vision_model">直連視覺 Model</string>
+  <string name="feature_settings_ai_direct_image_model">直連圖片 Model</string>
   <string name="feature_settings_ai_direct_api_key">直連 API Key</string>
   <string name="feature_settings_ai_timeout_ms">逾時（毫秒）</string>
   <string name="feature_settings_ai_retries">最大重試次數</string>
-  <string name="feature_settings_ai_shortcut_title">AI 擷取頁頂部 Provider 入口</string>
-  <string name="feature_settings_ai_shortcut_hint">在 AI 擷取頁頂部顯示 Provider
-    快捷切換。之後也可以在聊天頁或這裡再次隱藏。
+  <string name="feature_settings_ai_shortcut_title">AI 擷取頁頂部快捷入口</string>
+  <string name="feature_settings_ai_shortcut_hint">在 AI 擷取頁頂部顯示一枚精簡的 Provider
+    切換入口。這裡只控制聊天頁頂部快捷入口，之後也可以在這裡重新打開。
   </string>
   <string name="feature_settings_ai_mode_hint">選擇新的分析請求應該走哪一條 Provider 路徑。</string>
   <string name="feature_settings_ai_direct_title">直連 API 參數</string>
-  <string name="feature_settings_ai_direct_hint">僅在選擇「直連 API」模式時生效。</string>
+  <string name="feature_settings_ai_direct_hint">僅在選擇「直連
+    API」模式時生效。建議分別配置文字分析、圖片理解與圖片生成模型。
+  </string>
   <string name="feature_settings_ai_runtime_title">執行參數</string>
   <string name="feature_settings_ai_runtime_hint">逾時和重試次數會作用於所有 Provider 模式。</string>
   <string name="feature_settings_ai_save">儲存 AI 設定</string>
@@ -44,5 +48,7 @@
   <string name="feature_settings_ai_validation_max_retries_invalid">最大重試次數必須是大於等於 0 的整數</string>
   <string name="feature_settings_ai_validation_direct_endpoint_required">直連 Endpoint 不能為空</string>
   <string name="feature_settings_ai_validation_direct_model_required">直連 Model 不能為空</string>
+  <string name="feature_settings_ai_validation_direct_vision_model_required">直連視覺 Model 不能為空</string>
+  <string name="feature_settings_ai_validation_direct_image_model_required">直連圖片 Model 不能為空</string>
   <string name="feature_settings_ai_validation_direct_api_key_required">直連 API Key 不能為空</string>
 </resources>

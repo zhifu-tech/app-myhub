@@ -1,16 +1,16 @@
 package tech.zhifu.app.myhub.component.media.internal
 
-import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.path
+import tech.zhifu.app.myhub.component.media.MediaItem
 import java.awt.Desktop
 import java.io.File
 import java.net.URI
 
 actual fun openInSystemPlayer(
-    file: PlatformFile,
+    item: MediaItem,
     mimeType: String?
 ): Boolean {
-    val rawPath = file.path
+    val rawPath = item.previewUrl.ifBlank { item.file?.path.orEmpty() }
     if (rawPath.isBlank()) return false
     if (!Desktop.isDesktopSupported()) return false
     return try {
