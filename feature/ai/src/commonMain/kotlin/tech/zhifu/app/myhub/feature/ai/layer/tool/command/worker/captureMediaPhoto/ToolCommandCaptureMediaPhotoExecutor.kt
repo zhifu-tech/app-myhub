@@ -15,10 +15,11 @@ class ToolCommandCaptureMediaPhotoExecutor(
         command: ToolCommand
     ): ToolCommandResult {
         val command = command as ToolCommand.CaptureMediaPhoto
-        val file = mediaPicker.capturePhoto() ?: return ToolCommandResult.MediaAttached(
-            draft = command.draft,
-            attachedAssets = emptyList(),
-        )
+        val file = mediaPicker.capturePhoto()
+            ?: return ToolCommandResult.MediaAttached(
+                draft = command.draft,
+                attachedAssets = emptyList(),
+            )
         val imported = mediaAttachmentSupport.buildAttachedMedia(
             draftId = command.draft.id,
             files = listOf(file),

@@ -30,6 +30,7 @@ kotlin {
             implementation(libs.jb.compose.material3.material3)
             implementation(libs.jb.compose.ui.ui)
             implementation(libs.jb.compose.material.materialIconsExtend)
+            implementation(libs.koin.compose)
             implementation(libs.koin.core)
 
             if (project.isDev()) {

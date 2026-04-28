@@ -41,7 +41,11 @@ actual fun isVlcAvailable(): Boolean {
             "${System.getenv("ProgramFiles(x86)")}\\VideoLAN\\VLC\\vlc.exe"
         )
 
-        else -> listOf("/usr/bin/vlc", "/snap/bin/vlc", "/usr/local/bin/vlc")
+        else -> listOf(
+            "/usr/bin/vlc",
+            "/snap/bin/vlc",
+            "/usr/local/bin/vlc"
+        )
     }
     if (candidates.any { it.isNotBlank() && File(it).exists() }) return true
     val path = System.getenv("PATH") ?: return false

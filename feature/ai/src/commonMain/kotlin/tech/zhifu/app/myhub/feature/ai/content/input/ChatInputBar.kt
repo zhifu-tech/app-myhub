@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -80,10 +80,10 @@ fun ChatInputBar(
             if (safeState.showCaptureShortcuts()) {
                 QuickCaptureActions(
                     onCapture = {
-                        viewModel.doAction(ActionOptionType.CAPTURE_MEDIA.value)
+                        viewModel.doAction(ActionCommand.CaptureMedia)
                     },
                     onUpload = {
-                        viewModel.doAction(ActionOptionType.UPLOAD_MEDIA.value)
+                        viewModel.doAction(ActionCommand.UploadMedia)
                     },
                 )
             }

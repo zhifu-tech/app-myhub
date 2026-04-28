@@ -23,33 +23,50 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import tech.zhifu.app.myhub.feature.ai.AIViewModel
+import tech.zhifu.app.myhub.feature.ai.content.item.action.ActionComponents
+import tech.zhifu.app.myhub.feature.ai.content.item.action.EditFieldPill
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
-import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.model.Message
-import tech.zhifu.app.myhub.feature.ai.resources.Res
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_location
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_media
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_summary
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_tags
-import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_title
+
+@Composable
+fun AssistantMessageItem(
+    viewModel: AIViewModel,
+    draft: CaptureDraft,
+    mediaGenerationProgress: ProviderImageGenerationProgress?,
+    message: Message,
+) {
+    AssistantMessageItem(
+        message = message,
+        actionComponents = {
+            ActionComponents(
+                viewModel = viewModel,
+                draft = draft,
+                message = message,
+                mediaGenerationProgress = mediaGenerationProgress,
+            )
+        }
+    )
+}
 
 @Composable
 fun AssistantMessageItem(
     message: Message,
-    tone: AssistantTone,
-    draft: CaptureDraft,
-    mediaGenerationProgress: ProviderImageGenerationProgress?,
-    selectedTags: List<String>,
-    onAction: (String) -> Unit,
+    actionComponents: @Composable () -> Unit,
 ) {
-    val backgroundColor = when (tone) {
-        AssistantTone.AI -> MaterialTheme.colorScheme.surfaceContainerHighest
-        AssistantTone.SYSTEM -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f)
-    }
-    val contentColor = when (tone) {
-        AssistantTone.AI -> MaterialTheme.colorScheme.onSurface
-        AssistantTone.SYSTEM -> MaterialTheme.colorScheme.onSecondaryContainer
+    val (backgroundColor, contentColor) = when (message.role) {
+        Message.Role.AI -> {
+            MaterialTheme.colorScheme.surfaceContainerHighest to
+                MaterialTheme.colorScheme.onSurface
+        }
+
+        Message.Role.SYSTEM -> {
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.92f) to
+                MaterialTheme.colorScheme.onSecondaryContainer
+        }
+
+        else -> return
     }
     val text = message.textRes
         ?.let { res ->
@@ -67,7 +84,7 @@ fun AssistantMessageItem(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Top,
     ) {
-        AssistantAvatar(tone = tone)
+        AssistantAvatar(role = message.role)
         Spacer(modifier = Modifier.width(10.dp))
         Surface(
             modifier = Modifier
@@ -102,50 +119,18 @@ fun AssistantMessageItem(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-                if (message.actionComponents.isNotEmpty()) {
-                    InlineActionDeck(
-                        components = message.actionComponents,
-                        draft = draft,
-                        mediaGenerationProgress = mediaGenerationProgress,
-                        selectedTags = selectedTags,
-                        onAction = onAction,
-                    )
-                }
+                actionComponents()
             }
         }
     }
 }
 
 @Composable
-private fun EditFieldPill(
-    field: Field,
-) {
-    Surface(
-        shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.84f),
-    ) {
-        Text(
-            text = when (field) {
-                Field.MEDIA -> stringResource(Res.string.feature_ai_action_edit_media)
-                Field.TAGS -> stringResource(Res.string.feature_ai_action_edit_tags)
-                Field.SUMMARY -> stringResource(Res.string.feature_ai_action_edit_summary)
-                Field.LOCATION -> stringResource(Res.string.feature_ai_action_edit_location)
-                else -> stringResource(Res.string.feature_ai_action_edit_title)
-            },
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
-
-@Composable
 private fun AssistantAvatar(
-    tone: AssistantTone,
+    role: Message.Role,
 ) {
-    val (label, brush, contentColor) = when (tone) {
-        AssistantTone.AI -> Triple(
+    val (label, brush, contentColor) = when (role) {
+        Message.Role.AI -> Triple(
             "AI",
             Brush.linearGradient(
                 colors = listOf(Color(0xFF9B8CFF), Color(0xFF4F46E5)),
@@ -153,7 +138,7 @@ private fun AssistantAvatar(
             Color.White,
         )
 
-        AssistantTone.SYSTEM -> Triple(
+        Message.Role.SYSTEM -> Triple(
             "SYS",
             Brush.linearGradient(
                 colors = listOf(
@@ -163,6 +148,8 @@ private fun AssistantAvatar(
             ),
             MaterialTheme.colorScheme.onSecondary,
         )
+
+        else -> return
     }
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -185,9 +172,4 @@ private fun AssistantAvatar(
             )
         }
     }
-}
-
-enum class AssistantTone {
-    AI,
-    SYSTEM,
 }

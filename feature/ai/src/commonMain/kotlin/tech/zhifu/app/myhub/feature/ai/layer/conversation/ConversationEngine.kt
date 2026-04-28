@@ -797,6 +797,7 @@ class ConversationEngine(
             state = nextState,
             draft = nextDraft,
             focusField = nextFocus,
+            mediaGenerationProgress = current.mediaGenerationProgress,
         )
         val actionOwnerMessageId = when {
             message?.canOwnActionComponents() == true -> message.id
@@ -967,6 +968,7 @@ class ConversationEngine(
             state = current.state,
             draft = draft,
             focusField = focusField,
+            mediaGenerationProgress = current.mediaGenerationProgress,
         )
         val actionOwnerMessageId = when {
             message?.canOwnActionComponents() == true -> message.id
@@ -1003,6 +1005,7 @@ class ConversationEngine(
             state = current.state,
             draft = draft,
             focusField = focusField,
+            mediaGenerationProgress = current.mediaGenerationProgress,
         )
         val ownerMessageId = current.actionOwnerMessageId
             ?: current.messages.lastOrNull { existing ->

@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.isVideo
+import tech.zhifu.app.myhub.datastore.model.domain.name
 
 @Composable
 fun ContentItemLeading(
@@ -17,28 +19,24 @@ fun ContentItemLeading(
     onOpenMediaPreview: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val mediaItems = item.medias.map { media ->
+        MediaItem(
+            id = media.id,
+            name = media.name(),
+            previewUrl = media.accessUrl,
+            isVideo = media.isVideo(),
+            thumbnailUrl = media.thumbAccessUrl,
+        )
+    }
     Box(
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
     ) {
-        if (item.medias.isNotEmpty()) {
-            MediaGridNine(
-                items = item.medias.map { media ->
-                    MediaItem(
-                        id = media.id,
-                        name = media.accessUrl.substringAfterLast('/'),
-                        previewUrl = media.accessUrl,
-                        isVideo = media.mediaType.startsWith(
-                            prefix = "video/",
-                            ignoreCase = true
-                        ),
-                        thumbnailUrl = media.thumbAccessUrl,
-                    )
-                },
-                modifier = Modifier.fillMaxSize(),
-                onItemClick = onOpenMediaPreview,
-            )
-        }
+        MediaGridNine(
+            items = mediaItems,
+            modifier = Modifier.fillMaxSize(),
+            onItemClick = onOpenMediaPreview,
+        )
     }
 }

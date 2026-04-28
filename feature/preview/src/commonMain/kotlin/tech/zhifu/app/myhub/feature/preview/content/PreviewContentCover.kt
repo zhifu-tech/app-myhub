@@ -12,6 +12,8 @@ import androidx.compose.ui.draw.clip
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.isVideo
+import tech.zhifu.app.myhub.datastore.model.domain.name
 import tech.zhifu.app.myhub.feature.preview.PreviewState
 import tech.zhifu.app.myhub.feature.preview.PreviewTokens
 
@@ -33,12 +35,9 @@ internal fun PreviewContentCover(
                 items = card.medias.map { media ->
                     MediaItem(
                         id = media.id,
-                        name = media.accessUrl.substringAfterLast('/'),
+                        name = media.name(),
                         previewUrl = media.accessUrl,
-                        isVideo = media.mediaType.startsWith(
-                            prefix = "video/",
-                            ignoreCase = true
-                        ),
+                        isVideo = media.isVideo(),
                         thumbnailUrl = media.thumbAccessUrl,
                     )
                 },

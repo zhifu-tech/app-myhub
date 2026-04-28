@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.component.media.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,17 +16,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import tech.zhifu.app.myhub.component.media.MediaItem
-import tech.zhifu.app.myhub.component.media.util.displayImageModel
+import tech.zhifu.app.myhub.component.media.displayImageModel
 
 @Composable
 fun MediaGridNine(
@@ -58,12 +58,9 @@ fun MediaGridNine(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-        ) {
-            measurables,
-            constraints,
-        ->
+        ) { measurables, constraints ->
             val spacingPx = spacing.roundToPx()
-            val cols = GRID_UNITS
+            val cols = 6
             val rows = layoutSpec.maxOf { it.y + it.h }
             val availableWidth = (constraints.maxWidth - spacingPx * (cols - 1)).coerceAtLeast(0)
             val baseColUnit = availableWidth / cols
@@ -98,7 +95,7 @@ fun MediaGridNine(
                 val itemHeight = (rowOffsets[cell.y + cell.h] - rowOffsets[cell.y]) +
                     spacingPx * (cell.h - 1)
                 measurable.measure(
-                    androidx.compose.ui.unit.Constraints.fixed(
+                    Constraints.fixed(
                         width = itemWidth,
                         height = itemHeight,
                     )
@@ -139,10 +136,7 @@ private fun MediaGridTile(
         contentAlignment = Alignment.Center,
     ) {
         if (item.isVideo && item.thumbnailUrl.isNullOrBlank()) {
-            MediaGridPlaceholder(
-                label = item.name.ifBlank { "Video" },
-                showPlay = true,
-            )
+            MediaGridPlaceholder(label = item.name, showPlay = true)
         } else {
             SubcomposeAsyncImage(
                 model = imageModel,
@@ -150,16 +144,10 @@ private fun MediaGridTile(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 loading = {
-                    MediaGridPlaceholder(
-                        label = item.name.ifBlank { if (item.isVideo) "Video" else "Image" },
-                        showPlay = item.isVideo,
-                    )
+                    MediaGridPlaceholder(label = item.name, showPlay = item.isVideo)
                 },
                 error = {
-                    MediaGridPlaceholder(
-                        label = item.name.ifBlank { if (item.isVideo) "Video" else "Image" },
-                        showPlay = item.isVideo,
-                    )
+                    MediaGridPlaceholder(label = item.name, showPlay = item.isVideo)
                 },
             )
         }
@@ -202,8 +190,6 @@ private data class MediaGridCell(
     val w: Int,
     val h: Int,
 )
-
-private const val GRID_UNITS = 6
 
 private fun mediaGridLayoutSpec(
     count: Int,

@@ -44,16 +44,6 @@ fun ReasoningTraceCard(
     onSecondaryAction: (() -> Unit)? = null,
 ) {
     var expanded by rememberSaveable(persistentKey) { mutableStateOf(live) }
-    val headerTitle = if (live) {
-        stringResource(Res.string.feature_ai_reasoning_live_title)
-    } else {
-        stringResource(Res.string.feature_ai_reasoning_history_title)
-    }
-    val headerDescription = if (live) {
-        stringResource(Res.string.feature_ai_reasoning_live_desc)
-    } else {
-        stringResource(Res.string.feature_ai_reasoning_collapsed_preview)
-    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -78,13 +68,21 @@ fun ReasoningTraceCard(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
-                        text = headerTitle,
+                        text = if (live) {
+                            stringResource(Res.string.feature_ai_reasoning_live_title)
+                        } else {
+                            stringResource(Res.string.feature_ai_reasoning_history_title)
+                        },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = headerDescription,
+                        text = if (live) {
+                            stringResource(Res.string.feature_ai_reasoning_live_desc)
+                        } else {
+                            stringResource(Res.string.feature_ai_reasoning_collapsed_preview)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -20,9 +20,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageG
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationEngine
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionOptionType
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.parseActionEvent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateGuard
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
@@ -52,7 +50,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * 3. 将结果交给 ConversationEngine 落到会话上下文
  *
  * 新增 action 的标准流程：
- * 1) 在 onAction 中解析 ActionEvent 并分发到 handleXxx。
+ * 1) 在 onAction 中分发 ActionCommand 到 handleXxx。
  * 2) handleXxx 内只做外部调用与错误分类，不直接改 state。
  * 3) 成功后调用 ConversationEngine 的标准入口（消息型/状态型/复合型）。
  */
@@ -128,56 +126,45 @@ class CaptureOrchestrator(
         }
     }
 
-    suspend fun onAction(action: String) {
-        // 这是新增 action 的首个入口：所有 action 必须先经过 guard，再解析为 ActionEvent。
+    suspend fun onAction(action: ActionCommand) {
         val state = conversationEngine.currentState()
-        if (!stateGuard.canAction(state = state, action = action)) {
-            conversationEngine.emitBlockedAction(action = action)
+        if (!stateGuard.canAction(state = state, command = action)) {
+            conversationEngine.emitBlockedAction(action = action.toString())
             return
         }
-        when (val event = parseActionEvent(action)) {
-            is ActionEvent.Option -> when (event.type) {
-                ActionOptionType.CAPTURE_MEDIA -> handleCaptureMediaInput(capturePhoto = true)
-                ActionOptionType.CLEAR_LOCATION -> handleClearLocation()
-                ActionOptionType.DELETE_CARD -> handleDeleteCard()
-                ActionOptionType.EDIT_LOCATION -> conversationEngine.commandEnterManualEdit(Field.LOCATION)
-                ActionOptionType.EDIT_MEDIA -> conversationEngine.commandEnterManualEdit(Field.MEDIA)
-                ActionOptionType.EDIT_SUMMARY -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
-                ActionOptionType.EDIT_TAGS -> conversationEngine.commandEnterManualEdit(Field.TAGS)
-                ActionOptionType.EDIT_TITLE -> conversationEngine.commandEnterManualEdit(Field.TITLE)
-                ActionOptionType.GENERATE_MEDIA -> handleGenerateMedia()
-                ActionOptionType.NEW_CAPTURE -> {
-                    conversationEngine.commandResetSession()
+        when (action) {
+            ActionCommand.CaptureMedia -> handleCaptureMediaInput(capturePhoto = true)
+            ActionCommand.ClearLocation -> handleClearLocation()
+            ActionCommand.DeleteCard -> handleDeleteCard()
+            ActionCommand.EditLocation -> conversationEngine.commandEnterManualEdit(Field.LOCATION)
+            ActionCommand.EditMedia -> conversationEngine.commandEnterManualEdit(Field.MEDIA)
+            ActionCommand.EditSummary -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
+            ActionCommand.EditTags -> conversationEngine.commandEnterManualEdit(Field.TAGS)
+            ActionCommand.EditTitle -> conversationEngine.commandEnterManualEdit(Field.TITLE)
+            ActionCommand.GenerateMedia -> handleGenerateMedia()
+            ActionCommand.NewCapture -> conversationEngine.commandResetSession()
+            ActionCommand.Publish -> handlePublish()
+            ActionCommand.RemoveMedia -> handleRemoveAllMedia()
+            is ActionCommand.RemoveMediaAt -> handleMediaRemovedAt(action.index)
+            is ActionCommand.RemoveTag -> handleTagRemoved(action.tag)
+            ActionCommand.ReplaceMedia -> handleAttachMedia(replaceExisting = true)
+            ActionCommand.Review -> conversationEngine.commandReview()
+            ActionCommand.SaveDraft -> conversationEngine.emitDraftSaved()
+            is ActionCommand.AddTag -> handleTagSelected(action.tag)
+            is ActionCommand.SetLocation -> handleLocationSelected(action.location)
+            ActionCommand.SkipMedia -> conversationEngine.commandSkipField(Field.MEDIA)
+            ActionCommand.SkipTags -> conversationEngine.commandSkipField(Field.TAGS)
+            ActionCommand.UploadMedia -> {
+                if (conversationEngine.currentState() in setOf(
+                        ConversationState.IDLE,
+                        ConversationState.COMPLETE,
+                    )
+                ) {
+                    handleCaptureMediaInput(capturePhoto = false)
+                } else {
+                    handleAttachMedia(replaceExisting = false)
                 }
-
-                ActionOptionType.PUBLISH -> handlePublish()
-                ActionOptionType.REMOVE_MEDIA -> handleRemoveAllMedia()
-                ActionOptionType.REPLACE_MEDIA -> handleAttachMedia(replaceExisting = true)
-                ActionOptionType.REVIEW -> conversationEngine.commandReview()
-                ActionOptionType.SAVE_DRAFT -> conversationEngine.emitDraftSaved()
-                ActionOptionType.SKIP_MEDIA -> conversationEngine.commandSkipField(Field.MEDIA)
-                ActionOptionType.SKIP_TAGS -> conversationEngine.commandSkipField(Field.TAGS)
-                ActionOptionType.UPLOAD_MEDIA -> {
-                    if (conversationEngine.currentState() in setOf(
-                            ConversationState.IDLE,
-                            ConversationState.COMPLETE,
-                        )
-                    ) {
-                        handleCaptureMediaInput(capturePhoto = false)
-                    } else {
-                        handleAttachMedia(replaceExisting = false)
-                    }
-                }
-
-                else -> Unit
             }
-
-            is ActionEvent.AddTag -> handleTagSelected(event.tag)
-            is ActionEvent.RemoveTag -> handleTagRemoved(event.tag)
-            is ActionEvent.RemoveMediaAt -> handleMediaRemovedAt(event.index)
-            is ActionEvent.SetCaptureType -> handleCaptureTypeSelected(event.type, action)
-            is ActionEvent.SetLocation -> handleLocationSelected(event.location)
-            else -> Unit
         }
     }
 
@@ -374,7 +361,7 @@ class CaptureOrchestrator(
             }
 
             is ToolCommandResult.Failed -> conversationEngine.emitBlockedAction(
-                action = "${ActionOptionType.PUBLISH.value}:${result.code}:${result.message}"
+                action = "publish:${result.code}:${result.message}"
             )
 
             else -> Unit
@@ -545,7 +532,7 @@ class CaptureOrchestrator(
     private suspend fun handleMediaRemovedAt(index: Int) {
         val draft = conversationEngine.currentDraft()
         if (index !in draft.mediaAssets.indices) {
-            conversationEngine.emitBlockedAction(action = ActionOptionType.encodeRemoveMediaAt(index))
+            conversationEngine.emitBlockedAction(action = "remove_media_at:$index")
             return
         }
         conversationEngine.applyMediaUpdated(

@@ -1,40 +1,60 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.action
 
-import kotlinx.serialization.Serializable
 import tech.zhifu.app.myhub.feature.ai.model.Field
 
-@Serializable
 data class ActionComponentSchema(
-    val type: ActionComponentType,
-    val field: Field? = null,
-    val status: ActionComponentStatus = ActionComponentStatus.ACTIVE,
-    val options: List<ActionOptionSchema> = emptyList(),
+    val kind: ActionComponentKind,
+    val payload: ActionPayload = ActionPayload.None,
+    val actions: ActionSlots = ActionSlots(),
 )
 
-@Serializable
-data class ActionOptionSchema(
-    val type: ActionOptionType,
-    val label: String,
-    val value: String,
-    val selected: Boolean = false,
-) {
-    companion object {
-        fun of(
-            type: ActionOptionType,
-            label: String = type.value,
-            value: String = type.value,
-            selected: Boolean = false,
-        ): ActionOptionSchema = ActionOptionSchema(
-            type = type,
-            label = label,
-            value = value,
-            selected = selected,
-        )
-    }
+enum class ActionComponentKind {
+    REVIEW,
+    PUBLISH,
+    MEDIA,
+    TAGS,
+    INPUT,
+    LOCATION,
+    QUICK_REPLY,
 }
 
-@Serializable
-enum class ActionComponentStatus {
-    ACTIVE,
-    COMPLETED,
+data class ActionSlots(
+    val primary: List<ActionItemSchema> = emptyList(),
+    val secondary: List<ActionItemSchema> = emptyList(),
+    val inline: List<ActionItemSchema> = emptyList(),
+    val overlay: List<ActionItemSchema> = emptyList(),
+)
+
+sealed interface ActionPayload {
+    data object None : ActionPayload
+
+    data class Review(
+        val fields: List<ReviewFieldItem>,
+    ) : ActionPayload
+
+    data class Media(
+        val hasMedia: Boolean,
+        val mediaCount: Int,
+        val missingMediaCount: Int,
+        val isGenerating: Boolean,
+    ) : ActionPayload
+
+    data class Tags(
+        val selectedCount: Int,
+    ) : ActionPayload
+
+    data class Input(
+        val field: Field,
+        val currentValue: String,
+    ) : ActionPayload
+
+    data class Location(
+        val currentLocation: String,
+    ) : ActionPayload
 }
+
+data class ReviewFieldItem(
+    val id: String,
+    val action: ActionItemSchema,
+    val value: ActionText,
+)

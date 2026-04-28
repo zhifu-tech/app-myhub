@@ -27,13 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
-import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Message
+import tech.zhifu.app.myhub.feature.ai.model.displayName
+import tech.zhifu.app.myhub.feature.ai.model.isVideo
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_user_badge
 
@@ -41,8 +41,15 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_user_badge
 fun MessageUserItem(
     message: Message
 ) {
-    val mediaPreviewer: MediaPreviewer = koinInject()
-    var previewingIndex by remember(message.id, message.mediaAssets) { mutableStateOf<Int?>(null) }
+    var mediaInitialIndex by remember(message.id, message.mediaAssets) {
+        mutableStateOf<Int?>(null)
+    }
+    val mediaItems = remember(message.id, message.mediaAssets) {
+        message.mediaAssets.mapNotNull { asset ->
+            if (asset.isMissing) null
+            else asset.toMediaItem()
+        }
+    }
     val text = message.textRes
         ?.let { res ->
             stringResource(
@@ -51,7 +58,6 @@ fun MessageUserItem(
             )
         }
         ?: message.text
-    val contentColor = MaterialTheme.colorScheme.onPrimaryContainer
 
     Row(
         modifier = Modifier
@@ -84,16 +90,16 @@ fun MessageUserItem(
                     ?.let { content ->
                         Text(
                             text = content,
-                            color = contentColor,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-                if (message.mediaAssets.isNotEmpty()) {
-                    UserMediaSection(
-                        mediaAssets = message.mediaAssets,
-                        onPreview = { previewingIndex = it },
-                    )
-                }
+                MediaGridNine(
+                    items = mediaItems,
+                    onItemClick = { index ->
+                        mediaInitialIndex = index
+                    },
+                )
             }
         }
         Spacer(modifier = Modifier.width(10.dp))
@@ -127,49 +133,19 @@ fun MessageUserItem(
         }
     }
 
-    previewingIndex?.let { index ->
+    mediaInitialIndex?.let {
         MediaGalleryDialog(
-            items = message.mediaAssets.mapIndexed { mediaIndex, asset ->
-                asset.toMediaItem(index = mediaIndex)
-            },
-            initialIndex = index,
-            mediaPreviewer = mediaPreviewer,
-            onDismiss = { previewingIndex = null },
+            items = mediaItems,
+            initialIndex = it,
+            onDismiss = { mediaInitialIndex = null },
         )
     }
 }
 
-@Composable
-private fun UserMediaSection(
-    mediaAssets: List<CaptureMediaAsset>,
-    onPreview: (Int) -> Unit,
-) {
-    MediaGridNine(
-        items = mediaAssets.mapIndexed { index, asset -> asset.toMediaItem(index) },
-        onItemClick = { index ->
-            if (!mediaAssets[index].isMissing) {
-                onPreview(index)
-            }
-        },
-    )
-}
-
-private fun CaptureMediaAsset.toMediaItem(index: Int = 0): MediaItem =
+private fun CaptureMediaAsset.toMediaItem(): MediaItem =
     MediaItem(
         id = sha256.ifBlank { storageHandle },
         name = displayName(),
         previewUrl = accessUrl.takeUnless { isMissing }.orEmpty(),
-        isVideo = isVideo(),
+        isVideo = isVideo()
     )
-
-private fun CaptureMediaAsset.displayName(index: Int = 0): String =
-    accessUrl.substringAfterLast('/').ifBlank {
-        if (isVideo()) {
-            "video-${index + 1}"
-        } else {
-            "image-${index + 1}"
-        }
-    }
-
-private fun CaptureMediaAsset.isVideo(): Boolean =
-    mediaType.startsWith("video/", ignoreCase = true)

@@ -21,12 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.koin.compose.koinInject
 import tech.zhifu.app.myhub.component.media.MediaItem
-import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
+import tech.zhifu.app.myhub.datastore.model.domain.isVideo
+import tech.zhifu.app.myhub.datastore.model.domain.name
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
@@ -36,7 +36,6 @@ import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotContr
 import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.logger
 
-
 @Composable
 fun Preview(
     state: PreviewState,
@@ -44,7 +43,6 @@ fun Preview(
 ) {
     logger.debug { "Preview : state: ${state.hashCode()}" }
     val snapshotController = rememberPreviewSnapshotController()
-    val mediaPreviewer: MediaPreviewer = koinInject()
     val mediaSession by state.mediaSession
     AnimatedContent(
         modifier = modifier.fillMaxSize(),
@@ -174,17 +172,13 @@ fun Preview(
             items = session.items.map { item ->
                 MediaItem(
                     id = item.media.id,
-                    name = item.media.accessUrl.substringAfterLast('/'),
+                    name = item.media.name(),
                     previewUrl = item.media.accessUrl,
-                    isVideo = item.media.mediaType.startsWith(
-                        prefix = "video/",
-                        ignoreCase = true
-                    ),
+                    isVideo = item.media.isVideo(),
                     thumbnailUrl = item.media.thumbAccessUrl,
                 )
             },
             initialIndex = session.initialIndex,
-            mediaPreviewer = mediaPreviewer,
             onDismiss = state::hideMedia,
             titleForIndex = { index ->
                 session.items.getOrNull(index)?.cardTitle

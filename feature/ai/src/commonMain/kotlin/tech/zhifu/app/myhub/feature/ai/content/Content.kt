@@ -24,14 +24,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.feature.ai.content.item.MessageAIItem
-import tech.zhifu.app.myhub.feature.ai.content.item.MessageSystemItem
-import tech.zhifu.app.myhub.feature.ai.content.item.MessageThinkingItem
+import tech.zhifu.app.myhub.feature.ai.content.item.AssistantMessageItem
 import tech.zhifu.app.myhub.feature.ai.content.item.MessageUserItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ProviderModeItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningCardItem
+import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningTraceCard
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
@@ -55,15 +55,20 @@ fun Content(
     val safeState = state ?: return
     ContentContent(
         messages = safeState.messages,
-        draft = safeState.draft,
-        mediaGenerationProgress = safeState.mediaGenerationProgress,
         contentPadding = contentPadding,
-        onAction = viewModel::doAction,
         providerModeItem = {
             ProviderModeItem(viewModel)
         },
         reasoningCardItem = {
             ReasoningCardItem(viewModel)
+        },
+        assistantMessageItem = { message ->
+            AssistantMessageItem(
+                viewModel = viewModel,
+                draft = safeState.draft,
+                mediaGenerationProgress = safeState.mediaGenerationProgress,
+                message = message,
+            )
         },
     )
 }
@@ -71,12 +76,10 @@ fun Content(
 @Composable
 fun ContentContent(
     messages: List<Message>,
-    draft: CaptureDraft,
-    mediaGenerationProgress: ProviderImageGenerationProgress?,
     contentPadding: PaddingValues,
-    onAction: (String) -> Unit,
     providerModeItem: @Composable BoxScope.() -> Unit,
     reasoningCardItem: @Composable BoxScope.() -> Unit,
+    assistantMessageItem: @Composable BoxScope.(Message) -> Unit,
 ) {
     val listState = rememberLazyListState()
     var shouldStickToBottom by remember { mutableStateOf(true) }
@@ -126,46 +129,35 @@ fun ContentContent(
         contentPadding = contentPadding,
     ) {
         item(key = "provider_mode") {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                content = providerModeItem,
-            )
+            Box(modifier = Modifier.fillMaxWidth(), content = providerModeItem)
+        }
+        item(key = "reasoning_card") {
+            Box(modifier = Modifier.fillMaxWidth(), content = reasoningCardItem)
         }
         items(
             items = messages,
             key = { it.id },
             contentType = { "message" }
         ) { msg ->
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 when (msg.role) {
-                    Message.Role.AI -> MessageAIItem(
-                        message = msg,
-                        draft = draft,
-                        mediaGenerationProgress = mediaGenerationProgress,
-                        selectedTags = draft.tags,
-                        onAction = onAction,
-                    )
+                    Message.Role.AI,
+                    Message.Role.SYSTEM -> assistantMessageItem(msg)
 
                     Message.Role.USER -> MessageUserItem(msg)
-                    Message.Role.SYSTEM -> MessageSystemItem(
-                        message = msg,
-                        draft = draft,
-                        mediaGenerationProgress = mediaGenerationProgress,
-                        selectedTags = draft.tags,
-                        onAction = onAction,
+                    Message.Role.THINKING -> ReasoningTraceCard(
+                        text = msg.textRes?.let { res ->
+                            stringResource(
+                                resource = res,
+                                formatArgs = msg.textArgs.toTypedArray(),
+                            )
+                        } ?: msg.text,
+                        live = false,
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        persistentKey = "reasoning-${msg.id}",
                     )
-
-                    Message.Role.THINKING -> MessageThinkingItem(msg)
                 }
             }
-        }
-        item(key = "reasoning_card") {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                content = reasoningCardItem,
-            )
         }
     }
 }

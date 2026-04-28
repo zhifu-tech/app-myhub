@@ -2,14 +2,16 @@ package tech.zhifu.app.myhub.component.media.internal
 
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
-import tech.zhifu.app.myhub.component.media.util.systemMimeType
+import tech.zhifu.app.myhub.component.media.systemMimeType
 
 class DefaultMediaPreviewer : MediaPreviewer {
-    override fun openInSystemPlayer(item: MediaItem): Boolean {
-        return openInSystemPlayer(item, item.systemMimeType())
-    }
+    override fun openInSystemPlayer(
+        item: MediaItem
+    ): Boolean = openInSystemPlayer(
+        item = item,
+        mimeType = item.systemMimeType()
+    )
 
-    override fun isSystemPlayerPreferred(): Boolean {
-        return !isVlcAvailable()
-    }
+    override fun isSystemPlayerPreferred(): Boolean =
+        !isVlcAvailable()
 }
