@@ -26,15 +26,11 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.item.action.ActionComponents
 import tech.zhifu.app.myhub.feature.ai.content.item.action.EditFieldPill
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
 
 @Composable
 fun AssistantMessageItem(
     viewModel: AIViewModel,
-    draft: CaptureDraft,
-    mediaGenerationProgress: ProviderImageGenerationProgress?,
     message: Message,
 ) {
     AssistantMessageItem(
@@ -42,9 +38,7 @@ fun AssistantMessageItem(
         actionComponents = {
             ActionComponents(
                 viewModel = viewModel,
-                draft = draft,
                 message = message,
-                mediaGenerationProgress = mediaGenerationProgress,
             )
         }
     )

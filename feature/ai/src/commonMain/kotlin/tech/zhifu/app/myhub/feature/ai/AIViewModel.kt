@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import tech.zhifu.app.myhub.datastore.repository.user.UserRepository
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.context.ContextManager
 import tech.zhifu.app.myhub.feature.ai.orchestrator.CaptureOrchestrator
 import tech.zhifu.app.myhub.ui.state.ai.ProviderState
@@ -100,19 +100,19 @@ class AIViewModel(
         )
     }
 
-    fun doAction(command: ActionCommand) = intent {
+    fun doAction(event: ActionEvent) = intent {
         val current = state as? AIUiState.Content ?: return@intent
         reduce {
             current.copy(
-                input = when (command) {
-                    ActionCommand.EditTitle -> current.context.draft.title
-                    ActionCommand.EditSummary -> current.context.draft.summary
-                    ActionCommand.EditLocation -> current.context.draft.location?.name.orEmpty()
+                input = when (event) {
+                    ActionEvent.EditTitle -> current.context.draft.title
+                    ActionEvent.EditSummary -> current.context.draft.summary
+                    ActionEvent.EditLocation -> current.context.draft.location?.name.orEmpty()
                     else -> ""
                 }
             )
         }
-        orchestrator.onAction(command)
+        orchestrator.onAction(event)
     }
 
     fun cancelAnalysis() = intent {

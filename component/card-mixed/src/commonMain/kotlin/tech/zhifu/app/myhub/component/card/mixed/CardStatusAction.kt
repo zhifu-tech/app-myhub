@@ -23,20 +23,20 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 import tech.zhifu.app.myhub.component.card.mixed.resources.Res
-import tech.zhifu.app.myhub.component.card.mixed.resources.card_status_archived
 import tech.zhifu.app.myhub.component.card.mixed.resources.card_status_draft_continue_inputting
-import tech.zhifu.app.myhub.component.card.mixed.resources.card_status_published_review_now
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 
 @Composable
 fun CardStatusAction(
     status: CardStatus,
+    updatedAt: Instant? = null,
     modifier: Modifier = Modifier,
     iconSize: Dp = 16.dp,
     textAlpha: Float = 1f,
 ) {
-    val config = statusConfig(status)
+    val config = statusConfig(status = status, updatedAt = updatedAt)
     Surface(
         modifier = modifier,
         color = config.color.copy(alpha = 0.08f),
@@ -56,7 +56,7 @@ fun CardStatusAction(
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = stringResource(config.labelRes),
+                text = config.labelText ?: stringResource(config.labelRes!!),
                 color = config.color.copy(alpha = textAlpha),
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -65,7 +65,8 @@ fun CardStatusAction(
 }
 
 private fun statusConfig(
-    status: CardStatus
+    status: CardStatus,
+    updatedAt: Instant?
 ): CardStatusConfig = when (status) {
     CardStatus.DRAFT -> CardStatusConfig(
         labelRes = Res.string.card_status_draft_continue_inputting,
@@ -74,21 +75,27 @@ private fun statusConfig(
     )
 
     CardStatus.PUBLISHED -> CardStatusConfig(
-        labelRes = Res.string.card_status_published_review_now,
+        labelText = updatedAt.formatAsDate(),
         icon = Icons.Outlined.Visibility,
         color = Color(0xFF137FEC),
     )
 
     CardStatus.ARCHIVED -> CardStatusConfig(
-        labelRes = Res.string.card_status_archived,
+        labelText = updatedAt.formatAsDate(),
         icon = Icons.Outlined.EditNote,
         color = Color(0xFF64748B),
     )
 }
 
+private fun Instant?.formatAsDate(): String = this
+    ?.toString()
+    ?.substringBefore('T')
+    ?: "--"
+
 @Immutable
 private data class CardStatusConfig(
-    val labelRes: StringResource,
+    val labelRes: StringResource? = null,
+    val labelText: String? = null,
     val icon: ImageVector,
     val color: Color,
 )

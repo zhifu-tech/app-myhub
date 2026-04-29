@@ -32,8 +32,6 @@ import tech.zhifu.app.myhub.feature.ai.content.item.MessageUserItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ProviderModeItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningCardItem
 import tech.zhifu.app.myhub.feature.ai.content.item.ReasoningTraceCard
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
@@ -44,17 +42,11 @@ fun Content(
     contentPadding: PaddingValues,
 ) {
     val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
-        (it as? AIUiState.Content)?.let { content ->
-            ContentState(
-                messages = content.context.messages,
-                draft = content.context.draft,
-                mediaGenerationProgress = content.context.mediaGenerationProgress,
-            )
-        }
+        (it as? AIUiState.Content)?.context?.messages
     }
     val safeState = state ?: return
     ContentContent(
-        messages = safeState.messages,
+        messages = safeState,
         contentPadding = contentPadding,
         providerModeItem = {
             ProviderModeItem(viewModel)
@@ -65,8 +57,6 @@ fun Content(
         assistantMessageItem = { message ->
             AssistantMessageItem(
                 viewModel = viewModel,
-                draft = safeState.draft,
-                mediaGenerationProgress = safeState.mediaGenerationProgress,
                 message = message,
             )
         },
@@ -161,9 +151,3 @@ fun ContentContent(
         }
     }
 }
-
-private data class ContentState(
-    val messages: List<Message>,
-    val draft: CaptureDraft,
-    val mediaGenerationProgress: ProviderImageGenerationProgress?,
-)

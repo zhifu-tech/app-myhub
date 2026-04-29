@@ -132,9 +132,8 @@ fun AIScreenTwoPanel(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
-            ) {
-                content()
-            }
+                content = content,
+            )
             Box(
                 modifier = Modifier
                     .fillMaxHeight()

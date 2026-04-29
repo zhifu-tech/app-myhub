@@ -33,10 +33,12 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
+import tech.zhifu.app.myhub.feature.ai.AIUiState
+import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress.Stage
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPayload
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.text
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
@@ -59,13 +61,42 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_t
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_title_ready
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_remove_media
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_title_media
+import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
+import tech.zhifu.app.myhub.ui.viewmodel.uiState
 
 @Composable
 fun MediaActionPanel(
-    component: ActionComponentSchema,
+    component: ActionComponent,
+    viewModel: AIViewModel,
+) {
+    val state by viewModel.uiState.collectAsSelectedStateWithLifecycle {
+        (it as? AIUiState.Content)?.let { content ->
+            MediaActionPanelState(
+                draft = content.context.draft,
+                generationProgress = content.context.mediaGenerationProgress,
+            )
+        }
+    }
+    val safeState = state ?: return
+    MediaActionPanel(
+        component = component,
+        draft = safeState.draft,
+        mediaGenerationProgress = safeState.generationProgress,
+        onAction = viewModel::doAction,
+    )
+}
+
+private class MediaActionPanelState(
+    val draft: CaptureDraft,
+    val generationProgress: ProviderImageGenerationProgress?,
+)
+
+@Composable
+fun MediaActionPanel(
+    component: ActionComponent,
     draft: CaptureDraft,
     mediaGenerationProgress: ProviderImageGenerationProgress?,
-    onAction: (ActionCommand) -> Unit,
+    onAction: (ActionEvent) -> Unit,
 ) {
     val payload = component.payload as? ActionPayload.Media ?: return
     var mediaInitialIndex by remember(draft.mediaAssets) { mutableStateOf<Int?>(null) }
@@ -116,7 +147,7 @@ fun MediaActionPanel(
                 overlayContent = { index, _ ->
                     val overlayAction = component.actions.overlay.getOrNull(index) ?: return@MediaGridNine
                     IconButton(
-                        onClick = { onAction(overlayAction.command) },
+                        onClick = { onAction(overlayAction.event) },
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(6.dp)

@@ -47,7 +47,7 @@ fun BoxScope.PreviewThumbnail(
             }
             PreviewThumbnailState(
                 previewState = uiState.previewState,
-                draft = uiState.context.draft.takeIf { it.hasVisibleContent() },
+                draft = uiState.context.draft.takeIf(CaptureDraft::hasVisibleContent),
             )
         }
     }

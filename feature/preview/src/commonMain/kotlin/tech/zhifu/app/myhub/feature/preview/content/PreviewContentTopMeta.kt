@@ -28,6 +28,7 @@ internal fun PreviewContentTopMeta(
     Box(modifier = modifier) {
         CardStatusAction(
             status = card.card.status,
+            updatedAt = card.card.updatedAt,
             modifier = labelModifier.align(Alignment.CenterEnd),
             textAlpha = 0.6f,
         )

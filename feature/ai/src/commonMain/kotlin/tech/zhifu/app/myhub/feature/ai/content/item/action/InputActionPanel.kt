@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPayload
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -26,8 +26,8 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_input_t
 
 @Composable
 fun InputActionPanel(
-    component: ActionComponentSchema,
-    onAction: (ActionCommand) -> Unit,
+    component: ActionComponent,
+    onAction: (ActionEvent) -> Unit,
 ) {
     val payload = component.payload as? ActionPayload.Input ?: return
     ActionSupportPanel(

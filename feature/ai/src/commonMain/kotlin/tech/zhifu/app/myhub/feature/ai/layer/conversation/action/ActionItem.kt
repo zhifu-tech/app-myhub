@@ -4,7 +4,7 @@ import org.jetbrains.compose.resources.StringResource
 
 data class ActionItemSchema(
     val id: String,
-    val command: ActionCommand,
+    val event: ActionEvent,
     val label: ActionText,
     val style: ActionStyle,
     val enabled: Boolean = true,

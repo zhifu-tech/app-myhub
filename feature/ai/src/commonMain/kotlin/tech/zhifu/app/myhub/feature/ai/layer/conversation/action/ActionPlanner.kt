@@ -34,7 +34,7 @@ class ActionPlanner {
         draft: CaptureDraft,
         focusField: Field? = null,
         mediaGenerationProgress: ProviderImageGenerationProgress? = null,
-    ): List<ActionComponentSchema> = when (state) {
+    ): List<ActionComponent> = when (state) {
         ConversationState.INFO_COLLECT -> infoCollectActions(
             draft = draft,
             focusField = focusField,
@@ -50,13 +50,13 @@ class ActionPlanner {
         )
 
         ConversationState.COMPLETE -> listOf(
-            ActionComponentSchema(
+            ActionComponent(
                 kind = ActionComponentKind.QUICK_REPLY,
                 actions = ActionSlots(
                     primary = listOf(
                         item(
                             id = "new-capture",
-                            command = ActionCommand.NewCapture,
+                            event = ActionEvent.NewCapture,
                             label = text(Res.string.feature_ai_action_new_capture),
                             style = ActionStyle.Primary,
                         )
@@ -73,7 +73,7 @@ private fun infoCollectActions(
     draft: CaptureDraft,
     focusField: Field?,
     mediaGenerationProgress: ProviderImageGenerationProgress?,
-): List<ActionComponentSchema> = when (focusField) {
+): List<ActionComponent> = when (focusField) {
     Field.MEDIA -> listOf(
         mediaComponent(
             draft = draft,
@@ -117,51 +117,51 @@ private fun infoCollectActions(
 
 private fun reviewActions(
     draft: CaptureDraft,
-): List<ActionComponentSchema> = listOf(
-    ActionComponentSchema(
+): List<ActionComponent> = listOf(
+    ActionComponent(
         kind = ActionComponentKind.REVIEW,
         payload = ActionPayload.Review(
             fields = listOf(
                 reviewFieldItem(
                     id = "edit-title",
-                    command = ActionCommand.EditTitle,
+                    command = ActionEvent.EditTitle,
                     label = text(Res.string.feature_ai_action_edit_title),
-                    value = fieldValueText(ActionCommand.EditTitle, draft),
+                    value = fieldValueText(ActionEvent.EditTitle, draft),
                 ),
                 reviewFieldItem(
                     id = "edit-media",
-                    command = ActionCommand.EditMedia,
+                    command = ActionEvent.EditMedia,
                     label = text(Res.string.feature_ai_action_edit_media),
-                    value = fieldValueText(ActionCommand.EditMedia, draft),
+                    value = fieldValueText(ActionEvent.EditMedia, draft),
                 ),
                 reviewFieldItem(
                     id = "edit-tags",
-                    command = ActionCommand.EditTags,
+                    command = ActionEvent.EditTags,
                     label = text(Res.string.feature_ai_action_edit_tags),
-                    value = fieldValueText(ActionCommand.EditTags, draft),
+                    value = fieldValueText(ActionEvent.EditTags, draft),
                 ),
                 reviewFieldItem(
                     id = "edit-summary",
-                    command = ActionCommand.EditSummary,
+                    command = ActionEvent.EditSummary,
                     label = text(Res.string.feature_ai_action_edit_summary),
-                    value = fieldValueText(ActionCommand.EditSummary, draft),
+                    value = fieldValueText(ActionEvent.EditSummary, draft),
                 ),
                 reviewFieldItem(
                     id = "edit-location",
-                    command = ActionCommand.EditLocation,
+                    command = ActionEvent.EditLocation,
                     label = text(Res.string.feature_ai_action_edit_location),
-                    value = fieldValueText(ActionCommand.EditLocation, draft),
+                    value = fieldValueText(ActionEvent.EditLocation, draft),
                 ),
             )
         ),
     ),
-    ActionComponentSchema(
+    ActionComponent(
         kind = ActionComponentKind.PUBLISH,
         actions = ActionSlots(
             primary = listOf(
                 item(
                     id = "publish",
-                    command = ActionCommand.Publish,
+                    event = ActionEvent.Publish,
                     label = text(Res.string.feature_ai_action_publish),
                     style = ActionStyle.Primary,
                 )
@@ -169,13 +169,13 @@ private fun reviewActions(
             secondary = listOf(
                 item(
                     id = "save-draft",
-                    command = ActionCommand.SaveDraft,
+                    event = ActionEvent.SaveDraft,
                     label = text(Res.string.feature_ai_action_save_draft),
                     style = ActionStyle.Tonal,
                 ),
                 item(
                     id = "delete-card",
-                    command = ActionCommand.DeleteCard,
+                    event = ActionEvent.DeleteCard,
                     label = text(Res.string.feature_ai_action_delete_card),
                     style = ActionStyle.Destructive,
                 ),
@@ -188,7 +188,7 @@ private fun manualEditActions(
     draft: CaptureDraft,
     focusField: Field?,
     mediaGenerationProgress: ProviderImageGenerationProgress?,
-): List<ActionComponentSchema> = when (focusField) {
+): List<ActionComponent> = when (focusField) {
     Field.MEDIA -> listOf(mediaComponent(draft, mediaGenerationProgress, reviewMode = true))
     Field.TAGS -> listOf(tagComponent(draft, reviewMode = true))
     Field.SUMMARY -> listOf(inputComponent(draft, field = Field.SUMMARY, reviewMode = true))
@@ -200,10 +200,10 @@ private fun mediaComponent(
     draft: CaptureDraft,
     mediaGenerationProgress: ProviderImageGenerationProgress?,
     reviewMode: Boolean,
-): ActionComponentSchema {
+): ActionComponent {
     val hasMedia = draft.mediaAssets.isNotEmpty()
     val isGenerating = mediaGenerationProgress != null
-    return ActionComponentSchema(
+    return ActionComponent(
         kind = ActionComponentKind.MEDIA,
         payload = ActionPayload.Media(
             hasMedia = hasMedia,
@@ -216,7 +216,7 @@ private fun mediaComponent(
                 add(
                     item(
                         id = "capture-media",
-                        command = ActionCommand.CaptureMedia,
+                        event = ActionEvent.CaptureMedia,
                         label = text(Res.string.feature_ai_action_capture_media),
                         style = if (hasMedia) {
                             ActionStyle.Secondary
@@ -229,7 +229,7 @@ private fun mediaComponent(
                 add(
                     item(
                         id = if (hasMedia) "replace-media" else "upload-media",
-                        command = if (hasMedia) ActionCommand.ReplaceMedia else ActionCommand.UploadMedia,
+                        event = if (hasMedia) ActionEvent.ReplaceMedia else ActionEvent.UploadMedia,
                         label = text(
                             if (hasMedia) {
                                 Res.string.feature_ai_action_replace_media
@@ -244,7 +244,7 @@ private fun mediaComponent(
                 add(
                     item(
                         id = "generate-media",
-                        command = ActionCommand.GenerateMedia,
+                        event = ActionEvent.GenerateMedia,
                         label = text(Res.string.feature_ai_action_generate_media),
                         style = if (hasMedia) {
                             ActionStyle.Tonal
@@ -260,7 +260,7 @@ private fun mediaComponent(
                     add(
                         item(
                             id = "remove-media",
-                            command = ActionCommand.RemoveMedia,
+                            event = ActionEvent.RemoveMedia,
                             label = text(Res.string.feature_ai_action_remove_media),
                             style = ActionStyle.Destructive,
                         )
@@ -270,14 +270,14 @@ private fun mediaComponent(
                     if (reviewMode) {
                         item(
                             id = "review",
-                            command = ActionCommand.Review,
+                            event = ActionEvent.Review,
                             label = text(Res.string.feature_ai_action_review),
                             style = ActionStyle.Tonal,
                         )
                     } else {
                         item(
                             id = "skip-media",
-                            command = ActionCommand.SkipMedia,
+                            event = ActionEvent.SkipMedia,
                             label = text(Res.string.feature_ai_action_skip_media),
                             style = ActionStyle.Secondary,
                         )
@@ -287,7 +287,7 @@ private fun mediaComponent(
             overlay = draft.mediaAssets.indices.map { index ->
                 item(
                     id = "remove-media-$index",
-                    command = ActionCommand.RemoveMediaAt(index),
+                    event = ActionEvent.RemoveMediaAt(index),
                     label = text(Res.string.feature_ai_action_remove_media),
                     style = ActionStyle.Overlay,
                 )
@@ -299,7 +299,7 @@ private fun mediaComponent(
 private fun tagComponent(
     draft: CaptureDraft,
     reviewMode: Boolean,
-): ActionComponentSchema = ActionComponentSchema(
+): ActionComponent = ActionComponent(
     kind = ActionComponentKind.TAGS,
     payload = ActionPayload.Tags(selectedCount = draft.tags.size),
     actions = ActionSlots(
@@ -308,14 +308,14 @@ private fun tagComponent(
             if (reviewMode) {
                 item(
                     id = "review",
-                    command = ActionCommand.Review,
+                    event = ActionEvent.Review,
                     label = text(Res.string.feature_ai_action_review),
                     style = ActionStyle.Tonal,
                 )
             } else {
                 item(
                     id = "skip-tags",
-                    command = ActionCommand.SkipTags,
+                    event = ActionEvent.SkipTags,
                     label = text(Res.string.feature_ai_action_skip_tags),
                     style = ActionStyle.Secondary,
                 )
@@ -328,7 +328,7 @@ private fun inputComponent(
     draft: CaptureDraft,
     field: Field,
     reviewMode: Boolean,
-): ActionComponentSchema = ActionComponentSchema(
+): ActionComponent = ActionComponent(
     kind = ActionComponentKind.INPUT,
     payload = ActionPayload.Input(
         field = field,
@@ -343,7 +343,7 @@ private fun inputComponent(
             listOf(
                 item(
                     id = "review",
-                    command = ActionCommand.Review,
+                    event = ActionEvent.Review,
                     label = text(Res.string.feature_ai_action_review),
                     style = ActionStyle.Tonal,
                 )
@@ -357,7 +357,7 @@ private fun inputComponent(
 private fun locationComponent(
     draft: CaptureDraft,
     reviewMode: Boolean,
-): ActionComponentSchema = ActionComponentSchema(
+): ActionComponent = ActionComponent(
     kind = ActionComponentKind.LOCATION,
     payload = ActionPayload.Location(
         currentLocation = draft.location?.name.orEmpty(),
@@ -373,7 +373,7 @@ private fun locationComponent(
                 add(
                     item(
                         id = "clear-location",
-                        command = ActionCommand.ClearLocation,
+                        event = ActionEvent.ClearLocation,
                         label = text(Res.string.feature_ai_action_clear_location),
                         style = ActionStyle.Secondary,
                     )
@@ -383,7 +383,7 @@ private fun locationComponent(
                 add(
                     item(
                         id = "review",
-                        command = ActionCommand.Review,
+                        event = ActionEvent.Review,
                         label = text(Res.string.feature_ai_action_review),
                         style = ActionStyle.Tonal,
                     )
@@ -395,14 +395,14 @@ private fun locationComponent(
 
 private fun reviewFieldItem(
     id: String,
-    command: ActionCommand,
+    command: ActionEvent,
     label: ActionText,
     value: ActionText,
 ): ReviewFieldItem = ReviewFieldItem(
     id = id,
     action = item(
         id = id,
-        command = command,
+        event = command,
         label = label,
         style = ActionStyle.Secondary,
     ),
@@ -423,7 +423,7 @@ private fun buildTagActions(
     .map { tag ->
         item(
             id = "tag-$tag",
-            command = ActionCommand.AddTag(tag),
+            event = ActionEvent.AddTag(tag),
             label = ActionText.Plain(tag),
             style = if (tag in draft.tags) {
                 ActionStyle.SelectedChip
@@ -435,22 +435,22 @@ private fun buildTagActions(
     .toList()
 
 private fun fieldValueText(
-    command: ActionCommand,
+    command: ActionEvent,
     draft: CaptureDraft,
 ): ActionText = when (command) {
-    ActionCommand.EditTitle -> draft.title.ifBlankText()
-    ActionCommand.EditSummary -> draft.summary.ifBlank {
+    ActionEvent.EditTitle -> draft.title.ifBlankText()
+    ActionEvent.EditSummary -> draft.summary.ifBlank {
         draft.sourceText
     }.ifBlankText()
 
-    ActionCommand.EditLocation -> draft.location?.name.orEmpty().ifBlankText()
-    ActionCommand.EditMedia -> if (draft.mediaAssets.isEmpty()) {
+    ActionEvent.EditLocation -> draft.location?.name.orEmpty().ifBlankText()
+    ActionEvent.EditMedia -> if (draft.mediaAssets.isEmpty()) {
         text(Res.string.feature_ai_action_panel_edit_empty)
     } else {
         text(Res.string.feature_ai_action_panel_edit_media_value, draft.mediaAssets.size)
     }
 
-    ActionCommand.EditTags -> if (draft.tags.isEmpty()) {
+    ActionEvent.EditTags -> if (draft.tags.isEmpty()) {
         text(Res.string.feature_ai_action_panel_edit_empty)
     } else {
         text(
@@ -467,7 +467,7 @@ private fun locationExample(
     value: String,
 ): ActionItemSchema = item(
     id = "location-example-$id",
-    command = ActionCommand.SetLocation(
+    event = ActionEvent.SetLocation(
         value.substringAfter('：')
             .substringAfter(":")
             .ifBlank { value }
@@ -478,13 +478,13 @@ private fun locationExample(
 
 private fun item(
     id: String,
-    command: ActionCommand,
+    event: ActionEvent,
     label: ActionText,
     style: ActionStyle,
     enabled: Boolean = true,
 ) = ActionItemSchema(
     id = id,
-    command = command,
+    event = event,
     label = label,
     style = style,
     enabled = enabled,

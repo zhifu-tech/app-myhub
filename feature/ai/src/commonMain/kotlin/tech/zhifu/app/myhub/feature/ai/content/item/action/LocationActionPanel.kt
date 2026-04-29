@@ -15,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPayload
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_edit_location
@@ -29,8 +29,8 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_locatio
 
 @Composable
 fun LocationActionPanel(
-    component: ActionComponentSchema,
-    onAction: (ActionCommand) -> Unit,
+    component: ActionComponent,
+    onAction: (ActionEvent) -> Unit,
 ) {
     val payload = component.payload as? ActionPayload.Location ?: return
     val hasLocation = payload.currentLocation.isNotBlank()

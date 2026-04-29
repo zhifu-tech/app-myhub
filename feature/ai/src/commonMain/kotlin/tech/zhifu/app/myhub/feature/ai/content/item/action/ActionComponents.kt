@@ -7,35 +7,63 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
-import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentKind
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
-import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.model.Message
 
 @Composable
 fun ActionComponents(
     viewModel: AIViewModel,
-    draft: CaptureDraft,
     message: Message,
-    mediaGenerationProgress: ProviderImageGenerationProgress?,
 ) {
     ActionComponentsContent(
         components = message.actionComponents,
-        draft = draft,
-        mediaGenerationProgress = mediaGenerationProgress,
-        onAction = viewModel::doAction,
+        componentFactory = { component ->
+            when (component.kind) {
+                ActionComponentKind.REVIEW -> ReviewActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+
+                ActionComponentKind.PUBLISH -> PublishActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+
+                ActionComponentKind.MEDIA -> MediaActionPanel(
+                    component = component,
+                    viewModel = viewModel,
+                )
+
+                ActionComponentKind.TAGS -> TagActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+
+                ActionComponentKind.INPUT -> InputActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+
+                ActionComponentKind.LOCATION -> LocationActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+
+                ActionComponentKind.QUICK_REPLY -> QuickReplyActionPanel(
+                    component = component,
+                    onAction = viewModel::doAction,
+                )
+            }
+        }
     )
 }
 
 @Composable
 fun ActionComponentsContent(
-    components: List<ActionComponentSchema>,
-    draft: CaptureDraft,
-    mediaGenerationProgress: ProviderImageGenerationProgress?,
-    onAction: (ActionCommand) -> Unit,
+    components: List<ActionComponent>,
     modifier: Modifier = Modifier,
+    componentFactory: @Composable (ActionComponent) -> Unit,
 ) {
     if (components.isEmpty()) return
 
@@ -44,44 +72,7 @@ fun ActionComponentsContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         components.forEach { component ->
-            when (component.kind) {
-                ActionComponentKind.REVIEW -> ReviewActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.PUBLISH -> PublishActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.MEDIA -> MediaActionPanel(
-                    component = component,
-                    draft = draft,
-                    mediaGenerationProgress = mediaGenerationProgress,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.TAGS -> TagActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.INPUT -> InputActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.LOCATION -> LocationActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-
-                ActionComponentKind.QUICK_REPLY -> QuickReplyActionPanel(
-                    component = component,
-                    onAction = onAction,
-                )
-            }
+            componentFactory(component)
         }
     }
 }

@@ -50,6 +50,7 @@ fun ContentGridItem(
         )
         CardStatusAction(
             status = item.card.status,
+            updatedAt = item.card.updatedAt,
             modifier = Modifier.padding(top = 4.dp),
         )
     }

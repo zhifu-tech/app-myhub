@@ -2,7 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.layer.conversation.action
 
 import tech.zhifu.app.myhub.feature.ai.model.Field
 
-data class ActionComponentSchema(
+data class ActionComponent(
     val kind: ActionComponentKind,
     val payload: ActionPayload = ActionPayload.None,
     val actions: ActionSlots = ActionSlots(),

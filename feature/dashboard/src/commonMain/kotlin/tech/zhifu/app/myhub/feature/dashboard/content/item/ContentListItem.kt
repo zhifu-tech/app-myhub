@@ -65,6 +65,7 @@ fun ContentListItem(
             )
             CardStatusAction(
                 status = item.card.status,
+                updatedAt = item.card.updatedAt,
                 modifier = Modifier
                     .sharedElement(
                         key = "content-status-${item.card.id}",

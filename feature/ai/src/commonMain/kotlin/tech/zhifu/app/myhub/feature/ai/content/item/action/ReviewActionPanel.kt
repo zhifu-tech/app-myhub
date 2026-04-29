@@ -18,8 +18,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import org.jetbrains.compose.resources.stringResource
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPayload
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.text
 import tech.zhifu.app.myhub.feature.ai.resources.Res
@@ -34,8 +34,8 @@ import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_preview
 
 @Composable
 fun ReviewActionPanel(
-    component: ActionComponentSchema,
-    onAction: (ActionCommand) -> Unit,
+    component: ActionComponent,
+    onAction: (ActionEvent) -> Unit,
 ) {
     val payload = component.payload as? ActionPayload.Review ?: return
     val previewPinned = currentWindowAdaptiveInfo().windowSizeClass
@@ -66,7 +66,7 @@ fun ReviewActionPanel(
         ) {
             payload.fields.forEach { field ->
                 Surface(
-                    onClick = { onAction(field.action.command) },
+                    onClick = { onAction(field.action.event) },
                     shape = RoundedCornerShape(14.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
                     border = BorderStroke(

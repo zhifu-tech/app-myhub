@@ -3,6 +3,7 @@ package tech.zhifu.app.myhub.feature.ai.content.appbar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -93,7 +94,7 @@ internal fun TopBarContent(
                         contentDescription = stringResource(Res.string.feature_ai_top_bar_back),
                     )
                 }
-                androidx.compose.foundation.layout.Column(
+                Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {

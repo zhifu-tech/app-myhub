@@ -1,7 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.context
 
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.Field
@@ -18,7 +18,7 @@ data class ConversationContext(
 
     val focusField: Field? = null,
     val missingFields: List<Field> = emptyList(),
-    val actionComponents: List<ActionComponentSchema> = emptyList(),
+    val actionComponents: List<ActionComponent> = emptyList(),
 
     val reasoningText: String = "",
     val reasoningStatus: Boolean = false,

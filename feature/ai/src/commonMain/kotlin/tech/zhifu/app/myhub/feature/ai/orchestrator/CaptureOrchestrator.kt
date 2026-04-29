@@ -20,7 +20,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageG
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.router.ProviderRouter
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.telemetry.ProviderTelemetry
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.ConversationEngine
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.ConversationState
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.state.StateGuard
 import tech.zhifu.app.myhub.feature.ai.layer.storage.StorageGateway
@@ -126,35 +126,35 @@ class CaptureOrchestrator(
         }
     }
 
-    suspend fun onAction(action: ActionCommand) {
+    suspend fun onAction(event: ActionEvent) {
         val state = conversationEngine.currentState()
-        if (!stateGuard.canAction(state = state, command = action)) {
-            conversationEngine.emitBlockedAction(action = action.toString())
+        if (!stateGuard.canAction(state = state, event = event)) {
+            conversationEngine.emitBlockedAction(action = event.toString())
             return
         }
-        when (action) {
-            ActionCommand.CaptureMedia -> handleCaptureMediaInput(capturePhoto = true)
-            ActionCommand.ClearLocation -> handleClearLocation()
-            ActionCommand.DeleteCard -> handleDeleteCard()
-            ActionCommand.EditLocation -> conversationEngine.commandEnterManualEdit(Field.LOCATION)
-            ActionCommand.EditMedia -> conversationEngine.commandEnterManualEdit(Field.MEDIA)
-            ActionCommand.EditSummary -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
-            ActionCommand.EditTags -> conversationEngine.commandEnterManualEdit(Field.TAGS)
-            ActionCommand.EditTitle -> conversationEngine.commandEnterManualEdit(Field.TITLE)
-            ActionCommand.GenerateMedia -> handleGenerateMedia()
-            ActionCommand.NewCapture -> conversationEngine.commandResetSession()
-            ActionCommand.Publish -> handlePublish()
-            ActionCommand.RemoveMedia -> handleRemoveAllMedia()
-            is ActionCommand.RemoveMediaAt -> handleMediaRemovedAt(action.index)
-            is ActionCommand.RemoveTag -> handleTagRemoved(action.tag)
-            ActionCommand.ReplaceMedia -> handleAttachMedia(replaceExisting = true)
-            ActionCommand.Review -> conversationEngine.commandReview()
-            ActionCommand.SaveDraft -> conversationEngine.emitDraftSaved()
-            is ActionCommand.AddTag -> handleTagSelected(action.tag)
-            is ActionCommand.SetLocation -> handleLocationSelected(action.location)
-            ActionCommand.SkipMedia -> conversationEngine.commandSkipField(Field.MEDIA)
-            ActionCommand.SkipTags -> conversationEngine.commandSkipField(Field.TAGS)
-            ActionCommand.UploadMedia -> {
+        when (event) {
+            ActionEvent.CaptureMedia -> handleCaptureMediaInput(capturePhoto = true)
+            ActionEvent.ClearLocation -> handleClearLocation()
+            ActionEvent.DeleteCard -> handleDeleteCard()
+            ActionEvent.EditLocation -> conversationEngine.commandEnterManualEdit(Field.LOCATION)
+            ActionEvent.EditMedia -> conversationEngine.commandEnterManualEdit(Field.MEDIA)
+            ActionEvent.EditSummary -> conversationEngine.commandEnterManualEdit(Field.SUMMARY)
+            ActionEvent.EditTags -> conversationEngine.commandEnterManualEdit(Field.TAGS)
+            ActionEvent.EditTitle -> conversationEngine.commandEnterManualEdit(Field.TITLE)
+            ActionEvent.GenerateMedia -> handleGenerateMedia()
+            ActionEvent.NewCapture -> conversationEngine.commandResetSession()
+            ActionEvent.Publish -> handlePublish()
+            ActionEvent.RemoveMedia -> handleRemoveAllMedia()
+            is ActionEvent.RemoveMediaAt -> handleMediaRemovedAt(event.index)
+            is ActionEvent.RemoveTag -> handleTagRemoved(event.tag)
+            ActionEvent.ReplaceMedia -> handleAttachMedia(replaceExisting = true)
+            ActionEvent.Review -> conversationEngine.commandReview()
+            ActionEvent.SaveDraft -> conversationEngine.emitDraftSaved()
+            is ActionEvent.AddTag -> handleTagSelected(event.tag)
+            is ActionEvent.SetLocation -> handleLocationSelected(event.location)
+            ActionEvent.SkipMedia -> conversationEngine.commandSkipField(Field.MEDIA)
+            ActionEvent.SkipTags -> conversationEngine.commandSkipField(Field.TAGS)
+            ActionEvent.UploadMedia -> {
                 if (conversationEngine.currentState() in setOf(
                         ConversationState.IDLE,
                         ConversationState.COMPLETE,

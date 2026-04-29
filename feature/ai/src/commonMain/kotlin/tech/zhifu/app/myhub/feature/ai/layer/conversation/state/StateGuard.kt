@@ -1,6 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.state
 
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 
 class StateGuard {
     private val inputAllowedStates = setOf(
@@ -17,44 +17,44 @@ class StateGuard {
 
     fun canAction(
         state: ConversationState,
-        command: ActionCommand,
-    ): Boolean = when (command) {
-        ActionCommand.CaptureMedia,
-        ActionCommand.UploadMedia -> state in setOf(
+        event: ActionEvent,
+    ): Boolean = when (event) {
+        ActionEvent.CaptureMedia,
+        ActionEvent.UploadMedia -> state in setOf(
             ConversationState.IDLE,
             ConversationState.INFO_COLLECT,
             ConversationState.MANUAL_EDIT,
             ConversationState.COMPLETE,
         )
 
-        ActionCommand.ReplaceMedia,
-        ActionCommand.GenerateMedia,
-        ActionCommand.RemoveMedia,
-        is ActionCommand.RemoveMediaAt,
-        ActionCommand.SkipMedia -> state in setOf(
+        ActionEvent.ReplaceMedia,
+        ActionEvent.GenerateMedia,
+        ActionEvent.RemoveMedia,
+        is ActionEvent.RemoveMediaAt,
+        ActionEvent.SkipMedia -> state in setOf(
             ConversationState.INFO_COLLECT,
             ConversationState.MANUAL_EDIT,
         )
 
-        ActionCommand.EditMedia,
-        ActionCommand.EditTitle,
-        ActionCommand.EditTags,
-        ActionCommand.EditSummary,
-        ActionCommand.EditLocation,
-        ActionCommand.Publish,
-        ActionCommand.SaveDraft,
-        ActionCommand.DeleteCard -> state == ConversationState.CARD_REVIEW
+        ActionEvent.EditMedia,
+        ActionEvent.EditTitle,
+        ActionEvent.EditTags,
+        ActionEvent.EditSummary,
+        ActionEvent.EditLocation,
+        ActionEvent.Publish,
+        ActionEvent.SaveDraft,
+        ActionEvent.DeleteCard -> state == ConversationState.CARD_REVIEW
 
-        ActionCommand.Review,
-        ActionCommand.ClearLocation,
-        ActionCommand.SkipTags,
-        is ActionCommand.AddTag,
-        is ActionCommand.RemoveTag,
-        is ActionCommand.SetLocation -> state in setOf(
+        ActionEvent.Review,
+        ActionEvent.ClearLocation,
+        ActionEvent.SkipTags,
+        is ActionEvent.AddTag,
+        is ActionEvent.RemoveTag,
+        is ActionEvent.SetLocation -> state in setOf(
             ConversationState.INFO_COLLECT,
             ConversationState.MANUAL_EDIT,
         )
 
-        ActionCommand.NewCapture -> state == ConversationState.COMPLETE
+        ActionEvent.NewCapture -> state == ConversationState.COMPLETE
     }
 }

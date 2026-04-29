@@ -1,7 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.context
 
 import org.jetbrains.compose.resources.StringResource
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponentSchema
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Field
 import tech.zhifu.app.myhub.feature.ai.model.Message
@@ -42,7 +42,7 @@ fun List<Message>.replaceMessage(
 }
 
 fun List<Message>.bindActionComponents(
-    components: List<ActionComponentSchema>,
+    components: List<ActionComponent>,
     ownerMessageId: String?,
 ): List<Message> = map { message ->
     val nextComponents = if (message.id == ownerMessageId && message.canOwnActionComponents()) {

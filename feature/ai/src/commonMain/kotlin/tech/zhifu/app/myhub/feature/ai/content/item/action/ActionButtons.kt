@@ -16,7 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionCommand
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionItemSchema
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionStyle
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.text
@@ -24,7 +24,7 @@ import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.text
 @Composable
 fun ActionButtonsColumn(
     actions: List<ActionItemSchema>,
-    onAction: (ActionCommand) -> Unit,
+    onAction: (ActionEvent) -> Unit,
 ) {
     actions.forEach { action ->
         ActionButton(
@@ -38,7 +38,7 @@ fun ActionButtonsColumn(
 @Composable
 fun ActionButtonsFlow(
     actions: List<ActionItemSchema>,
-    onAction: (ActionCommand) -> Unit,
+    onAction: (ActionEvent) -> Unit,
 ) {
     if (actions.isEmpty()) return
     FlowRow(
@@ -57,13 +57,13 @@ fun ActionButtonsFlow(
 @Composable
 fun ActionButton(
     action: ActionItemSchema,
-    onAction: (ActionCommand) -> Unit,
+    onAction: (ActionEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val label = action.label.text()
     when (action.style) {
         ActionStyle.Primary -> Button(
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             modifier = modifier,
             shape = RoundedCornerShape(14.dp),
@@ -72,7 +72,7 @@ fun ActionButton(
         }
 
         ActionStyle.Tonal -> FilledTonalButton(
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             modifier = modifier,
             shape = RoundedCornerShape(14.dp),
@@ -81,7 +81,7 @@ fun ActionButton(
         }
 
         ActionStyle.Destructive -> OutlinedButton(
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             modifier = modifier,
             shape = RoundedCornerShape(14.dp),
@@ -97,25 +97,25 @@ fun ActionButton(
         }
 
         ActionStyle.Chip -> AssistChip(
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             label = { Text(label) },
         )
 
         ActionStyle.SelectedChip -> InputChip(
             selected = true,
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             label = { Text(label) },
         )
 
         ActionStyle.InlineSuggestion -> ExamplePill(
             text = label,
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
         )
 
         else -> OutlinedButton(
-            onClick = { onAction(action.command) },
+            onClick = { onAction(action.event) },
             enabled = action.enabled,
             modifier = modifier,
             shape = RoundedCornerShape(14.dp),

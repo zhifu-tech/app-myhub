@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
 import tech.zhifu.app.myhub.feature.dashboard.DashboardUiState
 import tech.zhifu.app.myhub.feature.dashboard.DashboardViewModel
@@ -18,6 +19,7 @@ import tech.zhifu.app.myhub.feature.preview.sharedBounds
 import tech.zhifu.app.myhub.feature.preview.util.PreviewAnimatedVisibility
 import tech.zhifu.app.myhub.ui.viewmodel.collectAsSelectedStateWithLifecycle
 import tech.zhifu.app.myhub.ui.viewmodel.uiState
+import tech.zhifu.app.myhub.feature.dashboard.viewmodel.navigateToAiCapture
 
 @Composable
 fun ContentItemHost(
@@ -40,7 +42,13 @@ fun ContentItemHost(
     val previewState = hostState?.previewState
     val items = hostState?.items?.toList().orEmpty()
     val onCardClick: () -> Unit = remember(item, previewState, items) {
-        { previewState?.show(item, items) }
+        {
+            if (item.card.status == CardStatus.DRAFT) {
+                viewModel.navigateToAiCapture()
+            } else {
+                previewState?.show(item, items)
+            }
+        }
     }
     val onMediaClick: (Int) -> Unit = remember(item, previewState, items) {
         { mediaIndex ->
