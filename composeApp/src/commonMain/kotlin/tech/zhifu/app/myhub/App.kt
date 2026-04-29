@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.viewmodel.koinViewModel
 import tech.zhifu.app.myhub.analytics.TrackAppStartedEvent
@@ -21,7 +20,6 @@ import tech.zhifu.app.myhub.navigation.navAppStartKey
 import tech.zhifu.app.myhub.navigation.navEntryProvider
 import tech.zhifu.app.myhub.navigation.navKeySerializerModule
 import tech.zhifu.app.myhub.navigation.rememberAppNavigationState
-import tech.zhifu.app.myhub.navigation.rememberListDetailSceneStrategy
 import tech.zhifu.app.myhub.navigation.rememberPageForwardTransitionSpec
 import tech.zhifu.app.myhub.navigation.rememberPagePopTransitionSpec
 import tech.zhifu.app.myhub.navigation.rememberPagePredictivePopTransitionSpec
@@ -61,7 +59,6 @@ internal fun AppContent() {
     val entries = navigationState.toEntries(
         entryProvider = navigator.navEntryProvider()
     )
-    val sceneStrategy = rememberListDetailSceneStrategy<NavKey>()
     val snackbarHostState = remember { SnackbarHostState() }
 
     CompositionLocalProvider(
@@ -69,7 +66,6 @@ internal fun AppContent() {
     ) {
         NavDisplay(
             entries = entries,
-            sceneStrategy = sceneStrategy,
             onBack = navigator::goBack,
             transitionSpec = rememberPageForwardTransitionSpec(),
             popTransitionSpec = rememberPagePopTransitionSpec(),
