@@ -1,8 +1,5 @@
 package tech.zhifu.app.myhub.feature.ai.layer.conversation.state
 
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
-
 class StateMachine {
     private val transitionTable: Map<TransitionKey, ConversationState> = mapOf(
         transition(ConversationState.IDLE, Signal.START_CAPTURE, ConversationState.INTENT_DETECT),
@@ -22,27 +19,23 @@ class StateMachine {
         transition(ConversationState.PUBLISH, Signal.PUBLISH_SUCCEEDED, ConversationState.COMPLETE),
 
         transition(ConversationState.COMPLETE, Signal.START_CAPTURE, ConversationState.INTENT_DETECT),
-    ).toMap()
+    )
 
     fun transition(
         current: ConversationState,
         signal: Signal,
-    ): ConversationState {
-        val next = transitionTable[TransitionKey(current, signal)] ?: current
-        logger.debug { "state.transition: $current --$signal--> $next" }
-        return next
-    }
-
-    private data class TransitionKey(
-        val from: ConversationState,
-        val signal: Signal,
-    )
+    ): ConversationState = transitionTable[TransitionKey(current, signal)] ?: current
 
     private fun transition(
         from: ConversationState,
         signal: Signal,
         to: ConversationState,
     ): Pair<TransitionKey, ConversationState> = TransitionKey(from, signal) to to
+
+    private data class TransitionKey(
+        val from: ConversationState,
+        val signal: Signal,
+    )
 }
 
 enum class Signal {

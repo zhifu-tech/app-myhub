@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.item.AssistantMessageItem
@@ -136,12 +135,7 @@ fun ContentContent(
 
                     Message.Role.USER -> MessageUserItem(msg)
                     Message.Role.THINKING -> ReasoningTraceCard(
-                        text = msg.textRes?.let { res ->
-                            stringResource(
-                                resource = res,
-                                formatArgs = msg.textArgs.toTypedArray(),
-                            )
-                        } ?: msg.text,
+                        text = msg.text(),
                         live = false,
                         modifier = Modifier.padding(horizontal = 12.dp),
                         persistentKey = "reasoning-${msg.id}",

@@ -3,17 +3,16 @@ package tech.zhifu.app.myhub.feature.ai.layer.conversation.state
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 
 class StateGuard {
-    private val inputAllowedStates = setOf(
+
+    fun canInput(
+        state: ConversationState
+    ): Boolean = state in setOf(
         ConversationState.IDLE,
         ConversationState.COMPLETE,
         ConversationState.INFO_COLLECT,
         ConversationState.CARD_REVIEW,
         ConversationState.MANUAL_EDIT,
     )
-
-    fun canInput(
-        state: ConversationState
-    ): Boolean = state in inputAllowedStates
 
     fun canAction(
         state: ConversationState,

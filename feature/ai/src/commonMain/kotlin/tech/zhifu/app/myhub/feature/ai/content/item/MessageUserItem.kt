@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
+import tech.zhifu.app.myhub.feature.ai.content.text
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.model.displayName
@@ -50,14 +51,6 @@ fun MessageUserItem(
             else asset.toMediaItem()
         }
     }
-    val text = message.textRes
-        ?.let { res ->
-            stringResource(
-                resource = res,
-                formatArgs = message.textArgs.toTypedArray(),
-            )
-        }
-        ?: message.text
 
     Row(
         modifier = Modifier
@@ -84,16 +77,11 @@ fun MessageUserItem(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                text
-                    .trim()
-                    .takeIf { it.isNotBlank() }
-                    ?.let { content ->
-                        Text(
-                            text = content,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+                Text(
+                    text = message.text(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 MediaGridNine(
                     items = mediaItems,
                     onItemClick = { index ->

@@ -33,15 +33,12 @@ import tech.zhifu.app.myhub.feature.preview.content.PreviewContent
 import tech.zhifu.app.myhub.feature.preview.content.PreviewOverlay
 import tech.zhifu.app.myhub.feature.preview.content.PreviewPlaceholder
 import tech.zhifu.app.myhub.feature.preview.content.rememberPreviewSnapshotController
-import tech.zhifu.app.myhub.logger.debug
-import tech.zhifu.app.myhub.logger.logger
 
 @Composable
 fun Preview(
     state: PreviewState,
     modifier: Modifier = Modifier,
 ) {
-    logger.debug { "Preview : state: ${state.hashCode()}" }
     val snapshotController = rememberPreviewSnapshotController()
     val mediaSession by state.mediaSession
     AnimatedContent(
@@ -62,7 +59,6 @@ fun Preview(
             )
         }
     ) { targetCard: ContentCard? ->
-        logger.debug { "Preview : targetCard: ${targetCard.hashCode()}" }
         if (targetCard == null) {
             if (state.pined) {
                 PreviewPlaceholder()

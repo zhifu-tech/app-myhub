@@ -22,10 +22,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.item.action.ActionComponents
 import tech.zhifu.app.myhub.feature.ai.content.item.action.EditFieldPill
+import tech.zhifu.app.myhub.feature.ai.content.text
 import tech.zhifu.app.myhub.feature.ai.model.Message
 
 @Composable
@@ -62,14 +62,6 @@ fun AssistantMessageItem(
 
         else -> return
     }
-    val text = message.textRes
-        ?.let { res ->
-            stringResource(
-                resource = res,
-                formatArgs = message.textArgs.toTypedArray(),
-            )
-        }
-        ?: message.text
 
     Row(
         modifier = Modifier
@@ -103,7 +95,7 @@ fun AssistantMessageItem(
                 message.editingField?.let { field ->
                     EditFieldPill(field = field)
                 }
-                text
+                message.text()
                     .trim()
                     .takeIf { it.isNotBlank() }
                     ?.let { content ->

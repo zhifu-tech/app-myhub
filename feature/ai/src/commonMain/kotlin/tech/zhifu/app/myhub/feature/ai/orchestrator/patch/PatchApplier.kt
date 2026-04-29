@@ -66,7 +66,10 @@ class PatchApplier {
     ): CaptureDraft? {
         val value = jsonText(op.value)?.trim() ?: return null
         return when (op.op) {
-            "replace", "add" -> current.copy(title = value)
+            "replace", "add" -> {
+                current.copy(title = value)
+            }
+
             "remove" -> current.copy(title = "")
             else -> null
         }
@@ -75,120 +78,103 @@ class PatchApplier {
     private fun applySummary(
         current: CaptureDraft,
         op: ProviderJsonPatchOp,
-    ): CaptureDraft? {
-        val value = jsonText(op.value)?.trim()
-        return when (op.op) {
-            "replace", "add" -> current.copy(summary = value.orEmpty())
-            "remove" -> current.copy(summary = "")
-            else -> null
+    ): CaptureDraft? = when (op.op) {
+        "replace", "add" -> {
+            val value = jsonText(op.value)?.trim()
+            current.copy(summary = value.orEmpty())
         }
+
+        "remove" -> current.copy(summary = "")
+        else -> null
     }
 
     private fun applyTags(
         current: CaptureDraft,
         op: ProviderJsonPatchOp,
-    ): CaptureDraft? {
-        val tags = current.tags.toMutableList()
-        return when (op.op) {
-            "replace" -> {
-                val incoming = jsonStringList(op.value)
-                current.copy(tags = incoming.distinct())
-            }
-
-            "add" -> {
-                val incoming = jsonStringList(op.value)
-                incoming.forEach { tag ->
-                    if (tag.isNotBlank() && tag !in tags) {
-                        tags += tag
-                    }
-                }
-                current.copy(tags = tags)
-            }
-
-            "remove" -> {
-                val incoming = jsonStringList(op.value)
-                if (incoming.isEmpty()) {
-                    current.copy(tags = emptyList())
-                } else {
-                    current.copy(tags = tags.filterNot { it in incoming })
-                }
-            }
-
-            else -> null
+    ): CaptureDraft? = when (op.op) {
+        "replace" -> {
+            val incoming = jsonStringList(op.value)
+            current.copy(tags = incoming.distinct())
         }
+
+        "add" -> {
+            val tags = current.tags.toMutableList()
+            val incoming = jsonStringList(op.value)
+            incoming.forEach { tag ->
+                if (tag.isNotBlank() && tag !in tags) {
+                    tags += tag
+                }
+            }
+            current.copy(tags = tags)
+        }
+
+        "remove" -> {
+            val incoming = jsonStringList(op.value)
+            if (incoming.isEmpty()) {
+                current.copy(tags = emptyList())
+            } else {
+                val tags = current.tags.toMutableList()
+                current.copy(tags = tags.filterNot { it in incoming })
+            }
+        }
+
+        else -> null
     }
 
     private fun applySourceText(
         current: CaptureDraft,
         op: ProviderJsonPatchOp,
-    ): CaptureDraft? {
-        val value = jsonText(op.value)?.trim()
-        return when (op.op) {
-            "replace", "add" -> current.copy(sourceText = value.orEmpty())
-            "remove" -> current.copy(sourceText = "")
-            else -> null
+    ): CaptureDraft? = when (op.op) {
+        "replace", "add" -> {
+            val value = jsonText(op.value)?.trim()
+            current.copy(sourceText = value.orEmpty())
         }
+
+        "remove" -> current.copy(sourceText = "")
+        else -> null
     }
 
     private fun applyCaptureType(
         current: CaptureDraft,
         op: ProviderJsonPatchOp,
-    ): CaptureDraft? {
-        val value = jsonText(op.value)?.trim()
-        return when (op.op) {
-            "replace", "add" -> current.copy(captureType = value?.let(CaptureType::fromValue))
-            "remove" -> current.copy(captureType = null)
-            else -> null
+    ): CaptureDraft? = when (op.op) {
+        "replace", "add" -> {
+            val value = jsonText(op.value)?.trim()
+            current.copy(
+                captureType = value?.let(CaptureType::fromValue)
+            )
         }
+
+        "remove" -> current.copy(captureType = null)
+        else -> null
     }
 
     private fun applyLocation(
         current: CaptureDraft,
         op: ProviderJsonPatchOp,
-    ): CaptureDraft? {
-        val value = jsonText(op.value)?.trim()
-        return when (op.op) {
-            "replace", "add" -> current.copy(
+    ): CaptureDraft? = when (op.op) {
+        "replace", "add" -> {
+            val value = jsonText(op.value)?.trim()
+            current.copy(
                 location = value
                     ?.takeIf { it.isNotBlank() }
                     ?.let { CaptureLocation(name = it) }
             )
-
-            "remove" -> current.copy(location = null)
-            else -> null
         }
-    }
 
-    private fun isSupported(path: String): Boolean {
-        return path == "/title" ||
-            path == "/summary" ||
-            path == "/tags/-" ||
-            path == "/tags" ||
-            path.startsWith("/extra/")
-    }
-
-    private fun isLocked(path: String, locked: Set<String>): Boolean {
-        val field = when {
-            path.startsWith("/title") -> "title"
-            path.startsWith("/summary") -> "summary"
-            path.startsWith("/tags") -> "tags"
-            path.startsWith("/media") -> "media"
-            path.startsWith("/extra") -> "extra"
-            else -> return false
-        }
-        return field in locked
+        "remove" -> current.copy(location = null)
+        else -> null
     }
 }
 
-private fun jsonText(value: JsonElement?): String? {
-    return (value as? JsonPrimitive)?.contentOrNull
-}
+private fun jsonText(value: JsonElement?): String? =
+    (value as? JsonPrimitive)?.contentOrNull
 
-private fun jsonStringList(value: JsonElement?): List<String> {
-    return when (value) {
-        is JsonPrimitive -> value.contentOrNull?.let { listOf(it) }.orEmpty()
-        is JsonArray -> value.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
-        is JsonObject -> emptyList()
-        null -> emptyList()
-    }.map { it.trim() }.filter { it.isNotBlank() }
-}
+private fun jsonStringList(
+    value: JsonElement?
+): List<String> = when (value) {
+    is JsonPrimitive -> value.contentOrNull?.let { listOf(it) }.orEmpty()
+    is JsonArray -> value.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+    is JsonObject -> emptyList()
+    null -> emptyList()
+}.map { it.trim() }.filter { it.isNotBlank() }
