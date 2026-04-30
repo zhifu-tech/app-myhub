@@ -130,7 +130,7 @@ private fun MediaGridTile(
     val imageModel = item.displayImageModel()
     Box(
         modifier = Modifier
-            .clip(shape)
+            .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
