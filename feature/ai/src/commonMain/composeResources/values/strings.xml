@@ -259,4 +259,5 @@
   <string name="feature_ai_preview_continue_hint">Continue adding your thoughts…</string>
   <string name="feature_ai_preview_continue_edit">Continue editing</string>
   <string name="feature_ai_preview_button_label">Preview</string>
+  <string name="feature_ai_msg_copied">Message copied</string>
 </resources>

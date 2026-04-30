@@ -201,4 +201,5 @@
   <string name="feature_ai_preview_continue_hint">继续补充你的想法...</string>
   <string name="feature_ai_preview_continue_edit">继续编辑</string>
   <string name="feature_ai_preview_button_label">预览</string>
+  <string name="feature_ai_msg_copied">消息已复制</string>
 </resources>

@@ -12,7 +12,6 @@ import tech.zhifu.app.myhub.datastore.model.domain.location
 import tech.zhifu.app.myhub.datastore.model.domain.source
 import tech.zhifu.app.myhub.datastore.model.domain.tags
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
-import tech.zhifu.app.myhub.logger.debug
 import tech.zhifu.app.myhub.logger.error
 import tech.zhifu.app.myhub.logger.logger
 
@@ -114,7 +113,6 @@ class LocalCardDataSourceImpl(
             }
 
             orderByTitle -> {
-                logger.debug { "orderByTitle hasCursor=$cursorCardId, cursorTitle=$cursorTitle" }
                 val hasCursor = cursorCardId != null && cursorTitle != null
                 if (normalizedQuery != null) {
                     if (hasCursor) {

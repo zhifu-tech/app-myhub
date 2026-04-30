@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,21 +13,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.content.item.action.ActionComponents
 import tech.zhifu.app.myhub.feature.ai.content.item.action.EditFieldPill
 import tech.zhifu.app.myhub.feature.ai.content.text
 import tech.zhifu.app.myhub.feature.ai.model.Message
+import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_copied
+import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
+import tech.zhifu.app.myhub.ui.platform.copyText
 
 @Composable
 fun AssistantMessageItem(
@@ -63,6 +73,12 @@ fun AssistantMessageItem(
         else -> return
     }
 
+    val messageText = message.text()
+    val clipboard = LocalClipboard.current
+    val snackbarState = LocalSnackbarState.current
+    val coroutineScope = rememberCoroutineScope()
+    val copiedMessage = stringResource(Res.string.feature_ai_msg_copied)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,14 +105,26 @@ fun AssistantMessageItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = { },
+                        onLongClick = {
+                            if (messageText.isBlank()) return@combinedClickable
+                            coroutineScope.launch {
+                                clipboard.copyText(messageText)
+                                snackbarState.showSnackbar(
+                                    message = copiedMessage,
+                                    duration = SnackbarDuration.Short,
+                                )
+                            }
+                        }
+                    )
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 message.editingField?.let { field ->
                     EditFieldPill(field = field)
                 }
-                message.text()
-                    .trim()
+                messageText
                     .takeIf { it.isNotBlank() }
                     ?.let { content ->
                         Text(

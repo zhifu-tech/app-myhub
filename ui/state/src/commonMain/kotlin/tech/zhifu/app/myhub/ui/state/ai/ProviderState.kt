@@ -13,7 +13,8 @@ interface ProviderState {
 @Serializable
 data class ProviderRoutingConfig(
     val mode: ProviderMode = ProviderMode.DISABLED,
-    val directEndpoint: String = "http://192.168.0.154:11434",
+//    val directEndpoint: String = "http://192.168.0.154:11434",
+    val directEndpoint: String = "http://127.0.0.1:11434",
     val directModel: String = "qwen3:0.6b",
     val directVisionModel: String = "qwen3-vl:2b",
 //    val directImageModel: String = "gpt-image-1.5",

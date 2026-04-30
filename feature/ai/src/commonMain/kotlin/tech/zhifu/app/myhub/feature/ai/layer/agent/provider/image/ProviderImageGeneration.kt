@@ -1,5 +1,8 @@
 package tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ProviderImageGenerationRequest(
     val prompt: String,
     val language: String,
@@ -8,6 +11,7 @@ data class ProviderImageGenerationRequest(
     val quality: String = "medium",
 )
 
+@Serializable
 data class ProviderImageGenerationProgress(
     val stage: Stage,
     val completed: Int? = null,
@@ -21,6 +25,7 @@ data class ProviderImageGenerationProgress(
     }
 }
 
+@Serializable
 data class ProviderGeneratedImage(
     val bytes: ByteArray,
     val mimeType: String = "image/png",
@@ -47,6 +52,7 @@ data class ProviderGeneratedImage(
     }
 }
 
+@Serializable
 sealed interface ProviderImageGenerationResult {
     data class Success(
         val image: ProviderGeneratedImage,
@@ -58,6 +64,7 @@ sealed interface ProviderImageGenerationResult {
     ) : ProviderImageGenerationResult
 }
 
+@Serializable
 enum class ProviderImageGenerationError {
     CONFIG,
     AUTH,

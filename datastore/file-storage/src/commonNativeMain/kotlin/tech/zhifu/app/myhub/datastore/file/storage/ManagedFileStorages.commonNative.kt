@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.datastore.file.storage
 
 import io.github.vinceglb.filekit.absolutePath
+import io.ktor.http.decodeURLPart
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 
@@ -11,27 +12,22 @@ private val nativeStorageJson = Json {
     encodeDefaults = true
 }
 
-internal fun normalizeKey(
-    key: String,
-): String = key.trim().trim('/')
+internal fun String.normalize(): String = this.trim().trim('/')
 
-internal fun encodeNativeStorageHandle(
-    handle: NativeStorageHandle,
-): String = NATIVE_HANDLE_PREFIX + Base64.UrlSafe.encode(
-    source = nativeStorageJson
-        .encodeToString(
-            serializer = NativeStorageHandle.serializer(),
-            value = handle
-        )
-        .encodeToByteArray()
-)
+internal fun NativeStorageHandle.encodeToString(): String =
+    NATIVE_HANDLE_PREFIX + Base64.UrlSafe.encode(
+        source = nativeStorageJson
+            .encodeToString(
+                serializer = NativeStorageHandle.serializer(),
+                value = this
+            )
+            .encodeToByteArray()
+    )
 
-internal fun decodeNativeStorageHandle(
-    raw: String,
-): NativeStorageHandle? {
-    if (!raw.startsWith(NATIVE_HANDLE_PREFIX)) return null
+internal fun String.decodeToNativeStorageHandle(): NativeStorageHandle? {
+    if (!this.startsWith(NATIVE_HANDLE_PREFIX)) return null
     return runCatching {
-        val payload = raw.removePrefix(NATIVE_HANDLE_PREFIX)
+        val payload = this@decodeToNativeStorageHandle.removePrefix(NATIVE_HANDLE_PREFIX)
         val jsonText = Base64.UrlSafe.decode(payload).decodeToString()
         nativeStorageJson.decodeFromString(
             deserializer = NativeStorageHandle.serializer(),
@@ -43,7 +39,8 @@ internal fun decodeNativeStorageHandle(
 internal fun nativePrivateKeyFromAccessUrl(
     accessUrl: String,
 ): String? {
-    val normalized = accessUrl.removePrefix("file://").trim()
+    val normalized = accessUrl
+        .removePrefix("file://").decodeURLPart().trim()
     if (normalized.isBlank()) return null
     val rootPath = platformManagedAppDataDir().absolutePath().trimEnd('/')
     val withSlash = "$rootPath/"

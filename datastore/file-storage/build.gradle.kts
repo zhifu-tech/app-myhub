@@ -16,7 +16,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.logger)
+
             implementation(libs.filekit.core)
+            implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
         }

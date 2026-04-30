@@ -1,6 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,20 +13,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
@@ -36,12 +41,21 @@ import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.model.displayName
 import tech.zhifu.app.myhub.feature.ai.model.isVideo
 import tech.zhifu.app.myhub.feature.ai.resources.Res
+import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_copied
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_user_badge
+import tech.zhifu.app.myhub.ui.design.util.LocalSnackbarState
+import tech.zhifu.app.myhub.ui.platform.copyText
 
 @Composable
 fun MessageUserItem(
     message: Message
 ) {
+    val clipboard = LocalClipboard.current
+    val snackbarState = LocalSnackbarState.current
+    val coroutineScope = rememberCoroutineScope()
+    val copyText = message.text().trim()
+    val copiedMessage = stringResource(Res.string.feature_ai_msg_copied)
+
     var mediaInitialIndex by remember(message.id, message.mediaAssets) {
         mutableStateOf<Int?>(null)
     }
@@ -74,7 +88,20 @@ fun MessageUserItem(
             shadowElevation = 2.dp,
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .combinedClickable(
+                        onClick = { },
+                        onLongClick = {
+                            coroutineScope.launch {
+                                clipboard.copyText(copyText)
+                                snackbarState.showSnackbar(
+                                    message = copiedMessage,
+                                    duration = SnackbarDuration.Short,
+                                )
+                            }
+                        }
+                    )
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(

@@ -13,6 +13,7 @@ import io.github.vinceglb.filekit.parent
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.startAccessingSecurityScopedResource
 import io.github.vinceglb.filekit.stopAccessingSecurityScopedResource
+import io.ktor.http.decodeURLPart
 import tech.zhifu.app.myhub.datastore.file.storage.createPlatformPrivateStorageHandle
 import tech.zhifu.app.myhub.datastore.file.storage.extractPlatformPrivateStorageKeyFromStorageHandle
 import tech.zhifu.app.myhub.datastore.file.storage.resolveStorageHandleToAccessUrl
@@ -192,4 +193,8 @@ private suspend fun <T> PlatformFile.withScopedAccessSuspend(
 private suspend fun normalizeAccessUrl(accessUrl: String): String =
     resolveStorageHandleToAccessUrl(accessUrl)
         ?.removePrefix("file://")
+        ?.decodeURLPart()
+        ?.trim()
         ?: accessUrl.removePrefix("file://")
+            .decodeURLPart()
+            .trim()

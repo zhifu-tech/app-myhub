@@ -12,17 +12,13 @@ import io.github.vinceglb.filekit.write
 
 actual fun createPlatformPrivateStorageHandle(
     key: String,
-): String = encodeNativeStorageHandle(
-    handle = NativeStorageHandle.ManagedAsset(
-        key = normalizeKey(
-            key
-        )
-    )
-)
+): String = NativeStorageHandle.ManagedAsset(
+    key = key.normalize()
+).encodeToString()
 
 actual fun extractPlatformPrivateStorageKeyFromStorageHandle(
     storageHandle: String,
-): String? = decodeNativeStorageHandle(storageHandle)
+): String? = storageHandle.decodeToNativeStorageHandle()
     ?.let { handle ->
         when (handle) {
             is NativeStorageHandle.ManagedAsset -> handle.key
@@ -45,7 +41,7 @@ actual suspend fun writePlatformPrivateStorageBytes(
     bytes: ByteArray,
     mimeType: String,
 ): String? {
-    val normalizedKey = normalizeKey(key)
+    val normalizedKey = key.normalize()
     if (normalizedKey.isBlank()) return null
     val file = platformManagedAppDataDir() / normalizedKey
     file.parent()?.createDirectories()
@@ -61,7 +57,7 @@ actual suspend fun copyPlatformPrivateStorage(
         sourceStorageHandle
     ) ?: return null
     val normalizedTargetKey =
-        normalizeKey(targetKey)
+        targetKey.normalize()
     if (normalizedTargetKey.isBlank()) return null
     val source = platformManagedAppDataDir() / sourceKey
     if (!source.exists()) return null
