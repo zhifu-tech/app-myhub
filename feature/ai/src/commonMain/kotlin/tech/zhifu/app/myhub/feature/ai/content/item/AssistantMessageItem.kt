@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.animateContentSize
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -105,6 +106,7 @@ fun AssistantMessageItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .animateContentSize()
                     .combinedClickable(
                         onClick = { },
                         onLongClick = {

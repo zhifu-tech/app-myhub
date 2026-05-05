@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +55,7 @@ fun ReasoningTraceCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .animateContentSize()
                 .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
