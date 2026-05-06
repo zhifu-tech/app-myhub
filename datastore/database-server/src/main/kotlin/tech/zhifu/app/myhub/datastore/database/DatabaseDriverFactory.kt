@@ -8,17 +8,13 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 //import tech.zhifu.app.myhub.datastore.database.manage.DatabaseManager
 import java.io.File
 
-/**
- * 数据库驱动工厂（服务端）
- * 支持 SQLite 和 PostgreSQL
- */
-class DatabaseDriverFactory(private val config: DatabaseConfig) {
+class DatabaseDriverFactory(
+    private val config: DatabaseConfig
+) {
 
-    fun createDriver(): SqlDriver {
-        return when (config.type) {
-            DatabaseType.SQLITE -> createSqliteDriver()
-            DatabaseType.POSTGRESQL -> createPostgresDriver()
-        }
+    fun createDriver(): SqlDriver = when (config.type) {
+        DatabaseType.SQLITE -> createSqliteDriver()
+        DatabaseType.POSTGRESQL -> createPostgresDriver()
     }
 
     private fun createSqliteDriver(): SqlDriver {
@@ -38,15 +34,6 @@ class DatabaseDriverFactory(private val config: DatabaseConfig) {
         if (!databaseExists) {
             // 数据库文件不存在，创建新数据库和表
             MyHubDatabase.Schema.synchronous().create(driver)
-
-//            // 加载初始数据
-//            val databaseManager = GlobalContext.get().get<DatabaseManager>()
-//            runBlocking {
-//                databaseManager.loadAllData(
-//                    resourcePath = "database/init",
-//                    clearBeforeLoad = false
-//                )
-//            }
         }
 
         // 启用外键约束

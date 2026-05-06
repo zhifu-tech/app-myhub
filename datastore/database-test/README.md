@@ -7,19 +7,6 @@
 - ✅ **测试数据库创建**：为每个测试用例提供独立的测试数据库实例
 - ✅ **跨平台支持**：支持所有平台（Android、iOS、JVM、JS、WASM）
 - ✅ **自动清理**：测试结束后自动清理数据库数据（通过关闭 driver 或使用唯一名称）
-- ✅ **外键约束**：自动启用外键约束以支持级联删除等操作
-- ✅ **内存数据库**：所有平台都使用内存数据库，不会持久化数据
-- ✅ **测试隔离**：iOS 平台使用唯一的内存数据库名称确保测试隔离
-- ⚠️ **WASM 支持**：WASM 平台数据库测试会自动跳过（由于 JS interop 限制）
-- ✅ **平台特定实现**：JS 和 WASM 分别实现（webMain 有访问限制）
-
-## 🎯 支持的平台
-
-- **Android** - Android 平台（使用 JdbcSqliteDriver）
-- **iOS** - iOS 平台（使用 NativeSqliteDriver）
-- **JVM** - 桌面应用（使用 JdbcSqliteDriver）
-- **JS** - Web 应用（使用 WebWorkerDriver）
-- **WASM** - Web 应用（数据库测试自动跳过，推荐使用 JS 平台）
 
 ## 📁 模块结构
 
@@ -64,12 +51,12 @@ datastore/database-test/src/
 ```kotlin
 @Test
 fun `test insert card`() = runDatabaseTest { database ->
-    val dataSource = LocalCardDataSourceImpl(database)
+        val dataSource = LocalCardDataSourceImpl(database)
 
-    // 测试代码...
-    val card = dataSource.getCardById("card-1")
-    assertEquals("Test Content", card?.content)
-}
+        // 测试代码...
+        val card = dataSource.getCardById("card-1")
+        assertEquals("Test Content", card?.content)
+    }
 ```
 
 ### createTestDatabase
@@ -79,13 +66,13 @@ fun `test insert card`() = runDatabaseTest { database ->
 ```kotlin
 @Test
 fun `test custom database setup`() = runTest {
-    val database = createTestDatabase()
+        val database = createTestDatabase()
 
-    // 自定义测试逻辑...
+        // 自定义测试逻辑...
 
-    // 手动清理
-    destroyTestDatabase(database)
-}
+        // 手动清理
+        destroyTestDatabase(database)
+    }
 ```
 
 ### destroyTestDatabase
@@ -230,15 +217,15 @@ class CardDataSourceTest {
 ```kotlin
 @Test
 fun `test transaction rollback`() = runDatabaseTest { database ->
-    database.transaction {
-        database.cardQueries.insertCard(...)
-        throw RuntimeException("Test rollback")
-    }
+        database.transaction {
+            database.cardQueries.insertCard(...)
+            throw RuntimeException("Test rollback")
+        }
 
-    // 验证数据已回滚
-    val result = database.cardQueries.selectById("card-1").awaitAsOneOrNull()
-    assertEquals(null, result)
-}
+        // 验证数据已回滚
+        val result = database.cardQueries.selectById("card-1").awaitAsOneOrNull()
+        assertEquals(null, result)
+    }
 ```
 
 ### 测试外键约束
@@ -246,14 +233,14 @@ fun `test transaction rollback`() = runDatabaseTest { database ->
 ```kotlin
 @Test
 fun `test foreign key constraints`() = runDatabaseTest { database ->
-    // 创建用户
-    database.userQueries.insertUser(...)
+        // 创建用户
+        database.userQueries.insertUser(...)
 
-    // 创建卡片（关联用户）
-    database.cardQueries.insertCard(..., user_id = "user-1")
+        // 创建卡片（关联用户）
+        database.cardQueries.insertCard(..., user_id = "user-1")
 
-    // 验证关联关系
-    val card = database.cardQueries.selectById("card-1", "user-1").awaitAsOneOrNull()
-    assertNotNull(card)
-}
+        // 验证关联关系
+        val card = database.cardQueries.selectById("card-1", "user-1").awaitAsOneOrNull()
+        assertNotNull(card)
+    }
 ```

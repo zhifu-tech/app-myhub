@@ -1,14 +1,15 @@
-# MyHub 数据库模块方案设计
+# MyHub 数据库模块方案设计 v1.0
 
-**方案名称**：Datastore Database Infra v1  
+**方案名称**：Datastore Database Infra v1.0  
 **文档版本**：v1.0  
 **文档类型**：技术方案设计文档  
-**创建日期**：2026-01-20  
-**锁定日期**：2026-01-20  
-**最后更新**：2026-01-20  
+**创建日期**：2026-05-06  
+**最后更新**：2026-05-06  
 **作者**：MyHub Development Team  
 **评审状态**：🟢 通过  
 **方案状态**：🔒 已锁定
+
+**依据文档**：本方案依据当前 `datastore/database` 的实际 Schema 与代码实现整理，不保留历史兼容叙事。
 
 ---
 
@@ -31,10 +32,10 @@
 
 **当前状态**：
 
-- **评审状态**：🟢 通过（文档已通过评审，可以进入实施阶段）
-- **方案状态**：🔒 已锁定 - 此版本已冻结，作为 Datastore Database Infra v1 的基线设计
-- **锁定日期**：2026-01-20
-- **当前进度**：Schema 与查询已实现，作为 v1.0 基线设计
+- **评审状态**：🟢 通过
+- **方案状态**：🔒 已锁定
+- **当前版本**：`v1.0`
+- **当前结论**：`datastore/database` 是 MyHub 的本地数据库基础设施模块，负责 Schema、查询、索引和版本管理
 
 **状态说明**：
 
@@ -46,15 +47,14 @@
     - 🔒 已锁定：方案设计已确定，不允许随意修改
     - 📝 进行中：方案设计正在进行中，可以修改
     - ⏸️ 暂停：方案设计暂时停止，保留当前状态
-- 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
 ## 修改历史
 
-| 版本   | 日期         | 修改内容   | 修改原因 |
-|------|------------|--------|------|
-| v1.0 | 2026-01-20 | 全新方案设计 | 新建   |
+| 版本   | 日期         | 修改内容   | 修改原因          |
+|------|------------|--------|---------------|
+| v1.0 | 2026-05-06 | 初始方案设计 | 基于当前数据库现状重建文档 |
 
 ---
 
@@ -62,27 +62,24 @@
 
 ### 1.1 用户场景
 
-MyHub 进入新阶段后，数据库需要完全按照当前的领域模型与建模原则重建，确保：
-
-1. **事实与主观分离**：Card 作为事实，不承载用户主观状态
-2. **关系驱动**：User × Card、User × Collection 等关系作为独立表表达
-3. **类型扩展**：Card 类型差异通过 Metadata 表扩展
-4. **跨平台一致**：KMP 多平台使用统一 Schema
-5. **类型安全**：使用 SQLDelight 生成类型安全查询
+- MyHub 需要一套统一的本地数据库基础设施
+- 应用需要在多平台共享同一套 Schema 与查询定义
+- 业务模块需要稳定的表结构承载用户、卡片、草稿、媒体和同步数据
+- 数据库设计需要明确职责边界，避免把业务编排混入 Schema 模块
 
 ### 1.2 问题根因
 
-旧 Schema 将事实、主观、派生混合在主表中，导致：
-
-1. 数据语义混乱，难以演进
-2. 用户状态与事实耦合，难以扩展多用户与协作
-3. 类型字段堆叠，导致主表复杂且难维护
+- 如果 Schema、索引、查询定义分散在业务模块中，会导致维护成本升高
+- 如果数据库表职责不清晰，会增加扩展和迁移风险
+- 如果本地存储策略没有收口，平台行为会不一致
 
 ### 1.3 影响范围
 
-- **产品一致性**：模型与产品概念不一致
-- **演进成本**：Schema 变更频繁且风险高
-- **多端一致性**：Schema 难以跨平台统一
+- 本地数据库结构
+- SQLDelight `.sq` 文件
+- 数据库版本号
+- 数据访问调用方
+- 平台私有存储路径
 
 ---
 
@@ -90,22 +87,24 @@ MyHub 进入新阶段后，数据库需要完全按照当前的领域模型与�
 
 ### 2.1 功能目标
 
-- ✅ **事实模型稳定**：Card 表只保留最小事实字段
-- ✅ **主观关系独立**：User × Card / User × Collection 关系独立建表
-- ✅ **类型语义扩展**：每种 Card 类型独立 Metadata 表
-- ✅ **结构与权限分离**：Collection 的 owner 为事实，权限在 user_collection
-- ✅ **索引齐全**：每个表提供最基础索引
-- ✅ **CRUD 完整**：每个表至少提供基础 CRUD 操作
+- 统一承载 MyHub 的本地数据库 Schema
+- 提供一致的表结构和查询定义
+- 支持卡片、草稿、媒体、AI 任务和同步基础设施
+- 保持当前版本号和结构可追踪
 
 ### 2.2 非功能目标
 
-- ✅ **跨平台一致**：所有平台共用 SQLDelight Schema
-- ✅ **可迁移**：版本号清晰，迁移成本低
-- ✅ **可维护**：结构清晰、语义可读
+- 保持 Schema 清晰可维护
+- 保持跨平台一致性
+- 避免业务逻辑侵入数据库模块
+- 让表职责与领域模型尽量一致
 
 ### 2.3 模块特性说明
 
-`datastore/database` 仅负责 **Schema、索引与查询定义**，不包含业务逻辑或平台驱动实现。
+- `datastore/database` 只负责数据库基础设施
+- 不负责平台驱动创建
+- 不负责业务编排
+- 不负责 UI 状态管理
 
 ---
 
@@ -113,16 +112,20 @@ MyHub 进入新阶段后，数据库需要完全按照当前的领域模型与�
 
 ### 3.1 技术选型
 
-#### 3.1.1 数据库 Schema 管理：SQLDelight
+#### 3.1.1 SQLDelight + SQLite
 
-- ✅ KMP 原生支持
-- ✅ 生成类型安全的 Kotlin API
-- ✅ 可维护的版本管理与迁移
+**选择理由**：
 
-#### 3.1.2 数据库引擎：SQLite
+- KMP 统一 Schema 管理
+- 类型安全的查询生成
+- 平台表现稳定
 
-- ✅ 所有平台可用
-- ✅ 轻量稳定，适合本地存储
+#### 3.1.2 版本管理方式
+
+**选择理由**：
+
+- 使用 SQLDelight 的 Schema 版本管理
+- 通过版本号与迁移逻辑保持表结构演进
 
 ---
 
@@ -132,392 +135,154 @@ MyHub 进入新阶段后，数据库需要完全按照当前的领域模型与�
 
 ```text
 datastore/database/
+├── README.md
+├── docs/
+│   └── myhub-datastore-database-infra-v1.0.md
 ├── src/
 │   └── commonMain/
 │       └── sqldelight/
 │           └── tech/zhifu/app/myhub/datastore/database/
-│               ├── card.sq
-│               ├── card_metadata_article.sq
-│               ├── card_metadata_code.sq
-│               ├── card_metadata_idea.sq
-│               ├── card_metadata_quote.sq
-│               ├── card_metadata_todo.sq
-│               ├── card_metadata_word.sq
-│               ├── card_tag.sq
-│               ├── card_template.sq
-│               ├── collection.sq
-│               ├── tag.sq
 │               ├── user.sq
-│               ├── user_card.sq
-│               ├── user_card_type_statistics.sq
-│               ├── user_collection.sq
 │               ├── user_preferences.sq
-│               └── user_statistics.sq
+│               ├── card.sq
+│               ├── user_card.sq
+│               ├── draft_session.sq
+│               ├── bookkeeper.sq
+│               ├── media_asset.sq
+│               ├── ai_job.sq
+│               ├── sync_state.sq
+│               ├── sync_outbox.sq
+│               ├── sync_oplog.sq
+│               └── sync_conflict_log.sq
 └── build.gradle.kts
 ```
 
-### 4.2 数据库 Schema
+### 4.2 核心组件
 
-#### 4.2.1 核心事实与关系表
+#### 4.2.1 user 表
 
-**user 表**：
+- 用户主表
+- 承载用户身份和基础信息
 
-```sql
-CREATE TABLE user (
-    id TEXT PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL UNIQUE,
-    display_name TEXT,
-    avatar_url TEXT,
-    avatar_text TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    status TEXT,
-    last_login_at TEXT
-);
-```
+#### 4.2.2 user_preferences 表
 
-**user_preferences 表**：
+- 用户偏好设置
+- 承载界面和行为偏好
 
-```sql
-CREATE TABLE user_preferences (
-    user_id TEXT PRIMARY KEY NOT NULL,
-    theme TEXT NOT NULL DEFAULT 'dark',
-    language TEXT NOT NULL DEFAULT 'en',
-    default_card_type TEXT,
-    auto_sync INTEGER NOT NULL DEFAULT 1,
-    sync_interval INTEGER NOT NULL DEFAULT 3600000,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-);
-```
+#### 4.2.3 card 表
 
-**card 表**：
+- 卡片事实表
+- 承载核心业务对象
 
-```sql
-CREATE TABLE card (
-    id TEXT PRIMARY KEY NOT NULL,
-    type TEXT NOT NULL,
-    title TEXT,
-    content TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-);
-```
+#### 4.2.4 user_card 表
 
-**user_card 表（主观关系）**：
+- 用户与卡片关系表
+- 承载用户视角下的主观关系
 
-```sql
-CREATE TABLE user_card (
-    user_id TEXT NOT NULL,
-    card_id TEXT NOT NULL,
-    is_favorite INTEGER NOT NULL DEFAULT 0,
-    last_reviewed_at TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    PRIMARY KEY (user_id, card_id),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
+#### 4.2.5 draft_session 表
 
-**collection 表（结构事实）**：
+- 草稿会话恢复
+- 承载草稿恢复相关状态
 
-```sql
-CREATE TABLE collection (
-    id TEXT PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    topic TEXT,
-    description TEXT,
-    user_id TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-);
-```
+#### 4.2.6 bookkeeper 表
 
-**user_collection 表（权限关系）**：
+- 本地失败记录
+- 承载重试或回溯需要的持久化状态
 
-```sql
-CREATE TABLE user_collection (
-    user_id TEXT NOT NULL,
-    collection_id TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'owner',
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (user_id, collection_id),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (collection_id) REFERENCES collection(id) ON DELETE CASCADE
-);
-```
+#### 4.2.7 media_asset 表
 
-**tag 表**：
+- 媒体资产索引
+- 承载本地媒体与资源引用
 
-```sql
-CREATE TABLE tag (
-    id TEXT PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    color TEXT,
-    description TEXT,
-    user_id TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    card_count INTEGER NOT NULL DEFAULT 0,
-    UNIQUE(name, user_id)
-);
-```
+#### 4.2.8 ai_job 表
 
-**card_tag 表（多对多）**：
+- AI 任务记录
+- 承载 AI 处理任务状态
 
-```sql
-CREATE TABLE card_tag (
-    card_id TEXT NOT NULL,
-    tag_id TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (card_id, tag_id),
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
-);
-```
+#### 4.2.9 同步基础设施表
 
-**card_template 表**：
-
-```sql
-CREATE TABLE card_template (
-    id TEXT PRIMARY KEY NOT NULL,
-    type TEXT NOT NULL,
-    title TEXT,
-    content TEXT,
-    description TEXT,
-    created_at TEXT NOT NULL
-);
-```
-
-#### 4.2.2 Metadata 表（按类型拆分）
-
-**card_metadata_article**：
-
-```sql
-CREATE TABLE card_metadata_article (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    url TEXT NOT NULL,
-    summary TEXT,
-    cover_image_url TEXT,
-    author TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**card_metadata_code**：
-
-```sql
-CREATE TABLE card_metadata_code (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    language TEXT NOT NULL,
-    snippet TEXT NOT NULL,
-    description TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**card_metadata_idea**：
-
-```sql
-CREATE TABLE card_metadata_idea (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    priority TEXT,
-    status TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**card_metadata_quote**：
-
-```sql
-CREATE TABLE card_metadata_quote (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    author TEXT,
-    category TEXT,
-    source TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**card_metadata_todo**：
-
-```sql
-CREATE TABLE card_metadata_todo (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
-    priority TEXT,
-    due_at TEXT,
-    completed_at TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-**card_metadata_word**：
-
-```sql
-CREATE TABLE card_metadata_word (
-    card_id TEXT PRIMARY KEY NOT NULL,
-    pronunciation TEXT,
-    definition TEXT NOT NULL,
-    example TEXT,
-    FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
-);
-```
-
-#### 4.2.3 派生与统计表
-
-**user_statistics 表**：
-
-```sql
-CREATE TABLE user_statistics (
-    user_id TEXT PRIMARY KEY NOT NULL,
-    total_cards INTEGER NOT NULL DEFAULT 0,
-    favorite_cards INTEGER NOT NULL DEFAULT 0,
-    recent_edits INTEGER NOT NULL DEFAULT 0,
-    last_sync_at TEXT,
-    updated_at TEXT NOT NULL
-);
-```
-
-**user_card_type_statistics 表**：
-
-```sql
-CREATE TABLE user_card_type_statistics (
-    card_type TEXT NOT NULL,
-    count INTEGER NOT NULL DEFAULT 0,
-    user_id TEXT NOT NULL DEFAULT '',
-    PRIMARY KEY (user_id, card_type)
-);
-```
-
-#### 4.2.4 索引设计
-
-索引原则：每个表至少提供 **主键/高频过滤字段** 的索引，包含但不限于：
-
-```sql
--- card
-CREATE INDEX idx_card_type ON card(type);
-CREATE INDEX idx_card_created_at ON card(created_at);
-CREATE INDEX idx_card_updated_at ON card(updated_at);
-
--- user_card
-CREATE INDEX idx_user_card_user_id ON user_card(user_id);
-CREATE INDEX idx_user_card_card_id ON user_card(card_id);
-CREATE INDEX idx_user_card_updated_at ON user_card(user_id, updated_at);
-
--- collection
-CREATE INDEX idx_collection_user_id ON collection(user_id);
-CREATE INDEX idx_collection_user_name ON collection(user_id, name);
-
--- tag
-CREATE INDEX idx_tag_user_id ON tag(user_id);
-CREATE INDEX idx_tag_user_name ON tag(user_id, name);
-
--- card_tag
-CREATE INDEX idx_card_tag_card_id ON card_tag(card_id);
-CREATE INDEX idx_card_tag_tag_id ON card_tag(tag_id);
-
--- metadata
-CREATE INDEX idx_card_metadata_article_url ON card_metadata_article(url);
-CREATE INDEX idx_card_metadata_code_language ON card_metadata_code(language);
-CREATE INDEX idx_card_metadata_idea_status ON card_metadata_idea(status);
-CREATE INDEX idx_card_metadata_todo_status ON card_metadata_todo(status);
-```
-
-### 4.3 版本管理
-
-#### 4.3.1 版本历史
-
-- **v1.0**：当前基线版本，完整 Schema 与 CRUD 定义
-
-#### 4.3.2 迁移机制
-
-v1.0 为全新基线，不承载历史迁移。后续版本通过 `.sqm` 文件进行增量迁移。
-
-### 4.4 查询接口
-
-每个表提供基础 CRUD，命名统一为：
-
-```sql
--- select / insert / update / delete
-selectCardById:
-SELECT * FROM card WHERE id = ?;
-
-insertCard:
-INSERT OR REPLACE INTO card (id, type, title, content, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?);
-```
-
-关系表与统计表提供按主键与外键的查询与删除，例如：
-
-```sql
-selectUserCardById:
-SELECT * FROM user_card WHERE user_id = ? AND card_id = ?;
-
-deleteUserCardsByUserId:
-DELETE FROM user_card WHERE user_id = ?;
-```
+- `sync_state`
+- `sync_outbox`
+- `sync_oplog`
+- `sync_conflict_log`
 
 ---
 
 ## 5. 实现细节
 
-### 5.1 SQLDelight 配置
+### 5.1 当前数据库版本
 
-```kotlin
-sqldelight {
-    databases {
-        create("MyHubDatabase") {
-            packageName.set("tech.zhifu.app.myhub.datastore.database")
-            generateAsync.set(true)
-            version = 1
-        }
-    }
-    linkSqlite = true
-}
-```
+- 数据库名：`MyHubDatabase`
+- 版本号：`1`
+- Schema 位置：`src/commonMain/sqldelight/tech/zhifu/app/myhub/datastore/database`
 
-### 5.2 版本管理配置
+### 5.2 表清单
 
-```kotlin
-sqldelight {
-    databases {
-        create("MyHubDatabase") {
-            version = 1  // v1.0 基线
-        }
-    }
-}
-```
+#### 账号与偏好
 
-### 5.3 领域原则落地说明
+- `user`
+- `user_preferences`
 
-- **Card 是事实**：Card 表不包含任何用户主观字段
-- **User 是视角**：主观状态统一放在 user_card
-- **Collection 是结构**：结构事实在 collection，权限在 user_collection
-- **Tag 是语义**：Tag 用户私有，跨用户不共享语义
+#### 卡片与草稿
+
+- `card`
+- `user_card`
+- `draft_session`
+- `bookkeeper`
+
+#### 媒体与 AI
+
+- `media_asset`
+- `ai_job`
+
+#### 同步基础设施
+
+- `sync_state`
+- `sync_outbox`
+- `sync_oplog`
+- `sync_conflict_log`
+
+### 5.3 设计约束
+
+- `Card` 是事实
+- `Collection` 是结构
+- `Tag` 是语义
+- `User` 是视角
+- `user_card` 是用户对内容的主观关系
+- `user_collection` 是用户在集合中的权限关系
+- `card_tag` 是内容与用户语义的附着关系
+- 派生统计表可以删、可以重建，不参与核心业务判断
+
+### 5.4 存储策略
+
+- Android / JVM / Desktop 通常使用 `FileKit.filesDir/app-data`
+- iOS / macOS Designed for iPad 使用**应用沙盒容器**
+- 数据库文件、草稿和媒体文件都属于**本地私有存储**
+
+### 5.5 维护方式
+
+- 新增或修改表结构时，必须同步更新：
+    - `.sq` 文件
+    - `build.gradle.kts` 版本号
+    - 调用方代码
+- 所有 Schema 和查询都通过 SQLDelight 管理
+- 当前模块不包含业务编排逻辑
 
 ---
 
 ## 6. 实施计划
 
-### 6.1 实施阶段
+### 6.1 当前状态
 
-#### 阶段 1：Schema 定义（已完成）
+- 当前 Schema 已稳定
+- 当前文档已与代码对齐
 
-- ✅ 事实表、关系表、元数据表、统计表
+### 6.2 后续调整原则
 
-#### 阶段 2：索引与 CRUD（已完成）
-
-- ✅ 所有表补齐索引
-- ✅ 所有表提供基础 CRUD
-
-### 6.2 里程碑
-
-| 里程碑              | 目标日期       | 状态    |
-|------------------|------------|-------|
-| v1.0 Schema 完成   | 2026-01-20 | ✅ 已完成 |
-| v1.0 索引与 CRUD 完成 | 2026-01-20 | ✅ 已完成 |
+- 优先更新 `.sq` 文件
+- 再同步版本号
+- 再同步调用方
+- 最后同步文档
 
 ---
 
@@ -525,19 +290,18 @@ sqldelight {
 
 ### 7.1 技术风险
 
-#### 7.1.1 迁移风险
+- Schema 变更可能影响现有数据
+- 平台存储路径差异可能造成调试混乱
 
-**风险描述**：后续版本增量迁移可能导致结构兼容问题  
-**影响**：中  
-**缓解措施**：小步迁移、自动化测试、保持向后兼容
+### 7.2 风险缓解
 
-### 7.2 维护风险
+- 通过版本号和迁移逻辑管理变化
+- 统一平台私有存储策略
 
-#### 7.2.1 语义漂移风险
+### 7.3 边界条件
 
-**风险描述**：开发中绕过建模原则添加字段导致语义漂移  
-**影响**：中  
-**缓解措施**：文档约束、评审机制、强制 Schema 审核
+- 不在数据库模块处理驱动创建
+- 不在数据库模块处理业务编排
 
 ---
 
@@ -545,17 +309,9 @@ sqldelight {
 
 ### 8.1 相关文档
 
-- [MyHub 领域模型图（Card / Collection / User / Tag）](./myhub_领域模型图（card_collection_user_tag）!!!.md)
-- [MyHub 数据建模原则 v1](./myhub_数据建模原则_v1.0.md)
-- [SQLDelight 官方文档](https://cashapp.github.io/sqldelight/)
+- [数据库模块入口](../README.md)
+- [MyHub 数据存储套件概览](../../README.md)
 
-### 8.2 术语表
+### 8.2 代码入口
 
-| 术语         | 说明                                   |
-|------------|--------------------------------------|
-| Schema     | 数据库表结构定义                             |
-| Metadata   | 按 Card 类型拆分的语义扩展表                    |
-| 关系表        | 用于表达 User × Card / User × Collection |
-| 派生表        | 可重建统计表，不作为事实来源                       |
-| 迁移文件（.sqm） | SQLDelight 版本迁移脚本                    |
-| 查询文件（.sq）  | SQLDelight 查询与表结构定义文件                |
+- `src/commonMain/sqldelight/tech/zhifu/app/myhub/datastore/database`

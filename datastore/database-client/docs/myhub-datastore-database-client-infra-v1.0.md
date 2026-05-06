@@ -4,8 +4,7 @@
 **文档版本**：v1.0  
 **文档类型**：技术方案设计文档  
 **创建日期**：2026-01-13  
-**锁定日期**：2026-01-13  
-**最后更新**：2026-01-13  
+**最后更新**：2026-05-06  
 **作者**：MyHub Development Team  
 **评审状态**：🟢 通过  
 **方案状态**：🔒 已锁定
@@ -52,11 +51,12 @@
 
 ## 修改历史
 
-| 版本   | 日期         | 修改内容            | 修改原因      |
-|------|------------|-----------------|-----------|
-| v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
-| v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
-| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
+| 版本   | 日期         | 修改内容                    | 修改原因      |
+|------|------------|-------------------------|-----------|
+| v1.0 | 2026-01-13 | 初始方案设计                  | 新建        |
+| v1.0 | 2026-01-13 | 完成架构设计文档                | 完善文档      |
+| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定         | 状态更新：评审通过 |
+| v1.0 | 2026-05-06 | 按当前代码现状重写模块职责、平台实现和实现细节 | 文档与代码对齐   |
 
 ---
 
@@ -64,7 +64,7 @@
 
 ### 1.1 用户场景
 
-在 MyHub 应用的开发和运行过程中，需要创建和管理数据库驱动。典型的场景包括：
+MyHub 是一个 KMP 应用，需要在多个平台上使用同一套数据库 schema
 
 1. **数据库驱动创建**：不同平台需要不同的数据库驱动实现
 2. **依赖注入集成**：需要与 Koin 等 DI 框架集成
@@ -156,23 +156,23 @@
 
 ```text
 datastore/database-client/
-├── src/
-│   ├── commonMain/
-│   │   └── kotlin/tech/zhifu/app/myhub/datastore/database/
-│   │       ├── DatabaseDriverFactory.kt      # expect 接口定义
-│   │       └── di/
-│   │           └── DatabaseModule.kt          # Koin DI 模块
-│   ├── androidMain/
-│   │   └── kotlin/.../DatabaseDriverFactory.android.kt
-│   ├── iosMain/
-│   │   └── kotlin/.../DatabaseDriverFactory.ios.kt
-│   ├── jvmMain/
-│   │   └── kotlin/.../DatabaseDriverFactory.jvm.kt
-│   ├── jsMain/
-│   │   └── kotlin/.../DatabaseDriverFactory.js.kt
-│   └── wasmJsMain/
-│       └── kotlin/.../DatabaseDriverFactory.wasmJs.kt
-└── build.gradle.kts
+├── README.md
+├── build.gradle.kts
+├── docs/
+│   └── myhub-datastore-database-client-infra-v*.md
+└── src/
+    ├── commonMain/
+    │   └── kotlin/tech/zhifu/app/myhub/datastore/database/
+    │       ├── DatabaseDriverFactory.kt
+    │       └── di/DatabaseModule.kt
+    ├── androidMain/
+    │   └── kotlin/.../DatabaseDriverFactory.android.kt
+    ├── iosMain/
+    │   └── kotlin/.../DatabaseDriverFactory.ios.kt
+    ├── jvmMain/
+    │   └── kotlin/.../DatabaseDriverFactory.jvm.kt
+    └── webMain/
+        └── kotlin/.../DatabaseDriverFactory.web.kt
 ```
 
 ### 4.2 核心组件
@@ -194,10 +194,7 @@ expect class DatabaseDriverFactory {
 
 **平台实现**：
 
-- **Android**：使用 `AndroidSqliteDriver`，需要 `Context` 参数
-- **iOS**：使用 `NativeSqliteDriver`，数据库存储在应用沙盒目录
-- **JVM**：使用 `JdbcSqliteDriver`，数据库存储在 `FileKit.filesDir/app-data/myhub.db`
-- **JS/WASM**：使用 `WebWorkerDriver`，在 Web Worker 中运行
+## 5. 实现细节
 
 #### 4.2.2 DatabaseModule（Koin 模块）
 
@@ -220,149 +217,52 @@ val databaseModule = module {
 
 ### 4.3 平台特定实现
 
-#### 4.3.1 Android 实现
+#### 4.3.1 Android
 
-**特点**：
+- `src/androidMain/kotlin/tech/zhifu/app/myhub/datastore/database/DatabaseDriverFactory.android.kt`
+
+实现：
 
 - 使用 `AndroidSqliteDriver`
-- 需要 `Context` 参数
-- 数据库存储在应用私有目录
 
-**实现**：
+#### 4.3.2 iOS
 
-```kotlin
-actual class DatabaseDriverFactory(private val context: Context) {
-    actual fun createDriver(): SqlDriver {
-        return AndroidSqliteDriver(
-            schema = MyHubDatabase.Schema.synchronous(),
-            context = context,
-            name = "myhub.db"
-        )
-    }
-}
-```
+文件：
 
-#### 4.3.2 iOS 实现
+- `src/iosMain/kotlin/tech/zhifu/app/myhub/datastore/database/DatabaseDriverFactory.ios.kt`
 
-**特点**：
+实现：
 
 - 使用 `NativeSqliteDriver`
-- 数据库存储在应用沙盒目录
-- 无需额外参数
 
-#### 4.3.3 JVM 实现
+#### 4.3.3 JVM
 
-**特点**：
+文件：
+
+- `src/jvmMain/kotlin/tech/zhifu/app/myhub/datastore/database/DatabaseDriverFactory.jvm.kt`
+
+实现：
 
 - 使用 `JdbcSqliteDriver`
-- 数据库存储在 `FileKit.filesDir/app-data/myhub.db`
-- 自动创建数据库目录
 
-#### 4.3.4 JS/WASM 实现
+### 4.3.4 Web
 
-**特点**：
+文件：
 
-- 使用 `WebWorkerDriver`（`createDefaultWebWorkerDriver()`）
-- 在 Web Worker 中运行 SQL.js
-- 自动初始化数据库架构
-- 自动启用外键约束
+- `src/webMain/kotlin/tech/zhifu/app/myhub/datastore/database/DatabaseDriverFactory.web.kt`
+- `src/webMain/kotlin/tech/zhifu/app/myhub/datastore/database/InitializingDriver.kt`
 
----
+实现：
 
-## 5. 实现细节
-
-### 5.1 数据库驱动创建
-
-**Android**：
-
-```kotlin
-actual class DatabaseDriverFactory(private val context: Context) {
-    actual fun createDriver(): SqlDriver {
-        return AndroidSqliteDriver(
-            schema = MyHubDatabase.Schema.synchronous(),
-            context = context,
-            name = "myhub.db"
-        )
-    }
-}
-```
-
-**JVM**：
-
-```kotlin
-actual class DatabaseDriverFactory {
-    actual fun createDriver(): SqlDriver {
-        val appDataDir = FileKit.filesDir / "app-data"
-        appDataDir.createDirectories()
-        val databasePath = (appDataDir / "myhub.db").path
-        return JdbcSqliteDriver(url = "jdbc:sqlite:$databasePath")
-    }
-}
-```
-
-**JS/WASM**：
-
-```kotlin
-actual class DatabaseDriverFactory {
-    actual fun createDriver(): SqlDriver {
-        val driver = createDefaultWebWorkerDriver()
-        MyHubDatabase.Schema.create(driver)
-        driver.execute(null, "PRAGMA foreign_keys = ON", 0)
-        return driver
-    }
-}
-```
-
-### 5.2 依赖注入配置
-
-**Android**：
-
-```kotlin
-actual fun databaseDriverFactoryModule(): Module = module {
-    single<DatabaseDriverFactory> {
-        DatabaseDriverFactory(get<Context>())
-    }
-}
-```
-
-**其他平台**：
-
-```kotlin
-actual fun databaseDriverFactoryModule(): Module = module {
-    single<DatabaseDriverFactory> {
-        DatabaseDriverFactory()
-    }
-}
-```
-
----
-
-## 6. 实施计划
-
-### 6.1 实施阶段
-
-#### 阶段 1：核心功能实现（已完成）
-
-- ✅ 定义 `DatabaseDriverFactory` 期望类
-- ✅ Android 平台实现
-- ✅ iOS 平台实现
-- ✅ JVM 平台实现
-- ✅ JS 平台实现
-- ✅ WASM 平台实现
-
-#### 阶段 2：依赖注入集成（已完成）
-
-- ✅ `databaseDriverFactoryModule` 实现
-- ✅ `databaseModule` 实现
-- ✅ Koin 集成
-
-### 6.2 里程碑
-
-| 里程碑    | 目标日期       | 状态    |
-|--------|------------|-------|
-| 核心功能完成 | 2026-01-13 | ✅ 已完成 |
-| 平台实现完成 | 2026-01-13 | ✅ 已完成 |
-| 依赖注入完成 | 2026-01-13 | ✅ 已完成 |
+- 使用 `createDefaultWebWorkerDriver()`
+- 使用 `InitializingDriver` 包装 driver
+- 初始化流程执行：
+    - 读取 `PRAGMA user_version`
+    - 检查是否已有用户表
+    - 必要时补齐 `user_version`
+    - 需要时执行 schema create / migrate
+    - 开启 `PRAGMA foreign_keys = ON`
+- 初始化未完成时，所有 query / execute / transaction 都等待完成
 
 ---
 
@@ -370,81 +270,25 @@ actual fun databaseDriverFactoryModule(): Module = module {
 
 ### 7.1 技术风险
 
-#### 7.1.1 Web 平台异步操作风险
+- Web 初始化失败会阻塞数据库可用性
+- JVM 目录创建失败会导致数据库无法创建
+- Android 端 `Context` 注入错误会导致驱动工厂不可用
 
-**风险描述**：Web 平台的数据库操作都是异步的，必须使用 `await` 方法
+### 7.2 风险缓解
 
-**影响**：中
+- Web 初始化失败向上传播
+- JVM 在创建 driver 前先创建目录
+- Android 通过 Koin 显式获取 `Context`
 
-**缓解措施**：
+### 7.3 边界条件
 
-- ✅ 文档说明 Web 平台异步操作要求
-- ✅ 提供示例代码
-- ✅ 编译时检查
-
-#### 7.1.2 Android Context 依赖风险
-
-**风险描述**：Android 平台需要 `Context` 参数，DI 配置需要确保 Context 已注册
-
-**影响**：低
-
-**缓解措施**：
-
-- ✅ 文档说明 Android 平台特殊要求
-- ✅ DI 模块自动处理 Context 依赖
-
-### 7.2 维护风险
-
-#### 7.2.1 平台特定代码维护
-
-**风险描述**：不同平台的实现需要分别维护
-
-**影响**：低
-
-**缓解措施**：
-
-- ✅ 使用 expect/actual 模式统一接口
-- ✅ 充分的测试覆盖
-- ✅ 文档说明平台差异
+- 不在本模块处理业务逻辑
+- 不在本模块处理 schema 迁移策略设计
+- 不在本模块处理数据访问层策略
 
 ---
 
-## 8. 附录
-
-### 8.1 相关文档
-
-- [MyHub 数据库模块方案设计](../datastore-database/docs/myhub-datastore-database-infra-v1.0.md)
-- [MyHub 数据库测试模块方案设计](../datastore-database-test/docs/myhub-datastore-database-test-infra-v1.0.md)
-- [SQLDelight 官方文档](https://cashapp.github.io/sqldelight/)
-
-### 8.2 代码示例
-
-#### 8.2.1 基本使用
-
-```kotlin
-val driverFactory = DatabaseDriverFactory()
-val database = MyHubDatabase(driverFactory.createDriver())
-```
-
-#### 8.2.2 依赖注入使用
-
-```kotlin
-startKoin {
-    modules(
-        databaseModule  // 提供 DatabaseDriverFactory 和 MyHubDatabase
-    )
-}
-
-class MyRepository(
-    private val database: MyHubDatabase
-) {
-    suspend fun getAllCards() {
-        val cards = database.cardQueries.selectAll("user-1").awaitAsList()
-    }
-}
-```
-
-### 8.3 术语表
+## 8. 术语表
 
 | 术语                    | 说明                                          |
 |-----------------------|---------------------------------------------|
@@ -453,7 +297,7 @@ class MyRepository(
 | WebWorkerDriver       | SQLDelight 提供的 Web 平台数据库驱动，在 Web Worker 中运行 |
 | expect/actual         | Kotlin Multiplatform 的跨平台抽象机制               |
 
-### 8.4 常见问题
+## 常见问题
 
 #### Q1: Android 平台为什么需要 Context？
 

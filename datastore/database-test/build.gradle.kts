@@ -45,12 +45,5 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.sqldelight.native)
         }
-
-//        jsMain.dependencies {
-//            implementation(libs.sqldelight.web)
-//            implementation(npm("sql.js", "1.12.0"))
-//            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
-//            implementation(devNpm("copy-webpack-plugin", "9.1.0"))
-//        }
     }
 }

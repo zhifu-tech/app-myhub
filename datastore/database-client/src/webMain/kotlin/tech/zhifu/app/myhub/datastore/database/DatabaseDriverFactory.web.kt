@@ -13,24 +13,21 @@ import kotlinx.coroutines.launch
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/**
- * WASM 平台的数据库驱动工厂实现
- * 使用 WebWorkerDriver 在 Web Worker 中运行 SQL.js
- */
+actual fun databaseDriverFactoryModule(): Module = module {
+    factory<DatabaseDriverFactory> {
+        DatabaseDriverFactory {
+            val driver = createDefaultWebWorkerDriver()
+            val initDeferred = initCompletableDeferred(driver)
 
-actual class DatabaseDriverFactory {
-    actual fun createDriver(): SqlDriver {
-        val driver = createDefaultWebWorkerDriver()
-        val initDeferred = initCompletableDeferred(driver)
-
-        return InitializingDriver(
-            delegate = driver,
-            initDeferred = initDeferred
-        )
+            InitializingDriver(
+                delegate = driver,
+                initDeferred = initDeferred
+            )
+        }
     }
 }
 
-internal fun initCompletableDeferred(driver: SqlDriver): CompletableDeferred<Unit> {
+private fun initCompletableDeferred(driver: SqlDriver): CompletableDeferred<Unit> {
     val initDeferred = CompletableDeferred<Unit>()
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -132,8 +129,3 @@ private suspend fun hasUserTables(driver: SqlDriver): Boolean =
         )
         .await()
 
-actual fun databaseDriverFactoryModule(): Module = module {
-    single<DatabaseDriverFactory> {
-        DatabaseDriverFactory()
-    }
-}

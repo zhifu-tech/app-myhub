@@ -1,16 +1,10 @@
 package tech.zhifu.app.myhub.datastore.database
 
-/**
- * 数据库类型
- */
 enum class DatabaseType {
     SQLITE,
     POSTGRESQL
 }
 
-/**
- * 数据库配置
- */
 data class DatabaseConfig(
     val type: DatabaseType,
     val host: String? = null,
@@ -21,16 +15,11 @@ data class DatabaseConfig(
     val path: String? = null // SQLite 文件路径
 ) {
     companion object {
-        /**
-         * 从环境变量创建数据库配置
-         */
+
         fun fromEnvironment(): DatabaseConfig {
             val dbType = System.getenv("DB_TYPE")?.uppercase() ?: "SQLITE"
-            val type = try {
-                DatabaseType.valueOf(dbType)
-            } catch (e: Exception) {
-                DatabaseType.SQLITE
-            }
+            val type = runCatching { DatabaseType.valueOf(dbType) }
+                .getOrDefault(DatabaseType.SQLITE)
 
             return when (type) {
                 DatabaseType.POSTGRESQL -> DatabaseConfig(
