@@ -15,8 +15,10 @@ set -e
 
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# 项目根目录（scripts 的父目录）
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# 项目根目录（脚本所在目录）
+PROJECT_ROOT="$SCRIPT_DIR"
+# 脚本显示路径
+SCRIPT_PATH="./$(basename "${BASH_SOURCE[0]}")"
 
 # 切换到项目根目录
 cd "$PROJECT_ROOT"
@@ -87,16 +89,18 @@ show_welcome() {
 
 # 显示帮助信息
 show_help() {
+    local script_path="${SCRIPT_PATH:-./run.sh}"
+
     echo -e "${CYAN}MyHub - 统一管理脚本 - 使用帮助${NC}"
     echo ""
     echo -e "${YELLOW}用法:${NC}"
-    echo "  ./scripts/run.sh [command] [options]"
+    echo "  ${script_path} [command] [options]"
     echo ""
     echo -e "${YELLOW}可用命令:${NC}"
     echo ""
     echo -e "  ${GREEN}desktop${NC}             运行 Desktop 应用"
-    echo -e "  ${GREEN}js${NC}                  运行 Web 应用（JavaScript）"
-    echo -e "  ${GREEN}wasmJs${NC}              运行 Web 应用（WebAssembly）"
+    echo -e "  ${GREEN}web${NC}                 运行 Web 应用（Wasm JS）"
+    echo -e "  ${GREEN}wasmJs${NC}              运行 Web 应用（Wasm JS，兼容别名）"
     echo -e "  ${GREEN}android${NC}             构建并安装 Android 应用"
     echo -e "  ${GREEN}ios${NC}                 构建并打开 iOS 项目（自动检测设备）"
     echo -e "  ${GREEN}ios simulator${NC}       构建并打开 iOS 项目（使用模拟器）"
@@ -130,51 +134,54 @@ show_help() {
     echo -e "${YELLOW}完整示例（可直接拷贝执行）:${NC}"
     echo ""
     echo -e "${CYAN}📱 Desktop 应用:${NC}"
-    echo "  ./scripts/run.sh desktop"
-    echo "  ./scripts/run.sh desktop --release"
-    echo "  ./scripts/run.sh desktop -PappEnv=prod -PappTier=premium"
-    echo "  ./scripts/run.sh desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ${script_path} desktop"
+    echo "  ${script_path} desktop --release   # 生成当前系统安装包"
+    echo "  ${script_path} desktop -PappEnv=prod -PappTier=premium"
+    echo "  ${script_path} desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
     echo ""
-    echo -e "${CYAN}🌐 Web 应用 (JavaScript):${NC}"
-    echo "  ./scripts/run.sh js"
-    echo "  ./scripts/run.sh js --release"
-    echo "  ./scripts/run.sh js -PappEnv=prod -PappTier=premium"
-    echo "  ./scripts/run.sh js --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo -e "${CYAN}🌐 Web 应用 (Wasm JS):${NC}"
+    echo "  ${script_path} web"
+    echo "  ${script_path} web --release"
+    echo "  ${script_path} web -PappEnv=prod -PappTier=premium"
+    echo "  ${script_path} web --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ${script_path} wasmJs"
+    echo "  ${script_path} wasmJs --release"
     echo ""
-    echo -e "${CYAN}🌐 Web 应用 (WebAssembly):${NC}"
-    echo "  ./scripts/run.sh wasmJs"
-    echo "  ./scripts/run.sh wasmJs --release"
-    echo "  ./scripts/run.sh wasmJs -PappEnv=prod -PappTier=premium"
-    echo "  ./scripts/run.sh wasmJs --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo -e "${CYAN}🌐 Web 兼容别名:${NC}"
+    echo "  ${script_path} js   # 已映射到 wasmJs"
+    echo "  ${script_path} wasmJs"
+    echo "  ${script_path} wasmJs --release"
+    echo "  ${script_path} wasmJs -PappEnv=prod -PappTier=premium"
+    echo "  ${script_path} wasmJs --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
     echo ""
     echo -e "${CYAN}🤖 Android 应用:${NC}"
-    echo "  ./scripts/run.sh android"
-    echo "  ./scripts/run.sh android --release"
-    echo "  ./scripts/run.sh android -PappEnv=prod -PappTier=premium"
-    echo "  ./scripts/run.sh android --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ${script_path} android"
+    echo "  ${script_path} android --release"
+    echo "  ${script_path} android -PappEnv=prod -PappTier=premium"
+    echo "  ${script_path} android --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
     echo ""
     echo -e "${CYAN}🍎 iOS 应用:${NC}"
-    echo "  ./scripts/run.sh ios"
-    echo "  ./scripts/run.sh ios simulator"
-    echo "  ./scripts/run.sh ios device"
-    echo "  ./scripts/run.sh ios list"
-    echo "  ./scripts/run.sh ios -PappEnv=prod -PappTier=premium"
-    echo "  ./scripts/run.sh ios simulator -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ${script_path} ios"
+    echo "  ${script_path} ios simulator"
+    echo "  ${script_path} ios device"
+    echo "  ${script_path} ios list"
+    echo "  ${script_path} ios -PappEnv=prod -PappTier=premium"
+    echo "  ${script_path} ios simulator -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
     echo ""
     echo -e "${CYAN}📦 CocoaPods 依赖安装:${NC}"
-    echo "  ./scripts/run.sh pod install"
-    echo "  ./scripts/run.sh pod install -PappChannel=googlePlay -PappEnv=dev"
+    echo "  ${script_path} pod install"
+    echo "  ${script_path} pod install -PappChannel=googlePlay -PappEnv=dev"
     echo ""
     echo -e "${CYAN}🖥️  服务器:${NC}"
-    echo "  ./scripts/run.sh server"
-    echo "  ./scripts/run.sh server dev"  # dev -PappEnv=dev -PappTier=free
-    echo "  ./scripts/run.sh server postgres"  # postgres -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
-    echo "  ./scripts/run.sh server docker"  # docker -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+    echo "  ${script_path} server"
+    echo "  ${script_path} server dev"  # dev -PappEnv=dev -PappTier=free
+    echo "  ${script_path} server postgres"  # postgres -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+    echo "  ${script_path} server docker"  # docker -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
     echo ""
     echo -e "${CYAN}🔨 构建和清理:${NC}"
-    echo "  ./scripts/run.sh build"
-    echo "  ./scripts/run.sh build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
-    echo "  ./scripts/run.sh clean"
+    echo "  ${script_path} build"
+    echo "  ${script_path} build -PappEnv=prod -PappTier=premium -PappChannel=googlePlay"
+    echo "  ${script_path} clean"
     echo ""
 }
 
@@ -199,6 +206,38 @@ check_xcode() {
         print_error "未找到 Xcode，请先安装 Xcode"
         exit 1
     fi
+}
+
+# 选择可用的 Java 运行环境，确保 Compose Desktop release 所需的 jpackage 可用
+ensure_java_home() {
+    if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/jpackage" ]; then
+        return 0
+    fi
+
+    local candidates=(
+        "$(/usr/libexec/java_home -v 25 2>/dev/null)"
+        "$(/usr/libexec/java_home -v 21 2>/dev/null)"
+        "$(/usr/libexec/java_home -v 17 2>/dev/null)"
+    )
+
+    for candidate in "${candidates[@]}"; do
+        if [ -n "$candidate" ] && [ -x "$candidate/bin/jpackage" ]; then
+            export JAVA_HOME="$candidate"
+            export PATH="$JAVA_HOME/bin:$PATH"
+            export GRADLE_OPTS="-Dorg.gradle.java.home=$JAVA_HOME ${GRADLE_OPTS:-}"
+            ./gradlew --stop >/dev/null 2>&1 || true
+            print_info "已切换 JAVA_HOME: $JAVA_HOME"
+            return 0
+        fi
+    done
+
+    if command -v jpackage &> /dev/null; then
+        return 0
+    fi
+
+    print_error "未找到包含 jpackage 的可用 JDK"
+    print_info "请安装 JDK 17/21/25，或手动设置 JAVA_HOME"
+    exit 1
 }
 
 # 检查并终止占用端口的进程
@@ -266,9 +305,27 @@ run_desktop() {
     export APP_BUILD_TYPE="$build_type"
     export APP_ENVIRONMENT="$environment"
     export APP_VERSION="$version"
-    
+
     if [ "$build_type" = "release" ]; then
-        ./gradlew :composeApp:runDistributable $gradle_args --args="--release"
+        ./gradlew :composeApp:packageDistributionForCurrentOS $gradle_args
+
+        local normalized_version="$version"
+        if [ "$normalized_version" = "preminum" ]; then
+            normalized_version="premium"
+        fi
+
+        local output_name="MyHub-${environment}-${normalized_version}${channel:+-${channel}}-1.0.0.dmg"
+        local output_dir="composeApp/build/compose/binaries/main/dmg"
+        local source_file="$output_dir/MyHub-1.0.0.dmg"
+        local target_file="$output_dir/$output_name"
+
+        if [ -f "$source_file" ]; then
+            mv -f "$source_file" "$target_file"
+            print_success "安装包已生成: $target_file"
+        else
+            print_warning "未找到预期的安装包文件: $source_file"
+            print_info "请检查 composeApp/build/compose/binaries/main/dmg 目录"
+        fi
     else
         ./gradlew :composeApp:runDistributable $gradle_args
     fi
@@ -276,15 +333,15 @@ run_desktop() {
 
 # 运行 Web 应用
 run_web() {
-    local web_target="${1:-js}"
+    local web_target="${1:-wasmJs}"
     local build_type="${2:-debug}"
     local environment="${3:-dev}"
     local version="${4:-free}"
     local channel="${5:-}"
     
     # 验证 web_target 参数
-    if [ "$web_target" != "js" ] && [ "$web_target" != "wasmJs" ]; then
-        print_error "无效的 webTarget: $web_target，必须是 'js' 或 'wasmJs'"
+    if [ "$web_target" != "wasmJs" ]; then
+        print_error "无效的 webTarget: $web_target，必须是 'web' 或 'wasmJs'"
         exit 1
     fi
     
@@ -303,20 +360,12 @@ run_web() {
     export APP_ENVIRONMENT="$environment"
     export APP_VERSION="$version"
     
-    # 根据 web_target 和 build_type 选择正确的 Gradle 任务
+    # 当前工程仅启用 wasmJs，因此 Web 统一映射到 wasmJs 的 Gradle 任务
     local task_name=""
-    if [ "$web_target" = "wasmJs" ]; then
-        if [ "$build_type" = "release" ]; then
-            task_name="wasmJsBrowserProductionRun"
-        else
-            task_name="wasmJsBrowserDevelopmentRun"
-        fi
+    if [ "$build_type" = "release" ]; then
+        task_name="wasmJsBrowserProductionRun"
     else
-        if [ "$build_type" = "release" ]; then
-            task_name="jsBrowserProductionRun"
-        else
-            task_name="jsBrowserDevelopmentRun"
-        fi
+        task_name="wasmJsBrowserDevelopmentRun"
     fi
     
     ./gradlew :composeApp:${task_name} $gradle_args
@@ -470,9 +519,9 @@ run_ios() {
         list_ios_devices
         echo ""
         print_info "💡 提示: 使用以下命令打开 Xcode 项目并构建:"
-        echo "  ./scripts/run.sh ios              # 自动检测设备"
-        echo "  ./scripts/run.sh ios simulator     # 使用模拟器"
-        echo "  ./scripts/run.sh ios device        # 使用真机"
+        echo "  ${SCRIPT_PATH:-./run.sh} ios              # 自动检测设备"
+        echo "  ${SCRIPT_PATH:-./run.sh} ios simulator     # 使用模拟器"
+        echo "  ${SCRIPT_PATH:-./run.sh} ios device        # 使用真机"
         return 0
     fi
     
@@ -616,10 +665,10 @@ run_pod_install() {
     print_info "如果需要修改配置，可以使用以下方式："
     echo ""
     echo -e "  ${CYAN}方式1: 通过脚本参数（推荐）${NC}"
-    echo "    ./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev"
-    echo ""
-    echo -e "  ${CYAN}方式2: 修改 gradle.properties 文件${NC}"
-    echo "    编辑 gradle.properties，设置 appChannel 和 appEnv"
+            echo "    ${SCRIPT_PATH:-./run.sh} pod install -PappChannel=umeng -PappEnv=dev"
+            echo ""
+            echo -e "  ${CYAN}方式2: 修改 gradle.properties 文件${NC}"
+            echo "    编辑 gradle.properties，设置 appChannel 和 appEnv"
     echo ""
     
     # 询问用户是否继续
@@ -644,7 +693,7 @@ run_pod_install() {
         echo ""
         print_info "下一步："
         echo "  1. 打开 Xcode 项目: open iosApp/iosApp.xcworkspace"
-        echo "  2. 或使用脚本: ./scripts/run.sh ios"
+        echo "  2. 或使用脚本: ${SCRIPT_PATH:-./run.sh} ios"
     else
         echo ""
         print_error "CocoaPods 依赖安装失败"
@@ -875,6 +924,7 @@ main() {
     fi
     
     show_welcome "$command${subcommand:+ $subcommand}"
+    ensure_java_home
     check_gradle
     
     # 执行命令
@@ -882,8 +932,8 @@ main() {
         desktop)
             run_desktop "$build_type" "$environment" "$version" "$channel"
             ;;
-        js)
-            run_web "js" "$build_type" "$environment" "$version" "$channel"
+        web|js)
+            run_web "wasmJs" "$build_type" "$environment" "$version" "$channel"
             ;;
         wasmJs)
             run_web "wasmJs" "$build_type" "$environment" "$version" "$channel"

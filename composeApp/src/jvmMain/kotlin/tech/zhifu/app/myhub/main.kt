@@ -6,6 +6,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import org.jetbrains.compose.resources.painterResource
+import tech.zhifu.app.myhub.resources.Res
+import tech.zhifu.app.myhub.resources.app_logo
 
 fun main() = application {
     AppBootstrap.start()
@@ -19,7 +22,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "MyHub",
         state = windowState,
-//        icon = painterResource(Res.drawable)
+        icon = painterResource(Res.drawable.app_logo)
     ) {
         // 传递当前窗口大小，以便 App 内部能正确计算 WindowSizeClass
         App()

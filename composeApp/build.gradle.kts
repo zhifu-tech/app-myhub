@@ -208,10 +208,17 @@ tasks.matching {
 compose.desktop {
     application {
         mainClass = "tech.zhifu.app.myhub.MainKt"
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "tech.zhifu.app.myhub"
+            packageName = "MyHub"
             packageVersion = "1.0.0"
+            modules("java.sql")
+            macOS {
+                iconFile.set(project.file("src/jvmMain/resources/MyHub.icns"))
+            }
         }
     }
 }

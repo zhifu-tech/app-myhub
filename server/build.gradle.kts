@@ -10,7 +10,7 @@ version = "1.0.0"
 application {
     mainClass.set("tech.zhifu.app.myhub.ApplicationKt")
 
-    val isDevelopment: Boolean = project.ext.has("development")
+    val isDevelopment: Boolean = project.hasProperty("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 

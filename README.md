@@ -120,46 +120,46 @@ app-myhub/
 
 # 构建特定平台
 ./gradlew :composeApp:assembleDebug          # Android
-./gradlew :composeApp:packageDistributionForCurrentOS  # Desktop
-./gradlew :composeApp:jsBrowserDevelopmentRun  # Web
+./gradlew :composeApp:packageReleaseDistributionForCurrentOS  # Desktop release installer
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun  # Web
 ```
 
 ### 运行应用
 
 #### 使用统一管理脚本（推荐）
 
-项目提供了统一管理脚本 `scripts/run.sh`，支持使用 `-P` 格式参数（与 Gradle 对齐）：
+项目提供了统一管理脚本 `run.sh`，支持使用 `-P` 格式参数（与 Gradle 对齐）：
 
 ```bash
 # 运行桌面应用（使用默认值：debug, dev, free）
-./scripts/run.sh desktop
+./run.sh desktop
 
-# 运行桌面应用（release 模式，生产环境，收费版，Google Play 渠道）
-./scripts/run.sh desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
+# 生成桌面安装包（release 模式，生产环境，收费版，Google Play 渠道）
+./run.sh desktop --release -PappEnv=prod -PappTier=premium -PappChannel=googlePlay
 
 # 构建并安装 Android 应用
-./scripts/run.sh android -PappEnv=prod -PappTier=premium
+./run.sh android -PappEnv=prod -PappTier=premium
 
-# 运行 Web 应用（JavaScript，默认：debug）
-./scripts/run.sh js
+# 运行 Web 应用（Wasm JS，默认：debug）
+./run.sh web
 
-# 运行 Web 应用（JavaScript，release 模式）
-./scripts/run.sh js --release
+# 运行 Web 应用（Wasm JS，release 模式）
+./run.sh web --release
 
 # 运行 Web 应用（WebAssembly，默认：debug）
-./scripts/run.sh wasmJs
+./run.sh wasmJs
 
 # 运行 Web 应用（WebAssembly，release 模式）
-./scripts/run.sh wasmJs --release
+./run.sh wasmJs --release
 
 # 构建并打开 iOS 项目
-./scripts/run.sh ios
+./run.sh ios
 
 # 运行服务器
-./scripts/run.sh server
+./run.sh server
 ```
 
-**注意：** 脚本使用 `-P` 格式参数，与 Gradle 命令的参数格式完全一致。使用 `./scripts/run.sh --help` 查看完整帮助信息。
+**注意：** 脚本使用 `-P` 格式参数，与 Gradle 命令的参数格式完全一致。使用 `./run.sh --help` 查看完整帮助信息。
 
 #### 直接使用 Gradle 命令
 
@@ -178,10 +178,6 @@ app-myhub/
 #### Web
 
 ```bash
-# JavaScript 版本（默认）
-./gradlew :composeApp:jsBrowserDevelopmentRun -PappEnv=dev -PappTier=free
-./gradlew :composeApp:jsBrowserProductionRun -PappEnv=prod -PappTier=premium
-
 # WebAssembly 版本
 ./gradlew :composeApp:wasmJsBrowserDevelopmentRun -PappEnv=dev -PappTier=free
 ./gradlew :composeApp:wasmJsBrowserProductionRun -PappEnv=prod -PappTier=premium
@@ -191,13 +187,13 @@ app-myhub/
 
 ```bash
 # 使用项目脚本（推荐）
-./scripts/run.sh ios
+./run.sh ios
 
 # 安装 CocoaPods 依赖
-./scripts/run.sh pod install -PappChannel=umeng -PappEnv=dev
+./run.sh pod install -PappChannel=umeng -PappEnv=dev
 
 # 指定渠道和环境
-./scripts/run.sh ios -PappChannel=googlePlay -PappEnv=prod
+./run.sh ios -PappChannel=googlePlay -PappEnv=prod
 ```
 
 ⚠️ **重要**：
@@ -205,14 +201,14 @@ app-myhub/
 - 必须使用 `iosApp/iosApp.xcworkspace` 打开项目（不是 `.xcodeproj`）
 - 首次运行前需要执行 `pod install` 安装依赖
 - 在 macOS 上以 Designed for iPad 方式运行时，应用数据会落在 macOS 沙盒容器里，常见路径是 `~/Library/Containers/<bundle-id>/Data/Library/Application Support/app-data`
-- 详细说明请参考 [iosApp/README.md](iosApp/README.md)
+  - 详细说明请参考 [iosApp/README.md](iosApp/README.md)
 - 当前 AI Capture 页面在宽屏下会使用双 panel 布局：左侧 section rail，右侧主内容区；窄屏下回退为单 panel。
 
 ### 运行服务器
 
 ```bash
 # 使用脚本
-./scripts/run.sh server
+./run.sh server
 
 # 或直接使用 Gradle
 ./gradlew :server:run
