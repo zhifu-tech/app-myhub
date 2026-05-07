@@ -39,24 +39,24 @@
 **状态说明**：
 
 - **评审状态**：用于标识文档的评审进度
-  - 🟢 通过：文档已通过评审，可以进入实施阶段
-  - 🟡 待评审：文档正在等待评审或评审进行中
-  - 🔴 需修改：文档评审后需要修改
+    - 🟢 通过：文档已通过评审，可以进入实施阶段
+    - 🟡 待评审：文档正在等待评审或评审进行中
+    - 🔴 需修改：文档评审后需要修改
 - **方案状态**：用于标识方案的实施进度
-  - 🔒 已锁定：方案设计已确定，不允许随意修改
-  - 📝 进行中：方案设计正在进行中，可以修改
-  - ⏸️ 暂停：方案设计暂时停止，保留当前状态
+    - 🔒 已锁定：方案设计已确定，不允许随意修改
+    - 📝 进行中：方案设计正在进行中，可以修改
+    - ⏸️ 暂停：方案设计暂时停止，保留当前状态
 - 详细状态定义请参考 [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
 
 ---
 
 ## 修改历史
 
-| 版本 | 日期       | 修改内容                           | 修改原因           |
-| ---- | ---------- | ---------------------------------- | ------------------ |
-| v1.0 | 2026-01-13 | 初始方案设计                       | 新建               |
-| v1.0 | 2026-01-13 | 完成架构设计文档                   | 完善文档           |
-| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定     | 状态更新：评审通过 |
+| 版本   | 日期         | 修改内容            | 修改原因      |
+|------|------------|-----------------|-----------|
+| v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
+| v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
+| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
 
 ---
 
@@ -191,21 +191,21 @@
 
 #### 3.2.1 支持的平台
 
-| 平台    | 支持状态    | 说明                     |
-| ------- | ----------- | ------------------------ |
+| 平台      | 支持状态   | 说明                     |
+|---------|--------|------------------------|
 | Android | ✅ 完全支持 | Firebase、Umeng、Console |
 | iOS     | ✅ 完全支持 | Firebase、Umeng、Console |
-| JVM     | ✅ 完全支持 | File、Console            |
-| JS      | ✅ 完全支持 | Firebase、Console        |
-| WASM    | ✅ 完全支持 | Firebase、Console        |
+| JVM     | ✅ 完全支持 | File、Console           |
+| JS      | ✅ 完全支持 | Firebase、Console       |
+| WASM    | ✅ 完全支持 | Firebase、Console       |
 
 #### 3.2.2 渠道支持策略
 
-| 渠道       | 支持状态    | 说明                   |
-| ---------- | ----------- | ---------------------- |
-| googlePlay | ✅ 完全支持 | Firebase Analytics     |
-| umeng      | ✅ 完全支持 | Umeng Analytics        |
-| channel    | ✅ 完全支持 | 默认渠道（仅 Console） |
+| 渠道         | 支持状态   | 说明                 |
+|------------|--------|--------------------|
+| googlePlay | ✅ 完全支持 | Firebase Analytics |
+| umeng      | ✅ 完全支持 | Umeng Analytics    |
+| channel    | ✅ 完全支持 | 默认渠道（仅 Console）    |
 
 ### 3.3 渠道框架策略
 
@@ -616,8 +616,8 @@ core/analytics/
 ├── README.md                     # 模块说明文档
 ├── docs/                         # 架构设计文档
 │   ├── myhub-analytics-infra-v1.0.md
-│   ├── CHANNEL_FRAMEWORK_DESIGN.md
-│   └── TEST_SUMMARY.md
+│   ├── myhub-analytics-channel-framework-design.md
+│   └── myhub-analytics-test-summary.md
 └── src/
     ├── commonMain/               # 公共接口和实现
     │   └── kotlin/tech/zhifu/app/myhub/analytics/
@@ -1124,10 +1124,10 @@ class AnalyticsManagerTest {
 
 ### 6.2 里程碑
 
-| 里程碑            | 目标日期   | 状态     |
-| ----------------- | ---------- | -------- |
-| 核心框架完成      | 2026-01-13 | ✅ 已完成 |
-| 渠道框架完成      | 2026-01-13 | ✅ 已完成 |
+| 里程碑           | 目标日期       | 状态    |
+|---------------|------------|-------|
+| 核心框架完成        | 2026-01-13 | ✅ 已完成 |
+| 渠道框架完成        | 2026-01-13 | ✅ 已完成 |
 | Firebase 集成完成 | 2026-01-13 | ✅ 已完成 |
 | Umeng 集成完成    | 2026-01-13 | ✅ 已完成 |
 | 文档完善          | 2026-01-13 | ✅ 已完成 |
@@ -1213,7 +1213,7 @@ class AnalyticsManagerTest {
 
 - [MyHub 基础设施文档](../../../docs/infra/myhub-infra.md)
 - [MyHub 架构设计文档规范](../../../docs/infra/myhub-infra-rules.md)
-- [渠道框架设计文档](CHANNEL_FRAMEWORK_DESIGN.md)
+- [渠道框架设计文档](myhub-analytics-channel-framework-design.md)
 - [Firebase Analytics 官方文档](https://firebase.google.com/docs/analytics)
 - [Umeng Analytics 官方文档](https://developer.umeng.com/docs/67966/detail/193837)
 
@@ -1224,19 +1224,19 @@ class AnalyticsManagerTest {
 
 ### 8.3 术语表
 
-| 术语                       | 说明                                                             |
-| -------------------------- | ---------------------------------------------------------------- |
-| AnalyticsService           | 统一统计服务接口，业务代码通过此接口进行统计上报                 |
+| 术语                         | 说明                                        |
+|----------------------------|-------------------------------------------|
+| AnalyticsService           | 统一统计服务接口，业务代码通过此接口进行统计上报                  |
 | AnalyticsProvider          | 统计服务提供商接口，各个统计 SDK 的适配器实现此接口              |
-| AnalyticsManager           | 统计管理器，管理多个统计服务提供商                               |
-| AnalyticsValue             | 类型安全的统计值类型，避免使用 Any 导致的跨平台兼容性问题        |
-| AnalyticsConsent           | 隐私合规接口，用于处理 GDPR、CCPA 等隐私法规要求                 |
-| AnalyticsEvent             | 统计事件模型，包含事件名称、参数等信息                           |
-| ProviderType               | 提供商类型枚举（CONSOLE、FILE、FIREBASE、UMENG）                 |
-| AnalyticsProviderFactory   | Provider 工厂，使用 Registry 模式管理 Provider                   |
+| AnalyticsManager           | 统计管理器，管理多个统计服务提供商                         |
+| AnalyticsValue             | 类型安全的统计值类型，避免使用 Any 导致的跨平台兼容性问题           |
+| AnalyticsConsent           | 隐私合规接口，用于处理 GDPR、CCPA 等隐私法规要求             |
+| AnalyticsEvent             | 统计事件模型，包含事件名称、参数等信息                       |
+| ProviderType               | 提供商类型枚举（CONSOLE、FILE、FIREBASE、UMENG）      |
+| AnalyticsProviderFactory   | Provider 工厂，使用 Registry 模式管理 Provider     |
 | AnalyticsProviderRegistrar | Provider 注册器接口，各平台模块实现此接口注册平台特定的 Provider |
-| 渠道框架                   | 平台+渠道双维度变体系统，支持通过构建变体选择不同的统计服务      |
-| 事件缓冲                   | Provider 初始化期间的事件自动缓冲机制，避免事件丢失              |
+| 渠道框架                       | 平台+渠道双维度变体系统，支持通过构建变体选择不同的统计服务            |
+| 事件缓冲                       | Provider 初始化期间的事件自动缓冲机制，避免事件丢失            |
 
 ### 8.4 常见问题
 
@@ -1259,7 +1259,7 @@ class AnalyticsManagerTest {
 3. **类替换**：渠道源集中的类会替换平台标准源集中的同名类
 4. **互斥性保证**：编译时保证只有一个渠道源集被注入
 
-详细说明请参考：[渠道框架设计文档](CHANNEL_FRAMEWORK_DESIGN.md)
+详细说明请参考：[渠道框架设计文档](myhub-analytics-channel-framework-design.md)
 
 #### Q3: 如何处理隐私合规？
 

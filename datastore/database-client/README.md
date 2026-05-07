@@ -1,13 +1,7 @@
-# datastore:database-client
+# Core Datastore Database Client Module
 
-本模块负责为 MyHub 数据库提供`跨平台驱动创建`。
+这个模块用于**规范**和**实现** MyHub 应用数据库客户端驱动基础设施，为各功能模块**提供统一、跨平台的数据库驱动创建能力**。
 
-## 🔗 相关模块
+## 文档
 
-- `datastore:database` - 数据库 Schema 定义
-
-## 📚 相关文档
-
-- [MyHub 数据库客户端模块方案设计v1.0](./docs/myhub-datastore-database-client-infra-v1.0.md)
-- [SQLDelight 官方文档](https://cashapp.github.io/sqldelight/)
-- [SQLDelight Web 平台文档](https://cashapp.github.io/sqldelight/js_sqlite/)
+- [MyHub 数据库客户端模块方案设计 v1.0](./docs/myhub-datastore-database-client-infra-v1.0.md)

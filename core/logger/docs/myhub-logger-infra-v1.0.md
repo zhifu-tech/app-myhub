@@ -868,7 +868,7 @@ internal actual fun LoggerConfig.configPlatform() {
 ### 8.1 相关文档
 
 - [Logger 模块 README](../README.md) - 快速开始和核心组件
-- [Logger 模块使用指南](./USAGE_GUIDE.md) - 详细使用指南
+- [Logger 模块使用指南](./myhub-logger-usage-guide.md) - 详细使用指南
 - [MyHub 基础设施规则](../../../docs/infra/myhub-infra-rules.md) - 架构设计文档规范
 - [kotlin-logging GitHub](https://github.com/oshai/kotlin-logging) - 官方文档
 - [SLF4J 官方文档](http://www.slf4j.org/) - SLF4J 文档

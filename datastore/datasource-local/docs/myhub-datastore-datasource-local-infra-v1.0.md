@@ -52,11 +52,12 @@
 
 ## 修改历史
 
-| 版本   | 日期         | 修改内容            | 修改原因      |
-|------|------------|-----------------|-----------|
-| v1.0 | 2026-01-13 | 初始方案设计          | 新建        |
-| v1.0 | 2026-01-13 | 完成架构设计文档        | 完善文档      |
-| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定 | 状态更新：评审通过 |
+| 版本   | 日期         | 修改内容                               | 修改原因      |
+|------|------------|------------------------------------|-----------|
+| v1.0 | 2026-01-13 | 初始方案设计                             | 新建        |
+| v1.0 | 2026-01-13 | 完成架构设计文档                           | 完善文档      |
+| v1.0 | 2026-01-13 | 更新状态：评审通过、方案已锁定                    | 状态更新：评审通过 |
+| v1.0 | 2026-05-07 | 对齐当前代码实现，移除不存在的数据源条目并修正 package 路径 | 文档修订      |
 
 ---
 
@@ -158,20 +159,27 @@ datastore/datasource-local/
 ├── src/
 │   ├── commonMain/
 │   │   └── kotlin/tech/zhifu/app/myhub/datastore/datasource/
-│   │       ├── LocalDataSource.kt              # 数据源接口定义
-│   │       ├── UserContextProvider.kt         # 用户上下文提供者接口
+│   │       ├── card/
+│   │       │   ├── LocalCardDataSource.kt
+│   │       │   ├── LocalCardDataSourceImpl.kt
+│   │       │   ├── LocalCardMapper.kt
+│   │       │   └── di/
+│   │       │       └── LocalCardDataSourceModule.kt
+│   │       ├── user/
+│   │       │   ├── LocalUserDataSource.kt
+│   │       │   ├── LocalUserDataSourceImpl.kt
+│   │       │   ├── LocalUserMappers.kt
+│   │       │   └── di/
+│   │       │       └── LocalUserDataSourceModule.kt
+│   │       ├── sync/
+│   │       │   ├── LocalSyncDataSource.kt
+│   │       │   ├── LocalSyncDataSourceImpl.kt
+│   │       │   └── di/
+│   │       │       └── LocalSyncDataSourceModule.kt
 │   │       ├── di/
 │   │       │   └── LocalDataSourceModule.kt    # Koin DI 模块
-│   │       └── impl/
-│   │           ├── LocalCardDataSourceImpl.kt
-│   │           ├── LocalTagDataSourceImpl.kt
-│   │           ├── LocalTemplateDataSourceImpl.kt
-│   │           ├── LocalUserDataSourceImpl.kt
-│   │           ├── LocalStatisticsDataSourceImpl.kt
-│   │           └── UserContextProviderImpl.kt
 │   └── commonTest/
 │       └── kotlin/.../
-│           ├── LocalCardDataSourceTest.kt
 │           └── ...
 └── build.gradle.kts
 ```
@@ -184,52 +192,83 @@ datastore/datasource-local/
 
 ```kotlin
 interface LocalCardDataSource {
-    suspend fun getAllCards(userId: String): List<Card>
-    suspend fun getCardById(id: String, userId: String): Card?
-    suspend fun insertCard(card: Card, userId: String)
-    suspend fun updateCard(card: Card, userId: String)
-    suspend fun deleteCard(id: String, userId: String)
-    suspend fun deleteAllCards(userId: String)
-    fun observeCards(userId: String): Flow<List<Card>>
+    suspend fun insertCard(userId: String, card: Card)
+    fun flowCard(cardId: String): Flow<Card?>
+    fun flowCards(
+        userId: String,
+        cursorCardId: String?,
+        cursorTitle: String? = null,
+        cursorUpdatedAt: Long? = null,
+        orderByUpdated: Boolean = true,
+        orderByTitle: Boolean = false,
+        query: String? = null,
+        limit: Int
+    ): Flow<List<Card>>
+    suspend fun deleteCard(cardId: String)
 }
 ```
 
 **实现**：`LocalCardDataSourceImpl`
 
-#### 4.2.2 LocalTagDataSource（标签数据源）
+#### 4.2.2 LocalUserDataSource（用户数据源）
+
+`LocalUserDataSource` 直接继承：
+
+```kotlin
+interface LocalUserDataSource :
+    UserOperations,
+    UserPreferencesOperations
+}
+```
+
+**实现**：`LocalUserDataSourceImpl`
+
+#### 4.2.3 LocalSyncDataSource（同步数据源）
 
 **接口**：
 
 ```kotlin
-interface LocalTagDataSource {
-    suspend fun getAllTags(userId: String): List<Tag>
-    suspend fun getTagById(id: String, userId: String): Tag?
-    suspend fun getTagByName(name: String, userId: String): Tag?
-    suspend fun insertTag(tag: Tag, userId: String)
-    suspend fun updateTag(tag: Tag, userId: String)
-    suspend fun deleteTag(id: String, userId: String)
-    fun observeTags(userId: String): Flow<List<Tag>>
+interface LocalSyncDataSource {
+    suspend fun getOutboxById(id: String): Sync_outbox?
+    suspend fun getOutboxByUserId(userId: String): List<Sync_outbox>
+    suspend fun getPendingOutboxByUserId(
+        userId: String,
+        status: String = SyncOutboxStatus.PENDING
+    ): List<Sync_outbox>
+    suspend fun getReadyOutboxByUserId(
+        userId: String,
+        now: String,
+        pendingStatus: String = SyncOutboxStatus.PENDING,
+        failedStatus: String = SyncOutboxStatus.FAILED
+    ): List<Sync_outbox>
+    fun observePendingOutboxByUserId(
+        userId: String,
+        status: String = SyncOutboxStatus.PENDING
+    ): Flow<List<Sync_outbox>>
+    suspend fun insertOutbox(...)
+    suspend fun insertOutboxAndOpLog(...)
+    suspend fun updateOutboxStatus(...)
+    suspend fun incrementOutboxRetry(...)
+    suspend fun deleteOutboxById(id: String)
+    suspend fun deleteOutboxByUserId(userId: String)
+    suspend fun deleteOutboxByStatusBefore(...)
+    suspend fun getSyncState(userId: String, entityType: String): Sync_state?
+    suspend fun getSyncStates(userId: String): List<Sync_state>
+    suspend fun insertSyncState(...)
+    suspend fun deleteSyncStateById(id: String)
+    suspend fun deleteSyncStatesByUserId(userId: String)
+    suspend fun getOpLogsByUserId(userId: String): List<Sync_oplog>
+    suspend fun getOpLogsByUserIdAndEntityAfter(...)
+    suspend fun insertOpLog(...)
+    suspend fun deleteOpLogById(id: String)
+    suspend fun deleteOpLogsByUserId(userId: String)
+    suspend fun deleteOpLogsBefore(userId: String, beforeAt: String)
+    suspend fun getConflictLogsByUserId(userId: String): List<Sync_conflict_log>
+    suspend fun insertConflictLog(...)
+    suspend fun deleteConflictLogById(id: String)
+    suspend fun deleteConflictLogsByUserId(userId: String)
 }
 ```
-
-**实现**：`LocalTagDataSourceImpl`
-
-#### 4.2.3 UserContextProvider（用户上下文提供者）
-
-**接口**：
-
-```kotlin
-interface UserContextProvider {
-    fun getCurrentUserId(): String?
-}
-```
-
-**功能**：
-
-- 提供当前用户 ID
-- 如果用户未登录则返回 `null`
-
----
 
 ## 5. 实现细节
 
@@ -241,34 +280,43 @@ interface UserContextProvider {
 class LocalCardDataSourceImpl(
     private val database: MyHubDatabase
 ) : LocalCardDataSource {
-    
-    override suspend fun getAllCards(userId: String): List<Card> {
-        return database.cardQueries.selectAll(userId)
-            .awaitAsList()
-            .map { it.toDomain() }
+
+    override suspend fun insertCard(
+        userId: String,
+        card: Card,
+    ) {
+        // 省略：以数据库写入与 user_card 关联为主
     }
-    
-    override fun observeCards(userId: String): Flow<List<Card>> {
-        return database.cardQueries.selectAll(userId)
-            .asFlow()
-            .mapToList()
-            .map { it.map { row -> row.toDomain() } }
+
+    override fun flowCard(cardId: String): Flow<Card?> {
+        // 省略：按 cardId 监听单条记录
+        TODO()
+    }
+
+    override fun flowCards(
+        userId: String,
+        cursorCardId: String?,
+        cursorTitle: String?,
+        cursorUpdatedAt: Long?,
+        orderByUpdated: Boolean,
+        orderByTitle: Boolean,
+        query: String?,
+        limit: Int
+    ): Flow<List<Card>> {
+        // 省略：按用户、游标、排序和搜索条件查询
+        TODO()
+    }
+
+    override suspend fun deleteCard(cardId: String) {
+        // 省略：按 cardId 删除
+        TODO()
     }
 }
 ```
 
 ### 5.2 响应式数据流
 
-**实现**：
-
-```kotlin
-fun observeCards(userId: String): Flow<List<Card>> {
-    return database.cardQueries.selectAll(userId)
-        .asFlow()
-        .mapToList()
-        .map { it.map { row -> row.toDomain() } }
-}
-```
+**实现**：当前实现通过 `flowCard(cardId)` 和 `flowCards(...)` 暴露查询监听；文档中的旧版 `observeCards` 命名已废弃，以源码为准。
 
 **使用**：
 
@@ -277,7 +325,11 @@ class CardViewModel(
     private val cardDataSource: LocalCardDataSource,
     private val userId: String
 ) {
-    val cards: Flow<List<Card>> = cardDataSource.observeCards(userId)
+    val cards: Flow<List<Card>> = cardDataSource.flowCards(
+        userId = userId,
+        cursorCardId = null,
+        limit = 50
+    )
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -291,10 +343,13 @@ class CardViewModel(
 **所有查询都添加用户过滤**：
 
 ```kotlin
-override suspend fun getAllCards(userId: String): List<Card> {
-    return database.cardQueries.selectAll(userId)  // 添加 userId 过滤
-        .awaitAsList()
-        .map { it.toDomain() }
+override fun flowCards(...): Flow<List<Card>> {
+    return database.cardQueries.selectCardsByUserIdWithUpdatedDescFirst(
+        userId = userId,
+        limit = limit.toLong()
+    ).asFlow()
+        .mapToList()
+        .map { rows -> rows.map { row -> row.toDomain() } }
 }
 ```
 
@@ -307,10 +362,8 @@ override suspend fun getAllCards(userId: String): List<Card> {
 #### 阶段 1：核心数据源实现（已完成）
 
 - ✅ LocalCardDataSource 实现
-- ✅ LocalTagDataSource 实现
-- ✅ LocalTemplateDataSource 实现
 - ✅ LocalUserDataSource 实现
-- ✅ LocalStatisticsDataSource 实现
+- ✅ LocalSyncDataSource 实现
 
 #### 阶段 2：响应式数据流支持（已完成）
 
@@ -392,12 +445,16 @@ override suspend fun getAllCards(userId: String): List<Card> {
 class CardRepository(
     private val cardDataSource: LocalCardDataSource
 ) {
-    suspend fun getAllCards(userId: String): List<Card> {
-        return cardDataSource.getAllCards(userId)
+    suspend fun insertCard(userId: String, card: Card) {
+        cardDataSource.insertCard(userId, card)
     }
-    
+
     fun observeCards(userId: String): Flow<List<Card>> {
-        return cardDataSource.observeCards(userId)
+        return cardDataSource.flowCards(
+            userId = userId,
+            cursorCardId = null,
+            limit = 50
+        )
     }
 }
 ```

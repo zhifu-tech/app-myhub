@@ -12,7 +12,7 @@
 
 ## 模块 UI Design Spec
 
-+ [feature/dashboard ui design spec](../../feature/dashboard/docs/ui-design-spec.md)
-+ [feature/settings ui design spec](../../feature/settings/docs/ui-design-spec.md)
++ [feature/dashboard ui design spec](../../feature/dashboard/docs/myhub-dashboard-ui-design-spec.md)
++ [feature/settings ui design spec](../../feature/settings/docs/myhub-dashboard-ui-design-spec.md)
 + [feature/capture ui design spec](../../feature/capture/docs/ui-desigin-spec.md)
 + [feature/capture ui design spec](../../feature/capture/docs/ui-desigin-spec.md)

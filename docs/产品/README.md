@@ -21,6 +21,7 @@ products/
 └── docs/
     └── 产品/
         ├── README.md
+        ├── myhub-app.md
         ├── myhub-产品思考与定位.md
         ├── myhub-1页产品Pitch.md
         ├── myhub-产品-v0.1-产品边界.md
@@ -99,3 +100,7 @@ products/
 ## 八、一句话总结
 
 > **本目录下的所有文档，共同回答一个问题：MyHub 为什么存在，以及每一个阶段它应该只做什么。**
+
+## 九、补充文档
+
+- [`myhub-app.md`](./myhub-app.md) - MyHub App 产品思考与愿景补充

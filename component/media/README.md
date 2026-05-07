@@ -1,9 +1,7 @@
-# Media Component 模块架构设计
+# Media Component Module
 
-## 概述
-
-Media Component 模块提供跨平台媒体选择、预览与播放能力，统一封装 FileKit 与 ComposeMultiplatformMediaPlayer 的基础设施能力，并通过 Koin 提供默认实现。
+这个模块用于**规范**和**实现** MyHub 应用的媒体基础设施，为各功能模块**提供统一的媒体选择、预览与播放能力**。
 
 ## 文档
 
-- 方案设计：`docs/myhub-media-infra-v1.0.md`
+- [Media 组件基础设施方案设计](./docs/myhub-media-infra-v1.0.md)

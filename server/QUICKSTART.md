@@ -98,8 +98,8 @@ docker-compose up -d
 
 ## 📚 更多信息
 
-- [环境变量配置指南](docs/environment-variables.md) - 详细的配置方式说明
-- [数据库配置文档](docs/database.md) - 数据库配置详细说明
+- [环境变量配置指南](docs/myhub-server-environment-variables.md) - 详细的配置方式说明
+- [数据库配置文档](docs/myhub-server-database.md) - 数据库配置详细说明
 - [README.md](README.md) - 完整的项目文档
 
 

@@ -48,7 +48,6 @@ kotlin {
         optIn.add("kotlin.io.encoding.ExperimentalEncodingApi")
         optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
         optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
-        optIn.add("kotlinx.cinterop.ExperimentalForeignApi")
         optIn.add("org.mobilenativefoundation.store.core5.ExperimentalStoreApi")
     }
 }

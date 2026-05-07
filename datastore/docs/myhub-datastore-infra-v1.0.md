@@ -545,7 +545,7 @@ class CardRepositoryImpl(
     private val localDataSource: LocalCardDataSource,
     private val remoteDataSource: RemoteCardDataSource
 ) : ReactiveCardRepository {
-    
+
     override fun observeAllCards(): Flow<List<Card>> {
         return localDataSource.observeAllCards()
             .onStart {
@@ -553,11 +553,11 @@ class CardRepositoryImpl(
                 refreshFromRemote()
             }
     }
-    
+
     override suspend fun createCard(card: Card): Card {
         // 1. 先写入本地（乐观更新）
         val createdCard = localDataSource.insertCard(card)
-        
+
         // 2. 异步同步到远程
         try {
             remoteDataSource.createCard(card.toDto())
@@ -565,10 +565,10 @@ class CardRepositoryImpl(
             // 同步失败，标记待同步
             markForSync(createdCard.id)
         }
-        
+
         return createdCard
     }
-    
+
     private suspend fun refreshFromRemote() {
         try {
             val remoteCards = remoteDataSource.getAllCards()
@@ -588,11 +588,11 @@ class CardRepositoryImpl(
 class CardRepositoryImpl(
     private val localDataSource: LocalCardDataSource
 ) : CardRepository {
-    
+
     override suspend fun getAllCards(): List<Card> {
         return localDataSource.getAllCards()
     }
-    
+
     override suspend fun createCard(card: Card): Card {
         return localDataSource.insertCard(card)
     }
@@ -610,14 +610,14 @@ class LocalCardDataSourceImpl(
     private val database: MyHubDatabase,
     private val userContextProvider: UserContextProvider
 ) : LocalCardDataSource {
-    
+
     override fun observeAllCards(): Flow<List<Card>> {
         val userId = userContextProvider.getCurrentUserId()
         return database.cardQueries
             .observeAllCards(userId)
             .map { it.map { row -> row.toDomain() } }
     }
-    
+
     override suspend fun insertCard(card: Card) {
         val userId = userContextProvider.getCurrentUserId()
         database.cardQueries.insertCard(
@@ -641,13 +641,13 @@ class RemoteCardDataSourceImpl(
     private val httpClient: HttpClient,
     private val apiConfig: ApiConfig
 ) : RemoteCardDataSource {
-    
+
     override suspend fun getAllCards(): List<CardDto> {
         return httpClient.get("${apiConfig.baseUrl}/cards") {
             contentType(ContentType.Application.Json)
         }.body<List<CardDto>>()
     }
-    
+
     override suspend fun createCard(cardDto: CardDto): CardDto {
         return httpClient.post("${apiConfig.baseUrl}/cards") {
             contentType(ContentType.Application.Json)
@@ -729,11 +729,11 @@ actual class DatabaseDriverFactory {
 val repositoryModule = module {
     // Database
     includes(databaseModule) // 来自 datastore:database-client
-    
+
     // DataSource
     includes(localDataSourceModule) // 来自 datastore:datasource-local
     includes(remoteDataSourceModule) // 来自 datastore:datasource-remote
-    
+
     // Repository
     single<CardRepository> { CardRepositoryImpl(get(), get()) }
     single<ReactiveCardRepository> { get<CardRepository>() as ReactiveCardRepository }
@@ -747,10 +747,10 @@ val repositoryModule = module {
 val repositoryModule = module {
     // Database
     includes(databaseModule) // 来自 datastore:database-server
-    
+
     // DataSource
     includes(localDataSourceModule) // 来自 datastore:datasource-local
-    
+
     // Repository
     single<CardRepository> { CardRepositoryImpl(get()) }
     // ... 其他 Repository
@@ -940,7 +940,7 @@ val repositoryModule = module {
 - [数据库模块方案设计](../datastore-database/docs/myhub-datastore-database-infra-v1.0.md)
 - [数据库客户端模块方案设计](../datastore-database-client/docs/myhub-datastore-database-client-infra-v1.0.md)
 - [数据库服务端模块方案设计](../datastore-database-server/docs/myhub-datastore-database-server-infra-v1.0.md)
-- [数据库测试模块方案设计](../datastore-database-test/docs/myhub-datastore-database-test-infra-v1.0.md)
+- [数据库测试模块方案设计](../datastore-database-test/docs/myhub-datastore-database-test-infra.md)
 - [数据库管理模块方案设计](../datastore-database-manage/docs/myhub-datastore-database-manage-infra-v1.0.md)
 - [本地数据源模块方案设计](../datastore-datasource-local/docs/myhub-datastore-datasource-local-infra-v1.0.md)
 - [远程数据源模块方案设计](../datastore-datasource-remote/docs/myhub-datastore-datasource-remote-infra-v1.0.md)
