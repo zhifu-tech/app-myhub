@@ -296,7 +296,7 @@ run_desktop() {
     print_info "配置: ${build_type} 模式 | ${environment} 环境 | ${version} 版${channel:+ | ${channel} 渠道}"
     
     # 构建 Gradle 参数
-    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    local gradle_args="-PenabledPlatforms=jvm -PappEnv=${environment} -PappTier=${version}"
     if [ -n "$channel" ]; then
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi
@@ -350,7 +350,7 @@ run_web() {
     print_info "应用将在浏览器中自动打开"
     
     # 构建 Gradle 参数
-    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    local gradle_args="-PenabledPlatforms=android -PappEnv=${environment} -PappTier=${version}"
     if [ -n "$channel" ]; then
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi
