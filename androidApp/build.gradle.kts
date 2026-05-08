@@ -17,7 +17,7 @@ android {
     defaultConfig {
         applicationId = "tech.zhifu.app.myhub"
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "0.1.0"
     }
 
     signingConfigs {
@@ -79,6 +79,35 @@ android {
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
     }
+}
+
+tasks.register<Copy>("renameReleaseApk") {
+    dependsOn("assembleRelease")
+    val appEnv = project.findProperty("appEnv")?.toString()?.takeIf { it.isNotBlank() } ?: "dev"
+    val appTier = project.findProperty("appTier")?.toString()?.takeIf { it.isNotBlank() } ?: "free"
+    val appChannel = project.findProperty("appChannel")?.toString()?.takeIf { it.isNotBlank() } ?: "channel"
+    val versionName = android.defaultConfig.versionName ?: "1.0.0"
+    val outputDir = layout.buildDirectory.dir("outputs/apk/release")
+    val targetFileName = "myhub-${appEnv}-${appTier}-${appChannel}-${versionName}.apk"
+
+    from(outputDir) {
+        include("androidApp-release.apk")
+    }
+    into(outputDir)
+    rename { targetFileName }
+}
+
+tasks.register<Delete>("cleanReleaseApkName") {
+    dependsOn("renameReleaseApk")
+    delete(layout.buildDirectory.file("outputs/apk/release/androidApp-release.apk"))
+}
+
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    finalizedBy("renameReleaseApk", "cleanReleaseApkName")
+}
+
+tasks.matching { it.name == "renameReleaseApk" }.configureEach {
+    mustRunAfter("createReleaseApkListingFileRedirect")
 }
 
 dependencies {
