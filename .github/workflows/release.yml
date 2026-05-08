@@ -11,20 +11,64 @@ permissions:
 
 jobs:
   build-desktop:
-    name: Build ${{ matrix.os_name }} Package
+    name: Build ${{ matrix.variant_label }} ${{ matrix.os_name }} Package
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - app_env: dev
+            app_tier: free
+            app_channel: channel
+            variant_label: dev-free-channel
+            os: macos-latest
             os_name: macOS
             jdk: "25"
-            artifact_name: desktop-dmg
+            artifact_name: desktop-dmg-dev-free-channel
             package_path: composeApp/build/compose/binaries/main/dmg/*.dmg
-          - os: windows-latest
+          - app_env: dev
+            app_tier: free
+            app_channel: channel
+            variant_label: dev-free-channel
+            os: windows-latest
             os_name: Windows
             jdk: "25"
-            artifact_name: desktop-msi
+            artifact_name: desktop-msi-dev-free-channel
+            package_path: composeApp/build/compose/binaries/main/msi/*.msi
+          - app_env: prod
+            app_tier: free
+            app_channel: umeng
+            variant_label: prod-free-umeng
+            os: macos-latest
+            os_name: macOS
+            jdk: "25"
+            artifact_name: desktop-dmg-prod-free-umeng
+            package_path: composeApp/build/compose/binaries/main/dmg/*.dmg
+          - app_env: prod
+            app_tier: free
+            app_channel: umeng
+            variant_label: prod-free-umeng
+            os: windows-latest
+            os_name: Windows
+            jdk: "25"
+            artifact_name: desktop-msi-prod-free-umeng
+            package_path: composeApp/build/compose/binaries/main/msi/*.msi
+          - app_env: prod
+            app_tier: free
+            app_channel: googlePlay
+            variant_label: prod-free-googlePlay
+            os: macos-latest
+            os_name: macOS
+            jdk: "25"
+            artifact_name: desktop-dmg-prod-free-googlePlay
+            package_path: composeApp/build/compose/binaries/main/dmg/*.dmg
+          - app_env: prod
+            app_tier: free
+            app_channel: googlePlay
+            variant_label: prod-free-googlePlay
+            os: windows-latest
+            os_name: Windows
+            jdk: "25"
+            artifact_name: desktop-msi-prod-free-googlePlay
             package_path: composeApp/build/compose/binaries/main/msi/*.msi
 
     runs-on: ${{ matrix.os }}
@@ -45,9 +89,16 @@ jobs:
         shell: bash
         run: chmod +x gradlew
 
+      - name: Print variant
+        shell: bash
+        run: |
+          echo "APP_ENV=${{ matrix.app_env }}"
+          echo "APP_TIER=${{ matrix.app_tier }}"
+          echo "APP_CHANNEL=${{ matrix.app_channel }}"
+
       - name: Build desktop package
         shell: bash
-        run: ./gradlew :composeApp:packageDistributionForCurrentOS --no-daemon --stacktrace
+        run: ./gradlew :composeApp:packageDistributionForCurrentOS --no-daemon --stacktrace -PappEnv=${{ matrix.app_env }} -PappTier=${{ matrix.app_tier }} -PappChannel=${{ matrix.app_channel }}
 
       - name: Upload ${{ matrix.os_name }} artifact
         uses: actions/upload-artifact@v4
@@ -57,7 +108,23 @@ jobs:
           if-no-files-found: error
 
   build-android:
-    name: Build Android Release APK
+    name: Build Android ${{ matrix.variant_label }} APK
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app_env: dev
+            app_tier: free
+            app_channel: channel
+            variant_label: dev-free-channel
+          - app_env: prod
+            app_tier: free
+            app_channel: umeng
+            variant_label: prod-free-umeng
+          - app_env: prod
+            app_tier: free
+            app_channel: googlePlay
+            variant_label: prod-free-googlePlay
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -76,6 +143,13 @@ jobs:
         shell: bash
         run: chmod +x gradlew
 
+      - name: Print variant
+        shell: bash
+        run: |
+          echo "APP_ENV=${{ matrix.app_env }}"
+          echo "APP_TIER=${{ matrix.app_tier }}"
+          echo "APP_CHANNEL=${{ matrix.app_channel }}"
+
       - name: Prepare Android release signing config
         shell: bash
         run: |
@@ -87,12 +161,12 @@ jobs:
 
       - name: Build Android release APK
         shell: bash
-        run: ./gradlew :androidApp:assembleRelease --no-daemon --stacktrace
+        run: ./gradlew :androidApp:assembleRelease --no-daemon --stacktrace -PappEnv=${{ matrix.app_env }} -PappTier=${{ matrix.app_tier }} -PappChannel=${{ matrix.app_channel }}
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: android-apk-${{ matrix.variant_label }}
           path: androidApp/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
@@ -125,7 +199,8 @@ jobs:
 
           ## Notes
           - Desktop installers and Android APK are attached as release assets.
-          - Use the file that matches your platform.
+          - Use the file that matches your platform and variant.
+          - Variants built in this release: `dev/free/channel`, `prod/free/umeng`, `prod/free/googlePlay`.
           EOF
 
       - name: Publish GitHub Release
