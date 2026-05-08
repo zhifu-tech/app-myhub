@@ -390,8 +390,10 @@ run_android() {
     # 注意：Android App 现在使用动态源集注入，不再使用 productFlavors
     # 因此使用标准的 assembleDebug/assembleRelease 任务
     if [ "$build_type" = "release" ]; then
-        print_info "执行: ./gradlew :androidApp:assembleRelease"
-        ./gradlew :androidApp:assembleRelease $gradle_args
+        print_info "Release 模式会先构建 androidApp 的 release 包，再尝试安装到已连接的设备/模拟器"
+        print_info "执行: ./gradlew :androidApp:installRelease"
+        print_info "前提: 设备/模拟器在线，且已配置 release 签名或使用 debug 回退签名"
+        ./gradlew :androidApp:installRelease $gradle_args
     else
         print_info "执行: ./gradlew :androidApp:assembleDebug"
         ./gradlew :androidApp:assembleDebug $gradle_args
@@ -402,41 +404,7 @@ run_android() {
     
     print_info "正在安装到设备..."
     if [ "$build_type" = "release" ]; then
-        # Release 版本没有 install 任务，需要手动使用 adb 安装
-        # APK 路径格式: androidApp/build/outputs/apk/release/androidApp-release.apk
-        local apk_path="androidApp/build/outputs/apk/release/androidApp-release.apk"
-        
-        # 如果标准路径不存在，尝试查找其他可能的路径
-        if [ ! -f "$apk_path" ]; then
-            apk_path=$(find androidApp/build/outputs/apk/release -name "*.apk" -type f 2>/dev/null | head -1)
-        fi
-        
-        if [ -z "$apk_path" ] || [ ! -f "$apk_path" ]; then
-            print_error "未找到 APK 文件，请检查构建是否成功"
-            print_info "预期路径: androidApp/build/outputs/apk/release/"
-            print_info "请确保已成功构建 Release 版本"
-            exit 1
-        fi
-        
-        print_info "找到 APK: $apk_path"
-        
-        if command -v adb &> /dev/null; then
-            # 先卸载旧版本（如果存在）
-            adb uninstall "$package_name" 2>/dev/null || true
-            
-            # 安装新版本（-r 表示替换已存在的应用）
-            adb install -r "$apk_path"
-            if [ $? -ne 0 ]; then
-                print_error "安装失败，请确保设备已连接或模拟器正在运行"
-                print_info "如果是因为签名问题，请使用 Debug 模式或配置签名"
-                exit 1
-            fi
-        else
-            print_error "未找到 adb 命令，无法安装 Release 版本"
-            print_info "APK 文件位置: $apk_path"
-            print_info "请手动使用 adb install 安装，或使用 Debug 模式"
-            exit 1
-        fi
+        print_success "Android Release 已构建并安装（${environment} 环境，${version} 版${channel:+，${channel} 渠道}）"
     else
         # Debug 版本使用 Gradle install 任务
         ./gradlew :androidApp:installDebug $gradle_args

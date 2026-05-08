@@ -65,6 +65,8 @@ yarn-error.log*
 .env.*.local
 server/.env
 server/.env.local
+androidApp/release.properties
+androidApp/release
 .cursor
 
 # ============================================================================

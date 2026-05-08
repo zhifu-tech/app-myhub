@@ -14,7 +14,6 @@ fun main() = application {
     AppBootstrap.start()
 
     val windowState = remember {
-//        WindowState(size = DpSize(width = 390.dp, height = 844.dp))
         WindowState(size = DpSize(width = 840.dp, height = 844.dp))
     }
 
@@ -24,7 +23,6 @@ fun main() = application {
         state = windowState,
         icon = painterResource(Res.drawable.app_logo)
     ) {
-        // 传递当前窗口大小，以便 App 内部能正确计算 WindowSizeClass
         App()
     }
 }

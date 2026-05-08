@@ -1,4 +1,4 @@
-name: Desktop Release
+name: Release
 
 on:
   push:
@@ -26,11 +26,6 @@ jobs:
             jdk: "25"
             artifact_name: desktop-msi
             package_path: composeApp/build/compose/binaries/main/msi/*.msi
-          - os: ubuntu-latest
-            os_name: Linux
-            jdk: "25"
-            artifact_name: desktop-deb
-            package_path: composeApp/build/compose/binaries/main/deb/*.deb
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
@@ -61,9 +56,51 @@ jobs:
           path: ${{ matrix.package_path }}
           if-no-files-found: error
 
+  build-android:
+    name: Build Android Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: temurin
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        shell: bash
+        run: chmod +x gradlew
+
+      - name: Prepare Android release signing config
+        shell: bash
+        run: |
+          if [ ! -f androidApp/release.properties ]; then
+            if [ -f androidApp/release.properties.example ]; then
+              cp androidApp/release.properties.example androidApp/release.properties
+            fi
+          fi
+
+      - name: Build Android release APK
+        shell: bash
+        run: ./gradlew :androidApp:assembleRelease --no-daemon --stacktrace
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: androidApp/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
   publish-release:
     name: Publish GitHub Release
-    needs: build-desktop
+    needs:
+      - build-desktop
+      - build-android
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -73,9 +110,29 @@ jobs:
           path: release-assets
           merge-multiple: true
 
+      - name: Generate release notes
+        shell: bash
+        run: |
+          cat > release-notes.md <<'EOF'
+          ## Downloads
+
+          ### Desktop
+          - macOS: `.dmg`
+          - Windows: `.msi`
+
+          ### Android
+          - `.apk`
+
+          ## Notes
+          - Desktop installers and Android APK are attached as release assets.
+          - Use the file that matches your platform.
+          EOF
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
           files: release-assets/*/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

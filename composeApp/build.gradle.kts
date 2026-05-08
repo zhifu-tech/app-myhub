@@ -219,6 +219,9 @@ compose.desktop {
             macOS {
                 iconFile.set(project.file("src/jvmMain/resources/MyHub.icns"))
             }
+            windows {
+                iconFile.set(project.file("src/jvmMain/resources/MyHub.ico"))
+            }
         }
     }
 }
