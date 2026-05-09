@@ -1,9 +1,5 @@
 package tech.zhifu.app.myhub.analytics
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-
 /**
  * Mock Provider 用于测试
  */
@@ -12,7 +8,7 @@ class MockProvider(
     override val supportedPlatforms: Set<Platform> = setOf(Platform.JVM),
     override val supportedRegions: Set<Region> = setOf(Region.DOMESTIC, Region.OVERSEAS)
 ) : BaseAnalyticsProvider() {
-    
+
     val loggedEvents = mutableListOf<AnalyticsEvent>()
     val userProperties = mutableMapOf<String, AnalyticsValue?>()
     var currentUserId: String? = null

@@ -379,7 +379,7 @@ run_android() {
     local channel="${4:-}"
     
     # 构建 Gradle 参数（使用独立的变体参数，不再组合）
-    local gradle_args="-PappEnv=${environment} -PappTier=${version}"
+    local gradle_args="-PenabledPlatforms=android -PappEnv=${environment} -PappTier=${version}"
     if [ -n "$channel" ]; then
         gradle_args="$gradle_args -PappChannel=${channel}"
     fi

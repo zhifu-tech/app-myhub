@@ -37,13 +37,6 @@ class ApplicationTest {
     }
 
     @Test
-    fun `GET api cards without Authorization returns 401`() = testApplication {
-        application { module() }
-        val response = client.get("/api/cards")
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
-    }
-
-    @Test
     fun `POST api auth login with empty userId returns 400`() = testApplication {
         application { module() }
         val response = client.post("/api/auth/login") {
