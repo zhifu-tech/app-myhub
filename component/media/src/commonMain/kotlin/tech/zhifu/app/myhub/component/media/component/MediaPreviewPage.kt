@@ -28,6 +28,7 @@ import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
 import tech.zhifu.app.myhub.component.media.displayImageModel
 import tech.zhifu.app.myhub.component.media.displayMediaUrl
+import tech.zhifu.app.myhub.component.media.isVideo
 
 @Composable
 internal fun MediaPreviewPage(
@@ -37,7 +38,7 @@ internal fun MediaPreviewPage(
     val mediaUrl = remember(item.previewUrl, item.file) {
         item.displayMediaUrl()
     }
-    val shouldFallbackToSystemPlayer = item.isVideo &&
+    val shouldFallbackToSystemPlayer = item.mediaType.isVideo() &&
         (mediaPreviewer.isSystemPlayerPreferred() || mediaUrl.isBlank())
 
     when {
@@ -48,7 +49,7 @@ internal fun MediaPreviewPage(
             MediaPreviewFallbackOverlay()
         }
 
-        item.isVideo -> VideoContent(mediaUrl = mediaUrl)
+        item.mediaType.isVideo() -> VideoContent(mediaUrl = mediaUrl)
         else -> ImageContent(item = item)
     }
 }

@@ -4,6 +4,8 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.size
+import tech.zhifu.app.myhub.component.media.isImage
+import tech.zhifu.app.myhub.component.media.isVideo
 import tech.zhifu.app.myhub.datastore.model.util.generateUUId
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.analysis.ProviderAnalysisMediaInput
 import tech.zhifu.app.myhub.feature.ai.layer.common.util.inferMimeType
@@ -37,7 +39,7 @@ class MediaAttachmentSupport(
                 ?: return@forEachIndexed
             val mimeType = file.mimeType()?.toString().orEmpty()
                 .ifBlank { inferMimeType(sourceUri) }
-            val bytes = if (mimeType.startsWith("image/")) {
+            val bytes = if (mimeType.isImage()) {
                 runCatching { file.readBytes() }.getOrDefault(defaultValue = ByteArray(0))
             } else {
                 ByteArray(0)
@@ -61,14 +63,14 @@ class MediaAttachmentSupport(
                 sizeBytes = imported.sizeBytes,
                 sha256 = Sha256.digestHex(signatureBytes),
             )
-            if (bytes.isNotEmpty() && mimeType.startsWith("image/")) {
+            if (bytes.isNotEmpty() && mimeType.isImage()) {
                 analysisInputs += ProviderAnalysisMediaInput(
                     mimeType = mimeType,
                     dataBase64 = Base64.encode(bytes),
                     sourceUrl = imported.accessUrl,
                 )
             }
-            if (mimeType.startsWith("video/")) {
+            if (mimeType.isVideo()) {
                 val videoIndex = videoFiles.indexOf(file).takeIf { it >= 0 } ?: 0
                 val extraction = VideoKeyframeExtractor.extract(
                     file = file,
@@ -93,7 +95,7 @@ class MediaAttachmentSupport(
         file: PlatformFile,
     ): Boolean {
         val mimeType = file.mimeType()?.toString().orEmpty()
-        if (mimeType.startsWith("video/")) return true
+        if (mimeType.isVideo()) return true
         val path = file.toString().lowercase()
         return path.endsWith(".mp4") ||
             path.endsWith(".mov") ||

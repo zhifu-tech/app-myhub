@@ -1,5 +1,7 @@
 package tech.zhifu.app.myhub.feature.ai.layer.storage.media
 
+import tech.zhifu.app.myhub.component.media.isImage
+import tech.zhifu.app.myhub.component.media.isVideo
 import tech.zhifu.app.myhub.datastore.model.domain.MediaAsset
 import tech.zhifu.app.myhub.datastore.model.serializer.deserialize
 import tech.zhifu.app.myhub.datastore.model.serializer.serialize
@@ -75,7 +77,7 @@ class MediaPostProcessExecutor(
     private suspend fun deriveThumbnail(
         media: MediaAsset,
     ): ImportedMedia? = when {
-        media.mediaType.startsWith("image/") -> runCatching {
+        media.mediaType.isImage() -> runCatching {
             mediaFileStore.createImageThumbnail(
                 source = ImportedMedia(
                     storageHandle = media.storageHandle,
@@ -86,11 +88,11 @@ class MediaPostProcessExecutor(
         }.getOrNull()
 
         // 当前阶段未实现跨平台视频首帧抽取，保留为空。
-        media.mediaType.startsWith("video/") -> null
+        media.mediaType.isVideo() -> null
         else -> null
     }
 
     private fun deriveDurationMs(
         mediaType: String
-    ): Long? = if (mediaType.startsWith("video/")) null else null
+    ): Long? = if (mediaType.isVideo()) null else null
 }

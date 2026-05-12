@@ -14,6 +14,8 @@ import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.startAccessingSecurityScopedResource
 import io.github.vinceglb.filekit.stopAccessingSecurityScopedResource
 import io.ktor.http.decodeURLPart
+import tech.zhifu.app.myhub.component.media.extensionToMimeType
+import tech.zhifu.app.myhub.component.media.mimeTypeToExtension
 import tech.zhifu.app.myhub.datastore.file.storage.createPlatformPrivateStorageHandle
 import tech.zhifu.app.myhub.datastore.file.storage.extractPlatformPrivateStorageKeyFromStorageHandle
 import tech.zhifu.app.myhub.datastore.file.storage.resolveStorageHandleToAccessUrl
@@ -47,7 +49,7 @@ internal class NativeMediaFileStore : MediaFileStore {
         bytes: ByteArray,
         mimeType: String,
     ): ImportedMedia {
-        val extension = extensionForMimeType(mimeType)
+        val extension = mimeType.mimeTypeToExtension()
         val relativeKey = "ai-capture/generated/$draftId/$mediaId.$extension"
         val accessUrl = writePlatformPrivateStorageBytes(
             key = relativeKey,
@@ -71,7 +73,7 @@ internal class NativeMediaFileStore : MediaFileStore {
         val sourceFile = PlatformFile(sourcePath)
         if (!sourceFile.exists()) return null
         val parent = sourceFile.parent() ?: return null
-        val thumb = parent / "${sourceFile.nameWithoutExtension}.thumb.jpg"
+        parent / "${sourceFile.nameWithoutExtension}.thumb.jpg"
         val bytes = sourceFile.withScopedAccessSuspend {
             FileKit.compressImage(
                 file = sourceFile,
@@ -134,37 +136,13 @@ private suspend fun importMedia(
     val accessUrl = writePlatformPrivateStorageBytes(
         key = relativeKey,
         bytes = payload,
-        mimeType = sourceFile.mimeType()?.toString().orEmpty().ifBlank { inferMimeTypeFromExtension(extension) },
+        mimeType = sourceFile.mimeType()?.toString().orEmpty().ifBlank { extension.extensionToMimeType() },
     ).orEmpty()
     return ImportedMedia(
         storageHandle = createPlatformPrivateStorageHandle(relativeKey),
         accessUrl = accessUrl,
         sizeBytes = payload.size.toLong(),
     )
-}
-
-private fun extensionForMimeType(
-    mimeType: String,
-): String = when (mimeType.lowercase()) {
-    "image/jpeg",
-    "image/jpg" -> "jpg"
-
-    "image/webp" -> "webp"
-    "image/gif" -> "gif"
-    else -> "png"
-}
-
-private fun inferMimeTypeFromExtension(
-    extension: String,
-): String = when (extension.lowercase()) {
-    "jpg", "jpeg" -> "image/jpeg"
-    "png" -> "image/png"
-    "webp" -> "image/webp"
-    "gif" -> "image/gif"
-    "mp4" -> "video/mp4"
-    "mov" -> "video/quicktime"
-    "webm" -> "video/webm"
-    else -> "application/octet-stream"
 }
 
 private fun buildThumbKey(

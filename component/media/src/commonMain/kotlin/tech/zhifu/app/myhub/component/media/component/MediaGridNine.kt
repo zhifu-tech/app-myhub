@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.displayImageModel
+import tech.zhifu.app.myhub.component.media.isVideo
 
 @Composable
 fun MediaGridNine(
@@ -124,7 +125,7 @@ private fun MediaGridTile(
     onClick: () -> Unit,
     overlayContent: @Composable BoxScope.(index: Int, item: MediaItem) -> Unit,
 ) {
-    val shape = RoundedCornerShape(
+    RoundedCornerShape(
         size = if (visibleCount == 1) 18.dp else 14.dp
     )
     val imageModel = item.displayImageModel()
@@ -135,7 +136,7 @@ private fun MediaGridTile(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        if (item.isVideo && item.thumbnailUrl.isNullOrBlank()) {
+        if (item.mediaType.isVideo()) {
             MediaGridPlaceholder(label = item.name, showPlay = true)
         } else {
             SubcomposeAsyncImage(
@@ -144,14 +145,14 @@ private fun MediaGridTile(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 loading = {
-                    MediaGridPlaceholder(label = item.name, showPlay = item.isVideo)
+                    MediaGridPlaceholder(label = item.name, showPlay = false)
                 },
                 error = {
-                    MediaGridPlaceholder(label = item.name, showPlay = item.isVideo)
+                    MediaGridPlaceholder(label = item.name, showPlay = false)
                 },
             )
         }
-        if (item.isVideo) {
+        if (item.mediaType.isVideo()) {
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)

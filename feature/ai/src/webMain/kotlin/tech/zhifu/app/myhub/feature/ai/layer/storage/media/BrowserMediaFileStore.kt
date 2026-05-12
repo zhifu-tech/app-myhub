@@ -2,6 +2,7 @@ package tech.zhifu.app.myhub.feature.ai.layer.storage.media
 
 import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.readBytes
+import tech.zhifu.app.myhub.component.media.mimeTypeToExtension
 import tech.zhifu.app.myhub.datastore.file.storage.copyPlatformPrivateStorage
 import tech.zhifu.app.myhub.datastore.file.storage.createPlatformPrivateStorageHandle
 import tech.zhifu.app.myhub.datastore.file.storage.deleteStorageHandle
@@ -38,7 +39,7 @@ internal class BrowserMediaFileStore : MediaFileStore {
         bytes: ByteArray,
         mimeType: String,
     ): ImportedMedia {
-        val extension = extensionForMimeType(mimeType)
+        val extension = mimeType.mimeTypeToExtension()
         val key = "ai-capture/generated/$draftId/$mediaId.$extension"
         val accessUrl = writePlatformPrivateStorageBytes(
             key = key,
@@ -161,7 +162,7 @@ private fun String.resolveExtension(
         ?.lowercase()
     if (fromAccessUrl != null) return "$this.$fromAccessUrl"
     val mimeType = source.platformFile?.mimeType()?.toString().orEmpty()
-    val extension = extensionForMimeType(mimeType)
+    val extension = mimeType.mimeTypeToExtension()
     return "$this.$extension"
 }
 
@@ -176,20 +177,6 @@ private fun decodeDataUrl(
     val mimeType = metadata.substringBefore(';').ifBlank { "application/octet-stream" }
     val bytes = runCatching { Base64.decode(payload) }.getOrNull() ?: return null
     return PersistablePayload(bytes = bytes, mimeType = mimeType)
-}
-
-private fun extensionForMimeType(
-    mimeType: String,
-): String = when (mimeType.lowercase()) {
-    "image/jpeg",
-    "image/jpg" -> "jpg"
-
-    "image/webp" -> "webp"
-    "image/gif" -> "gif"
-    "video/mp4" -> "mp4"
-    "video/quicktime" -> "mov"
-    "video/webm" -> "webm"
-    else -> "bin"
 }
 
 private data class PersistablePayload(

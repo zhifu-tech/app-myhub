@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGridNine
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
-import tech.zhifu.app.myhub.datastore.model.domain.isVideo
 import tech.zhifu.app.myhub.datastore.model.domain.name
 
 @Composable
@@ -24,7 +23,7 @@ fun ContentItemLeading(
             id = media.id,
             name = media.name(),
             previewUrl = media.accessUrl,
-            isVideo = media.isVideo(),
+            mediaType = media.mediaType,
             thumbnailUrl = media.thumbAccessUrl,
         )
     }

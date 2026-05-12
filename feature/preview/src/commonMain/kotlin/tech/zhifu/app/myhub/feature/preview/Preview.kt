@@ -25,7 +25,6 @@ import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.component.MediaGalleryDialog
 import tech.zhifu.app.myhub.datastore.model.domain.CardStatus
 import tech.zhifu.app.myhub.datastore.model.domain.ContentCard
-import tech.zhifu.app.myhub.datastore.model.domain.isVideo
 import tech.zhifu.app.myhub.datastore.model.domain.name
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionSavingButton
 import tech.zhifu.app.myhub.feature.preview.content.PreviewActionShareButton
@@ -170,7 +169,7 @@ fun Preview(
                     id = item.media.id,
                     name = item.media.name(),
                     previewUrl = item.media.accessUrl,
-                    isVideo = item.media.isVideo(),
+                    mediaType = item.media.mediaType,
                     thumbnailUrl = item.media.thumbAccessUrl,
                 )
             },

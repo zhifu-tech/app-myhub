@@ -1,5 +1,6 @@
 package tech.zhifu.app.myhub.feature.ai.content.item
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.animation.animateContentSize
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,7 +40,6 @@ import tech.zhifu.app.myhub.feature.ai.content.text
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.Message
 import tech.zhifu.app.myhub.feature.ai.model.displayName
-import tech.zhifu.app.myhub.feature.ai.model.isVideo
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_msg_copied
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_user_badge
@@ -164,5 +163,5 @@ private fun CaptureMediaAsset.toMediaItem(): MediaItem =
         id = sha256.ifBlank { storageHandle },
         name = displayName(),
         previewUrl = accessUrl.takeUnless { isMissing }.orEmpty(),
-        isVideo = isVideo()
+        mediaType = mediaType
     )

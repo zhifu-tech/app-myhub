@@ -2,7 +2,6 @@ package tech.zhifu.app.myhub.component.media.internal
 
 import tech.zhifu.app.myhub.component.media.MediaItem
 import tech.zhifu.app.myhub.component.media.MediaPreviewer
-import tech.zhifu.app.myhub.component.media.systemMimeType
 
 class DefaultMediaPreviewer : MediaPreviewer {
     override fun openInSystemPlayer(

@@ -1,12 +1,10 @@
 package tech.zhifu.app.myhub.feature.ai.model
 
-fun CaptureMediaAsset.isVideo(): Boolean =
-    mediaType.startsWith("video/", ignoreCase = true)
-
+import tech.zhifu.app.myhub.component.media.isVideo
 
 fun CaptureMediaAsset.displayName(index: Int = 0): String =
     accessUrl.substringAfterLast('/').ifBlank {
-        if (isVideo()) {
+        if (mediaType.isVideo()) {
             "video-${index + 1}"
         } else {
             "image-${index + 1}"

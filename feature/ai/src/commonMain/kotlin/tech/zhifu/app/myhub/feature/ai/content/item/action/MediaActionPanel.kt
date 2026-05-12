@@ -37,14 +37,13 @@ import tech.zhifu.app.myhub.feature.ai.AIUiState
 import tech.zhifu.app.myhub.feature.ai.AIViewModel
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress
 import tech.zhifu.app.myhub.feature.ai.layer.agent.provider.image.ProviderImageGenerationProgress.Stage
-import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionComponent
+import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionEvent
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.ActionPayload
 import tech.zhifu.app.myhub.feature.ai.layer.conversation.action.text
 import tech.zhifu.app.myhub.feature.ai.model.CaptureDraft
 import tech.zhifu.app.myhub.feature.ai.model.CaptureMediaAsset
 import tech.zhifu.app.myhub.feature.ai.model.displayName
-import tech.zhifu.app.myhub.feature.ai.model.isVideo
 import tech.zhifu.app.myhub.feature.ai.resources.Res
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_empty_placeholder
 import tech.zhifu.app.myhub.feature.ai.resources.feature_ai_action_panel_media_existing
@@ -290,13 +289,13 @@ private fun CaptureMediaAsset.toMediaItem(
         id = "${storageHandle}_missing_$index",
         name = displayName(index),
         previewUrl = "",
-        isVideo = isVideo(),
+        mediaType = mediaType,
     )
 } else {
     MediaItem(
         id = storageHandle.ifBlank { "draft_media_$index" },
         name = displayName(index),
         previewUrl = accessUrl,
-        isVideo = isVideo(),
+        mediaType = mediaType,
     )
 }
