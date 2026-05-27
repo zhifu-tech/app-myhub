@@ -1,0 +1,34 @@
+plugins {
+    alias(libs.plugins.myhub.kmp)
+    alias(libs.plugins.myhub.kmp.android)
+    alias(libs.plugins.myhub.kmp.ios)
+    alias(libs.plugins.myhub.kmp.jvm)
+    alias(libs.plugins.myhub.kmp.js)
+    alias(libs.plugins.myhub.kmp.wasmJs)
+    alias(libs.plugins.kotlinSerialization)
+}
+
+kotlin {
+    android {
+        namespace = "tech.zhifu.app.myhub.datastore.model"
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            api(libs.kotlinx.collections.immutable)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotlin.testJunit)
+        }
+    }
+}
+

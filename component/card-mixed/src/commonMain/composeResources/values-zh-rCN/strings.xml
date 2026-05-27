@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="card_status_draft_continue_inputting">继续输入</string>
+  <string name="card_status_published_review_now">立即查看</string>
+  <string name="card_status_archived">已归档</string>
+</resources>

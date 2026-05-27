@@ -1,0 +1,61 @@
+-- 用户表
+CREATE TABLE user (
+    id TEXT PRIMARY KEY NOT NULL,
+
+    username TEXT NOT NULL UNIQUE,
+    display_name TEXT,
+
+    avatar_url TEXT,
+    avatar_text TEXT,
+
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+
+    status TEXT,           -- active / inactive / disabled / system
+    last_login_at TEXT     -- ISO-8601 UTC
+);
+
+-- 索引
+CREATE INDEX idx_user_username ON user(username);
+CREATE INDEX idx_user_status ON user(status);
+CREATE INDEX idx_user_last_login_at ON user(last_login_at);
+
+-- CRUD 操作
+
+selectUserById:
+SELECT * FROM user
+WHERE id = ?;
+
+insertUser:
+INSERT OR REPLACE INTO user (
+    id,
+    username,
+    display_name,
+    avatar_url,
+    avatar_text,
+    created_at,
+    updated_at,
+    status,
+    last_login_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateUser:
+UPDATE user
+SET username = ?,
+    display_name = ?,
+    avatar_url = ?,
+    avatar_text = ?,
+    updated_at = ?,
+    status = ?,
+    last_login_at = ?
+WHERE id = ?;
+
+selectCurrentUser:
+SELECT *
+FROM user
+WHERE last_login_at IS NOT NULL
+ORDER BY
+  CASE WHEN status = 'active' THEN 0 ELSE 1 END,
+  last_login_at DESC
+LIMIT 1;

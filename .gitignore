@@ -1,19 +1,86 @@
+# ============================================================================
+# IDE & Editor
+# ============================================================================
+.idea/
 *.iml
-.kotlin
-.gradle
+.vscode/
+
+# ============================================================================
+# Gradle & Kotlin
+# ============================================================================
+.gradle/
 **/build/
-xcuserdata
-!src/**/build/
 local.properties
-.idea
-.DS_Store
-captures
-.externalNativeBuild
-.cxx
+.kotlin/
+
+# ============================================================================
+# Android
+# ============================================================================
+.externalNativeBuild/
+.cxx/
+captures/
+
+# ============================================================================
+# iOS & Xcode
+# ============================================================================
+# Xcode 项目文件（保留必要的共享文件）
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
+
+# Xcode 工作空间（保留工作空间配置文件）
+*.xcworkspace/*
 !*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+
+# Xcode 用户数据和构建产物
+**/xcuserdata/
+**/DerivedData/
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# CocoaPods（Pods 目录已包含所有子目录，无需单独列出）
+iosApp/Pods/
+# Kotlin Multiplatform 自动生成的 podspec
+composeApp/composeApp.podspec
+
+# 注意：以下文件应该提交：
+# - iosApp/Podfile（必须）
+# - iosApp/Podfile.lock（推荐，确保依赖版本一致）
+# - iosApp/iosApp.xcworkspace（推荐，CocoaPods 需要）
+
+# ============================================================================
+# Node.js & Web
+# ============================================================================
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================================================
+# Environment & Config
+# ============================================================================
+.env
+.env.local
+.env.*.local
+server/.env
+server/.env.local
+androidApp/release.properties
+androidApp/release
+.cursor
+
+# ============================================================================
+# System Files
+# ============================================================================
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# Analytics
+# ============================================================================
+composeApp/analytics/analytics_*.json
+
+# ============================================================================
+# Build Artifacts
+# ============================================================================
+*/bin/

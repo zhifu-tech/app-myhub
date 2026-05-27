@@ -5,3 +5,9 @@ PRODUCT_BUNDLE_IDENTIFIER=tech.zhifu.app.myhub.MyHub$(TEAM_ID)
 
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0
+
+// Link SQLite library for SQLDelight NativeSqliteDriver
+// 注意：由于 composeApp 使用静态 Framework（isStatic = true），SQLite3 符号已经包含在 Framework 中
+// 因此不需要在 Xcode 项目中再次链接 SQLite3，避免重复链接警告
+// 如果改为动态 Framework，需要取消下面的注释
+// OTHER_LDFLAGS = $(inherited) -lsqlite3

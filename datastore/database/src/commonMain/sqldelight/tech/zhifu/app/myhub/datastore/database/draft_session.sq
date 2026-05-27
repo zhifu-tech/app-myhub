@@ -1,0 +1,43 @@
+-- 草稿会话表（中断恢复）
+CREATE TABLE draft_session (
+  id TEXT PRIMARY KEY NOT NULL,
+  card_id TEXT,
+  state TEXT NOT NULL,
+  draft_json TEXT NOT NULL,
+  missing_fields_json TEXT,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_draft_session_card_id ON draft_session(card_id);
+CREATE INDEX idx_draft_session_updated_at ON draft_session(updated_at);
+
+upsertDraftSession:
+INSERT OR REPLACE INTO draft_session (
+  id,
+  card_id,
+  state,
+  draft_json,
+  missing_fields_json,
+  updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteDraftSessionById:
+DELETE FROM draft_session
+WHERE id = ?;
+
+deleteDraftSessionsByCardId:
+DELETE FROM draft_session
+WHERE card_id = ?;
+
+selectDraftSessionById:
+SELECT *
+FROM draft_session
+WHERE id = ?;
+
+selectLatestDraftSessions:
+SELECT *
+FROM draft_session
+ORDER BY updated_at DESC
+LIMIT :limit OFFSET :offset;

@@ -1,0 +1,9 @@
+<resources>
+  <string name="feature_preview_journal_entry">笔记</string>
+  <string name="feature_preview_placeholder_hint">输入内容后，可在这里实时预览</string>
+  <string name="feature_preview_float_thumbnail_description">草稿预览</string>
+  <string name="feature_preview_saving_success">已保存到相册</string>
+  <string name="feature_preview_saving_permission_denied">相册权限被拒绝</string>
+  <string name="feature_preview_saving_failure">保存图片失败</string>
+  <string name="feature_preview_saving_unsupported">当前平台暂不支持保存</string>
+</resources>

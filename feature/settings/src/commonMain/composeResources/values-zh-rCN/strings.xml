@@ -1,0 +1,58 @@
+<resources>
+  <string name="feature_settings_appearance_language">外观和语言</string>
+
+  <string name="feature_settings_display_language">显示语言</string>
+  <string name="feature_settings_select_language">选择语言</string>
+  <string name="feature_settings_language_english">英语</string>
+  <string name="feature_settings_language_hant">繁體中文</string>
+  <string name="feature_settings_language_hans">简体中文</string>
+
+  <string name="feature_settings_theme_mode">主题模式</string>
+  <string name="feature_settings_select_theme">选择主题</string>
+  <string name="feature_settings_theme_light">浅色</string>
+  <string name="feature_settings_theme_dark">深色</string>
+  <string name="feature_settings_theme_system">跟随系统</string>
+
+  <string name="feature_settings_close">关闭</string>
+  <string name="feature_settings_retry">重试</string>
+  <string name="feature_settings_on">开启</string>
+  <string name="feature_settings_off">关闭</string>
+
+  <string name="feature_settings_ai">AI</string>
+  <string name="feature_settings_more">更多</string>
+  <string name="feature_settings_support">反馈与帮助</string>
+  <string name="feature_settings_license">开源代码许可</string>
+  <string name="feature_settings_logout">退出登录</string>
+  <string name="feature_settings_ai_config">AI Provider 配置</string>
+  <string name="feature_settings_ai_mode">模式</string>
+  <string name="feature_settings_select_ai_mode">选择 AI 模式</string>
+  <string name="feature_settings_ai_mode_disabled">禁用</string>
+  <string name="feature_settings_ai_mode_server_gateway">服务网关</string>
+  <string name="feature_settings_ai_mode_direct_api">直连 API</string>
+  <string name="feature_settings_ai_direct_endpoint">直连 Endpoint</string>
+  <string name="feature_settings_ai_direct_model">直连 Model</string>
+  <string name="feature_settings_ai_direct_vision_model">直连视觉 Model</string>
+  <string name="feature_settings_ai_direct_image_model">直连图片 Model</string>
+  <string name="feature_settings_ai_direct_api_key">直连 API Key</string>
+  <string name="feature_settings_ai_timeout_ms">超时（毫秒）</string>
+  <string name="feature_settings_ai_retries">最大重试次数</string>
+  <string name="feature_settings_ai_shortcut_title">AI 捕获页头部快捷入口</string>
+  <string name="feature_settings_ai_shortcut_hint">在 AI 捕获页头部显示一枚紧凑的 Provider
+    切换入口。这里只控制聊天页顶部快捷入口，之后也可以在这里重新打开。
+  </string>
+  <string name="feature_settings_ai_mode_hint">选择新的分析请求应该走哪条 Provider 路径。</string>
+  <string name="feature_settings_ai_direct_title">直连 API 参数</string>
+  <string name="feature_settings_ai_direct_hint">仅在选择“直连
+    API”模式时生效。建议分别配置文本分析、图片理解和图片生成模型。
+  </string>
+  <string name="feature_settings_ai_runtime_title">运行参数</string>
+  <string name="feature_settings_ai_runtime_hint">超时和重试次数会作用于所有 Provider 模式。</string>
+  <string name="feature_settings_ai_save">保存 AI 配置</string>
+  <string name="feature_settings_ai_validation_timeout_invalid">超时必须是大于 0 的整数</string>
+  <string name="feature_settings_ai_validation_max_retries_invalid">最大重试次数必须是大于等于 0 的整数</string>
+  <string name="feature_settings_ai_validation_direct_endpoint_required">直连 Endpoint 不能为空</string>
+  <string name="feature_settings_ai_validation_direct_model_required">直连 Model 不能为空</string>
+  <string name="feature_settings_ai_validation_direct_vision_model_required">直连视觉 Model 不能为空</string>
+  <string name="feature_settings_ai_validation_direct_image_model_required">直连图片 Model 不能为空</string>
+  <string name="feature_settings_ai_validation_direct_api_key_required">直连 API Key 不能为空</string>
+</resources>

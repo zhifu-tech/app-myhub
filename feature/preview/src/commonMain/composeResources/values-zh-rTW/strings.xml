@@ -1,0 +1,9 @@
+<resources>
+  <string name="feature_preview_journal_entry">筆記</string>
+  <string name="feature_preview_placeholder_hint">輸入內容後，可在這裡即時預覽</string>
+  <string name="feature_preview_float_thumbnail_description">草稿預覽</string>
+  <string name="feature_preview_saving_success">已儲存到相簿</string>
+  <string name="feature_preview_saving_permission_denied">相簿權限被拒絕</string>
+  <string name="feature_preview_saving_failure">儲存圖片失敗</string>
+  <string name="feature_preview_saving_unsupported">目前平台暫不支援儲存</string>
+</resources>

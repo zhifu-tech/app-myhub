@@ -1,0 +1,6 @@
+# Android release signing config
+
+releaseKeystorePath=/absolute/path/to/release.keystore
+releaseKeystorePassword=your-keystore-password
+releaseKeyAlias=your-key-alias
+releaseKeyPassword=your-key-password

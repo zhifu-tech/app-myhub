@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="card_status_draft_continue_inputting">Continue Inputting</string>
+  <string name="card_status_published_review_now">Review Now</string>
+  <string name="card_status_archived">Archived</string>
+</resources>

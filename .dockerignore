@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+!server/build/libs/*.jar
+gradle-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# 测试和临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# 其他构建产物
+bin/
+out/
+dist/
+
+# 数据库文件（运行时生成）
+*.db
+*.db-shm
+*.db-wal
+.myhub/
+
+# Node modules (如果存在)
+node_modules/
+
+# Android/iOS 构建产物（不需要用于 server 构建）
+androidApp/build/
+iosApp/build/
+composeApp/build/
+
+# 其他不需要的目录（保留源代码但排除构建产物）
+kotlin-js-store/
+
+

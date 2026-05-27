@@ -1,0 +1,70 @@
+package tech.zhifu.app.myhub.logger
+
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KMarkerFactory
+import io.github.oshai.kotlinlogging.Marker
+
+internal class LoggerImpl(
+    private val delegate: KLogger
+) : Logger {
+    override fun isTraceEnabled() = delegate.isTraceEnabled()
+    override fun trace(
+        marker: Any?,
+        throwable: Throwable?,
+        message: () -> Any?
+    ) = delegate.trace(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
+
+    override fun isDebugEnabled() = delegate.isDebugEnabled()
+    override fun debug(
+        marker: Any?,
+        throwable: Throwable?,
+        message: () -> Any?
+    ) = delegate.debug(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
+
+    override fun isInfoEnabled() = delegate.isInfoEnabled()
+    override fun info(
+        marker: Any?,
+        throwable: Throwable?,
+        message: () -> Any?
+    ) = delegate.info(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
+
+    override fun isWarnEnabled() = delegate.isWarnEnabled()
+    override fun warn(
+        marker: Any?,
+        throwable: Throwable?,
+        message: () -> Any?
+    ) = delegate.warn(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
+
+    override fun isErrorEnabled() = delegate.isErrorEnabled()
+    override fun error(
+        marker: Any?,
+        throwable: Throwable?,
+        message: () -> Any?
+    ) = delegate.error(
+        marker = marker?.asMarker(),
+        throwable = throwable,
+        message = message,
+    )
+}
+
+private fun Any?.asMarker(): Marker? = when (this) {
+    is Marker -> this
+    is String -> KMarkerFactory.getMarker(this)
+    else -> null
+}

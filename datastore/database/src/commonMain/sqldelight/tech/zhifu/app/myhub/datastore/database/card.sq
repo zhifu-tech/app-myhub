@@ -1,0 +1,141 @@
+-- 卡片事实表（本地资产主表）
+CREATE TABLE card (
+    id TEXT PRIMARY KEY NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    summary TEXT,
+    status TEXT,
+    location TEXT, -- JSON-TEXT
+    tags TEXT, -- JSON-TEXT
+    source TEXT, -- JSON-TEXT
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    deleted_at INTEGER DEFAULT NULL,
+    version INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX idx_card_updated_at ON card(updated_at);
+CREATE INDEX idx_card_type_status_updated_at ON card(type, status, updated_at);
+CREATE INDEX idx_card_type ON card(type);
+CREATE INDEX idx_card_status ON card(status);
+CREATE INDEX idx_card_location ON card(location);
+CREATE INDEX idx_card_title_id_asc ON card(title, id);
+CREATE INDEX idx_card_title_id_desc ON card(title DESC, id DESC);
+
+insertCard:
+INSERT OR REPLACE INTO card (
+  id, type, title, summary, status, location, tags, source, created_at, updated_at, deleted_at, version
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteCard:
+DELETE FROM card
+WHERE id = ?;
+
+selectCardById:
+SELECT * FROM card
+WHERE id = ?;
+
+selectCardsByUserIdWithUpdatedDescFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id =:userId
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithUpdatedDescNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (c.updated_at < :cursorUpdatedAt
+       OR (c.updated_at = :cursorUpdatedAt AND c.id < :cursorId))
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithUpdatedDescSearchFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithUpdatedDescSearchNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+  AND (c.updated_at < :cursorUpdatedAt
+       OR (c.updated_at = :cursorUpdatedAt AND c.id < :cursorId))
+ORDER BY c.updated_at DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    c.title < :cursorTitle
+    OR (c.title = :cursorTitle AND c.id < :cursorId)
+  )
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescSearchFirst:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;
+
+selectCardsByUserIdWithTitleDescSearchNext:
+SELECT c.*
+FROM card c
+JOIN user_card uc ON uc.card_id = c.id
+WHERE uc.user_id = :userId
+  AND (
+    lower(c.title) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.summary, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.tags, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.location, '')) LIKE '%' || :query || '%'
+    OR lower(COALESCE(c.source, '')) LIKE '%' || :query || '%'
+  )
+  AND (
+    c.title < :cursorTitle
+    OR (c.title = :cursorTitle AND c.id < :cursorId)
+  )
+ORDER BY c.title DESC, c.id DESC
+LIMIT :limit;

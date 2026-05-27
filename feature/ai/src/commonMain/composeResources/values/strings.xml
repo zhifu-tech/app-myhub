@@ -1,0 +1,263 @@
+<resources>
+  <string name="feature_ai_top_bar_title">AI Capture</string>
+  <string name="feature_ai_top_bar_subtitle">Turn loose thoughts into publishable cards</string>
+  <string name="feature_ai_top_bar_back">Back</string>
+  <string name="feature_ai_top_bar_settings">Settings</string>
+  <string name="feature_ai_loading_title">Loading…</string>
+  <string name="feature_ai_loading_subtitle">Please wait</string>
+  <string name="feature_ai_error_fallback_title">Load failed</string>
+  <string name="feature_ai_thinking_collapsed_hint">AI thinking completed (tap to expand)</string>
+  <string name="feature_ai_thinking_expand">Expand</string>
+  <string name="feature_ai_thinking_collapse">Collapse</string>
+  <string name="feature_ai_thinking_title">AI is thinking…</string>
+  <string name="feature_ai_reasoning_live_title">Analyzing</string>
+  <string name="feature_ai_reasoning_live_desc">I will keep updating the draft while reasoning. You can follow the trace
+    or wait for the result.
+  </string>
+  <string name="feature_ai_reasoning_live_desc_media">Analyzing the uploaded media now. I will stop at the first stable
+    draft instead of
+    looping through conflicting details.
+  </string>
+  <string name="feature_ai_reasoning_live_desc_text">Analyzing your input now. I will summarize the result as soon as
+    the draft is
+    stable.
+  </string>
+  <string name="feature_ai_reasoning_history_title">Reasoning trace</string>
+  <string name="feature_ai_reasoning_collapsed_preview">Analysis finished. Tap to expand the trace.</string>
+  <string name="feature_ai_action_title_media">Media</string>
+  <string name="feature_ai_action_title_tags">Tags</string>
+  <string name="feature_ai_action_title_next_step">Next step</string>
+  <string name="feature_ai_action_title_recommended_tags">Recommended tags</string>
+  <string name="feature_ai_action_title_draft_actions">Draft actions</string>
+  <string name="feature_ai_action_title_type">Capture type</string>
+  <string name="feature_ai_action_title_location">Location</string>
+  <string name="feature_ai_action_input_hint">Type below and send</string>
+  <string name="feature_ai_input_quick_capture">Take photo</string>
+  <string name="feature_ai_input_quick_upload">Upload media</string>
+  <string name="feature_ai_input_support_capture">You can also take a photo or upload an image. I will read it first and
+    turn it into a draft.
+  </string>
+  <string name="feature_ai_input_placeholder_media">Add media, or let AI generate an image first</string>
+  <string name="feature_ai_input_placeholder_tags">Add one tag at a time, e.g. cafe</string>
+  <string name="feature_ai_input_placeholder_summary">Add a fuller summary and send</string>
+  <string name="feature_ai_input_placeholder_location">Type a place and send</string>
+  <string name="feature_ai_input_placeholder_title">Type a clear title and send</string>
+  <string name="feature_ai_input_placeholder_review">Choose an edit action below first</string>
+  <string name="feature_ai_input_placeholder_default">Type text, or take / upload media</string>
+  <string name="feature_ai_send_desc">Send</string>
+  <string name="feature_ai_input_context_default">Free input</string>
+  <string name="feature_ai_input_context_media">Add media notes</string>
+  <string name="feature_ai_input_context_tags">Add tags</string>
+  <string name="feature_ai_input_context_summary">Refine summary</string>
+  <string name="feature_ai_input_context_location">Add place</string>
+  <string name="feature_ai_input_context_title">Add title</string>
+  <string name="feature_ai_input_context_review">Choose an edit</string>
+  <string name="feature_ai_input_context_complete">Start another</string>
+  <string name="feature_ai_input_context_hint">Your input will sync into the draft immediately</string>
+  <string name="feature_ai_input_context_hint_apply">Sending will update the current draft immediately</string>
+  <string name="feature_ai_input_context_hint_review">Choose an edit action below first</string>
+  <string name="feature_ai_action_upload_media">Add media</string>
+  <string name="feature_ai_action_capture_media">Take photo</string>
+  <string name="feature_ai_action_replace_media">Replace media</string>
+  <string name="feature_ai_action_generate_media">Generate with AI</string>
+  <string name="feature_ai_action_remove_media">Clear images</string>
+  <string name="feature_ai_action_cancel_analysis">Stop analysis</string>
+  <string name="feature_ai_action_uploaded_media">Uploaded images</string>
+  <string name="feature_ai_action_skip_media">Skip for now</string>
+  <string name="feature_ai_action_skip_tags">Skip tags</string>
+  <string name="feature_ai_action_review">Back to review</string>
+  <string name="feature_ai_action_edit_media">Adjust images</string>
+  <string name="feature_ai_action_edit_location">Edit place</string>
+  <string name="feature_ai_action_edit_title">Edit title</string>
+  <string name="feature_ai_action_edit_tags">Edit tags</string>
+  <string name="feature_ai_action_edit_summary">Edit summary</string>
+  <string name="feature_ai_action_publish">Publish</string>
+  <string name="feature_ai_action_save_draft">Save draft</string>
+  <string name="feature_ai_action_delete_card">Discard draft</string>
+  <string name="feature_ai_action_clear_location">Clear place</string>
+  <string name="feature_ai_action_new_capture">Start another</string>
+  <string name="feature_ai_action_input_title_hint">Type a new title and send</string>
+  <string name="feature_ai_msg_bootstrap">Type a thought, paste some text, or take / upload media. I will extract
+    the key signals first, then shape them into a draft with you.
+  </string>
+  <string name="feature_ai_msg_reasoning">AI reasoning:\n%1$s</string>
+  <string name="feature_ai_msg_intent">Intent detected: %1$s</string>
+  <string name="feature_ai_msg_draft_complete">The draft is ready. I put the key parts below, and you can publish after
+    a quick check.
+  </string>
+  <string name="feature_ai_msg_draft_need_media">The content is already organized. Adding one visual will make the card
+    feel complete, but you can continue without it.
+  </string>
+  <string name="feature_ai_msg_draft_need_tags">I already pulled out the main idea. A few tags will make it easier to
+    find later, but skipping is also fine.
+  </string>
+  <string name="feature_ai_msg_draft_need_title">The content is taking shape. Give it a clear title and we can move
+    on.
+  </string>
+  <string name="feature_ai_msg_tag_added_complete">Tag added: %1$s. All info is ready. You can review now.</string>
+  <string name="feature_ai_msg_tag_added_need_more">Added “%1$s”. Keep adjusting tags, or go back to review.</string>
+  <string name="feature_ai_msg_media_not_selected">No media selected. Continue the next step below.</string>
+  <string name="feature_ai_msg_media_attached">Added %1$d media item(s). The draft already feels more complete.</string>
+  <string name="feature_ai_msg_media_generating">I am generating an image that fits the current draft. This may take a
+    moment.
+  </string>
+  <string name="feature_ai_msg_media_generate_failed">Image generation did not finish this time. You can upload a local
+    image below, or try generating again.
+  </string>
+  <string name="feature_ai_msg_media_editing">The images are synced. Add more, replace them, or clear them below.
+  </string>
+  <string name="feature_ai_msg_media_analysis_cancelled">Stopped the current media analysis. You can adjust the upload
+    and try
+    again.
+  </string>
+  <string name="feature_ai_msg_media_analysis_fallback">The media is saved. I could not extract analyzable frames this
+    time, so you can add one line of text, upload a cover image, or retry on a device with video frame extraction
+    available.
+  </string>
+  <string name="feature_ai_msg_skip_media">Skipped media step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_tags">Skipped tag step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_field">Skipped field: %1$s. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_title">Skipped title step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_summary">Skipped summary step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_location">Skipped place step. Continue the next step below.</string>
+  <string name="feature_ai_msg_skip_current_step">Skipped the current step. Continue the next step below.</string>
+  <string name="feature_ai_msg_move_review">The draft is ready. Publish if it already looks right, or tap a field below
+    to adjust it.
+  </string>
+  <string name="feature_ai_msg_manual_edit">Tell me how you want it changed and I will update the draft directly.
+  </string>
+  <string name="feature_ai_msg_title_editing">Type the new title below. When you are done, you can go back to review.
+  </string>
+  <string name="feature_ai_msg_ai_unavailable">AI unavailable: %1$s</string>
+  <string name="feature_ai_msg_switch_manual">Switched to manual edit. Enter title first, then publish.</string>
+  <string name="feature_ai_msg_title_updated">Title updated. Keep editing, or go back to review.</string>
+  <string name="feature_ai_msg_tags_editing">Tap a suggested tag, or type one new tag below. When you are done, go back
+    to review.
+  </string>
+  <string name="feature_ai_msg_summary_editing">Type a better summary below. When you are done, go back to review.
+  </string>
+  <string name="feature_ai_msg_location_editing">Type a place directly, or tap an example below. When you are done, go
+    back to review.
+  </string>
+  <string name="feature_ai_msg_summary_updated">Summary updated. Keep editing, or go back to review.</string>
+  <string name="feature_ai_msg_tag_removed">Removed “%1$s”. Keep adjusting tags, or go back to review.</string>
+  <string name="feature_ai_msg_type_updated">Capture type updated: %1$s.</string>
+  <string name="feature_ai_msg_location_updated">Location updated to “%1$s”. Keep editing, or go back to review.
+  </string>
+  <string name="feature_ai_msg_location_cleared">Location cleared. You can add a new one, or go back to review.</string>
+  <string name="feature_ai_msg_draft_saved">Saved locally. You can come back and finish it later.</string>
+  <string name="feature_ai_msg_published">Published “%1$s”. Want to capture something else next?</string>
+  <string name="feature_ai_msg_publishing">Publishing now. I am handling the final step.</string>
+  <string name="feature_ai_msg_reset">New session started. Enter content to capture.</string>
+  <string name="feature_ai_msg_blocked_input">This step works better with the actions below, or with the specific input
+    I am asking for.
+  </string>
+  <string name="feature_ai_msg_blocked_action">Action unavailable: %1$s (current state: %2$s)</string>
+  <string name="feature_ai_msg_restore_session">Last draft session restored.</string>
+  <string name="feature_ai_msg_restore_session_media_missing">%1$s media item(s) could not be restored. Please choose the image again.</string>
+  <string name="feature_ai_msg_review_input_help">Tap the item you want to adjust below, then enter the new content
+    inside that editor.
+  </string>
+  <string name="feature_ai_action_panel_media_title_missing">Add media to make the card feel complete</string>
+  <string name="feature_ai_action_panel_media_title_generating">AI is generating an image</string>
+  <string name="feature_ai_action_panel_media_title_ready">%1$d media item(s) are ready. Want to adjust them?</string>
+  <string name="feature_ai_action_panel_media_support_missing">Take a photo, upload one, or let AI generate an image
+    from
+    the current draft. Images and videos are both supported; the first media tile becomes the default cover, and you can
+    replace it later.
+  </string>
+  <string name="feature_ai_action_panel_media_support_generating">Generation has started. Watch the progress here; the
+    final image will appear automatically when it is ready.
+  </string>
+  <string name="feature_ai_action_panel_media_support_ready">The first image is currently used as the cover. Adding,
+    replacing, generating, or clearing images keeps you here until you decide to go back to review.
+  </string>
+  <string name="feature_ai_action_panel_media_existing">Current media</string>
+  <string name="feature_ai_action_panel_media_empty_placeholder">There is no media yet. Any uploaded or AI-generated
+    media will appear here immediately.
+  </string>
+  <string name="feature_ai_action_panel_media_missing_hint">%1$s media item(s) are unavailable after restart. Please choose the image again.</string>
+  <string name="feature_ai_action_panel_media_stage_preparing">Preparing model</string>
+  <string name="feature_ai_action_panel_media_stage_generating">Rendering image</string>
+  <string name="feature_ai_action_panel_media_stage_finalizing">Finalizing image</string>
+  <string name="feature_ai_action_panel_media_progress">Step %1$d / %2$d</string>
+  <string name="feature_ai_action_panel_tag_title_empty">Pick a few tags so this is easier to find later</string>
+  <string name="feature_ai_action_panel_tag_title_selected">The tags are already organized. Tap one to remove it.
+  </string>
+  <string name="feature_ai_action_panel_tag_support">Suggested tags and custom tags can be used together.</string>
+  <string name="feature_ai_action_panel_tag_custom_hint">You can also type one new tag below</string>
+  <string name="feature_ai_action_panel_input_title">Give this capture a title that is easy to understand at a glance
+  </string>
+  <string name="feature_ai_action_panel_input_summary">Add a fuller summary so the card is easier to revisit later
+  </string>
+  <string name="feature_ai_action_panel_input_location">Add a place so it is easier to search later</string>
+  <string name="feature_ai_action_panel_input_support">Type in the bottom input bar and send. I will sync the change
+    into the draft right away.
+  </string>
+  <string name="feature_ai_action_panel_review_edit_title">Tap any part you want to improve</string>
+  <string name="feature_ai_action_panel_review_edit_support">Each item shows the current value, so you can jump straight
+    into the right editor.
+  </string>
+  <string name="feature_ai_action_panel_publish_title">Publish when everything looks right</string>
+  <string name="feature_ai_action_panel_publish_support">You can also save the draft now and finish it later.</string>
+  <string name="feature_ai_action_panel_complete_title">This one is done. Want to start another capture?</string>
+  <string name="feature_ai_action_panel_complete_support">A new capture starts with a fresh draft and will not affect
+    what you just finished.
+  </string>
+  <string name="feature_ai_action_panel_preview_status">Preview first</string>
+  <string name="feature_ai_action_panel_preview_title_pinned">Keep the right-side preview open</string>
+  <string name="feature_ai_action_panel_preview_title_floating">Take a quick look at the preview</string>
+  <string name="feature_ai_action_panel_preview_support_pinned">Check the cover, copy, and metadata first, then edit the
+    field you want.
+  </string>
+  <string name="feature_ai_action_panel_preview_support_floating">On small screens, tap the preview button near the
+    composer, then come back and edit.
+  </string>
+  <string name="feature_ai_action_panel_preview_check_cover">Cover</string>
+  <string name="feature_ai_action_panel_preview_check_copy">Copy</string>
+  <string name="feature_ai_action_panel_preview_check_meta">Meta</string>
+  <string name="feature_ai_action_panel_preview_media_count">%1$d media item(s)</string>
+  <string name="feature_ai_action_panel_preview_no_media">Media pending</string>
+  <string name="feature_ai_action_panel_current_value">Current value</string>
+  <string name="feature_ai_action_panel_edit_empty">Not added yet</string>
+  <string name="feature_ai_action_panel_edit_media_value">%1$d media item(s) selected</string>
+  <string name="feature_ai_action_panel_edit_tags_value">%1$s</string>
+  <string name="feature_ai_action_panel_location_title_missing">Add a place so this is easier to find later</string>
+  <string name="feature_ai_action_panel_location_title_ready">The place is set. Want to make it more precise?</string>
+  <string name="feature_ai_action_panel_location_support_missing">Type a city, district, landmark, or venue name, or tap
+    an example below. The more concrete it is, the easier it will be to find later.
+  </string>
+  <string name="feature_ai_action_panel_location_support_ready">Update it with a fuller place name, or clear it and add
+    a new one.
+  </string>
+  <string name="feature_ai_action_panel_location_current">Current place</string>
+  <string name="feature_ai_action_panel_location_empty_placeholder">No place is attached yet. Add a city, district,
+    landmark, or venue so the capture is easier to revisit later.
+  </string>
+  <string name="feature_ai_action_panel_location_example_city">e.g. Jing'an, Shanghai</string>
+  <string name="feature_ai_action_panel_location_example_district">e.g. West Lake, Hangzhou</string>
+  <string name="feature_ai_action_panel_location_example_store">e.g. a cafe on Yuyuan Road</string>
+  <string name="feature_ai_provider_title">Current provider</string>
+  <string name="feature_ai_provider_hint">Switching here affects the next analysis request immediately.</string>
+  <string name="feature_ai_provider_close">Hide provider shortcut</string>
+  <string name="feature_ai_provider_hidden_hint">The provider shortcut is hidden. You can turn it back on in AI Provider
+    settings.
+  </string>
+  <string name="feature_ai_provider_mode_disabled_label">Manual</string>
+  <string name="feature_ai_provider_mode_disabled_desc">Keep drafting and editing without AI analysis.</string>
+  <string name="feature_ai_provider_mode_server_label">Server</string>
+  <string name="feature_ai_provider_mode_server_desc">Use the server path first for a steadier experience.</string>
+  <string name="feature_ai_provider_mode_direct_label">Direct</string>
+  <string name="feature_ai_provider_mode_direct_desc">Talk straight to a local or external model for experimentation.
+  </string>
+  <string name="feature_ai_user_badge">Me</string>
+  <string name="feature_ai_capture_type_place">Place</string>
+  <string name="feature_ai_capture_type_idea">Idea</string>
+  <string name="feature_ai_capture_type_article">Article</string>
+  <string name="feature_ai_capture_type_person">Person</string>
+  <string name="feature_ai_preview_untitled_draft">Untitled draft</string>
+  <string name="feature_ai_preview_continue_hint">Continue adding your thoughts…</string>
+  <string name="feature_ai_preview_continue_edit">Continue editing</string>
+  <string name="feature_ai_preview_button_label">Preview</string>
+  <string name="feature_ai_msg_copied">Message copied</string>
+</resources>

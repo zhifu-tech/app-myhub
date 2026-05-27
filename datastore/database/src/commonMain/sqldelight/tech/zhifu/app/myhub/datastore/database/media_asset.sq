@@ -1,0 +1,60 @@
+-- 媒体资产表（本地二进制文件索引）
+CREATE TABLE media_asset (
+  id TEXT PRIMARY KEY NOT NULL,
+  card_id TEXT NOT NULL,
+  media_type TEXT NOT NULL, -- image/jpeg, video/mp4, audio/mpeg...
+  storage_handle TEXT NOT NULL,
+  thumb_storage_handle TEXT,
+  width INTEGER,
+  height INTEGER,
+  duration_ms INTEGER,
+  size_bytes INTEGER NOT NULL,
+  sha256 TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_media_asset_card_id ON media_asset(card_id);
+CREATE INDEX idx_media_asset_media_type ON media_asset(media_type);
+CREATE INDEX idx_media_asset_created_at ON media_asset(created_at);
+
+upsertMediaAsset:
+INSERT OR REPLACE INTO media_asset (
+  id,
+  card_id,
+  media_type,
+  storage_handle,
+  thumb_storage_handle,
+  width,
+  height,
+  duration_ms,
+  size_bytes,
+  sha256,
+  created_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteMediaAssetById:
+DELETE FROM media_asset
+WHERE id = ?;
+
+deleteMediaAssetsByCardId:
+DELETE FROM media_asset
+WHERE card_id = ?;
+
+selectMediaAssetById:
+SELECT *
+FROM media_asset
+WHERE id = ?;
+
+selectMediaAssetsByCardId:
+SELECT *
+FROM media_asset
+WHERE card_id = ?
+ORDER BY created_at DESC;
+
+selectAllMediaAssets:
+SELECT *
+FROM media_asset
+ORDER BY created_at DESC
+LIMIT :limit OFFSET :offset;

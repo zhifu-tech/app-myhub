@@ -1,0 +1,10 @@
+{
+  "userId": "user-001",
+  "theme": "dark",
+  "language": "zh-CN",
+  "layoutAsList": true,
+  "sortAsDate": true,
+  "defaultCardType": "quote",
+  "autoSync": true,
+  "syncInterval": 3600000
+}

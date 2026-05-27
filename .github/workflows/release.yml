@@ -1,0 +1,322 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publish GitHub Release"
+        required: false
+        default: "true"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: 25
+
+  GRADLE_OPTS: >
+    -Dorg.gradle.daemon=false
+    -Dorg.gradle.parallel=true
+    -Dorg.gradle.configuration-cache=true
+    -Dorg.gradle.caching=true
+    -Dkotlin.incremental=true
+
+jobs:
+
+  build-desktop:
+    name: Desktop • ${{ matrix.variant }} • ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+
+          # -------------------------------------------------
+          # dev-free-channel
+          # -------------------------------------------------
+
+          - variant: dev-free-channel
+            os: macos-latest
+            platform: macOS
+            artifact_name: desktop-macos-dev-free-channel
+            artifact_path: composeApp/build/compose/binaries/main/dmg/*.dmg
+
+          - variant: dev-free-channel
+            os: windows-latest
+            platform: Windows
+            artifact_name: desktop-windows-dev-free-channel
+            artifact_path: composeApp/build/compose/binaries/main/msi/*.msi
+
+
+          # -------------------------------------------------
+          # prod-free-umeng
+          # -------------------------------------------------
+
+          - variant: prod-free-umeng
+            os: macos-latest
+            platform: macOS
+            artifact_name: desktop-macos-prod-free-umeng
+            artifact_path: composeApp/build/compose/binaries/main/dmg/*.dmg
+
+          #          - variant: prod-free-umeng
+          #            os: windows-latest
+          #            platform: Windows
+          #            artifact_name: desktop-windows-prod-free-umeng
+          #            artifact_path: composeApp/build/compose/binaries/main/msi/*.msi
+
+          # -------------------------------------------------
+          # prod-free-googlePlay
+          # -------------------------------------------------
+
+          - variant: prod-free-googlePlay
+            os: macos-latest
+            platform: macOS
+            artifact_name: desktop-macos-prod-free-googlePlay
+            artifact_path: composeApp/build/compose/binaries/main/dmg/*.dmg
+
+          #          - variant: prod-free-googlePlay
+          #            os: windows-latest
+          #            platform: Windows
+          #            artifact_name: desktop-windows-prod-free-googlePlay
+          #            artifact_path: composeApp/build/compose/binaries/main/msi/*.msi
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission
+        shell: bash
+        run: chmod +x gradlew
+
+      - name: Resolve variant params
+        id: variant
+        shell: bash
+        run: |
+          case "${{ matrix.variant }}" in
+
+            dev-free-channel)
+              echo "app_env=dev" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=channel" >> $GITHUB_OUTPUT
+              ;;
+
+            prod-free-umeng)
+              echo "app_env=prod" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=umeng" >> $GITHUB_OUTPUT
+              ;;
+
+            prod-free-googlePlay)
+              echo "app_env=prod" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=googlePlay" >> $GITHUB_OUTPUT
+              ;;
+
+          esac
+
+      - name: Build desktop package
+        shell: bash
+        run: |
+          ./gradlew \
+            :composeApp:packageDistributionForCurrentOS \
+            --stacktrace \
+            -PappEnv=${{ steps.variant.outputs.app_env }} \
+            -PappTier=${{ steps.variant.outputs.app_tier }} \
+            -PappChannel=${{ steps.variant.outputs.app_channel }}
+
+      - name: Verify desktop artifacts
+        shell: bash
+        run: |
+          echo "Listing compose binaries..."
+          ls -R composeApp/build/compose/binaries || true
+
+      - name: Upload desktop artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+          compression-level: 0
+
+  # =========================================================
+  # Android Builds
+  # =========================================================
+
+  build-android:
+    name: Android • ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        variant:
+          - dev-free-channel
+          - prod-free-umeng
+          - prod-free-googlePlay
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission
+        shell: bash
+        run: chmod +x gradlew
+
+      - name: Resolve variant params
+        id: variant
+        shell: bash
+        run: |
+          case "${{ matrix.variant }}" in
+
+            dev-free-channel)
+              echo "app_env=dev" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=channel" >> $GITHUB_OUTPUT
+              ;;
+
+            prod-free-umeng)
+              echo "app_env=prod" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=umeng" >> $GITHUB_OUTPUT
+              ;;
+
+            prod-free-googlePlay)
+              echo "app_env=prod" >> $GITHUB_OUTPUT
+              echo "app_tier=free" >> $GITHUB_OUTPUT
+              echo "app_channel=googlePlay" >> $GITHUB_OUTPUT
+              ;;
+
+          esac
+
+      - name: Prepare Android signing config
+        shell: bash
+        run: |
+          if [ ! -f androidApp/release.properties ]; then
+            cp androidApp/release.properties.example androidApp/release.properties
+          fi
+
+      - name: Build Android APK
+        shell: bash
+        run: |
+          ./gradlew \
+            :androidApp:assembleRelease \
+            --stacktrace \
+            -PenabledPlatforms=android \
+            -PappEnv=${{ steps.variant.outputs.app_env }} \
+            -PappTier=${{ steps.variant.outputs.app_tier }} \
+            -PappChannel=${{ steps.variant.outputs.app_channel }}
+
+      - name: Verify Android artifacts
+        shell: bash
+        run: |
+          echo "Listing APK outputs..."
+          ls -R androidApp/build/outputs/apk || true
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.variant }}
+          path: androidApp/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+          compression-level: 0
+
+  # =========================================================
+  # Publish GitHub Release
+  # =========================================================
+
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-desktop
+      - build-android
+
+    if: |
+      startsWith(github.ref, 'refs/tags/') ||
+      github.event.inputs.publish_release == 'true'
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Print release assets
+        shell: bash
+        run: |
+          echo "Release assets:"
+          ls -R release-assets
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          cat > release-notes.md <<'EOF'
+          ## Downloads
+
+          ### Desktop
+          - macOS (.dmg)
+          - Windows (.msi)
+
+          ### Android
+          - APK release builds
+
+          ## Included Variants
+
+          - dev/free/channel
+          - prod/free/umeng
+          - prod/free/googlePlay
+
+          ## Integrity
+
+          SHA256 checksums are attached.
+          EOF
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body_path: release-notes.md
+          files: |
+            release-assets/*
+            release-assets/SHA256SUMS.txt

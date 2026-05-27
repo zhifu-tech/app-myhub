@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "557805960070",
+    "project_id": "myhub-2a6db",
+    "storage_bucket": "myhub-2a6db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557805960070:android:f58ac011a124ef192dca07",
+        "android_client_info": {
+          "package_name": "tech.zhifu.app.myhub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2kInb5WfWKsl5yp5OEKQQku6v5S5adHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

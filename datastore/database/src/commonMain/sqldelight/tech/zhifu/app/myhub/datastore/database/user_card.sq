@@ -1,0 +1,42 @@
+-- 用户 × 卡片 的主观状态表
+CREATE TABLE user_card (
+  user_id TEXT NOT NULL,
+  card_id TEXT NOT NULL,
+
+  PRIMARY KEY (user_id, card_id),
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (card_id) REFERENCES card(id) ON DELETE CASCADE
+);
+
+-- 索引
+CREATE INDEX idx_user_card_user_id ON user_card(user_id);
+CREATE INDEX idx_user_card_card_id ON user_card(card_id);
+
+-- CRUD 操作
+
+selectUserCardsByUserId:
+SELECT * FROM user_card
+WHERE user_id = ?;
+
+selectUserCardIdsByUserId:
+SELECT card_id FROM user_card
+WHERE user_id = ?;
+
+selectUserCardById:
+SELECT * FROM user_card
+WHERE user_id = ? AND card_id = ?;
+
+insertUserCard:
+INSERT OR REPLACE INTO user_card (
+    user_id,
+    card_id
+)
+VALUES ( ?, ?);
+
+deleteUserCard:
+DELETE FROM user_card
+WHERE user_id = ? AND card_id = ?;
+
+deleteUserCardsByUserId:
+DELETE FROM user_card
+WHERE user_id = ?;

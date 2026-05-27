@@ -1,0 +1,205 @@
+<resources>
+  <string name="feature_ai_top_bar_title">AI 擷取</string>
+  <string name="feature_ai_top_bar_subtitle">把靈感整理成可發布卡片</string>
+  <string name="feature_ai_top_bar_back">返回</string>
+  <string name="feature_ai_top_bar_settings">設定</string>
+  <string name="feature_ai_loading_title">載入中...</string>
+  <string name="feature_ai_loading_subtitle">請稍候</string>
+  <string name="feature_ai_error_fallback_title">載入失敗</string>
+  <string name="feature_ai_thinking_collapsed_hint">思考完成（點擊展開）</string>
+  <string name="feature_ai_thinking_expand">展開</string>
+  <string name="feature_ai_thinking_collapse">收起</string>
+  <string name="feature_ai_thinking_title">AI 思考中…</string>
+  <string name="feature_ai_reasoning_live_title">正在分析</string>
+  <string name="feature_ai_reasoning_live_desc">我會一邊整理一邊更新草稿，你可以先看過程，也可以等結果完成。</string>
+  <string name="feature_ai_reasoning_live_desc_media">
+    正在分析你上傳的媒體。我會在得到第一版穩定草稿後立刻停下，不會反覆卡在衝突細節裡。
+  </string>
+  <string name="feature_ai_reasoning_live_desc_text">正在分析你剛輸入的內容，草稿穩定後會立刻回到結果。</string>
+  <string name="feature_ai_reasoning_history_title">本次分析過程</string>
+  <string name="feature_ai_reasoning_collapsed_preview">分析已完成，點擊展開查看過程</string>
+  <string name="feature_ai_action_title_media">圖片補充</string>
+  <string name="feature_ai_action_title_tags">標籤補充</string>
+  <string name="feature_ai_action_title_next_step">下一步操作</string>
+  <string name="feature_ai_action_title_recommended_tags">推薦標籤</string>
+  <string name="feature_ai_action_title_draft_actions">草稿操作</string>
+  <string name="feature_ai_action_title_type">捕獲類型</string>
+  <string name="feature_ai_action_title_location">位置</string>
+  <string name="feature_ai_action_input_hint">直接在下方輸入並發送</string>
+  <string name="feature_ai_input_quick_capture">拍照識別</string>
+  <string name="feature_ai_input_quick_upload">上傳媒體</string>
+  <string name="feature_ai_input_support_capture">也可以直接拍照、上傳圖片或影片，我會先識別內容再整理成卡片。</string>
+  <string name="feature_ai_input_placeholder_media">可以先補充媒體，或讓 AI 生成一張圖</string>
+  <string name="feature_ai_input_placeholder_tags">一次輸入一個標籤，例如：探店</string>
+  <string name="feature_ai_input_placeholder_summary">補一句更完整的摘要後發送</string>
+  <string name="feature_ai_input_placeholder_location">輸入地點後發送，例如：上海靜安</string>
+  <string name="feature_ai_input_placeholder_title">輸入一個清晰標題後發送</string>
+  <string name="feature_ai_input_placeholder_review">先點下方修改項，再輸入內容</string>
+  <string name="feature_ai_input_placeholder_default">輸入文字，或直接拍照 / 上傳媒體</string>
+  <string name="feature_ai_send_desc">發送</string>
+  <string name="feature_ai_input_context_default">自由輸入</string>
+  <string name="feature_ai_input_context_media">補充圖片說明</string>
+  <string name="feature_ai_input_context_tags">補充標籤</string>
+  <string name="feature_ai_input_context_summary">補充摘要</string>
+  <string name="feature_ai_input_context_location">補充位置</string>
+  <string name="feature_ai_input_context_title">補充標題</string>
+  <string name="feature_ai_input_context_review">先點修改</string>
+  <string name="feature_ai_input_context_complete">開始下一條</string>
+  <string name="feature_ai_input_context_hint">當前輸入會直接同步到草稿</string>
+  <string name="feature_ai_input_context_hint_apply">發送後會立即更新到目前草稿</string>
+  <string name="feature_ai_input_context_hint_review">先點下方修改項進入對應編輯</string>
+  <string name="feature_ai_action_upload_media">補充媒體</string>
+  <string name="feature_ai_action_capture_media">拍照識別</string>
+  <string name="feature_ai_action_replace_media">重新選擇媒體</string>
+  <string name="feature_ai_action_generate_media">AI 生成圖片</string>
+  <string name="feature_ai_action_remove_media">清空圖片</string>
+  <string name="feature_ai_action_cancel_analysis">停止分析</string>
+  <string name="feature_ai_action_uploaded_media">已上傳圖片</string>
+  <string name="feature_ai_action_skip_media">暫時跳過</string>
+  <string name="feature_ai_action_skip_tags">先不加標籤</string>
+  <string name="feature_ai_action_review">回到複核</string>
+  <string name="feature_ai_action_edit_media">調圖片</string>
+  <string name="feature_ai_action_edit_location">改位置</string>
+  <string name="feature_ai_action_edit_title">改標題</string>
+  <string name="feature_ai_action_edit_tags">改標籤</string>
+  <string name="feature_ai_action_edit_summary">改摘要</string>
+  <string name="feature_ai_action_publish">確認發布</string>
+  <string name="feature_ai_action_save_draft">先存草稿</string>
+  <string name="feature_ai_action_delete_card">放棄草稿</string>
+  <string name="feature_ai_action_clear_location">清空位置</string>
+  <string name="feature_ai_action_new_capture">開始下一條</string>
+  <string name="feature_ai_action_input_title_hint">輸入新標題後發送</string>
+  <string name="feature_ai_msg_bootstrap">輸入一句話、貼一段內容，或直接拍照 /
+    上傳媒體；我會先識別重點，再整理成草稿陪你補齊。
+  </string>
+  <string name="feature_ai_msg_reasoning">AI 思考過程：\n%1$s</string>
+  <string name="feature_ai_msg_intent">意圖識別：%1$s</string>
+  <string name="feature_ai_msg_draft_complete">草稿已經整理好了，我把重點放在下面，確認一下就能發布。</string>
+  <string name="feature_ai_msg_draft_need_media">內容我已經整理好了。補一則媒體會更完整；如果現在沒有，也可以直接繼續。
+  </string>
+  <string name="feature_ai_msg_draft_need_tags">我已經提煉出主要內容了。選幾個標籤會更好檢索，不想加也可以繼續。</string>
+  <string name="feature_ai_msg_draft_need_title">內容已經成形了，再給它起一個清晰的標題就可以繼續。</string>
+  <string name="feature_ai_msg_tag_added_complete">已添加標籤：%1$s。資訊已齊全，可進入複核。</string>
+  <string name="feature_ai_msg_tag_added_need_more">已加入「%1$s」。還可以繼續加標籤，或點「回到複核」。</string>
+  <string name="feature_ai_msg_media_not_selected">未選擇媒體。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_media_attached">已添加 %1$d 則媒體。現在看起來更完整了。</string>
+  <string name="feature_ai_msg_media_generating">我會根據目前草稿生成一張更貼合內容的圖片，稍等一下。</string>
+  <string name="feature_ai_msg_media_generate_failed">這次生成圖片沒有成功。你可以直接上傳本地圖片，或再試一次 AI 生成。
+  </string>
+  <string name="feature_ai_msg_media_editing">圖片已同步。想繼續補圖、換圖或清空，都可以直接在下面操作。</string>
+  <string name="feature_ai_msg_media_analysis_cancelled">已停止目前媒體分析。你可以調整上傳內容後重新開始。</string>
+  <string name="feature_ai_msg_media_analysis_fallback">
+    媒體已經保留好了，但這次沒有提取到可分析的畫面。你可以補一句文字、再加一張封面圖，或在支援影片關鍵影格提取的裝置上重試。
+  </string>
+  <string name="feature_ai_msg_skip_media">已跳過媒體補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_tags">已跳過標籤補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_field">已跳過欄位：%1$s。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_title">已跳過標題補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_summary">已跳過摘要補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_location">已跳過位置補充。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_skip_current_step">已跳過目前步驟。請繼續完成下一步。</string>
+  <string name="feature_ai_msg_move_review">草稿已經整理好了。沒問題就直接發布；想調整的話，點下方項目即可。</string>
+  <string name="feature_ai_msg_manual_edit">告訴我你想改成什麼樣，我會直接更新草稿。</string>
+  <string name="feature_ai_msg_title_editing">在下方輸入新標題；改完可點「回到複核」。</string>
+  <string name="feature_ai_msg_ai_unavailable">AI 不可用：%1$s</string>
+  <string name="feature_ai_msg_switch_manual">已切換到手工編輯，請先輸入標題後發布。</string>
+  <string name="feature_ai_msg_title_updated">標題已更新。還可以繼續改，或點「回到複核」。</string>
+  <string name="feature_ai_msg_tags_editing">點推薦標籤，或在下方一次輸入一個新標籤；改完可點「回到複核」。</string>
+  <string name="feature_ai_msg_summary_editing">在下方輸入更合適的摘要；改完可點「回到複核」。</string>
+  <string name="feature_ai_msg_location_editing">可以直接輸入地點，也可以點下方範例快速填入；改完可點「回到複核」。</string>
+  <string name="feature_ai_msg_summary_updated">摘要已更新。還可以繼續改，或點「回到複核」。</string>
+  <string name="feature_ai_msg_tag_removed">已移除「%1$s」。還可以繼續調整標籤，或點「回到複核」。</string>
+  <string name="feature_ai_msg_type_updated">已更新捕獲類型：%1$s。</string>
+  <string name="feature_ai_msg_location_updated">位置已更新為「%1$s」。還可以繼續改，或點「回到複核」。</string>
+  <string name="feature_ai_msg_location_cleared">位置已清空。還可以繼續補充，或點「回到複核」。</string>
+  <string name="feature_ai_msg_draft_saved">草稿已保存到本地，稍後回來也能繼續。</string>
+  <string name="feature_ai_msg_published">已發布「%1$s」。接下來還想繼續捕獲什麼？</string>
+  <string name="feature_ai_msg_publishing">正在發布，我來處理最後一步。</string>
+  <string name="feature_ai_msg_reset">新會話已開始，請輸入你要捕獲的內容。</string>
+  <string name="feature_ai_msg_blocked_input">這一步更適合用下方動作，或依照提示在輸入框繼續補充。</string>
+  <string name="feature_ai_msg_blocked_action">動作不可用：%1$s（當前狀態 %2$s）</string>
+  <string name="feature_ai_msg_restore_session">已恢復上次會話草稿。</string>
+  <string name="feature_ai_msg_restore_session_media_missing">有 %1$s 個媒體檔案在重啟後無法恢復，請重新選擇圖片。</string>
+  <string name="feature_ai_msg_review_input_help">先點下方想修改的項目，進入對應編輯後再輸入內容。</string>
+  <string name="feature_ai_action_panel_media_title_missing">補一則媒體，卡片會更完整</string>
+  <string name="feature_ai_action_panel_media_title_generating">AI 正在生成圖片</string>
+  <string name="feature_ai_action_panel_media_title_ready">%1$d 則媒體已就緒，還想調整一下嗎？</string>
+  <string name="feature_ai_action_panel_media_support_missing">支援拍照、上傳本地圖片或影片，或根據目前草稿讓 AI
+    生成一張圖；第一則媒體會預設作為封面，之後也可以再換。
+  </string>
+  <string name="feature_ai_action_panel_media_support_generating">
+    已經開始生成了，先看這裡的進度；完成後會自動替換成最終圖片。
+  </string>
+  <string name="feature_ai_action_panel_media_support_ready">目前第一張圖會預設作為封面；補圖、換圖、AI
+    生成、清空都會停留在這裡，你自己決定什麼時候回到複核。
+  </string>
+  <string name="feature_ai_action_panel_media_existing">目前媒體</string>
+  <string name="feature_ai_action_panel_media_empty_placeholder">還沒有媒體。上傳或 AI 生成後會直接顯示在這裡。</string>
+  <string name="feature_ai_action_panel_media_missing_hint">有 %1$s 個媒體檔案已失效，請重新選擇圖片。</string>
+  <string name="feature_ai_action_panel_media_stage_preparing">正在喚起模型</string>
+  <string name="feature_ai_action_panel_media_stage_generating">正在生成圖片</string>
+  <string name="feature_ai_action_panel_media_stage_finalizing">正在整理結果</string>
+  <string name="feature_ai_action_panel_media_progress">第 %1$d / %2$d 步</string>
+  <string name="feature_ai_action_panel_tag_title_empty">選幾個標籤，之後會更好找</string>
+  <string name="feature_ai_action_panel_tag_title_selected">標籤已經整理好了，點一下可移除</string>
+  <string name="feature_ai_action_panel_tag_support">推薦標籤和自訂標籤都可以一起使用。</string>
+  <string name="feature_ai_action_panel_tag_custom_hint">也可以在下方一次輸入一個新標籤</string>
+  <string name="feature_ai_action_panel_input_title">給這條內容起一個一眼能懂的標題</string>
+  <string name="feature_ai_action_panel_input_summary">補一句更完整的摘要，讓卡片更容易回看</string>
+  <string name="feature_ai_action_panel_input_location">補充地點資訊，方便之後檢索</string>
+  <string name="feature_ai_action_panel_input_support">直接在底部輸入框輸入並發送，我會立即同步到草稿。</string>
+  <string name="feature_ai_action_panel_review_edit_title">想改哪一項，直接點一下</string>
+  <string name="feature_ai_action_panel_review_edit_support">每項都會顯示目前內容，點一下就能進入對應編輯。</string>
+  <string name="feature_ai_action_panel_publish_title">確認無誤後就可以發布</string>
+  <string name="feature_ai_action_panel_publish_support">你也可以先存草稿，等想好了再回來繼續。</string>
+  <string name="feature_ai_action_panel_complete_title">這條已經處理好了，要不要開始下一條？</string>
+  <string name="feature_ai_action_panel_complete_support">新捕獲會開啟一張全新的草稿，不影響剛剛的內容。</string>
+  <string name="feature_ai_action_panel_preview_status">先看預覽</string>
+  <string name="feature_ai_action_panel_preview_title_pinned">右側預覽保持開啟即可</string>
+  <string name="feature_ai_action_panel_preview_title_floating">先看一眼預覽</string>
+  <string name="feature_ai_action_panel_preview_support_pinned">先確認封面、文案和資訊是否順眼，再點下方修改。</string>
+  <string name="feature_ai_action_panel_preview_support_floating">小螢幕先點右下角預覽按鈕看整體，再回來修改。</string>
+  <string name="feature_ai_action_panel_preview_check_cover">封面</string>
+  <string name="feature_ai_action_panel_preview_check_copy">文案</string>
+  <string name="feature_ai_action_panel_preview_check_meta">資訊</string>
+  <string name="feature_ai_action_panel_preview_media_count">%1$d 則媒體</string>
+  <string name="feature_ai_action_panel_preview_no_media">待補媒體</string>
+  <string name="feature_ai_action_panel_current_value">目前內容</string>
+  <string name="feature_ai_action_panel_edit_empty">尚未填寫</string>
+  <string name="feature_ai_action_panel_edit_media_value">已選 %1$d 則媒體</string>
+  <string name="feature_ai_action_panel_edit_tags_value">%1$s</string>
+  <string name="feature_ai_action_panel_location_title_missing">補個位置，之後會更好找回</string>
+  <string name="feature_ai_action_panel_location_title_ready">位置已經有了，還想再精確一點嗎？</string>
+  <string name="feature_ai_action_panel_location_support_missing">
+    可直接輸入，也可以點下方範例快速填入；位置越具體，之後越好檢索。
+  </string>
+  <string name="feature_ai_action_panel_location_support_ready">可以直接改成更完整的位置，也可以先清空後重新填寫。
+  </string>
+  <string name="feature_ai_action_panel_location_current">目前位置</string>
+  <string name="feature_ai_action_panel_location_empty_placeholder">
+    還沒有位置資訊。補一個城市、商圈、地標或門店名會更容易回看。
+  </string>
+  <string name="feature_ai_action_panel_location_example_city">例如：上海靜安</string>
+  <string name="feature_ai_action_panel_location_example_district">例如：杭州西湖邊</string>
+  <string name="feature_ai_action_panel_location_example_store">例如：愚園路某家咖啡館</string>
+  <string name="feature_ai_provider_title">目前 Provider</string>
+  <string name="feature_ai_provider_hint">切換後會立即影響新的分析請求。</string>
+  <string name="feature_ai_provider_close">關閉 Provider 快捷入口</string>
+  <string name="feature_ai_provider_hidden_hint">Provider 快捷入口已隱藏，可在設定裡的 AI Provider 中重新打開。</string>
+  <string name="feature_ai_provider_mode_disabled_label">手動模式</string>
+  <string name="feature_ai_provider_mode_disabled_desc">只保留草稿整理和手動編輯。</string>
+  <string name="feature_ai_provider_mode_server_label">服務端</string>
+  <string name="feature_ai_provider_mode_server_desc">優先走服務端能力，適合穩定體驗。</string>
+  <string name="feature_ai_provider_mode_direct_label">直連模型</string>
+  <string name="feature_ai_provider_mode_direct_desc">直接連接本地或外部模型，適合調試與實驗。</string>
+  <string name="feature_ai_user_badge">我</string>
+  <string name="feature_ai_capture_type_place">地點</string>
+  <string name="feature_ai_capture_type_idea">靈感</string>
+  <string name="feature_ai_capture_type_article">文章</string>
+  <string name="feature_ai_capture_type_person">人物</string>
+  <string name="feature_ai_preview_untitled_draft">未命名草稿</string>
+  <string name="feature_ai_preview_continue_hint">繼續補充你的想法...</string>
+  <string name="feature_ai_preview_continue_edit">繼續編輯</string>
+  <string name="feature_ai_preview_button_label">預覽</string>
+  <string name="feature_ai_msg_copied">訊息已複製</string>
+</resources>

@@ -1,0 +1,49 @@
+-- AI任务表（调用记录与状态）
+CREATE TABLE ai_job (
+  id TEXT PRIMARY KEY NOT NULL,
+  provider TEXT NOT NULL,
+  request_json TEXT NOT NULL,
+  response_json TEXT,
+  status TEXT NOT NULL, -- queued|running|succeeded|failed|cancelled
+  error_message TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX idx_ai_job_status_updated_at ON ai_job(status, updated_at);
+CREATE INDEX idx_ai_job_created_at ON ai_job(created_at);
+
+upsertAiJob:
+INSERT OR REPLACE INTO ai_job (
+  id,
+  provider,
+  request_json,
+  response_json,
+  status,
+  error_message,
+  created_at,
+  updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAiJobById:
+DELETE FROM ai_job
+WHERE id = ?;
+
+selectAiJobById:
+SELECT *
+FROM ai_job
+WHERE id = ?;
+
+selectAiJobsByStatus:
+SELECT *
+FROM ai_job
+WHERE status = ?
+ORDER BY updated_at DESC
+LIMIT :limit OFFSET :offset;
+
+selectPendingAiJobs:
+SELECT *
+FROM ai_job
+WHERE status IN ('queued', 'running')
+ORDER BY created_at ASC;
