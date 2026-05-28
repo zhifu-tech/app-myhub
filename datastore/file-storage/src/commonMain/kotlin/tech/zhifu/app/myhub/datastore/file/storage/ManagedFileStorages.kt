@@ -18,6 +18,11 @@ fun storageHandleFromAccessUrl(
 ): String {
     val raw = accessUrl.trim()
     if (raw.isBlank()) return raw
+    if (raw.startsWith("file://")) {
+        val key = extractPlatformPrivateStorageKeyFromAccessUrl(raw)
+        if (key != null) return createPlatformPrivateStorageHandle(key)
+        return raw
+    }
     if (isExternalStorageHandle(raw)) return raw
     val key = extractPlatformPrivateStorageKeyFromAccessUrl(raw) ?: return raw
     return createPlatformPrivateStorageHandle(key)
